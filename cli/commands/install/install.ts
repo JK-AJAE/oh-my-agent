@@ -170,7 +170,36 @@ export function cleanDanglingSymlinks(dir: string): void {
   }
 }
 
-export type InstallOptions = Record<string, never>;
+export type InstallOptions = {
+  /**
+   * Non-interactive mode. Skips every prompt and falls back to safe
+   * defaults (language=existing|en, model_preset=existing|claude-only,
+   * project_type=all, vendors=all non-HOME-base). HOME-base vendor consent
+   * stays opt-in (skipped), competitor uninstall is skipped, GitHub star
+   * prompt is skipped.
+   *
+   * Also activated by `OMA_YES=1` or `CI=true` env vars.
+   */
+  yes?: boolean;
+};
+
+/**
+ * True when the user explicitly opted into "yes to everything" via the
+ * `--yes` flag or `OMA_YES` env. Distinct from CI auto-detection because
+ * explicit opt-in also enables affirmative side-effects (e.g. GitHub star).
+ */
+export function isExplicitYes(options: InstallOptions = {}): boolean {
+  if (options.yes) return true;
+  if (process.env.OMA_YES === "1" || process.env.OMA_YES === "true")
+    return true;
+  return false;
+}
+
+export function isNonInteractive(options: InstallOptions = {}): boolean {
+  if (isExplicitYes(options)) return true;
+  if (process.env.CI === "true" || process.env.CI === "1") return true;
+  return false;
+}
 
 export function getExistingPreset(targetDir: string): string | null {
   const prefsPath = join(targetDir, ".agents", "oma-config.yaml");
@@ -185,9 +214,16 @@ export function getExistingPreset(targetDir: string): string | null {
   }
 }
 
-export async function install(_options: InstallOptions = {}): Promise<void> {
+export async function install(options: InstallOptions = {}): Promise<void> {
+  const nonInteractive = isNonInteractive(options);
+  const explicitYes = isExplicitYes(options);
+
   console.clear();
   p.intro(pc.bgMagenta(pc.white(" 🛸 oh-my-agent ")));
+
+  if (nonInteractive) {
+    p.log.info(pc.dim("Non-interactive mode — using defaults."));
+  }
 
   // Run all migrations (legacy dirs, shared layout, config rename)
   const migrationActions = runMigrations(process.cwd());
@@ -198,8 +234,11 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
     );
   }
 
-  // Detect and offer to remove competing tools
-  await promptUninstallCompetitors(process.cwd());
+  // Detect and offer to remove competing tools (skipped in non-interactive
+  // mode — destructive HOME-level operation should stay opt-in).
+  if (!nonInteractive) {
+    await promptUninstallCompetitors(process.cwd());
+  }
 
   const spinner = p.spinner();
   spinner.start("Downloading...");
@@ -225,11 +264,13 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
   )
     ? (existingLanguage as string)
     : "en";
-  const language = await p.select({
-    message: "Response language?",
-    options: languages,
-    initialValue: initialLanguage,
-  });
+  const language = nonInteractive
+    ? initialLanguage
+    : await p.select({
+        message: "Response language?",
+        options: languages,
+        initialValue: initialLanguage,
+      });
 
   if (p.isCancel(language)) {
     cleanup();
@@ -276,11 +317,13 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
     ? (existingPreset as string)
     : "claude-only";
 
-  const modelPreset = await p.select({
-    message: "Model preset?",
-    options: BUILT_IN_PRESET_OPTIONS,
-    initialValue: initialPreset,
-  });
+  const modelPreset = nonInteractive
+    ? initialPreset
+    : await p.select({
+        message: "Model preset?",
+        options: BUILT_IN_PRESET_OPTIONS,
+        initialValue: initialPreset,
+      });
 
   if (p.isCancel(modelPreset)) {
     cleanup();
@@ -288,30 +331,32 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
     process.exit(0);
   }
 
-  const projectType = await p.select({
-    message: "What type of project?",
-    options: [
-      { value: "all", label: "✨ All", hint: "Install everything" },
-      {
-        value: "fullstack",
-        label: "🌐 Fullstack",
-        hint: "Frontend + Backend + PM + QA",
-      },
-      { value: "frontend", label: "🎨 Frontend", hint: "React/Next.js" },
-      {
-        value: "backend",
-        label: "⚙️ Backend",
-        hint: "Python, Node.js, Rust, ...",
-      },
-      { value: "mobile", label: "📱 Mobile", hint: "Flutter/Dart" },
-      {
-        value: "devops",
-        label: "🚀 DevOps",
-        hint: "Terraform + CI/CD + Workflows",
-      },
-      { value: "custom", label: "🔧 Custom", hint: "Choose skills" },
-    ],
-  });
+  const projectType = nonInteractive
+    ? "all"
+    : await p.select({
+        message: "What type of project?",
+        options: [
+          { value: "all", label: "✨ All", hint: "Install everything" },
+          {
+            value: "fullstack",
+            label: "🌐 Fullstack",
+            hint: "Frontend + Backend + PM + QA",
+          },
+          { value: "frontend", label: "🎨 Frontend", hint: "React/Next.js" },
+          {
+            value: "backend",
+            label: "⚙️ Backend",
+            hint: "Python, Node.js, Rust, ...",
+          },
+          { value: "mobile", label: "📱 Mobile", hint: "Flutter/Dart" },
+          {
+            value: "devops",
+            label: "🚀 DevOps",
+            hint: "Terraform + CI/CD + Workflows",
+          },
+          { value: "custom", label: "🔧 Custom", hint: "Choose skills" },
+        ],
+      });
 
   if (p.isCancel(projectType)) {
     p.cancel("Cancelled.");
@@ -346,28 +391,30 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
   // Ask for language variant when backend skill is selected
   const variantSelections: Record<string, string> = {};
   if (selectedSkills.includes("oma-backend")) {
-    const backendLang = await p.select({
-      message: "Backend language?",
-      options: [
-        {
-          value: "python",
-          label: "🐍 Python",
-          hint: "FastAPI/SQLAlchemy (default)",
-        },
-        {
-          value: "node",
-          label: "🟢 Node.js",
-          hint: "NestJS/Hono + Prisma/Drizzle",
-        },
-        { value: "rust", label: "🦀 Rust", hint: "Axum/Actix-web" },
-        {
-          value: "other",
-          label: "🔧 Other / Auto-detect",
-          hint: "Configure later with /stack-set",
-        },
-      ],
-      initialValue: "python",
-    });
+    const backendLang = nonInteractive
+      ? "python"
+      : await p.select({
+          message: "Backend language?",
+          options: [
+            {
+              value: "python",
+              label: "🐍 Python",
+              hint: "FastAPI/SQLAlchemy (default)",
+            },
+            {
+              value: "node",
+              label: "🟢 Node.js",
+              hint: "NestJS/Hono + Prisma/Drizzle",
+            },
+            { value: "rust", label: "🦀 Rust", hint: "Axum/Actix-web" },
+            {
+              value: "other",
+              label: "🔧 Other / Auto-detect",
+              hint: "Configure later with /stack-set",
+            },
+          ],
+          initialValue: "python",
+        });
 
     if (p.isCancel(backendLang)) {
       p.cancel("Cancelled.");
@@ -410,20 +457,24 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
     { value: "qwen", label: "Qwen Code", hint: "hooks + settings" },
   ];
 
-  const selectedVendors = await p.multiselect({
-    message: "CLI tools to configure:",
-    options: vendorOptions,
-    // HOME-write vendors (hermes) are opt-in only — default off.
-    initialValues: vendorOptions
-      .filter((opt) => {
-        const spec = (CLI_SKILLS_DIR as Record<string, SkillTargetSpec>)[
-          opt.value
-        ];
-        return !spec || spec.base !== "home";
-      })
-      .map((v) => v.value),
-    required: true,
-  });
+  const defaultVendorValues = vendorOptions
+    .filter((opt) => {
+      const spec = (CLI_SKILLS_DIR as Record<string, SkillTargetSpec>)[
+        opt.value
+      ];
+      return !spec || spec.base !== "home";
+    })
+    .map((v) => v.value);
+
+  const selectedVendors = nonInteractive
+    ? defaultVendorValues
+    : await p.multiselect({
+        message: "CLI tools to configure:",
+        options: vendorOptions,
+        // HOME-write vendors (hermes) are opt-in only — default off.
+        initialValues: defaultVendorValues,
+        required: true,
+      });
 
   if (p.isCancel(selectedVendors)) {
     p.cancel("Cancelled.");
@@ -443,6 +494,14 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
   const selectedClis: CliTool[] = [];
   for (const cli of requestedClis) {
     if (vendorRequiresHomeConsent(cli)) {
+      // HOME-base vendors require explicit consent. In non-interactive mode
+      // we never auto-approve writes to the user's HOME directory.
+      if (nonInteractive) {
+        p.log.info(
+          pc.dim(`Skipped ${cli} export (HOME write requires -y opt-in).`),
+        );
+        continue;
+      }
       const consent = await p.confirm({
         message: `${cli} export writes to HOME (${pc.cyan(getVendorDisplayPath(cli))}). Proceed?`,
         initialValue: false,
@@ -687,9 +746,19 @@ export async function install(_options: InstallOptions = {}): Promise<void> {
     p.outro(pc.green("Done! Open your project in your IDE to use the skills."));
 
     if (isGhInstalled() && isGhAuthenticated() && !isAlreadyStarred()) {
-      const shouldStar = await p.confirm({
-        message: `${pc.yellow("⭐")} Star ${pc.cyan(REPO)} on GitHub? It helps a lot!`,
-      });
+      // Auto-star on explicit `--yes` / OMA_YES (user opted in to "yes
+      // everything"). Stay silent on auto-detected CI to avoid drive-by
+      // stars from build runners that happen to have gh auth.
+      let shouldStar: boolean | symbol;
+      if (explicitYes) {
+        shouldStar = true;
+      } else if (nonInteractive) {
+        shouldStar = false;
+      } else {
+        shouldStar = await p.confirm({
+          message: `${pc.yellow("⭐")} Star ${pc.cyan(REPO)} on GitHub? It helps a lot!`,
+        });
+      }
 
       if (!p.isCancel(shouldStar) && shouldStar) {
         try {

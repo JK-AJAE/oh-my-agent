@@ -7,10 +7,12 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   cleanDanglingSymlinks,
   getExistingLanguage,
+  isExplicitYes,
+  isNonInteractive,
   scanLanguages,
 } from "../install/install.js";
 
@@ -212,5 +214,66 @@ describe("cleanDanglingSymlinks", () => {
     expect(() =>
       cleanDanglingSymlinks("/nonexistent/path/to/skills"),
     ).not.toThrow();
+  });
+});
+
+describe("non-interactive mode", () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env.OMA_YES = undefined;
+    process.env.CI = undefined;
+    delete process.env.OMA_YES;
+    delete process.env.CI;
+  });
+
+  afterEach(() => {
+    delete process.env.OMA_YES;
+    delete process.env.CI;
+    if (originalEnv.OMA_YES) process.env.OMA_YES = originalEnv.OMA_YES;
+    if (originalEnv.CI) process.env.CI = originalEnv.CI;
+  });
+
+  it("isExplicitYes is false by default", () => {
+    expect(isExplicitYes()).toBe(false);
+    expect(isExplicitYes({})).toBe(false);
+    expect(isExplicitYes({ yes: false })).toBe(false);
+  });
+
+  it("isExplicitYes is true when --yes flag is set", () => {
+    expect(isExplicitYes({ yes: true })).toBe(true);
+  });
+
+  it("isExplicitYes is true when OMA_YES=1", () => {
+    process.env.OMA_YES = "1";
+    expect(isExplicitYes()).toBe(true);
+  });
+
+  it("isExplicitYes is true when OMA_YES=true", () => {
+    process.env.OMA_YES = "true";
+    expect(isExplicitYes()).toBe(true);
+  });
+
+  it("isExplicitYes is false when CI=true (env-only auto-detect does not count as explicit)", () => {
+    process.env.CI = "true";
+    expect(isExplicitYes()).toBe(false);
+  });
+
+  it("isNonInteractive is true on explicit yes", () => {
+    expect(isNonInteractive({ yes: true })).toBe(true);
+  });
+
+  it("isNonInteractive is true when CI=true", () => {
+    process.env.CI = "true";
+    expect(isNonInteractive()).toBe(true);
+  });
+
+  it("isNonInteractive is true when CI=1", () => {
+    process.env.CI = "1";
+    expect(isNonInteractive()).toBe(true);
+  });
+
+  it("isNonInteractive is false when no signal is set", () => {
+    expect(isNonInteractive()).toBe(false);
   });
 });
