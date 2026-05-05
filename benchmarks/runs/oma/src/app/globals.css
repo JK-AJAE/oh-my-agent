@@ -1,59 +1,44 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #FFF8F0;
-  --color-cream-dark: #F5EDE0;
-  --color-coral: #FF6B6B;
-  --color-coral-light: #FF8E8E;
-  --color-sky: #87CEEB;
-  --color-sky-light: #B0DFEF;
-  --color-mint: #98D8C8;
-  --color-mint-light: #B5E6D8;
-  --color-sunshine: #FFD93D;
-  --color-sunshine-light: #FFE566;
-  --color-lavender: #C3ACD0;
-  --color-lavender-light: #D4C1DF;
-  --color-charcoal: #2D3436;
-  --color-charcoal-light: #636E72;
-  --color-forest: #2D5016;
-  --color-ocean-deep: #1A535C;
-  --color-candy-pink: #FFB5E8;
-
-  --font-family-display: 'Nunito', ui-rounded, system-ui, -apple-system, sans-serif;
-  --font-family-body: 'Nunito', ui-rounded, system-ui, -apple-system, sans-serif;
-
-  --radius-btn: 1rem;
-  --radius-card: 1.25rem;
-  --radius-panel: 1.5rem;
+  --color-spark-50: #FFF8E1;
+  --color-spark-100: #FFECB3;
+  --color-spark-200: #FFE082;
+  --color-spark-300: #FFD54F;
+  --color-spark-400: #FFCA28;
+  --color-spark-500: #FFC107;
+  --color-ocean-400: #29B6F6;
+  --color-ocean-500: #03A9F4;
+  --color-forest-400: #66BB6A;
+  --color-forest-500: #4CAF50;
+  --color-magic-400: #AB47BC;
+  --color-magic-500: #9C27B0;
+  --color-sunset-400: #FF7043;
+  --color-sunset-500: #FF5722;
+  --color-candy-400: #EC407A;
+  --color-candy-500: #E91E63;
+  --font-family-display: 'Nunito', system-ui, sans-serif;
+  --font-family-body: 'Nunito', system-ui, sans-serif;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-bounce-gentle: bounce-gentle 2s ease-in-out infinite;
+  --animate-sparkle: sparkle 1.5s ease-in-out infinite;
 }
 
-@layer base {
-  body {
-    font-family: var(--font-family-body);
-    background-color: var(--color-cream);
-    color: var(--color-charcoal);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-@layer utilities {
-  .tap-target {
-    min-width: 48px;
-    min-height: 48px;
-  }
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
 
-  .glass-panel {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-  }
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
 
-  .shadow-soft {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  }
-
-  .shadow-glow-coral {
-    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
-  }
+body {
+  font-family: var(--font-family-body);
 }

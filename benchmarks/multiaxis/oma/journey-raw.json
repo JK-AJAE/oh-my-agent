@@ -1,7 +1,7 @@
 {
-  "journey-onboard":  {"score": 3, "max": 3, "evidence": "Landing page at / shows a clear 'Start Creating' button visible without scrolling, alongside 'Explore Worlds' and feature descriptions."},
-  "journey-builder":  {"score": 4, "max": 4, "evidence": "Three.js Canvas renders at 2560x1600 at /create with shape/object pickers in a sidebar panel containing Shapes (Cube, Ball, Tube, Cone, Ring), Nature, and Things categories."},
-  "journey-ai":       {"score": 3, "max": 3, "evidence": "Sparky AI buddy panel opens via button, accepted 'help me' input, and returned a non-empty response ('What would happen if it started snowing here? ❄️') with action buttons."},
-  "journey-save":     {"score": 3, "max": 3, "evidence": "Save button clicked and confirmed ('Saved!'), page reloaded, and localStorage retains world 'My World' with 1 cube object persisting across reload."},
-  "journey-gallery":  {"score": 2, "max": 2, "evidence": "Gallery at /gallery renders a grid showing the saved world card 'My World' by TestKid with Play, Edit, and Delete buttons."}
+  "journey-onboard":  {"score": 3, "max": 3, "evidence": "Landing page shows a prominent '🚀 Start Creating' button visible without scrolling, linking to /onboarding."},
+  "journey-builder":  {"score": 4, "max": 4, "evidence": "Three.js Canvas renders (1024x1440) at /builder/new with a sidebar containing shape pickers (Box, Ball, Tube, Cone, Ring) plus Nature, Buildings, and Characters categories."},
+  "journey-ai":       {"score": 3, "max": 3, "evidence": "Spark AI panel opens from sidebar, typed 'help me', received non-empty response: 'Ooh, I got excited and lost my train of thought! Tell me more about your world! 🌟'."},
+  "journey-save":     {"score": 1.5, "max": 3, "evidence": "Save button (💾 Save) exists and is clickable, but localStorage remains empty after save and page reload shows only default state with no persisted world data."},
+  "journey-gallery":  {"score": 2, "max": 2, "evidence": "Gallery at /gallery renders a grid of 6 world cards (Enchanted Forest, Space Station Alpha, Underwater Kingdom, etc.) with authors and like counts."}
 }

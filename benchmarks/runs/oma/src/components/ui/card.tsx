@@ -1,25 +1,34 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import type { HTMLAttributes } from 'react';
-
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
   hoverable?: boolean;
+  padding?: "sm" | "md" | "lg";
 }
 
-export function Card({ hoverable = false, children, className = '', ...props }: CardProps) {
-  const Comp = hoverable ? motion.div : 'div';
-  const motionProps = hoverable
-    ? { whileHover: { scale: 1.03, y: -4 }, transition: { type: 'spring', stiffness: 300 } }
-    : {};
+const paddingClasses = {
+  sm: "p-4",
+  md: "p-6",
+  lg: "p-8",
+};
 
+export function Card({
+  children,
+  className = "",
+  hoverable = false,
+  padding = "md",
+}: CardProps) {
   return (
-    <Comp
-      className={`bg-white rounded-[var(--radius-card)] shadow-soft p-5 ${className}`}
-      {...motionProps}
-      {...(props as any)}
+    <div
+      className={[
+        "bg-white rounded-3xl shadow-md",
+        paddingClasses[padding],
+        hoverable
+          ? "transition-all duration-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+          : "",
+        className,
+      ].join(" ")}
     >
       {children}
-    </Comp>
+    </div>
   );
 }

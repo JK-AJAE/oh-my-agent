@@ -1,13 +1,13 @@
 {
   "harness": "oma",
-  "package_manager": "npm",
-  "total": 88.0,
+  "package_manager": "bun",
+  "total": 75.5,
   "max": 100.0,
   "by_axis": {
-    "functional": 35,
+    "functional": 28.5,
     "spec": 13,
-    "visual": 16,
-    "engineering": 16,
-    "efficiency": 8
+    "visual": 14,
+    "engineering": 18,
+    "efficiency": 2
   }
 }

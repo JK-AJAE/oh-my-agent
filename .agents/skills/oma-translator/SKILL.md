@@ -117,9 +117,56 @@ Strip away source language structure. Ask yourself:
 
 Do NOT start forming target sentences yet.
 
+### Stage 2.5: Persona Assignment
+
+Persona resolution has two layers: **content-type** (what kind of text) and **voice** (how punchy or formal the rhythm). Both are needed.
+
+#### Layer 1: Read `translation_voice` from `.agents/oma-config.yaml`
+
+The `translation_voice` field controls global rhythm/formality. Three values:
+
+| Voice | Style override applied on top of content-type |
+|---|---|
+| `formal` | complete sentences only, no fragments, strict 합니다체/です・ます, no padding cuts |
+| `balanced` (default) | content-type defaults — fragments allowed only in label/cell positions |
+| `interpreter` | interpreter mindset across all content types: punchy, audience-first, spoken cadence, fragments allowed when natural in target, drops formal padding ("을 받았습니다" → "받음" / "을 모두" → drop) |
+
+If the field is missing, default to `balanced`. If `oma-config.yaml` is unreadable, also `balanced`.
+
+#### Layer 2: Content-type persona table
+
+| Content type | Persona | Base style markers |
+|---|---|---|
+| UI strings / microcopy | UX copywriter | concise, imperative, user-friendly |
+| Docs / README / API reference | technical writer | data + commentary, expanded explanations |
+| Benchmark / report / changelog | technical reporter | data + commentary, objective tone |
+| Marketing / landing / hero copy | brand copywriter | concise impact, audience-first, aggressive transcreation |
+| Blog post / essay | essayist | preserve cadence and rhythm, retain author voice |
+| Literary / prose | literary translator | preserve imagery, style consistency, narrative voice |
+| Dialogue / subtitle / interview | interpreter | immediacy, audience-first, spoken register, cultural context inline |
+
+Classification heuristics:
+- File location `messages/`, `locales/`, `*.arb` → UX copywriter
+- Filename `README*`, `docs/*`, or `.md` with frequent code blocks → technical writer
+- Score tables, benchmark stats, changelog rows → technical reporter
+- Page/section hero copy → brand copywriter
+- Quote marks, em-dashes, speaker labels in source → interpreter
+
+When unclear, default to **technical writer** for code-adjacent content and **essayist** for prose. Never use a generic "translator" persona.
+
+#### Combining layers
+
+Voice is applied **on top** of the content-type persona. Examples:
+
+- Content-type = `technical reporter` + voice = `formal` → fully expanded sentences, no fragments anywhere, strict 합니다체.
+- Content-type = `technical reporter` + voice = `balanced` → complete sentences in body, fragments allowed in table cells (current default).
+- Content-type = `technical reporter` + voice = `interpreter` → punchier rhythm, list-item fragments allowed (e.g., "39턴 / 8m 13s / $1.28 (파일당 $0.14)" instead of "39턴, 8m 13s, 총 $1.28을 썼습니다(파일당 약 $0.14)"), drops "을 모두 받았습니다" padding.
+
+The persona is then **localized to the target language** at execution time — translating into Korean as a "technical reporter" with `interpreter` voice means thinking as a Korean technical reporter who values rhythm and audience scan-speed over formal completeness.
+
 ### Stage 3: Reconstruct in Target Language
 
-Rebuild from meaning, following target language norms:
+Rebuild from meaning **as the assigned persona**, following target language norms:
 
 **Word order**: Follow target language's natural structure.
 - EN → KO: SVO → SOV, move verb to end, particles replace prepositions
@@ -189,14 +236,26 @@ When adding explanatory notes for terms, cultural references, or concepts that t
 - Don't annotate self-explanatory terms or widely recognized loanwords
 - If a comprehension challenge was identified in Stage 1, use the pre-planned explanation
 
-### Refined Mode (Long-form Content)
+### Reflection Mode (default for non-trivial content)
 
-For publication-quality translation of long-form content (articles, documentation, essays), extend the standard 4-stage workflow with three additional passes. Use when explicitly requested or when the content demands high polish.
+Reflection passes (Stage 5–7) are the default — not optional — for any content that is more than a short snippet. Empirical evidence (Slator 2024, Self-Refine paper) shows a single polish pass cuts translationese rates roughly in half. Skipping reflection on non-trivial content is the most common cause of translationese complaints.
 
-### When to use
-- User explicitly requests "refined", "publication quality", or "정밀 번역"
-- Important documents, official publications, marketing materials
-- Content where naturalness and readability are critical
+### When to run Stage 5–7
+
+Default ON for:
+- Documentation (README, guides, API reference)
+- Reports, benchmarks, changelogs, blog posts
+- Marketing copy and landing pages
+- Any prose longer than ~3 sentences
+- Anything containing tables, bullet lists, or code blocks mixed with prose
+- Translation review mode
+
+Default OFF (Stage 4 verification only) for:
+- Single short UI string (< 10 words) with established glossary
+- Batch UI key translations where each value is independent and < 1 sentence
+- User explicitly requests "fast translation", "skip reflection", or "직역"
+
+When in doubt, run reflection. The cost is roughly 1.5–2× tokens; the quality gain on body-text fragments and Europeanized patterns is large.
 
 ### Extended workflow
 
