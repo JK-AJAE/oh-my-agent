@@ -1,9 +1,9 @@
 {
   "harness": "oma",
   "items": {
-    "visual-anti-patterns":  { "score": 4, "max": 5, "notes": "Floating gradient orbs/blobs on landing page (pink circle, blue circle, yellow and purple shapes); no other anti-patterns observed." },
-    "visual-child-friendly": { "score": 4, "max": 5, "notes": "Large emoji-labeled object tiles, playful tone, warm palette, and minimal text density; bottom toolbar has some icon-only buttons that may challenge younger users." },
-    "visual-consistency":    { "score": 4, "max": 5, "notes": "Consistent warm yellow/orange brand color, rounded typography, and card radii across all pages; minor drift between the AI chat panel styling and the rest." },
-    "visual-accessibility":  { "score": 2, "max": 5, "notes": "Good dark-on-light body text contrast, but orange text on cream is borderline; toolbar and top-bar undo/redo are icon-only without labels; no visible focus rings; responsiveness not demonstrated." }
+    "visual-anti-patterns":  { "score": 2, "max": 5, "notes": "Purple-to-blue gradient background on landing and gallery pages; floating decorative orbs/circles on landing page; footer text and AI-panel timestamps appear below 16px" },
+    "visual-child-friendly": { "score": 4, "max": 5, "notes": "Emoji-based object picker, large tappable CTA buttons, playful language, suggestion chips reduce typing, low text density throughout" },
+    "visual-consistency":    { "score": 4, "max": 5, "notes": "Consistent purple accent color, button style, and typography across all pages; toolbar is identical across builder views; landing page is slightly more decorative but cohesive" },
+    "visual-accessibility":  { "score": 3, "max": 5, "notes": "All toolbar and object icons have clear text labels; dark-on-light contrast is generally strong; no focus rings visible in any screenshot; responsive behavior not demonstrated" }
   }
 }

@@ -1,13 +1,14 @@
 {
   "harness": "oma",
-  "package_manager": "bun",
-  "total": 75.5,
+  "package_manager": "npm",
+  "judge_runs_spec_visual": 3,
+  "total": 77.1,
   "max": 100.0,
   "by_axis": {
-    "functional": 28.5,
-    "spec": 13,
-    "visual": 14,
-    "engineering": 18,
-    "efficiency": 2
+    "functional": 30,
+    "spec": 15,
+    "visual": 12.600000000000001,
+    "engineering": 15.5,
+    "efficiency": 4
   }
 }

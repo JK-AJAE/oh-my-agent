@@ -1,0 +1,28 @@
+{
+  "sessions": {
+    "e78109ef-1497-400e-ae98-107830bd4a92": {
+      "injected": [
+        ".agents/skills/oma-frontend/SKILL.md"
+      ],
+      "timestamp": 1777984763016
+    },
+    "9599e84c-c0c1-486f-86d9-52cf53035074": {
+      "injected": [
+        ".agents/skills/oma-frontend/SKILL.md"
+      ],
+      "timestamp": 1777986725268
+    },
+    "46c047cf-a714-4f29-9211-fc7df759602c": {
+      "injected": [
+        ".agents/skills/oma-frontend/SKILL.md"
+      ],
+      "timestamp": 1777986848376
+    },
+    "16dd6fea-c804-4fff-87ae-7046e59b89b2": {
+      "injected": [
+        ".agents/skills/oma-frontend/SKILL.md"
+      ],
+      "timestamp": 1777986948354
+    }
+  }
+}

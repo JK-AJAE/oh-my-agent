@@ -1,6 +1,7 @@
 {
   "harness": "vanilla",
   "package_manager": "npm",
+  "judge_runs_spec_visual": 3,
   "axes": {
     "functional": {
       "items": {
@@ -66,81 +67,81 @@
       "items": {
         "spec-product-concept": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-personas": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-journeys": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-feature-list": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-ia": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-ui-direction": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-tech-arch": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-db-schema": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-ai-prompts": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-safety": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-impl-plan": {
           "pass": 1,
-          "score": 1,
+          "score": 0.67,
           "max": 1,
-          "evidence": "final-reply"
+          "evidence": "pass_votes=110 (2/3 rounds)"
         },
         "spec-starter-code": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply and src/ directory with 20 source files"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-priority-screens": {
           "pass": 0,
-          "score": 0,
+          "score": 0.00,
           "max": 1,
-          "evidence": "final-reply truncated before section 13; no dedicated section found in project files"
+          "evidence": "pass_votes=000 (0/3 rounds)"
         },
         "spec-real-api-bonus": {
           "pass": false,
@@ -149,37 +150,37 @@
           "evidence": "not found"
         }
       },
-      "total": 12,
+      "total": 11.67,
       "max": 15
     },
     "visual": {
       "items": {
         "visual-anti-patterns": {
           "pass": 0,
-          "score": 1,
+          "score": 2.3,
           "max": 5,
-          "evidence": "Purple-to-blue gradient hero on landing page; body/metadata text appears sub-16px in several places (gallery byline, category tabs, environment labels); gallery shows card-inside-card nesting (thumbnail container within outer card); builder shows 7 distinct UI groups at once (nav, object categories, object grid, 3D canvas, environment bar, AI panel, chat input)"
+          "evidence": "scores=[ 1 3 3 ] mean=2.3 (over 3 rounds)"
         },
         "visual-child-friendly": {
           "pass": 1,
-          "score": 4,
+          "score": 4.0,
           "max": 5,
-          "evidence": "Playful tone throughout with emoji, friendly AI buddy with suggestion chips, big CTA buttons on landing, whimsical environment names; slightly dense builder UI with small category tabs prevents a 5"
+          "evidence": "scores=[ 4 4 4 ] mean=4.0 (over 3 rounds)"
         },
         "visual-consistency": {
           "pass": 1,
-          "score": 3,
+          "score": 3.0,
           "max": 5,
-          "evidence": "DreamWorld branding and rounded card shapes are consistent, but button styles drift across pages (orange/teal on landing, purple on gallery, mixed in builder) and the landing gradient aesthetic clashes with the builder's clean white style"
+          "evidence": "scores=[ 3 3 3 ] mean=3.0 (over 3 rounds)"
         },
         "visual-accessibility": {
           "pass": 0,
-          "score": 2,
+          "score": 2.7,
           "max": 5,
-          "evidence": "Most text areas show adequate contrast and inputs have visible focus borders; text labels accompany most interactive elements, but some top-bar icons lack labels and no evidence of responsive layout adaptation"
+          "evidence": "scores=[ 2 3 3 ] mean=2.7 (over 3 rounds)"
         }
       },
-      "total": 10,
+      "total": 12,
       "max": 20
     },
     "engineering": {
@@ -243,6 +244,6 @@
       "max": 10
     }
   },
-  "total": 69.0,
+  "total": 70.7,
   "max": 100.0
 }

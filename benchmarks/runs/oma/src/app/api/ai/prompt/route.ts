@@ -1,75 +1,111 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOpenAI } from '@/lib/openai';
-import { aiPromptSchema } from '@/lib/validators';
+import type { WorldObject, EnvironmentTheme } from '@/types/world';
+import {
+  SYSTEM_PROMPT,
+  getRandomFallback,
+  getFallbackSuggestions,
+} from '@/lib/ai-prompts';
 
-const SYSTEM_PROMPT = `You are Spark, a friendly and curious creative companion for children building 3D worlds. You are warm, playful, and encouraging.
-
-RULES:
-- Keep responses to 1-2 short sentences maximum
-- Use simple words a 6-10 year old would understand
-- Always end with ONE question or ONE suggestion
-- Never be scary, violent, or inappropriate
-- Encourage experimentation and creativity
-- Never give "correct" answers - offer possibilities
-- Use occasional emojis (1-2 max per response)
-- If asked about personal info, redirect to building
-- Never mention you are an AI - you are Spark, a creative friend
-
-PERSONALITY:
-- Curious about everything the child builds
-- Excited by creative choices
-- Supportive when things don't work
-- Playful with "what if" questions
-- Celebrates effort, not perfection`;
-
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const parsed = aiPromptSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
-  }
-
-  const { message, worldContext, history } = parsed.data;
-
-  const contextSummary = `Current world: ${worldContext.environment || 'forest'} theme, ${worldContext.objectCount || 0} objects placed. Recent objects: ${worldContext.recentObjects || 'none'}.`;
-
-  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
-    { role: 'system', content: `${SYSTEM_PROMPT}\n\nWORLD CONTEXT: ${contextSummary}` },
-    ...history.map((msg) => ({
-      role: (msg.role === 'child' ? 'user' : 'assistant') as 'user' | 'assistant',
-      content: msg.content,
-    })),
-    { role: 'user', content: message },
-  ];
-
-  try {
-    const completion = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      max_tokens: 100,
-      temperature: 0.8,
-    });
-
-    const content = completion.choices[0]?.message?.content || "That's so cool! What will you add next? ✨";
-
-    const suggestions = generateSuggestions(worldContext);
-
-    return NextResponse.json({ content, suggestions });
-  } catch {
-    return NextResponse.json({
-      content: "Ooh, I got excited and lost my train of thought! Tell me more about your world! 🌟",
-      suggestions: ['Add something new', 'Change the colors', 'Try a different theme'],
-    });
-  }
+interface WorldContext {
+  objects: WorldObject[];
+  theme: EnvironmentTheme;
+  title: string;
 }
 
-function generateSuggestions(worldContext: Record<string, unknown>): string[] {
-  const objectCount = (worldContext.objectCount as number) || 0;
-  if (objectCount === 0) {
-    return ['Add your first object!', 'Pick an environment', 'Ask Spark for ideas'];
+interface PromptRequestBody {
+  worldContext: WorldContext;
+  userMessage?: string;
+}
+
+interface PromptResponseBody {
+  message: string;
+  suggestions: string[];
+}
+
+function buildWorldDescription(worldContext: WorldContext): string {
+  const { objects, theme, title } = worldContext;
+  const objectCounts: Record<string, number> = {};
+  for (const obj of objects) {
+    objectCounts[obj.type] = (objectCounts[obj.type] ?? 0) + 1;
   }
-  if (objectCount < 5) {
-    return ['Add more objects', 'Change colors', 'Try moving things around'];
+  const objectList = Object.entries(objectCounts)
+    .map(([type, count]) => `${count} ${type}${count > 1 ? 's' : ''}`)
+    .join(', ');
+
+  return [
+    `The child's world is titled "${title}".`,
+    `Environment theme: ${theme}.`,
+    objects.length > 0
+      ? `Objects in the world: ${objectList}.`
+      : 'The world is currently empty — the child is just getting started.',
+  ].join(' ');
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse<PromptResponseBody>> {
+  let body: PromptRequestBody;
+  try {
+    body = (await request.json()) as PromptRequestBody;
+  } catch {
+    return NextResponse.json(
+      { message: getRandomFallback(), suggestions: [] },
+      { status: 200 },
+    );
   }
-  return ['Enter play mode', 'Share your world', 'Try a what-if challenge'];
+
+  const { worldContext, userMessage } = body;
+
+  // Build suggestions regardless of OpenAI availability
+  const suggestions = getFallbackSuggestions(worldContext.theme);
+
+  // No API key — return deterministic fallback immediately
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({
+      message: getRandomFallback(),
+      suggestions,
+    });
+  }
+
+  // Build messages for OpenAI
+  const worldDescription = buildWorldDescription(worldContext);
+  const userContent = userMessage
+    ? `${worldDescription}\n\nThe child says: "${userMessage}"`
+    : `${worldDescription}\n\nGive the child one creative idea or question to spark their imagination!`;
+
+  try {
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        temperature: 0.8,
+        max_tokens: 120,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userContent },
+        ],
+      }),
+    });
+
+    if (!openAIResponse.ok) {
+      throw new Error(`OpenAI API error: ${openAIResponse.status}`);
+    }
+
+    const data = (await openAIResponse.json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+
+    const message = data.choices[0]?.message?.content?.trim() ?? getRandomFallback();
+
+    return NextResponse.json({ message, suggestions });
+  } catch {
+    // Fall back gracefully on any error
+    return NextResponse.json({
+      message: getRandomFallback(),
+      suggestions,
+    });
+  }
 }

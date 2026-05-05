@@ -1,0 +1,9 @@
+{
+  "harness": "oma",
+  "items": {
+    "visual-anti-patterns":  { "score": 2, "max": 5, "notes": "Purple-to-blue gradient background on landing page, floating gradient orbs/blobs on landing page (purple, blue, green circles), footer and gallery subtitle text appears smaller than 16px" },
+    "visual-child-friendly": { "score": 4, "max": 5, "notes": "Large tappable emoji-based object buttons, playful tone in Spark chat, low text density, friendly CTAs, toolbar icons all have text labels; minor deduction for AI chat text density" },
+    "visual-consistency":    { "score": 4, "max": 5, "notes": "Consistent purple accent, pill-shaped buttons, toolbar design, and type hierarchy across pages; slight drift between landing gradient background and builder/gallery backgrounds" },
+    "visual-accessibility":  { "score": 2, "max": 5, "notes": "Clear text labels on all toolbar and object icons; some gray subtitle text on white/light backgrounds appears below 4.5:1 contrast; no visible focus rings; responsiveness not confirmable from screenshots" }
+  }
+}

@@ -1,1159 +1,1045 @@
-# Worldcraft — Technical Architecture Document
+# WorldCraft Kids — Technical Architecture
 
-**Platform**: AI-Driven 3D Creative Learning Platform for Children
-**Version**: 1.0 (Greenfield)
-**Date**: 2026-05-05
-**Status**: Design
+**Version**: 0.1  
+**Status**: Pre-MVP  
+**Stack**: Next.js 16 (App Router) · TypeScript · React Three Fiber · Tailwind CSS 4 · Zustand · OpenAI API · SQLite (better-sqlite3)
 
 ---
 
 ## Table of Contents
 
-1. [System Architecture Overview](#1-system-architecture-overview)
-2. [Frontend Architecture](#2-frontend-architecture)
-3. [Backend Architecture](#3-backend-architecture)
-4. [3D Engine Design](#4-3d-engine-design)
-5. [AI Integration Design](#5-ai-integration-design)
-6. [Database Schema](#6-database-schema)
-7. [Data Flow](#7-data-flow)
-8. [Security Considerations](#8-security-considerations)
-9. [Performance Strategy](#9-performance-strategy)
+1. [Technical Architecture Overview](#1-technical-architecture-overview)
+2. [System Architecture Diagram](#2-system-architecture-diagram)
+3. [Directory Structure](#3-directory-structure)
+4. [Database Schema](#4-database-schema)
+5. [API Route Design](#5-api-route-design)
+6. [State Management Design](#6-state-management-design)
+7. [Key Technical Decisions](#7-key-technical-decisions)
 
 ---
 
-## 1. System Architecture Overview
+## 1. Technical Architecture Overview
 
-### High-Level System Diagram
+### Rendering Strategy
+
+WorldCraft Kids uses the Next.js 16 App Router with a deliberate split between server and client rendering:
+
+**Server Components (RSC)** handle:
+- Landing page, gallery index, dashboard world list — data-fetching pages where interactivity is minimal and SEO or initial-load speed matters.
+- Layout shells and navigation chrome that never change based on client state.
+- Streamed data from SQLite on API boundaries (via Route Handlers, not Server Actions, to keep the backend contract explicit and testable).
+
+**Client Components** (`"use client"`) handle:
+- Everything inside the builder workspace: the 3D canvas, object library panel, AI companion panel, properties panel, and toolbar.
+- The Zustand store providers and hook consumers.
+- Any component that uses `useEffect`, `useState`, browser APIs, or subscribes to real-time state.
+
+The rule is: push the boundary toward the server as far as possible, then flip to client only when interactivity or browser APIs are actually required.
+
+### 3D Canvas Layer
+
+React Three Fiber (R3F) renders inside a `<Canvas>` component that is always a Client Component. The canvas is isolated in `src/components/three/` and communicates with the rest of the application exclusively through the Zustand `useWorldStore`. It never fetches data directly — the store is the single source of truth for what is rendered.
+
+Drei provides ready-made abstractions (orbit controls, environment presets, instanced meshes, HTML overlays) that reduce boilerplate. The canvas does not know about API routes or the AI companion — it only reads and writes world state through the store.
+
+### API Layer
+
+All server-side logic lives in Next.js Route Handlers under `src/app/api/`. This keeps the deployment to a single Node.js process (one Vercel function, one Railway container, one Docker image) with no separate backend service required for MVP.
+
+Route Handlers follow the clean architecture pattern:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENTS                                  │
-│                                                                 │
-│  ┌──────────────────┐          ┌────────────────────────────┐   │
-│  │  Student Browser │          │    Teacher Browser         │   │
-│  │  (Next.js + R3F) │          │    (Next.js Dashboard)     │   │
-│  └────────┬─────────┘          └──────────────┬─────────────┘   │
-└───────────┼──────────────────────────────────┼─────────────────┘
-            │ HTTPS                             │ HTTPS
-            ▼                                  ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   VERCEL EDGE / CDN                             │
-│              (Static Assets, Image Optimization)                │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   NEXT.JS APPLICATION SERVER                    │
-│                                                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────┐  │
-│  │  App Router  │  │  API Routes  │  │  NextAuth.js          │  │
-│  │  (RSC + CSR) │  │  (Route      │  │  (Session + JWT)      │  │
-│  │              │  │   Handlers)  │  │                       │  │
-│  └──────────────┘  └──────┬───────┘  └───────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                             │
-           ┌─────────────────┼──────────────────┐
-           ▼                 ▼                  ▼
-┌──────────────────┐  ┌────────────────┐  ┌───────────────────┐
-│   SERVICE LAYER  │  │  AI SERVICE    │  │  STORAGE SERVICE  │
-│                  │  │                │  │                   │
-│  - ProjectSvc    │  │  OpenAI API    │  │  S3-Compatible    │
-│  - GallerySvc    │  │  (GPT-4o-mini) │  │  (Project Assets, │
-│  - TeacherSvc    │  │  + Safety      │  │   Thumbnails,     │
-│  - ChallengeSvc  │  │    Filter      │  │   3D Asset Lib)   │
-└────────┬─────────┘  └────────────────┘  └───────────────────┘
-         │
-         ▼
-┌──────────────────┐
-│   PRISMA ORM     │
-│                  │
-│  PostgreSQL DB   │
-│  (Users, World   │
-│   Projects, AI   │
-│   Conversations, │
-│   Classrooms)    │
-└──────────────────┘
+Route Handler (HTTP boundary) → Service (business logic) → Repository (SQLite access) → Model types
 ```
 
-### Key Architectural Decisions
+- Route handlers validate input with Zod and delegate immediately to a service function.
+- Service functions contain all business logic and call repository functions.
+- Repository functions contain all SQL and return typed model objects — never raw `Database.Statement` results.
+- No SQL appears in route handlers or service files.
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Monolithic vs. Microservices | Monolith (Next.js) | Team size, deployment simplicity, single Vercel deployment |
-| 3D Rendering | Client-side (React Three Fiber) | 3D state is inherently client-side; server-side 3D rendering is unnecessary complexity |
-| AI Communication | Server-side API route proxying OpenAI | Keeps API keys server-side; enables server-level rate limiting and safety filtering |
-| State Management | Zustand (domain-split stores) | Lightweight, no boilerplate, predictable for 3D real-time updates |
-| Auth Strategy | NextAuth.js (credentials + session) | Simple email/password; avoids OAuth complexity for children's accounts under teacher supervision |
+### Persistence Layer
+
+SQLite via `better-sqlite3` is the MVP database. The file lives at `data/worldcraft.db` (outside `src/`, gitignored). All queries are parameterized — no string interpolation in SQL ever.
+
+A thin repository layer in `src/lib/db/` wraps every query behind a typed function. When the product outgrows SQLite, the repository interface stays the same and the implementation is swapped to a Postgres client (via Drizzle ORM) without touching service or route code.
+
+### Client State
+
+Zustand manages all client state. There are four stores:
+
+| Store | Concern |
+|---|---|
+| `useWorldStore` | 3D objects, environment, camera — everything the canvas renders |
+| `useUIStore` | Panel visibility, undo/redo stack, play mode flag |
+| `useUserStore` | Current user session (name, avatar emoji, id) |
+| `useAIStore` | Spark conversation messages, loading flag, variation suggestions |
+
+Stores are not wrapped in React Context providers — Zustand's module-level singletons are used directly. This avoids provider trees and is safe for the single-tab session model.
+
+### Feature-Based Code Organization
+
+`src/` is organized by feature domain, not by file type. All code related to the builder (components, hooks, utilities) lives together under `src/app/builder/` and `src/components/builder/`. Shared primitives (UI atoms, Three.js helpers, utility functions) live in `src/components/ui/`, `src/components/three/`, and `src/lib/`. No cross-feature imports — features may only import from shared directories.
 
 ---
 
-## 2. Frontend Architecture
+## 2. System Architecture Diagram
 
-### App Router Directory Structure
+### Full System
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                        BROWSER                          │
+│                                                         │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │              Next.js App Router                 │   │
+│  │                                                 │   │
+│  │  ┌──────────────┐    ┌──────────────────────┐  │   │
+│  │  │  RSC Pages   │    │  Client Components   │  │   │
+│  │  │  (dashboard, │    │  (builder, canvas,   │  │   │
+│  │  │   gallery,   │    │   panels, toolbar)   │  │   │
+│  │  │   landing)   │    │                      │  │   │
+│  │  └──────┬───────┘    └──────────┬───────────┘  │   │
+│  │         │                       │               │   │
+│  │         │              ┌────────▼────────┐      │   │
+│  │         │              │  Zustand Stores │      │   │
+│  │         │              │  useWorldStore  │      │   │
+│  │         │              │  useUIStore     │      │   │
+│  │         │              │  useUserStore   │      │   │
+│  │         │              │  useAIStore     │      │   │
+│  │         │              └────────┬────────┘      │   │
+│  │         │                       │               │   │
+│  │         │              ┌────────▼────────┐      │   │
+│  │         │              │   R3F Canvas    │      │   │
+│  │         │              │  (Three.js +    │      │   │
+│  │         │              │   Drei helpers) │      │   │
+│  │         │              └─────────────────┘      │   │
+│  └─────────┼───────────────────────────────────────┘   │
+│            │  fetch()                                   │
+└────────────┼───────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────┐
+│              Next.js API Routes (Route Handlers)        │
+│                                                         │
+│   /api/auth/*        /api/worlds/*                      │
+│   /api/ai/*          /api/gallery/*                     │
+│   /api/challenges/*                                     │
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │    Service Layer  (src/lib/services/)            │  │
+│  │    AuthService  WorldService  AIService          │  │
+│  │    GalleryService  ChallengeService              │  │
+│  └──────────────┬───────────────────────────────────┘  │
+│                 │                                       │
+│  ┌──────────────▼───────────────────────────────────┐  │
+│  │  Repository Layer  (src/lib/db/repositories/)    │  │
+│  │  UserRepository  WorldRepository                 │  │
+│  │  ConversationRepository  LikeRepository          │  │
+│  │  ChallengeRepository  SubmissionRepository       │  │
+│  └──────────────┬───────────────────────────────────┘  │
+└─────────────────┼───────────────────────────────────────┘
+                  │                        │
+        ┌─────────▼────────┐    ┌──────────▼──────────┐
+        │   SQLite DB      │    │    OpenAI API        │
+        │  (better-sqlite3)│    │  (gpt-4o-mini for   │
+        │  data/worldcraft │    │   Spark prompts &   │
+        │  .db)            │    │   suggestions)      │
+        └──────────────────┘    └─────────────────────┘
+```
+
+### Client-Side Architecture Detail
+
+```
+React Component Tree
+│
+├── RSC Layout Shell (layout.tsx)
+│
+└── Client Boundary ("use client")
+    │
+    ├── Zustand Stores (module-level singletons, no provider needed)
+    │   ├── useWorldStore  ──────────────────────────────┐
+    │   ├── useUIStore                                   │
+    │   ├── useUserStore                                 │
+    │   └── useAIStore                                   │
+    │                                                    │
+    └── Builder Page                                     │
+        ├── Toolbar                   reads useUIStore   │
+        ├── ObjectLibraryPanel        dispatches to      │
+        ├── AICompanionPanel          useWorldStore ──►  R3F Canvas
+        ├── PropertiesPanel                              │
+        └── WorldCanvas ("use client")                  │
+            └── <Canvas> (React Three Fiber)  ◄─────────┘
+                ├── EnvironmentPreset (Drei)
+                ├── OrbitControls (Drei)
+                ├── InstancedObjects
+                │   └── WorldObject × N  (reads store.objects)
+                └── PostProcessing (if needed)
+```
+
+---
+
+## 3. Directory Structure
 
 ```
 src/
-├── app/
-│   ├── layout.tsx                    # Root layout (fonts, providers)
-│   ├── page.tsx                      # Landing / login redirect
-│   ├── (auth)/
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx         # Teacher registration
-│   ├── (student)/
-│   │   ├── layout.tsx                # Student shell (nav, Zustand providers)
-│   │   ├── dashboard/page.tsx        # Project list + challenges
-│   │   ├── world/
-│   │   │   └── [projectId]/
-│   │   │       └── page.tsx          # Main 3D editor (Client Component)
-│   │   └── gallery/page.tsx
-│   ├── (teacher)/
-│   │   ├── layout.tsx
-│   │   ├── dashboard/page.tsx
-│   │   ├── classroom/[id]/page.tsx
-│   │   └── challenges/page.tsx
-│   └── api/                          # See Section 3
+├── app/                              # Next.js App Router
+│   ├── layout.tsx                    # Root layout (fonts, global CSS, metadata)
+│   ├── page.tsx                      # Landing page (RSC)
+│   ├── globals.css                   # Tailwind base + CSS variables
+│   │
+│   ├── onboarding/                   # Child onboarding flow
+│   │   └── page.tsx                  # Name entry + starter world selection (Client)
+│   │
+│   ├── dashboard/                    # My worlds list
+│   │   └── page.tsx                  # World cards grid (RSC, fetches from DB)
+│   │
+│   ├── builder/
+│   │   └── [worldId]/
+│   │       ├── page.tsx              # Builder workspace shell (Client)
+│   │       └── loading.tsx           # Skeleton while world loads
+│   │
+│   ├── play/
+│   │   └── [worldId]/
+│   │       └── page.tsx              # Explore/play mode (Client, R3F full-screen)
+│   │
+│   ├── gallery/
+│   │   └── page.tsx                  # Community gallery (RSC)
+│   │
+│   └── api/                          # Route Handlers
+│       ├── auth/
+│       │   └── login/
+│       │       └── route.ts          # POST /api/auth/login
+│       ├── worlds/
+│       │   ├── route.ts              # GET /api/worlds, POST /api/worlds
+│       │   └── [id]/
+│       │       └── route.ts          # GET, PUT, DELETE /api/worlds/[id]
+│       ├── ai/
+│       │   ├── prompt/
+│       │   │   └── route.ts          # POST /api/ai/prompt
+│       │   └── suggest/
+│       │       └── route.ts          # POST /api/ai/suggest
+│       ├── gallery/
+│       │   ├── route.ts              # GET /api/gallery
+│       │   └── [id]/
+│       │       └── like/
+│       │           └── route.ts      # POST /api/gallery/[id]/like
+│       └── challenges/
+│           ├── route.ts              # GET /api/challenges, POST /api/challenges
+│           └── [id]/
+│               └── submit/
+│                   └── route.ts      # POST /api/challenges/[id]/submit
+│
 ├── components/
-│   ├── world/                        # 3D scene components (R3F)
-│   │   ├── Scene.tsx
-│   │   ├── WorldObject.tsx
-│   │   ├── Environment.tsx
-│   │   ├── AssetLibrary.tsx
-│   │   └── CameraController.tsx
-│   ├── ui/                           # Generic shadcn/ui base components
-│   │   ├── Button.tsx
-│   │   ├── Panel.tsx
-│   │   └── Modal.tsx
-│   ├── editor/                       # Editor-specific panels
-│   │   ├── Toolbar.tsx
-│   │   ├── PropertiesPanel.tsx
-│   │   ├── AICompanionPanel.tsx
-│   │   └── ObjectPicker.tsx
-│   └── teacher/                      # Teacher dashboard components
+│   ├── ui/                           # Shared UI primitives (shadcn/ui base)
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── input.tsx
+│   │   ├── sheet.tsx
+│   │   ├── tooltip.tsx
+│   │   └── badge.tsx
+│   │
+│   ├── builder/                      # Builder workspace components
+│   │   ├── toolbar.tsx               # Top bar: title, theme, undo/redo, save, play
+│   │   ├── object-library-panel.tsx  # Left panel: thematic groups + search
+│   │   ├── object-thumbnail.tsx      # Draggable object card
+│   │   ├── properties-panel.tsx      # Bottom bar: color, texture, animation, scale
+│   │   └── world-canvas.tsx          # "use client" wrapper for R3F Canvas
+│   │
+│   ├── three/                        # React Three Fiber components
+│   │   ├── scene.tsx                 # Root R3F scene: env preset, lighting, controls
+│   │   ├── world-object.tsx          # Single placed object mesh
+│   │   ├── instanced-objects.tsx     # InstancedMesh for many identical objects
+│   │   ├── environment-preset.tsx    # Drei <Environment> with theme mapping
+│   │   ├── play-camera.tsx           # First-person camera controller for play mode
+│   │   └── grid-plane.tsx            # Ground grid with snap behavior
+│   │
+│   └── ai/                           # AI companion components
+│       ├── spark-panel.tsx           # Collapsible Spark side panel
+│       ├── spark-message.tsx         # Individual message bubble
+│       ├── spark-input.tsx           # Child reply text field
+│       └── variation-cards.tsx       # 3-card suggestion strip
+│
+├── stores/                           # Zustand stores
+│   ├── use-world-store.ts
+│   ├── use-ui-store.ts
+│   ├── use-user-store.ts
+│   └── use-ai-store.ts
+│
 ├── lib/
-│   ├── stores/                       # Zustand stores (see below)
-│   ├── api/                          # Typed API client functions
-│   ├── prisma.ts                     # Singleton Prisma client
-│   └── auth.ts                       # NextAuth config
-├── types/
-│   ├── world.ts                      # WorldObject, SceneState types
-│   ├── ai.ts                         # AIMessage, AIResponse types
-│   └── project.ts                    # Project, Gallery types
-└── middleware.ts                     # Auth guard for protected routes
+│   ├── db/
+│   │   ├── client.ts                 # better-sqlite3 singleton (server-only)
+│   │   ├── schema.ts                 # CREATE TABLE statements (run once at startup)
+│   │   └── repositories/
+│   │       ├── user-repository.ts
+│   │       ├── world-repository.ts
+│   │       ├── conversation-repository.ts
+│   │       ├── like-repository.ts
+│   │       ├── challenge-repository.ts
+│   │       └── submission-repository.ts
+│   ├── services/
+│   │   ├── auth-service.ts
+│   │   ├── world-service.ts
+│   │   ├── ai-service.ts
+│   │   ├── gallery-service.ts
+│   │   └── challenge-service.ts
+│   ├── validations/
+│   │   ├── auth-schemas.ts           # Zod schemas for auth input
+│   │   ├── world-schemas.ts          # Zod schemas for world create/update
+│   │   └── ai-schemas.ts             # Zod schemas for AI prompt requests
+│   ├── errors.ts                     # Centralized custom error classes
+│   ├── session.ts                    # Cookie-based session helpers (server-only)
+│   └── cn.ts                         # clsx + tailwind-merge helper
+│
+├── hooks/                            # Custom React hooks
+│   ├── use-auto-save.ts              # Debounced world auto-save (60s interval)
+│   ├── use-drag-to-canvas.ts         # HTML drag events → R3F world coordinates
+│   ├── use-keyboard-shortcuts.ts     # Ctrl+Z undo, Ctrl+Y redo, Delete object
+│   └── use-spark-trigger.ts          # Heuristic: when to surface a Spark message
+│
+└── types/                            # Shared TypeScript type definitions
+    ├── world.ts                      # WorldObject, EnvironmentTheme, CameraPosition
+    ├── user.ts                       # User, Session
+    ├── ai.ts                         # SparkMessage, AISuggestion
+    └── api.ts                        # API request/response envelope types
+
+data/
+└── worldcraft.db                     # SQLite database file (gitignored)
+
+public/
+├── objects/                          # Static 3D model thumbnails (PNG, 64×64)
+└── environments/                     # Environment preview images
 ```
 
-### Component Hierarchy (Editor View)
+---
 
+## 4. Database Schema
+
+### Design Notes
+
+- Primary keys are `TEXT` UUIDs generated with `nanoid` in application code (not auto-increment integers), so IDs are safe to expose in URLs without enumeration risk.
+- `objects_json` and `messages_json` are stored as JSON strings. The application layer owns deserialization. This avoids a separate `world_objects` table for MVP while keeping the schema simple to migrate later.
+- `camera_position` is stored as a JSON string `{ x, y, z, target: { x, y, z } }`.
+- `STRICT` mode is used on all tables to enforce column type contracts at the SQLite level.
+- All foreign keys use `ON DELETE CASCADE` to prevent orphaned rows.
+- `PRAGMA foreign_keys = ON` is set at connection time in `src/lib/db/client.ts`.
+
+### SQL DDL
+
+```sql
+PRAGMA journal_mode = WAL;
+PRAGMA foreign_keys = ON;
+
+-- ─────────────────────────────────────────────
+-- Users
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS users (
+  id           TEXT    NOT NULL PRIMARY KEY,
+  display_name TEXT    NOT NULL,
+  avatar_emoji TEXT    NOT NULL DEFAULT '🌟',
+  role         TEXT    NOT NULL DEFAULT 'child'
+                       CHECK (role IN ('child', 'teacher')),
+  created_at   INTEGER NOT NULL DEFAULT (unixepoch())
+) STRICT;
+
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users (created_at);
+
+-- ─────────────────────────────────────────────
+-- Worlds
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS worlds (
+  id                TEXT    NOT NULL PRIMARY KEY,
+  user_id           TEXT    NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  title             TEXT    NOT NULL DEFAULT 'My World',
+  description       TEXT,
+  thumbnail_url     TEXT,
+  environment_theme TEXT    NOT NULL DEFAULT 'meadow'
+                            CHECK (environment_theme IN (
+                              'meadow', 'forest', 'ocean',
+                              'desert', 'night_sky', 'snowy_peak'
+                            )),
+  objects_json      TEXT    NOT NULL DEFAULT '[]',
+  camera_position   TEXT    NOT NULL DEFAULT '{"x":0,"y":5,"z":10,"target":{"x":0,"y":0,"z":0}}',
+  reflection_note   TEXT,
+  is_public         INTEGER NOT NULL DEFAULT 0
+                            CHECK (is_public IN (0, 1)),
+  created_at        INTEGER NOT NULL DEFAULT (unixepoch()),
+  updated_at        INTEGER NOT NULL DEFAULT (unixepoch())
+) STRICT;
+
+CREATE INDEX IF NOT EXISTS idx_worlds_user_id   ON worlds (user_id);
+CREATE INDEX IF NOT EXISTS idx_worlds_is_public ON worlds (is_public, updated_at DESC);
+
+-- ─────────────────────────────────────────────
+-- AI Conversations (one per world, append-only messages)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS ai_conversations (
+  id           TEXT    NOT NULL PRIMARY KEY,
+  world_id     TEXT    NOT NULL REFERENCES worlds (id) ON DELETE CASCADE,
+  messages_json TEXT   NOT NULL DEFAULT '[]',
+  created_at   INTEGER NOT NULL DEFAULT (unixepoch()),
+  updated_at   INTEGER NOT NULL DEFAULT (unixepoch())
+) STRICT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ai_conversations_world_id
+  ON ai_conversations (world_id);
+
+-- ─────────────────────────────────────────────
+-- Gallery Likes (emoji reactions: heart, star, wow, hmm)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS gallery_likes (
+  id         TEXT    NOT NULL PRIMARY KEY,
+  world_id   TEXT    NOT NULL REFERENCES worlds (id) ON DELETE CASCADE,
+  user_id    TEXT    NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  reaction   TEXT    NOT NULL DEFAULT 'heart'
+                     CHECK (reaction IN ('heart', 'star', 'wow', 'hmm')),
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  UNIQUE (world_id, user_id)
+) STRICT;
+
+CREATE INDEX IF NOT EXISTS idx_gallery_likes_world_id ON gallery_likes (world_id);
+
+-- ─────────────────────────────────────────────
+-- Teacher Challenges
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS teacher_challenges (
+  id                   TEXT    NOT NULL PRIMARY KEY,
+  teacher_id           TEXT    NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  title                TEXT    NOT NULL,
+  prompt               TEXT    NOT NULL,
+  starter_theme        TEXT,
+  due_at               INTEGER,
+  created_at           INTEGER NOT NULL DEFAULT (unixepoch())
+) STRICT;
+
+CREATE INDEX IF NOT EXISTS idx_teacher_challenges_teacher_id
+  ON teacher_challenges (teacher_id);
+
+-- ─────────────────────────────────────────────
+-- Challenge Submissions
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS challenge_submissions (
+  id           TEXT    NOT NULL PRIMARY KEY,
+  challenge_id TEXT    NOT NULL REFERENCES teacher_challenges (id) ON DELETE CASCADE,
+  world_id     TEXT    NOT NULL REFERENCES worlds (id) ON DELETE CASCADE,
+  user_id      TEXT    NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  submitted_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  UNIQUE (challenge_id, user_id)
+) STRICT;
+
+CREATE INDEX IF NOT EXISTS idx_submissions_challenge_id
+  ON challenge_submissions (challenge_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_user_id
+  ON challenge_submissions (user_id);
 ```
-WorldEditorPage (Client Component — "use client")
-├── <Canvas> (React Three Fiber)
-│   ├── <CameraController />           # Orbit controls with child-safe limits
-│   ├── <Environment />                # Sky, ground, ambient light
-│   ├── <WorldObject /> (×N)           # Each placed 3D object
-│   └── <SelectionIndicator />         # Highlight selected object
-├── <Toolbar />                        # Top bar: file, undo/redo, save status
-├── <ObjectPicker />                   # Left panel: asset library by category
-├── <PropertiesPanel />                # Right panel: transform, color, metadata
-├── <AICompanionPanel />               # Bottom/side: chat with AI companion
-└── <SaveStatusIndicator />            # Autosave feedback
-```
 
-### Zustand Store Design
-
-Each store is isolated by domain. Stores communicate via selectors, not direct coupling.
+### TypeScript Model Types
 
 ```typescript
-// lib/stores/worldStore.ts
-import { create } from 'zustand'
-import { immer } from 'zustand/middleware/immer'
-import { temporal } from 'zundo'           // undo/redo middleware
+// src/types/world.ts
+
+export type EnvironmentTheme =
+  | 'meadow' | 'forest' | 'ocean'
+  | 'desert' | 'night_sky' | 'snowy_peak';
+
+export interface CameraPosition {
+  x: number;
+  y: number;
+  z: number;
+  target: { x: number; y: number; z: number };
+}
 
 export interface WorldObject {
-  id: string
-  type: string                             // 'cube' | 'tree' | 'house' | ...
-  position: [number, number, number]
-  rotation: [number, number, number]
-  scale: [number, number, number]
-  color: string                            // hex string
-  metadata: Record<string, unknown>        // theme-specific props
+  id: string;
+  modelKey: string;          // key into the static object catalog
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: number;
+  color: string | null;      // hex color override, null = default material
+  textureKey: string | null;
+  animationEnabled: boolean;
 }
 
-export interface WorldState {
-  objects: Record<string, WorldObject>
-  selectedObjectId: string | null
-  environment: {
-    skyPreset: string
-    groundColor: string
-    ambientIntensity: number
-    timeOfDay: 'dawn' | 'day' | 'dusk' | 'night'
-  }
-  camera: {
-    target: [number, number, number]
-    minDistance: number
-    maxDistance: number
-    maxPolarAngle: number                  // cap at ~80deg to prevent flipping
-  }
-  // Actions
-  addObject: (obj: WorldObject) => void
-  updateObject: (id: string, patch: Partial<WorldObject>) => void
-  removeObject: (id: string) => void
-  selectObject: (id: string | null) => void
-  setEnvironment: (patch: Partial<WorldState['environment']>) => void
+export interface World {
+  id: string;
+  userId: string;
+  title: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  environmentTheme: EnvironmentTheme;
+  objects: WorldObject[];
+  cameraPosition: CameraPosition;
+  reflectionNote: string | null;
+  isPublic: boolean;
+  createdAt: number;
+  updatedAt: number;
 }
-
-export const useWorldStore = create<WorldState>()(
-  temporal(
-    immer((set) => ({
-      objects: {},
-      selectedObjectId: null,
-      environment: {
-        skyPreset: 'sunny',
-        groundColor: '#4caf50',
-        ambientIntensity: 0.8,
-        timeOfDay: 'day',
-      },
-      camera: {
-        target: [0, 0, 0],
-        minDistance: 5,
-        maxDistance: 40,
-        maxPolarAngle: Math.PI * 0.45,
-      },
-      addObject: (obj) =>
-        set((state) => { state.objects[obj.id] = obj }),
-      updateObject: (id, patch) =>
-        set((state) => { Object.assign(state.objects[id], patch) }),
-      removeObject: (id) =>
-        set((state) => { delete state.objects[id] }),
-      selectObject: (id) =>
-        set((state) => { state.selectedObjectId = id }),
-      setEnvironment: (patch) =>
-        set((state) => { Object.assign(state.environment, patch) }),
-    }))
-  )
-)
 ```
 
+---
+
+## 5. API Route Design
+
+All Route Handlers return `application/json`. Errors are returned as `{ error: string }` with the appropriate HTTP status. Input is validated with Zod; validation errors return `400` with a Zod error message.
+
+Authentication is cookie-based: a signed session cookie (`worldcraft_session`) is set on login. Route Handlers read the session via `src/lib/session.ts`. No JWTs for MVP — the added complexity of token refresh is not warranted for a single-server, single-DB setup.
+
+Rate limiting on `/api/auth/login`: max 10 requests per IP per minute (implemented via an in-memory sliding window in `src/lib/rate-limit.ts` for MVP; swap to Upstash Redis for production).
+
+### Auth
+
+#### `POST /api/auth/login`
+
+Simple name + avatar login. Creates user on first visit. Returns session cookie.
+
+**Request body**
+```json
+{
+  "displayName": "Mia",
+  "avatarEmoji": "🌟",
+  "role": "child"
+}
+```
+
+**Response `200`**
+```json
+{
+  "user": {
+    "id": "abc123",
+    "displayName": "Mia",
+    "avatarEmoji": "🌟",
+    "role": "child"
+  }
+}
+```
+
+Sets `Set-Cookie: worldcraft_session=<signed-value>; HttpOnly; SameSite=Lax; Path=/`
+
+**Errors**: `400` invalid input, `429` rate limit exceeded.
+
+---
+
+### Worlds
+
+#### `GET /api/worlds`
+
+Returns all worlds owned by the authenticated user, ordered by `updated_at` descending.
+
+**Response `200`**
+```json
+{
+  "worlds": [
+    {
+      "id": "world_abc",
+      "title": "Lonely Mountain",
+      "thumbnailUrl": "/thumbnails/world_abc.png",
+      "environmentTheme": "snowy_peak",
+      "isPublic": false,
+      "updatedAt": 1746000000
+    }
+  ]
+}
+```
+
+**Errors**: `401` not authenticated.
+
+---
+
+#### `POST /api/worlds`
+
+Creates a new world with default state.
+
+**Request body**
+```json
+{
+  "title": "My New World",
+  "environmentTheme": "meadow"
+}
+```
+
+**Response `201`**
+```json
+{
+  "world": { ...fullWorldObject }
+}
+```
+
+**Errors**: `400` invalid input, `401` not authenticated.
+
+---
+
+#### `GET /api/worlds/[id]`
+
+Returns a full world document including `objects`, `cameraPosition`, and `reflectionNote`.
+
+**Response `200`**: full `World` object.
+
+**Errors**: `401` not authenticated, `403` not owner (unless world is public), `404` not found.
+
+---
+
+#### `PUT /api/worlds/[id]`
+
+Updates a world. Accepts partial updates — only provided fields are changed.
+
+**Request body** (all fields optional)
+```json
+{
+  "title": "Renamed World",
+  "objects": [...],
+  "cameraPosition": { "x": 0, "y": 5, "z": 10, "target": { "x": 0, "y": 0, "z": 0 } },
+  "environmentTheme": "forest",
+  "isPublic": true,
+  "reflectionNote": "This world feels quiet."
+}
+```
+
+**Response `200`**: updated `World` object.
+
+**Errors**: `400` invalid input, `401` not authenticated, `403` not owner, `404` not found.
+
+---
+
+#### `DELETE /api/worlds/[id]`
+
+Deletes a world and all associated records (cascade).
+
+**Response `204`** — no body.
+
+**Errors**: `401` not authenticated, `403` not owner, `404` not found.
+
+---
+
+### AI
+
+#### `POST /api/ai/prompt`
+
+Sends the current world state as context to OpenAI and returns a Spark contextual question or observation. Appends the exchange to the world's `ai_conversations` record.
+
+**Request body**
+```json
+{
+  "worldId": "world_abc",
+  "worldSnapshot": {
+    "objectCount": 7,
+    "environmentTheme": "snowy_peak",
+    "lastPlacedObject": "flag",
+    "objectKeys": ["mountain", "pine_tree", "flag", "cabin"]
+  },
+  "userMessage": "I want it to feel foggy"
+}
+```
+
+**Response `200`**
+```json
+{
+  "sparkMessage": "Interesting — what kind of fog? Low mist on the ground, or thick clouds that hide the mountain top?",
+  "conversationId": "conv_xyz"
+}
+```
+
+**Errors**: `400` invalid input, `401` not authenticated, `503` OpenAI unavailable.
+
+---
+
+#### `POST /api/ai/suggest`
+
+Requests 3 object or scene variation suggestions based on the current world context. Does not append to conversation history.
+
+**Request body**
+```json
+{
+  "worldId": "world_abc",
+  "intent": "make it feel foggy",
+  "environmentTheme": "snowy_peak"
+}
+```
+
+**Response `200`**
+```json
+{
+  "suggestions": [
+    {
+      "id": "sug_1",
+      "label": "Low ground mist",
+      "description": "Add a fog plane near the ground",
+      "objectKey": "ground_fog",
+      "previewUrl": "/objects/ground_fog_thumb.png"
+    },
+    {
+      "id": "sug_2",
+      "label": "Dense cloud layer",
+      "description": "Lower a cloud ceiling over the mountain",
+      "objectKey": "cloud_low",
+      "previewUrl": "/objects/cloud_low_thumb.png"
+    },
+    {
+      "id": "sug_3",
+      "label": "Misty waterfall",
+      "description": "A waterfall whose spray creates a mist effect",
+      "objectKey": "waterfall_mist",
+      "previewUrl": "/objects/waterfall_mist_thumb.png"
+    }
+  ]
+}
+```
+
+**Errors**: `400` invalid input, `401` not authenticated, `503` OpenAI unavailable.
+
+---
+
+### Gallery
+
+#### `GET /api/gallery`
+
+Returns public worlds, ordered by `updated_at` descending. Supports optional `?limit=20&offset=0` pagination.
+
+**Response `200`**
+```json
+{
+  "worlds": [
+    {
+      "id": "world_abc",
+      "title": "Lonely Mountain",
+      "thumbnailUrl": "/thumbnails/world_abc.png",
+      "creatorName": "Mia",
+      "creatorAvatar": "🌟",
+      "environmentTheme": "snowy_peak",
+      "reflectionNote": "This world feels quiet.",
+      "likeCount": 4,
+      "updatedAt": 1746000000
+    }
+  ],
+  "total": 42
+}
+```
+
+**Errors**: none (public endpoint, no auth required).
+
+---
+
+#### `POST /api/gallery/[id]/like`
+
+Upserts a reaction from the authenticated user on a public world. One reaction per user per world (upserts on `UNIQUE` constraint).
+
+**Request body**
+```json
+{
+  "reaction": "heart"
+}
+```
+
+**Response `200`**
+```json
+{
+  "likeCount": 5,
+  "userReaction": "heart"
+}
+```
+
+**Errors**: `400` invalid reaction value, `401` not authenticated, `404` world not found or not public.
+
+---
+
+### Challenges
+
+#### `GET /api/challenges`
+
+Returns challenges assigned to the authenticated child user, or all challenges created by the authenticated teacher.
+
+**Response `200`**
+```json
+{
+  "challenges": [
+    {
+      "id": "chal_abc",
+      "title": "Desert Ecosystem",
+      "prompt": "Build the ecosystem where your favorite animal lives.",
+      "starterTheme": "desert",
+      "dueAt": 1746604800,
+      "submittedWorldId": null
+    }
+  ]
+}
+```
+
+**Errors**: `401` not authenticated.
+
+---
+
+#### `POST /api/challenges`
+
+Teacher only. Creates a new challenge.
+
+**Request body**
+```json
+{
+  "title": "Desert Ecosystem",
+  "prompt": "Build the ecosystem where your favorite animal lives.",
+  "starterTheme": "desert",
+  "dueAt": 1746604800
+}
+```
+
+**Response `201`**
+```json
+{
+  "challenge": { ...fullChallengeObject }
+}
+```
+
+**Errors**: `400` invalid input, `401` not authenticated, `403` not a teacher.
+
+---
+
+#### `POST /api/challenges/[id]/submit`
+
+Submits a world as the child's response to a challenge. One submission per child per challenge.
+
+**Request body**
+```json
+{
+  "worldId": "world_abc"
+}
+```
+
+**Response `201`**
+```json
+{
+  "submission": {
+    "id": "sub_xyz",
+    "challengeId": "chal_abc",
+    "worldId": "world_abc",
+    "submittedAt": 1746000000
+  }
+}
+```
+
+**Errors**: `400` invalid input or already submitted, `401` not authenticated, `404` challenge or world not found.
+
+---
+
+## 6. State Management Design
+
+All stores use Zustand with the `immer` middleware for ergonomic immutable updates on nested objects. Stores are defined in `src/stores/` as module-level singletons.
+
+### `useWorldStore`
+
+Owns the entire 3D scene state. The R3F canvas reads from this store and re-renders reactively.
+
 ```typescript
-// lib/stores/uiStore.ts
+// src/stores/use-world-store.ts
+
+import type { WorldObject, EnvironmentTheme, CameraPosition } from '@/types/world';
+
+interface WorldState {
+  worldId: string | null;
+  title: string;
+  objects: WorldObject[];
+  selectedObjectId: string | null;
+  environment: EnvironmentTheme;
+  camera: CameraPosition;
+  isDirty: boolean;   // true if unsaved changes exist
+
+  // Actions
+  setWorld: (world: {
+    worldId: string;
+    title: string;
+    objects: WorldObject[];
+    environment: EnvironmentTheme;
+    camera: CameraPosition;
+  }) => void;
+  setTitle: (title: string) => void;
+  addObject: (object: WorldObject) => void;
+  moveObject: (id: string, position: [number, number, number]) => void;
+  rotateObject: (id: string, rotation: [number, number, number]) => void;
+  scaleObject: (id: string, scale: number) => void;
+  colorObject: (id: string, color: string | null) => void;
+  updateObject: (id: string, patch: Partial<WorldObject>) => void;
+  removeObject: (id: string) => void;
+  selectObject: (id: string | null) => void;
+  setEnvironment: (theme: EnvironmentTheme) => void;
+  setCamera: (camera: CameraPosition) => void;
+  markSaved: () => void;
+}
+```
+
+### `useUIStore`
+
+Owns interface state: which panels are open, whether play mode is active, and the undo/redo history.
+
+```typescript
+// src/stores/use-ui-store.ts
+
+type ActivePanel = 'objects' | 'properties' | 'ai' | null;
+
 interface UIState {
-  activePanel: 'objects' | 'properties' | 'ai' | null
-  activeTool: 'select' | 'move' | 'rotate' | 'scale' | 'place'
-  openModal: 'save' | 'share' | 'settings' | null
-  assetCategory: string
-  isMobileDrawerOpen: boolean
-  setActivePanel: (panel: UIState['activePanel']) => void
-  setActiveTool: (tool: UIState['activeTool']) => void
-  openModalDialog: (modal: UIState['openModal']) => void
-  closeModal: () => void
-}
-```
+  activePanel: ActivePanel;
+  isPlaying: boolean;
+  showAI: boolean;
+  isSaving: boolean;
+  undoStack: WorldObject[][];   // snapshots of objects[] state
+  redoStack: WorldObject[][];
 
-```typescript
-// lib/stores/projectStore.ts
-interface ProjectState {
-  projectId: string | null
-  title: string
-  description: string
-  isPublic: boolean
-  isDirty: boolean          // unsaved changes
-  lastSavedAt: Date | null
-  saveStatus: 'idle' | 'saving' | 'saved' | 'error'
   // Actions
-  setProjectMeta: (meta: Partial<ProjectState>) => void
-  markDirty: () => void
-  markSaved: (savedAt: Date) => void
+  setActivePanel: (panel: ActivePanel) => void;
+  setIsPlaying: (playing: boolean) => void;
+  setShowAI: (show: boolean) => void;
+  setIsSaving: (saving: boolean) => void;
+  pushUndo: (snapshot: WorldObject[]) => void;
+  undo: () => WorldObject[] | undefined;
+  redo: () => WorldObject[] | undefined;
 }
 ```
 
+Undo stack is capped at 20 snapshots. `pushUndo` is called by `useWorldStore` action wrappers before each mutating action.
+
+### `useUserStore`
+
+Owns the current user session. Persisted to `localStorage` via the Zustand `persist` middleware so the child does not need to log in again on page reload.
+
 ```typescript
-// lib/stores/aiStore.ts
-interface AIMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
+// src/stores/use-user-store.ts
+
+interface User {
+  id: string;
+  displayName: string;
+  avatarEmoji: string;
+  role: 'child' | 'teacher';
 }
+
+interface UserState {
+  user: User | null;
+  isHydrated: boolean;
+
+  // Actions
+  setUser: (user: User) => void;
+  clearUser: () => void;
+}
+```
+
+### `useAIStore`
+
+Owns Spark's conversation and suggestion state. Separate from `useWorldStore` to avoid re-rendering the canvas on every message arrival.
+
+```typescript
+// src/stores/use-ai-store.ts
+
+import type { SparkMessage, AISuggestion } from '@/types/ai';
 
 interface AIState {
-  conversationId: string | null
-  messages: AIMessage[]
-  isLoading: boolean
-  suggestions: string[]        // quick-reply suggestions for children
+  conversationId: string | null;
+  messages: SparkMessage[];
+  isLoading: boolean;
+  suggestions: AISuggestion[];
+  hasDismissed: boolean;   // user tapped ×; Spark stays quiet until next trigger
+
   // Actions
-  addMessage: (msg: AIMessage) => void
-  setSuggestions: (suggestions: string[]) => void
-  setLoading: (loading: boolean) => void
-  clearConversation: () => void
+  setConversationId: (id: string) => void;
+  addMessage: (message: SparkMessage) => void;
+  setIsLoading: (loading: boolean) => void;
+  setSuggestions: (suggestions: AISuggestion[]) => void;
+  clearSuggestions: () => void;
+  dismiss: () => void;
+  resetDismiss: () => void;
+}
+```
+
+```typescript
+// src/types/ai.ts
+
+export interface SparkMessage {
+  id: string;
+  role: 'spark' | 'child';
+  content: string;
+  timestamp: number;
+}
+
+export interface AISuggestion {
+  id: string;
+  label: string;
+  description: string;
+  objectKey: string;
+  previewUrl: string;
 }
 ```
 
 ---
 
-## 3. Backend Architecture (Next.js API Routes)
+## 7. Key Technical Decisions
 
-### Route Inventory
+### SQLite for MVP — Zero Configuration, One File
 
-```
-app/api/
-├── auth/
-│   └── [...nextauth]/route.ts         # NextAuth handler (GET, POST)
-├── projects/
-│   ├── route.ts                       # GET (list), POST (create)
-│   └── [id]/
-│       ├── route.ts                   # GET, PATCH, DELETE
-│       └── thumbnail/route.ts         # POST (upload thumbnail to S3)
-├── ai/
-│   └── prompt/route.ts                # POST (send prompt, stream response)
-├── gallery/
-│   ├── route.ts                       # GET (public gallery, paginated)
-│   └── [id]/
-│       ├── route.ts                   # GET (single entry)
-│       └── like/route.ts              # POST (toggle like)
-└── teacher/
-    ├── classroom/
-    │   ├── route.ts                   # GET (list), POST (create)
-    │   └── [id]/
-    │       ├── route.ts               # GET, PATCH, DELETE
-    │       ├── students/route.ts      # GET (list), POST (enroll via code)
-    │       └── projects/route.ts      # GET (all student projects)
-    └── challenges/
-        ├── route.ts                   # GET, POST
-        └── [id]/route.ts             # GET, PATCH, DELETE
-```
+**Decision**: Use `better-sqlite3` directly (no ORM) for MVP. Database file at `data/worldcraft.db`.
 
-### Service Layer Pattern
+**Reasoning**:
+- Zero infrastructure: no Postgres instance to provision, no connection pooling to configure, no Docker Compose required for local development. A new contributor runs `npm install && npm run dev` and has a working database.
+- Single-writer workload: SQLite's serialized write model is not a limitation for an MVP with a handful of concurrent users.
+- Synchronous API of `better-sqlite3` is a performance advantage in Next.js Route Handlers — no async overhead for short queries.
+- `STRICT` tables and `PRAGMA foreign_keys = ON` give reasonable data integrity guarantees without an ORM.
 
-API route handlers are kept thin. Business logic lives in service modules following the router → service → repository pattern specified in backend standards.
+**Migration path to Postgres**: The repository layer is the only place with SQL. Swapping to Postgres means:
+1. Add `drizzle-orm` and `@vercel/postgres` (or `pg`).
+2. Rewrite `src/lib/db/repositories/*.ts` using Drizzle's query builder.
+3. Keep all service and route handler code identical.
+4. Run `drizzle-kit generate` to produce migrations from the existing schema shape.
 
-```typescript
-// app/api/projects/route.ts
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { ProjectService } from '@/lib/services/projectService'
-import { createProjectSchema } from '@/lib/validators/project'
-import { AppError } from '@/lib/errors'
-
-export async function POST(request: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const body = await request.json()
-  const parsed = createProjectSchema.safeParse(body)
-  if (!parsed.success) {
-    return Response.json({ error: parsed.error.flatten() }, { status: 400 })
-  }
-
-  try {
-    const project = await ProjectService.create(session.user.id, parsed.data)
-    return Response.json(project, { status: 201 })
-  } catch (error) {
-    if (error instanceof AppError) {
-      return Response.json({ error: error.message }, { status: error.statusCode })
-    }
-    return Response.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-```
-
-```typescript
-// lib/services/projectService.ts
-import { ProjectRepository } from '@/lib/repositories/projectRepository'
-import { WorldDataValidator } from '@/lib/validators/worldData'
-import { AppError } from '@/lib/errors'
-
-export class ProjectService {
-  static async create(userId: string, data: CreateProjectInput) {
-    const validated = WorldDataValidator.sanitize(data.worldData)
-    return ProjectRepository.create({
-      ...data,
-      userId,
-      worldData: validated,
-    })
-  }
-
-  static async update(userId: string, projectId: string, patch: UpdateProjectInput) {
-    const project = await ProjectRepository.findById(projectId)
-    if (!project) throw new AppError('Project not found', 404)
-    if (project.userId !== userId) throw new AppError('Forbidden', 403)
-    return ProjectRepository.update(projectId, patch)
-  }
-
-  static async getPublicGallery(page: number, limit: number) {
-    return ProjectRepository.findPublic({ page, limit })
-  }
-}
-```
-
-### Request Validation
-
-All API inputs are validated using `zod` before reaching service layer:
-
-```typescript
-// lib/validators/project.ts
-import { z } from 'zod'
-
-export const worldObjectSchema = z.object({
-  id: z.string().uuid(),
-  type: z.string().max(50),
-  position: z.tuple([z.number(), z.number(), z.number()]),
-  rotation: z.tuple([z.number(), z.number(), z.number()]),
-  scale: z.tuple([z.number().min(0.1).max(10), z.number().min(0.1).max(10), z.number().min(0.1).max(10)]),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  metadata: z.record(z.unknown()).optional().default({}),
-})
-
-export const createProjectSchema = z.object({
-  title: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
-  worldData: z.object({
-    objects: z.record(worldObjectSchema).refine(
-      (objs) => Object.keys(objs).length <= 200,
-      { message: 'Maximum 200 objects per world' }
-    ),
-    environment: z.object({
-      skyPreset: z.string(),
-      groundColor: z.string(),
-      ambientIntensity: z.number().min(0).max(2),
-      timeOfDay: z.enum(['dawn', 'day', 'dusk', 'night']),
-    }),
-  }),
-  isPublic: z.boolean().default(false),
-})
-```
+The `objects_json` and `messages_json` columns become `jsonb` in Postgres with no application-layer changes.
 
 ---
 
-## 4. 3D Engine Design
+### Zustand for Client State — Minimal Boilerplate, R3F Compatible
 
-### Scene Graph Structure
+**Decision**: Zustand with `immer` middleware. No Redux, no React Context, no Jotai.
 
-```
-<Canvas>                          # R3F root, WebGL context
-├── <Suspense fallback={...}>     # Asset loading boundary
-│   ├── <CameraController />      # OrbitControls with child-safe limits
-│   ├── <EnvironmentSystem />
-│   │   ├── <Sky />               # @react-three/drei Sky component
-│   │   ├── <Ground />            # Infinite grid plane
-│   │   └── <Lights />            # Ambient + directional
-│   ├── <ObjectRenderer />        # Maps worldStore.objects → WorldObject
-│   │   └── <WorldObject />       # Individual placed object
-│   │       ├── <ObjectMesh />    # Geometry + material
-│   │       └── <SelectionBox />  # Conditional bounding-box highlight
-│   └── <GhostObject />           # Preview during placement
-└── <Stats />                     # Dev-only FPS counter
-```
-
-### WorldObject Model
-
-```typescript
-// types/world.ts
-export type ObjectType =
-  | 'cube' | 'sphere' | 'cylinder' | 'pyramid'      // primitives
-  | 'tree_oak' | 'tree_pine' | 'tree_palm'           // nature
-  | 'house_small' | 'house_large' | 'castle_tower'  // structures
-  | 'car' | 'rocket' | 'boat'                        // vehicles
-  | 'character_human' | 'character_robot'            // characters
-  | 'light_point' | 'light_directional'              // lights
-
-export interface WorldObject {
-  id: string                                // nanoid() — not UUID, cheaper
-  type: ObjectType
-  position: [number, number, number]        // meters in world space
-  rotation: [number, number, number]        // euler angles in radians
-  scale: [number, number, number]           // uniform scale 0.1–10
-  color: string                             // hex, applied as mesh color
-  metadata: {
-    name?: string                           // user label
-    locked?: boolean                        // prevent accidental moves
-    groupId?: string                        // for grouped objects
-    [key: string]: unknown
-  }
-}
-```
-
-### Asset Library Organization
-
-Assets are organized into themed categories, each backed by pre-optimized GLTF files stored in S3 and cached at the CDN layer.
-
-```typescript
-// lib/assetLibrary.ts
-export interface AssetDefinition {
-  type: ObjectType
-  label: string
-  icon: string                     // path to 2D preview PNG
-  glbUrl: string                   // S3/CDN URL to .glb file
-  defaultScale: [number, number, number]
-  polyCount: 'low' | 'medium'      // never 'high' — school devices
-  tags: string[]
-}
-
-export const ASSET_CATEGORIES: Record<string, AssetDefinition[]> = {
-  nature: [
-    { type: 'tree_oak', label: 'Oak Tree', polyCount: 'low', ... },
-    { type: 'tree_pine', label: 'Pine Tree', polyCount: 'low', ... },
-  ],
-  buildings: [
-    { type: 'house_small', label: 'Small House', polyCount: 'medium', ... },
-  ],
-  vehicles: [ ... ],
-  characters: [ ... ],
-  primitives: [ ... ],
-}
-```
-
-GLB assets are preloaded with `useGLTF.preload()` for the currently visible category tab, and lazily loaded for others.
-
-### Camera Controls for Children
-
-```typescript
-// components/world/CameraController.tsx
-import { OrbitControls } from '@react-three/drei'
-
-export function CameraController() {
-  return (
-    <OrbitControls
-      // Prevent camera from going below ground
-      maxPolarAngle={Math.PI * 0.45}
-      minPolarAngle={0.1}
-      // Prevent extreme zoom
-      minDistance={5}
-      maxDistance={40}
-      // Smooth damping for less disorienting movement
-      enableDamping
-      dampingFactor={0.08}
-      // Pan limits to keep world centered
-      maxTargetRadius={30}
-      // Touch support for tablets
-      touches={{ ONE: 4 /* TOUCH.ROTATE */, TWO: 512 /* TOUCH.DOLLY_PAN */ }}
-    />
-  )
-}
-```
-
-### Performance Considerations for School Devices
-
-School hardware profile: Intel HD/UHD iGPU, 4–8 GB RAM, Chrome on Windows 10/11.
-
-| Constraint | Strategy |
-|------------|----------|
-| Max draw calls | Merge static geometry with `InstancedMesh` for repeated objects |
-| Texture memory | Max 512×512 textures; use vertex colors where possible |
-| Polygon budget | 200 objects × avg 500 polys = 100k tris per scene (well within budget) |
-| JS thread | Move physics/collision to Web Worker if added later |
-| Network | Cache GLBs in browser Cache API; serve from CDN with long-lived cache headers |
-
-```typescript
-// components/world/ObjectRenderer.tsx
-// Use InstancedMesh for objects of the same type to reduce draw calls
-import { useMemo, useRef } from 'react'
-import { InstancedMesh, Matrix4, Object3D } from 'three'
-import { useWorldStore } from '@/lib/stores/worldStore'
-
-export function ObjectRenderer() {
-  const objects = useWorldStore((s) => s.objects)
-  // Group by type and render as instanced meshes
-  const byType = useMemo(() =>
-    Object.values(objects).reduce((acc, obj) => {
-      ;(acc[obj.type] ??= []).push(obj)
-      return acc
-    }, {} as Record<string, typeof objects[string][]>),
-    [objects]
-  )
-  // Render each type group
-  return <>{Object.entries(byType).map(([type, objs]) =>
-    <InstancedObjectGroup key={type} type={type} objects={objs} />
-  )}</>
-}
-```
+**Reasoning**:
+- R3F's `useFrame` and `useThree` hooks run inside the canvas on every animation frame. They need to read state synchronously without triggering React re-renders. Zustand's `getState()` function is called outside React's render cycle without subscription overhead. Redux and Context both require being inside a React tree.
+- No provider required: stores are module-level singletons. This eliminates the `Provider` wrapping that becomes verbose in App Router when mixing RSC and Client Components.
+- `immer` middleware makes nested object mutations (updating one field on one `WorldObject` out of 50) readable without manual spread chains.
+- The store boundary is explicit: canvas reads `useWorldStore`, Spark reads `useAIStore`. A Spark message arriving does not re-render the canvas.
 
 ---
 
-## 5. AI Integration Design
+### React Three Fiber over Raw Three.js — Declarative Scene Graph
 
-### System Architecture
+**Decision**: R3F `@react-three/fiber` with Drei `@react-three/drei` helpers.
 
-```
-AICompanionPanel (client)
-      │ POST /api/ai/prompt
-      ▼
-app/api/ai/prompt/route.ts
-      │
-      ├── [1] Auth check
-      ├── [2] Rate limit check (Redis or DB-backed token bucket)
-      ├── [3] Build prompt (system prompt + world state summary + history)
-      ├── [4] PII scrub (strip student names, school names from world context)
-      ├── [5] OpenAI API call (GPT-4o-mini, streaming)
-      ├── [6] Content safety filter (response passes through moderation check)
-      └── [7] Persist to AIConversation + stream to client
-```
+**Reasoning**:
+- A placed world object is a React component. Adding, removing, or updating an object is a state update — React's reconciler diffs the scene graph. This eliminates manual `scene.add()` / `scene.remove()` bookkeeping.
+- Drei provides `<Environment>`, `<OrbitControls>`, `<Html>`, `<useGLTF>`, and instanced mesh helpers that would each take significant boilerplate to build with raw Three.js.
+- TypeScript types from `@types/three` work seamlessly with R3F's JSX props.
+- The canvas boundary is a clean Client Component boundary — RSC outside, Three.js inside. No mixing of server-rendering concerns with WebGL.
 
-### System Prompt Engineering
-
-The system prompt is the primary control surface for age-appropriate behavior. It is assembled server-side and never exposed to the client.
-
-```typescript
-// lib/ai/promptBuilder.ts
-
-function buildSystemPrompt(worldContext: WorldContextSummary): string {
-  return `
-You are Sparky, a friendly creative assistant for children ages 6-14 who are building 3D worlds.
-
-PERSONALITY:
-- Enthusiastic, encouraging, and patient
-- Use simple language appropriate for children
-- Celebrate creativity and effort, not just results
-- Never mention competitor platforms, brand names, or commercial products
-- Never discuss violence, scary topics, politics, or adult content
-
-YOUR ROLE:
-- Help children get unstuck creatively ("What if you added a...")
-- Suggest themes and color combinations
-- Explain what different objects could be used for
-- Encourage storytelling ("What story is happening in your world?")
-- Give simple building tips ("Trees look great near the edges of your world!")
-
-WORLD CONTEXT:
-- Objects in the scene: ${worldContext.objectCount} objects
-- Current theme: ${worldContext.dominantTheme}
-- Recent placements: ${worldContext.recentObjects.join(', ')}
-
-STRICT RULES:
-1. Never generate, request, or reference any personal information
-2. Never ask for the child's real name, location, age, or school
-3. If the child shares personal info, gently redirect: "That's cool! Let's focus on your amazing world."
-4. Responses must be 1-3 short sentences maximum
-5. Always end with a creative question or suggestion to keep the child engaged
-6. If any message is unclear or could be harmful, respond with: "Tell me more about what you want to build!"
-
-SAFETY ESCALATION:
-- If a child expresses sadness, danger, or distress, respond: "It sounds like you might need to talk to a grown-up. Is there a teacher or adult nearby?"
-`.trim()
-}
-```
-
-### World Context Serialization
-
-World state is summarized (not fully serialized) before sending to the AI to stay within context limits and avoid sending unnecessary data.
-
-```typescript
-// lib/ai/worldContextBuilder.ts
-
-export interface WorldContextSummary {
-  objectCount: number
-  dominantTheme: string
-  recentObjects: string[]
-  environmentDescription: string
-}
-
-export function buildWorldContext(
-  objects: Record<string, WorldObject>,
-  environment: WorldState['environment'],
-  lastNObjects: number = 5
-): WorldContextSummary {
-  const allObjects = Object.values(objects)
-  const typeCounts = allObjects.reduce((acc, obj) => {
-    acc[obj.type] = (acc[obj.type] ?? 0) + 1
-    return acc
-  }, {} as Record<string, number>)
-
-  const dominantType = Object.entries(typeCounts)
-    .sort(([, a], [, b]) => b - a)[0]?.[0] ?? 'mixed'
-
-  const themeMap: Record<string, string> = {
-    tree_oak: 'forest', tree_pine: 'forest',
-    house_small: 'village', castle_tower: 'medieval',
-    car: 'city', rocket: 'space',
-  }
-  const dominantTheme = themeMap[dominantType] ?? 'creative'
-
-  const recent = allObjects
-    .slice(-lastNObjects)
-    .map((o) => o.type.replace(/_/g, ' '))
-
-  return {
-    objectCount: allObjects.length,
-    dominantTheme,
-    recentObjects: recent,
-    environmentDescription: `${environment.timeOfDay} sky, ${environment.skyPreset} weather`,
-  }
-}
-```
-
-### Rate Limiting
-
-Rate limits protect both cost and child safety.
-
-```typescript
-// lib/ai/rateLimiter.ts
-// Simple DB-backed rate limiter (no Redis dependency required for Vercel)
-// Uses Prisma to track request counts with 1-minute sliding windows
-
-const RATE_LIMITS = {
-  student: { requests: 10, windowMs: 60_000 },     // 10 req/min
-  teacher: { requests: 30, windowMs: 60_000 },
-}
-
-export async function checkRateLimit(
-  userId: string,
-  role: 'student' | 'teacher'
-): Promise<{ allowed: boolean; remainingMs?: number }> {
-  // Implementation uses a RateLimitEntry table or can use
-  // Vercel KV / Upstash Redis if available for lower latency
-  const limit = RATE_LIMITS[role]
-  const since = new Date(Date.now() - limit.windowMs)
-  const count = await prisma.aIConversation.count({
-    where: { project: { userId }, createdAt: { gte: since } }
-  })
-  return { allowed: count < limit.requests }
-}
-```
-
-### Response Safety Filter
-
-```typescript
-// lib/ai/safetyFilter.ts
-// Secondary pass using OpenAI Moderation API (free) before returning to client
-
-export async function filterResponse(text: string): Promise<string> {
-  const moderation = await openai.moderations.create({ input: text })
-  const result = moderation.results[0]
-  if (result.flagged) {
-    console.warn('[AI Safety] Response flagged, substituting fallback', result.categories)
-    return "That's a great question! Try adding more objects to your world and see what you can create!"
-  }
-  return text
-}
-```
-
-### Token Budget Management
-
-```
-Max tokens per request to GPT-4o-mini:
-- System prompt:       ~400 tokens
-- World context:       ~100 tokens
-- Conversation history: ~300 tokens (last 6 messages, trimmed FIFO)
-- User message:        ~100 tokens
-- Response max:        ~200 tokens
-─────────────────────────────────────
-Total:                ~1,100 tokens per call
-
-At $0.15/1M input + $0.60/1M output (GPT-4o-mini pricing):
-≈ $0.00025 per conversation turn
-≈ $0.0025 for 10 turns (a full session)
-```
-
-Conversation history is stored in `aiStore` client-side and in `AIConversation.messages` server-side. When history exceeds 6 messages, oldest messages are dropped from the context window but remain persisted in the database.
+**Performance mitigation for many objects**:
+- Use `<InstancedMesh>` for object types that appear more than 3 times in the scene (trees, rocks, etc.). This collapses N draw calls to 1.
+- Apply `<Detailed>` (LOD) for complex models: high-poly version within 10 units, low-poly beyond.
+- Lazy-load GLTF models with `useGLTF.preload()` for objects likely to be used (based on environment theme).
 
 ---
 
-## 6. Database Schema
+### Next.js API Routes over a Separate Backend — Single Deployment Unit
 
-### Prisma Schema
+**Decision**: All API logic lives in `src/app/api/` as Next.js Route Handlers. No separate Express, Hono, or Fastify server.
 
-```prisma
-// prisma/schema.prisma
+**Reasoning**:
+- One deployment artifact: the Next.js app serves both the frontend and the API. One Dockerfile, one Railway/Fly.io/Vercel project, one environment variable set.
+- Shared TypeScript types: `src/types/` is imported by both client stores and server Route Handlers without a build step or code generation.
+- For MVP traffic (a classroom of 30 children), a single Next.js server handles the load comfortably.
+- When API load outgrows the frontend server, Route Handlers are extracted to a standalone Node.js service with minimal changes — the service and repository layers are already decoupled from the HTTP framework.
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// ─── Auth ───────────────────────────────────────────────────────────────────
-
-enum Role {
-  STUDENT
-  TEACHER
-  ADMIN
-}
-
-model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  emailVerified DateTime?
-  passwordHash  String
-  role          Role      @default(STUDENT)
-  avatarUrl     String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Relations
-  projects         Project[]
-  aiConversations  AIConversation[]
-  teacherOf        Classroom[]           @relation("TeacherClassrooms")
-  enrolledIn       ClassroomStudent[]
-  createdChallenges Challenge[]
-
-  @@index([email])
-}
-
-// ─── Projects ───────────────────────────────────────────────────────────────
-
-model Project {
-  id          String   @id @default(cuid())
-  userId      String
-  title       String   @db.VarChar(100)
-  description String?  @db.VarChar(500)
-  // worldData stores the full serialized world: objects map + environment config
-  // Schema is validated by WorldDataValidator before write; no raw user JSON passes through
-  worldData   Json
-  thumbnailUrl String?
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  version     Int      @default(1)      // optimistic locking
-
-  // Relations
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  gallery         Gallery?
-  aiConversations AIConversation[]
-
-  @@index([userId])
-  @@index([isPublic, createdAt])
-}
-
-// ─── AI Conversations ───────────────────────────────────────────────────────
-
-model AIConversation {
-  id        String   @id @default(cuid())
-  projectId String
-  userId    String
-  // messages: array of { role, content, timestamp }
-  // Full history stored; context window is trimmed server-side before AI calls
-  messages  Json     @default("[]")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([projectId])
-  @@index([userId, createdAt])
-}
-
-// ─── Challenges ─────────────────────────────────────────────────────────────
-
-model Challenge {
-  id          String   @id @default(cuid())
-  title       String   @db.VarChar(100)
-  description String   @db.Text
-  theme       String   @db.VarChar(50)
-  // prompts: array of suggested AI prompt strings to help students
-  prompts     Json     @default("[]")
-  createdById String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  createdBy User @relation(fields: [createdById], references: [id])
-
-  @@index([theme])
-  @@index([isActive])
-}
-
-// ─── Gallery ────────────────────────────────────────────────────────────────
-
-model Gallery {
-  id        String   @id @default(cuid())
-  projectId String   @unique
-  likes     Int      @default(0)
-  featured  Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([featured, likes])
-  @@index([createdAt])
-}
-
-// ─── Classrooms ─────────────────────────────────────────────────────────────
-
-model Classroom {
-  id        String   @id @default(cuid())
-  teacherId String
-  name      String   @db.VarChar(100)
-  code      String   @unique @db.VarChar(8)   // short join code (e.g. "SPACE42")
-  createdAt DateTime @default(now())
-
-  teacher  User               @relation("TeacherClassrooms", fields: [teacherId], references: [id])
-  students ClassroomStudent[]
-
-  @@index([teacherId])
-  @@index([code])
-}
-
-model ClassroomStudent {
-  classroomId String
-  studentId   String
-  joinedAt    DateTime @default(now())
-
-  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
-  student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  @@id([classroomId, studentId])
-}
-```
-
-### Schema Design Notes
-
-- `worldData` JSON column is write-protected by server-side schema validation (`WorldDataValidator`) before any write reaches the database. No raw user-provided JSON is persisted.
-- `AIConversation.messages` stores the full conversation log server-side, but context sent to OpenAI is always trimmed server-side. Message content should never include student PII.
-- `Project.version` enables optimistic locking for concurrent save conflicts (two browser tabs).
-- `Classroom.code` is a human-readable 8-character alphanumeric code generated at classroom creation, used by students to self-enroll without teacher email exchange.
+**Tradeoff acknowledged**: Route Handlers cold-start time on serverless platforms can add latency to the first AI request. Mitigation: use a persistent server (Railway, Fly.io) rather than serverless functions for the AI routes in production.
 
 ---
 
-## 7. Data Flow
+### Object Catalog as Static Data — No DB Table for Object Definitions
 
-### World State Persistence Flow
+**Decision**: The object catalog (the 60–80 3D models a child can place) is a static TypeScript file at `src/lib/objects-catalog.ts`, not a database table.
 
-```
-User places object in 3D editor
-        │
-        ▼
-worldStore.addObject(obj)           # immediate, synchronous
-        │
-        ▼
-projectStore.markDirty()            # isDirty = true
-        │
-        ▼
-AutoSave timer fires (30s debounce)
-        │
-        ▼
-projectStore.saveStatus = 'saving'
-        │
-        ▼
-POST /api/projects/[id]
-  body: { worldData: worldStore.snapshot(), version: current }
-        │
-        ├── Optimistic lock check (version match)
-        ├── WorldDataValidator.sanitize(worldData)
-        ├── ProjectRepository.update(id, sanitizedData)
-        │
-        ▼
-projectStore.markSaved(new Date())  # isDirty = false, status = 'saved'
-```
-
-**Autosave Strategy**: Debounced 30-second timer starts when `isDirty` becomes true. Manual save always available. On tab close, `beforeunload` triggers a synchronous save attempt. Conflict resolution: if `version` mismatch (two tabs), the server returns HTTP 409 and the client prompts "Your world was updated elsewhere — reload?"
-
-### AI Conversation Flow
-
-```
-Student types message in AICompanionPanel
-        │
-        ▼
-aiStore.addMessage({ role: 'user', content })
-aiStore.setLoading(true)
-        │
-        ▼
-POST /api/ai/prompt
-  body: {
-    projectId,
-    message: sanitized user input,
-    worldContext: buildWorldContext(worldStore.objects, worldStore.environment)
-  }
-        │
-        ├── [Server] Auth + rate limit check
-        ├── [Server] Build system prompt with world context
-        ├── [Server] Load last 6 messages from AIConversation
-        ├── [Server] PII scrub on user message
-        ├── [Server] OpenAI streaming call
-        ├── [Server] Content safety filter on response
-        ├── [Server] Persist updated conversation
-        │
-        ▼
-Server-Sent Events stream response chunks to client
-        │
-        ▼
-aiStore.addMessage({ role: 'assistant', content: streamedContent })
-aiStore.setSuggestions(parsedSuggestions)
-aiStore.setLoading(false)
-```
+**Reasoning**:
+- The catalog changes only on deployments, not at runtime. It is not user-generated data.
+- Static import means the catalog is available to both the server (Route Handlers generating AI context) and the client (Object Library panel) with no API round-trip.
+- GLTF model files are served from `/public/models/` as static assets, benefiting from CDN caching.
 
 ---
 
-## 8. Security Considerations
-
-### Authentication and Authorization
-
-| Concern | Mitigation |
-|---------|-----------|
-| Password storage | `bcrypt` with cost factor 12 via `next-auth` credentials provider |
-| Session security | HTTP-only, Secure, SameSite=Lax cookies managed by NextAuth.js |
-| Route authorization | `middleware.ts` protects all `/world/*`, `/teacher/*`, and `/api/*` routes; role checks in service layer |
-| CSRF | NextAuth.js CSRF token on credential form submissions |
-| Teacher-student isolation | All project ownership queries filter by `session.user.id`; teachers can only read students in their own classrooms |
-
-### Input Sanitization
-
-```typescript
-// All worldData writes pass through this validator
-// lib/validators/worldData.ts
-
-export class WorldDataValidator {
-  static sanitize(raw: unknown): WorldData {
-    // 1. Zod schema parse (rejects unexpected fields)
-    const parsed = worldDataSchema.parse(raw)
-    // 2. Sanitize string metadata fields (strip HTML)
-    for (const obj of Object.values(parsed.objects)) {
-      if (obj.metadata?.name) {
-        obj.metadata.name = DOMPurify.sanitize(String(obj.metadata.name))
-      }
-    }
-    // 3. Enforce object count limit
-    if (Object.keys(parsed.objects).length > 200) {
-      throw new AppError('World exceeds maximum object limit', 400)
-    }
-    return parsed
-  }
-}
-```
-
-### Rate Limiting
-
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| `POST /api/ai/prompt` | 10 requests | 1 minute (student) |
-| `POST /api/ai/prompt` | 30 requests | 1 minute (teacher) |
-| `POST /api/auth/signin` | 5 attempts | 15 minutes (by IP) |
-| `PATCH /api/projects/[id]` | 60 requests | 1 minute |
-
-Vercel's built-in edge rate limiting or a lightweight DB-backed counter is sufficient for this scale. Upgrade to Upstash Redis when approaching 1,000 concurrent users.
-
-### COPPA Compliance
-
-Worldcraft is intended for children under 13. The following controls address COPPA requirements:
-
-1. **Account creation requires teacher or parent**: Students do not self-register. Teachers create classrooms and students are added via classroom join code. Student accounts are created by teachers or via a teacher-supervised flow.
-2. **No direct contact**: The platform does not enable student-to-student messaging, comments, or any communication channel.
-3. **Minimal data collection**: Student records store only: name, hashed password, email (optional — join code flow does not require email), classroom association, and project data.
-4. **No behavioral tracking**: No analytics SDKs that fingerprint children. Server-side analytics only on aggregate usage (project count, AI request count — no user-level behavioral data exported to third parties).
-5. **No PII in AI prompts**: The `buildWorldContext()` function serializes only object types, counts, and environment settings — never the student's name, school, or any identifying information. The system prompt explicitly instructs the AI model to redirect if a child volunteers personal information.
-6. **Data deletion**: The `DELETE /api/projects/[id]` and user account deletion flows cascade-delete all associated AI conversation history.
-7. **Gallery opt-in**: Projects are private by default. Students must explicitly mark `isPublic: true` to appear in the gallery. Teachers can override this for their classroom.
-
-### Content Filtering
-
-Two-layer approach:
-- **Layer 1 (Input)**: Student prompts to the AI are character-limited (500 chars) and run through a simple keyword blocklist before reaching OpenAI.
-- **Layer 2 (Output)**: Every AI response passes through OpenAI's Moderation API before being returned to the client.
-
----
-
-## 9. Performance Strategy
-
-### Asset Loading
-
-```typescript
-// Preload assets for the currently selected category
-// components/editor/ObjectPicker.tsx
-import { useGLTF } from '@react-three/drei'
-
-const CATEGORY_ASSETS: Record<string, string[]> = {
-  nature: ['/assets/tree_oak.glb', '/assets/tree_pine.glb', ...],
-  buildings: ['/assets/house_small.glb', ...],
-}
-
-// Preload current category immediately, others lazily
-export function ObjectPicker({ activeCategory }: { activeCategory: string }) {
-  useEffect(() => {
-    CATEGORY_ASSETS[activeCategory]?.forEach(url => useGLTF.preload(url))
-  }, [activeCategory])
-  // ...
-}
-```
-
-GLB files are served from S3/CDN with `Cache-Control: public, max-age=31536000, immutable`. File names include a content hash. Typical GLB size target: 50–150 KB per asset after Draco compression.
-
-### Object Pooling
-
-For repeated object types (e.g., 20 trees), `InstancedMesh` is used instead of 20 separate mesh objects. This reduces draw calls from O(n) to O(unique types).
-
-```typescript
-// components/world/InstancedObjectGroup.tsx
-import { useRef, useEffect } from 'react'
-import { InstancedMesh, Object3D, Matrix4 } from 'three'
-import { useGLTF } from '@react-three/drei'
-
-const dummy = new Object3D()
-
-export function InstancedObjectGroup({
-  type, objects
-}: { type: string; objects: WorldObject[] }) {
-  const meshRef = useRef<InstancedMesh>(null)
-  const { nodes, materials } = useGLTF(`/assets/${type}.glb`)
-
-  useEffect(() => {
-    if (!meshRef.current) return
-    objects.forEach((obj, i) => {
-      dummy.position.set(...obj.position)
-      dummy.rotation.set(...obj.rotation)
-      dummy.scale.set(...obj.scale)
-      dummy.updateMatrix()
-      meshRef.current!.setMatrixAt(i, dummy.matrix)
-    })
-    meshRef.current.instanceMatrix.needsUpdate = true
-  }, [objects])
-
-  return (
-    <instancedMesh
-      ref={meshRef}
-      args={[nodes.Mesh.geometry, materials.Material, objects.length]}
-    />
-  )
-}
-```
-
-### Level of Detail (LOD)
-
-For the default school hardware profile, all assets use a single low-poly LOD. If higher-end devices are detected via `navigator.deviceMemory` (>= 8 GB) or `navigator.hardwareConcurrency` (>= 8 cores), medium-poly variants are used.
-
-```typescript
-// lib/lod.ts
-export function getLODVariant(): 'low' | 'medium' {
-  const memory = (navigator as any).deviceMemory ?? 4
-  const cores = navigator.hardwareConcurrency ?? 4
-  return memory >= 8 && cores >= 8 ? 'medium' : 'low'
-}
-```
-
-### Object Count Limits
-
-| Limit | Value | Reason |
-|-------|-------|--------|
-| Max objects per scene | 200 | Keeps triangle count under 150k on iGPU |
-| Max objects per type (non-instanced) | 50 | Above this, always use InstancedMesh |
-| Max texture size | 512×512 | Memory headroom on 4 GB devices |
-| AI conversation history (context) | Last 6 messages | Token budget control |
-
-### Optimistic UI Updates
-
-The editor never waits for a server round-trip to show user actions. All object placements, movements, and deletions update Zustand stores immediately. The server sync happens asynchronously via autosave.
-
-```
-User action → worldStore update (0ms) → UI re-render
-                     │
-                     └→ [30s debounce] → POST /api/projects/[id] → saved confirmation
-```
-
-If the save fails, `projectStore.saveStatus = 'error'` triggers a visible warning banner: "Your world couldn't be saved. Check your connection."
-
----
-
-## Architecture Assumptions and Risks
-
-| Assumption | Risk if Wrong | Mitigation |
-|------------|--------------|-----------|
-| Vercel serverless is sufficient for compute | Cold start latency on AI route >1s during low traffic | Keep AI handler warm with a periodic ping, or use Vercel Fluid Compute |
-| PostgreSQL JSON columns for worldData perform adequately | Slow queries on large worldData blobs when listing projects | Store thumbnail + metadata separately; only fetch full worldData on editor open |
-| GPT-4o-mini is sufficient for child-appropriate creative suggestions | Occasional unhelpful or off-tone responses | Two-layer safety filter + easy teacher feedback report mechanism |
-| School networks allow WebGL | Some restrictive school proxies or device policies block WebGL | Add a graceful fallback detection page with IT setup instructions |
-| 200 objects per scene fits school hardware | Older Chromebooks or shared iPads may struggle | Configurable limit; teachers can lower per-classroom max via settings |
-
----
-
-*Document maintained by engineering team. Update version and date on significant architecture changes.*
+*Document owner: Engineering — WorldCraft Kids*  
+*Last updated: 2026-05-05*

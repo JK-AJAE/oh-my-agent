@@ -1,9 +1,9 @@
-# Worldcraft — Product Documentation
+# WorldCraft Kids — Product Document
 
-**Working Title**: Worldcraft
-**Target Audience**: Children under Grade 6 (ages 5–11)
-**Document Status**: Draft v0.1
-**Last Updated**: 2026-05-05
+**Working name**: WorldCraft Kids
+**Version**: 0.1 (Pre-MVP)
+**Date**: 2026-05-05
+**Status**: Planning
 
 ---
 
@@ -12,595 +12,637 @@
 1. [Product Concept Summary](#1-product-concept-summary)
 2. [User Personas](#2-user-personas)
 3. [Core User Journeys](#3-core-user-journeys)
-4. [Feature List (MVP Priority)](#4-feature-list-mvp-priority)
+4. [Feature List (MVP-Prioritized)](#4-feature-list-mvp-prioritized)
 5. [Information Architecture](#5-information-architecture)
 6. [UX/UI Design Direction](#6-uxui-design-direction)
-7. [Safety & Moderation](#7-safety--moderation)
 
 ---
 
 ## 1. Product Concept Summary
 
-### Vision
+### What It Is
 
-Worldcraft is an AI-driven 3D creative learning platform built for children in Grades K–5 (approximately ages 5–11). Children build imaginary 3D worlds — and in doing so, they learn spatial reasoning, creative problem-solving, narrative thinking, and digital literacy — without ever feeling like they are in a classroom.
+WorldCraft Kids is a browser-based creative learning platform where children (ages 6–12, up to Grade 6) build 3D worlds guided by an AI creative partner. The platform treats creation itself as the learning activity — children express ideas, stories, and emotions by placing objects, shaping environments, and narrating their worlds.
 
-### Core Idea
+### Core Thesis
 
-> **Creation IS the learning process.**
+**Creation IS learning.** Worksheets teach children to recall. WorldCraft Kids teaches children to think, express, and reflect. When a child builds a "lonely mountain with a secret cave," they are practicing spatial reasoning, narrative construction, emotional vocabulary, and creative decision-making simultaneously — without a single multiple-choice question.
 
-The act of building — placing a tree beside a castle, choosing the color of the sky, deciding whether a fish can fly — is where learning happens. Worldcraft does not layer learning on top of play. It makes play itself the curriculum.
+### The AI Creative Partner Role
 
-### The AI Creative Partner
+The AI companion (working name: "Spark") guides without dominating. Spark:
 
-Worldcraft's AI companion (working name: "Spark") guides children's imagination through:
+- Asks open-ended questions to deepen the child's intent ("What happens inside that cave at night?")
+- Offers 2–3 variations when a child is stuck, not a single answer
+- Reflects back what the child has built ("I see you made the water darker — what made you choose that?")
+- Never completes the child's world for them
+- Celebrates decisions, not results ("That's a really interesting choice.")
 
-- **Prompts**: Open-ended questions that invite reflection and new ideas ("What lives under that bridge?")
-- **Variations**: Gentle suggestions that expand what a child has already made ("What if it was nighttime here?")
-- **Reflection**: Simple prompts that encourage children to talk about their choices ("Why did you pick the ocean theme?")
+Spark does not generate the world. The child builds it. Spark asks questions that make the child want to build more.
 
-Spark never dominates. It never completes a creation for the child. It listens, suggests, celebrates, and steps back. The child's imagination leads; Spark is a creative sidekick, not a director.
+### What It Is Not
 
-### Design Principles
+- Not a game with goals, levels, or scores
+- Not an AI generator where the child types a prompt and a world appears
+- Not a classroom drill tool wearing a creative disguise
+- Not multiplayer-first (solo creative expression is the MVP core)
 
-| Principle | Description |
-|-----------|-------------|
-| Child Agency | Every decision is the child's. The AI responds, never commands. |
-| Low Floor, High Ceiling | Instantly approachable for a 5-year-old; expressive enough for an 11-year-old. |
-| Emotional Safety | Creations are never judged as wrong or right. All worlds are valid. |
-| Progressive Complexity | Tools reveal themselves as children are ready, not all at once. |
-| Teacher-Enabled | Classroom use is a first-class experience, not an afterthought. |
+### Platform Target
+
+Web-first (desktop + tablet). Touch and mouse parity. Mobile as P2 stretch. No native app install required for MVP.
 
 ---
 
 ## 2. User Personas
 
-### Persona 1 — Maya, Age 7 (Primary User)
+### Persona 1 — Creative Explorer (Age 7–8)
 
-**Nickname**: The Dreamer
+**Name**: Mia, age 7
+**Context**: Second-grader who fills her notebooks with drawings and invents elaborate pretend-play scenarios. She gets frustrated when technology doesn't cooperate quickly.
 
-| Attribute | Detail |
-|-----------|--------|
-| Age | 7 years old, Grade 2 |
-| Device | Family iPad at home; school Chromebook in class |
-| Tech comfort | Plays mobile games, can navigate YouTube Kids independently |
-| Reading level | Emerging reader; relies heavily on icons and audio cues |
-| Motivation | Loves stories, drawing, and imaginative play ("I want to make a unicorn farm") |
-| Frustrations | Gets confused by long menus; gives up when she can't find what she wants quickly |
-| Goals | Make something colorful and fun; show her parents what she built |
-| Key needs | Large tap targets, audio feedback, icon-first UI, instant gratification, encouraging tone |
+**Goals**:
+- Bring her stories to life in a space that feels like hers
+- Make a world her stuffed animals could "live" in
+- Show her friends and family what she imagined
 
-**Design implications**: Minimal text in UI, large colorful buttons, Spark speaks out loud with a friendly voice, onboarding completes in under 60 seconds, first creation feels finished and shareable.
+**Pain Points**:
+- Loses interest if setup takes more than 30 seconds
+- Gets stuck if there are too many choices at once
+- Feels discouraged when she can't make something look "right"
 
----
+**Behaviors**:
+- Picks objects by appearance, not category
+- Names everything she creates
+- Abandons projects when interrupted; needs easy re-entry
 
-### Persona 2 — Ethan, Age 10 (Primary User)
-
-**Nickname**: The Architect
-
-| Attribute | Detail |
-|-----------|--------|
-| Age | 10 years old, Grade 5 |
-| Device | School Chromebook; home desktop |
-| Tech comfort | Plays Minecraft and Roblox; comfortable with layered menus |
-| Reading level | Fluent reader; can follow written instructions |
-| Motivation | Wants to build something complex: a working city with a train system |
-| Frustrations | Feels patronized by baby-ish UX; wants more control and precision |
-| Goals | Build elaborate worlds; show friends; iterate and improve over multiple sessions |
-| Key needs | Undo/redo, save versioning, detailed object controls, challenge modes with goals |
-
-**Design implications**: Progressive disclosure of advanced tools, challenge modes with optional constraints, project history, ability to load/save multiple named projects.
+**How WorldCraft Kids Serves Mia**:
+- Onboarding drops her into a starter world in under 60 seconds — she's building before she's done reading
+- Object library shows big, recognizable thumbnails grouped by feel ("cozy things," "wild things," "magical things")
+- Spark praises the story logic, not the visual fidelity ("I love that the tiny house is next to the big tree — who lives there?")
 
 ---
 
-### Persona 3 — Ms. Park, Age 34 (Secondary User)
+### Persona 2 — Curious Builder (Age 9–10)
 
-**Nickname**: The Facilitator
+**Name**: Theo, age 10
+**Context**: Fourth-grader obsessed with how things work. Builds elaborate LEGO systems, reads about animal habitats, and asks "but why?" constantly.
 
-| Attribute | Detail |
-|-----------|--------|
-| Age | 34, Grade 3 teacher |
-| Device | School laptop (Windows); classroom projector |
-| Tech comfort | Confident with Google Classroom; learns new tools if they save time |
-| Motivation | Needs a structured creative activity that fits a 45-minute class period |
-| Frustrations | Tools that require lengthy setup; content she can't preview or control; no way to see student progress |
-| Goals | Assign a themed creative challenge; review student work as a class; connect to curriculum topics |
-| Key needs | Class roster management, challenge assignment, gallery review mode, progress visibility, no student-to-student messaging |
+**Goals**:
+- Build ecosystems with logical rules (this animal needs this food, which needs this water)
+- Understand cause and effect through spatial construction
+- Push the limits of what the tool can do
 
-**Design implications**: Teacher dashboard with class overview, assignable creative challenge templates, gallery view for class review on projector, teacher moderation controls.
+**Pain Points**:
+- Gets bored if he can't go deeper into a topic
+- Frustrated when he can't find specific objects (wants a "baobab tree," not just "tree")
+- Wants to know why things look the way they do
+
+**Behaviors**:
+- Reads every tooltip
+- Tests edge cases: what happens if I put water on top of a mountain?
+- Spends 30 minutes on one small corner of the world
+
+**How WorldCraft Kids Serves Theo**:
+- Spark asks systems-thinking questions ("If a predator lives here, where does its prey hide?")
+- Object search + tagging allows specific queries ("desert," "nocturnal," "underground")
+- Progressive disclosure reveals properties panel with material, size, and placement detail when he's ready for it
+- Environment themes include biome-accurate sky, ground, and ambient lighting presets he can study and modify
+
+---
+
+### Persona 3 — Reflective Dreamer (Age 11–12)
+
+**Name**: Aisha, age 12
+**Context**: Sixth-grader who keeps a private journal and processes her feelings through art. She's skeptical of "educational" apps and values authenticity over gamification.
+
+**Goals**:
+- Build worlds that represent internal emotional states
+- Have a creative outlet that doesn't feel like school
+- Explore abstract concepts (loneliness, change, in-between spaces) through environment
+
+**Pain Points**:
+- Dismisses anything that feels condescending or over-designed for "little kids"
+- Distrusts AI suggestions that feel formulaic or hollow
+- Wants privacy — doesn't want classmates to see unfinished work
+
+**Behaviors**:
+- Works slowly and deliberately
+- Titles and annotates her worlds with short written notes
+- Returns to old worlds and revises them over time
+
+**How WorldCraft Kids Serves Aisha**:
+- Visual style is soft and non-childish — it respects her aesthetic sensibility
+- Spark's reflection prompts are open and emotional, never prescriptive ("What does this space feel like to you?")
+- Worlds default to private; sharing is an explicit, opt-in act
+- Builder supports world notes — a small text field for her to annotate the meaning of the world
+- Gallery has a "personal archive" view separate from class/public sharing
+
+---
+
+### Persona 4 — Teacher Facilitator
+
+**Name**: Ms. Chen, 5th Grade Homeroom
+**Context**: Ten-year teaching veteran who integrates project-based learning into her classroom. Uses tech purposefully, not as babysitter. Limited time for setup; needs observable outcomes.
+
+**Goals**:
+- Assign open creative prompts tied to curriculum themes (ecosystems, historical settings, emotional literacy)
+- See what students are working on without disrupting their process
+- Spark meaningful class discussion from what students create
+
+**Pain Points**:
+- Loses time to student tech confusion in the first 10 minutes of class
+- Can't tell if a student "got it" from a 3D world alone — needs some artifact or reflection
+- Worried about inappropriate content or sharing
+
+**Behaviors**:
+- Sets up assignments a week in advance
+- Wants a clean summary view, not a data dashboard
+- Shares compelling student work on the class projector
+
+**How WorldCraft Kids Serves Ms. Chen**:
+- Teacher portal: create a challenge with a prompt, optional starter world, and due date in under 3 minutes
+- Student view feed shows world thumbnail, title, last edited, and any reflection note — no complex metrics
+- Content is limited to curated object library — no freeform text or image upload from students
+- Projector mode: opens any student world in full-screen read-only Play Mode
+- Class gallery: teacher curates which worlds are visible to classmates
 
 ---
 
 ## 3. Core User Journeys
 
-### Journey 1 — First-Time Child Experience (Onboarding → First Creation)
+### Journey 1 — First-Time Child Onboarding (Target: Under 60 Seconds to First Build)
 
-**Goal**: A child with no prior experience completes onboarding and finishes their first 3D world creation within 5 minutes, feeling proud of the result.
+**Entry point**: Child navigates to worldcraftkids.com or teacher-provided link.
 
 ```
-Step 1: Launch
-  → Child opens Worldcraft
-  → Sees a welcoming, animated splash screen (no text-heavy login)
-  → Taps "Start Creating" (large button, icon + text)
-
-Step 2: Onboarding (< 60 seconds)
-  → Spark appears: "Hi! I'm Spark. I help you build amazing worlds."
-  → Interactive tutorial: drag one object into the scene (forest theme pre-set)
-  → Spark: "You did it! What should we add next?"
-  → Skip option available at any point (top-right corner)
-
-Step 3: Theme Selection
-  → 5 large illustrated tiles: Forest / Ocean / Space / City / Fantasy
-  → Spark suggests: "Ooh, which world feels like YOU today?"
-  → Child taps a theme; environment loads instantly with ambient sound
-
-Step 4: First Creation
-  → Object palette opens with 6–8 thematic objects (large icons, no text)
-  → Child drags objects into the 3D scene
-  → Tap object → color picker, rotate handle, scale handle appear
-  → Spark prompts at natural pauses: "What's this place called?"
-
-Step 5: Play Mode
-  → Child taps the "Play" button (rocket icon)
-  → Camera moves into the world; ambient sounds play
-  → Simple "Explore" mode: no controls to learn, just experience the world
-
-Step 6: Save & Share
-  → "Great world! Want to save it?" — Spark prompt
-  → Child types (or voice-inputs) a world name
-  → "Save" stores project; "Share to Gallery" makes it visible to class (if in school mode)
-  → Celebration animation + Spark cheers
+Landing Screen
+  └── Single CTA: "Start Building" (no account required for first session)
+        └── Name prompt: "What's your name?" (first name only, optional)
+              └── "Pick a starter world" — 3 illustrated cards:
+                    [ Cozy Meadow ]  [ Ocean Shore ]  [ Starry Desert ]
+                        └── Child taps a card
+                              └── Builder Workspace loads (~2s)
+                                    └── Spark says: "Hi [Name]! This world is yours.
+                                                     What's the first thing you want to add?"
+                                          └── Child is in the builder. Timer stops.
 ```
 
-**Success criteria**: Time from launch to first saved creation under 5 minutes; no error states encountered; child expresses positive emotion.
+**Account creation**: Deferred until the child wants to save. After 5 minutes in the builder, a gentle prompt: "Want to save your world? It takes 10 seconds." This reduces front-loaded friction to zero.
+
+**Success criterion**: 90% of children reach first object placement within 60 seconds of landing.
 
 ---
 
-### Journey 2 — Returning Child (Load → Iterate → Share)
+### Journey 2 — Building a World from a Creative Prompt
 
-**Goal**: A child who has used Worldcraft before continues a project, improves it, and shares it with their class.
+**Entry point**: Dashboard → "New World" button, or teacher-assigned challenge.
 
 ```
-Step 1: Return Visit
-  → Child sees "Welcome back, Maya!" with avatar/name
-  → "My Worlds" grid shows thumbnail previews of saved projects
-  → Spark: "Your ocean world is waiting for you!"
+Dashboard
+  └── "New World"
+        ├── Option A: "Free Build" — skip to environment selection
+        └── Option B: "Start with an idea" — Spark offers 3 prompt cards:
+              [ "Build a place where secrets are kept" ]
+              [ "What does a perfect afternoon look like?" ]
+              [ "Make a world that feels really far away" ]
+                    └── Child picks or skips
+                          └── Environment theme selection (6 options with live previews):
+                                Meadow / Forest / Ocean / Desert / Night Sky / Snowy Peak
+                                      └── Builder Workspace opens
+                                            └── Spark: "You chose [theme]. 
+                                                         What do you want to put here first?"
+```
 
-Step 2: Load Project
-  → Child taps their saved world thumbnail
-  → World loads in under 3 seconds
-  → Scene is exactly as left; undo history preserved
+**Building flow inside workspace**:
 
-Step 3: Iterate
-  → Child adds new objects, changes colors, rearranges layout
-  → Spark offers periodic prompts: "What if the sky changed color?"
-  → Undo/redo available (circular arrow buttons, always visible)
-
-Step 4: Version Save
-  → Child saves; new version is created (not overwriting)
-  → "Your world grew!" — Spark milestone message
-
-Step 5: Share to Gallery
-  → Child taps "Share" → selects class gallery or personal link
-  → Sets a title and optional description (voice or text)
-  → World appears in class gallery for teacher and peers to view
+```
+Child drags object from Object Library onto Canvas
+  └── Object places at drag point
+        └── Spark (after first placement): "Nice! What else belongs here?"
+Child places 3–5 objects
+  └── Spark: "I see you're building [observed pattern].
+               Where does [character/creature] go?"
+Child names the world (optional prompt after 10 minutes)
+  └── Auto-save occurs every 60 seconds
 ```
 
 ---
 
-### Journey 3 — Teacher Assigns Challenge → Students Create → Gallery Review
+### Journey 3 — AI-Guided Iteration and Reflection
 
-**Goal**: A teacher assigns a themed creative challenge to her class, students complete it, and the class reviews the gallery together on a projector.
+**Entry point**: Child has been building for 5–10 minutes, or reopens a saved world.
 
-```
-Step 1: Teacher Setup (Teacher Dashboard)
-  → Ms. Park logs into teacher account
-  → Navigates to "Challenges" tab
-  → Selects "Design an Underwater City" from challenge library
-    (or creates a custom challenge with a prompt and theme)
-  → Assigns to Class 3B, sets due date
-  → Challenge appears in each student's Worldcraft home screen
+**Spark interaction model**:
 
-Step 2: Students Create (Student View)
-  → Students see challenge banner: "Ms. Park set a challenge: Underwater City!"
-  → Tapping it starts a focused creation session:
-    - Ocean theme pre-selected and locked
-    - Challenge prompt displayed by Spark
-    - Optional constraints shown (e.g., "Include at least one building")
-  → Students create at their own pace; Spark provides challenge-specific prompts
+- Spark speaks in a side panel (not a blocking modal)
+- Messages are short — max 2 sentences
+- Spark offers one question OR one suggestion, never both simultaneously
+- Child can dismiss Spark at any time with a single tap
 
-Step 3: Submission
-  → Student taps "Submit to Ms. Park"
-  → World is saved and flagged as submitted
-  → Teacher is notified (dashboard badge)
-
-Step 4: Gallery Review (Teacher-Led)
-  → Teacher opens class gallery in "Presentation Mode"
-  → Projects displayed one at a time, full-screen
-  → Teacher can highlight specific worlds; add written comment
-  → Students can react with emoji (no text messages)
-  → Teacher can feature a "World of the Week"
-```
-
----
-
-### Journey 4 — Creative Challenge Mode Flow
-
-**Goal**: A child chooses a Creative Challenge independently and completes a guided creative session with optional constraints and Spark-guided reflection.
+**Iteration sequence**:
 
 ```
-Step 1: Challenge Discovery
-  → From home screen, child taps "Challenges" tab
-  → Sees colorful illustrated challenge cards:
-    "Build a treehouse", "Design a robot city", "Make a night market"
-  → Each card shows: theme icon, estimated time, difficulty star rating
+Child places a mountain
+  └── Spark: "That mountain is really tall! 
+               Is there anything at the very top?"
+        └── Child adds a flag (or ignores)
+              └── Child places water nearby
+                    └── Spark: "Interesting — the water is right next to the mountain.
+                                 Does it flow down?"
+                          └── Child rotates the terrain piece
+                                └── [Child pauses for 30+ seconds]
+                                      └── Spark: "What are you thinking about?"
+                                            └── Child types: "I want fog but I don't know how"
+                                                  └── Spark: "I can show you 3 ways to make it feel foggy.
+                                                               Want to see?"
+                                                        └── Spark surfaces 3 object/setting variations
+                                                              └── Child picks one and applies it
+```
 
-Step 2: Challenge Start
-  → Child taps a challenge card → brief animated intro
-  → Spark explains the challenge in 1–2 sentences (audio + icon)
-  → Optional: "Want a hint?" toggle
+**Reflection trigger** (end of session or on save):
 
-Step 3: Constrained Creation
-  → Theme and object palette are scoped to the challenge
-  → Progress indicator shows optional goals ("Added 3 objects", "Used 2 colors")
-  → No hard requirements — child can submit at any point
-
-Step 4: Completion + Reflection
-  → "I'm done!" button triggers Spark reflection prompt:
-    "What's your favorite part of your world?"
-  → Child responds (voice or choice from 3 illustrated options)
-  → Spark celebrates with animation and badge unlock
-
-Step 5: Gallery + Remix
-  → Completed challenge world added to personal gallery
-  → Option to "Remix a friend's world" (view-only copy to modify)
-  → Challenge marked as complete; next challenge unlocked
+```
+Child clicks Save
+  └── Spark: "Before you go — what's one thing you love about this world?"
+        └── Text input (optional, max 100 chars)
+              └── Response stored as world annotation
+                    └── "See you next time, [Name]."
 ```
 
 ---
 
-## 4. Feature List (MVP Priority)
+### Journey 4 — Sharing and Viewing Gallery
 
-### P0 — Must Have for MVP
+**Entry point**: Dashboard → Gallery tab, or post-save share prompt.
 
-These features define the minimum viable product. Without them, the core experience is broken.
+```
+Child finishes saving world
+  └── Post-save screen: 
+        "Share with your class?" 
+        [ Share ]  [ Keep Private ]
+              └── If Share:
+                    World thumbnail + title enters Class Gallery
+                          └── Classmates see it in Gallery
+                                └── Reaction: tap one of 4 emoji reactions
+                                      (heart / star / wow / hmm — no free text from other kids)
+              └── If Keep Private:
+                    World stays in personal archive only
+```
 
-| # | Feature | Description | Acceptance Criteria |
-|---|---------|-------------|---------------------|
-| P0-01 | Child-friendly onboarding | < 60-second interactive tutorial, skippable, no account required for first session | Child completes first creation without reading any text |
-| P0-02 | 3D world builder — drag-and-drop | Touch and mouse drag to place objects in a 3D scene | Objects snap to grid; no collision errors; works on tablet and desktop |
-| P0-03 | Object manipulation | Move, rotate, scale, and color any placed object | All operations accessible via tap/click on object; no menus deeper than 2 levels |
-| P0-04 | Environment themes | Forest, Ocean, Space, City, Fantasy with pre-set skyboxes, ground, and ambient sound | Theme loads in < 2 seconds; each theme has minimum 8 unique objects |
-| P0-05 | AI creative companion (Spark) | Spark offers contextual creative prompts, variations, and celebrations | Spark responds within 1 second; all output is age-appropriate and non-directive |
-| P0-06 | Play / explore mode | Child enters world and experiences it from a first-person or orbit camera | Mode accessible via single tap; exits gracefully back to builder |
-| P0-07 | Save / load projects | Projects persist between sessions, associated with child profile | Auto-save every 60 seconds; manual save available; project recoverable after crash |
-| P0-08 | Basic gallery | Personal gallery of saved worlds shown as thumbnail grid | Thumbnails generated at save time; grid loads in < 2 seconds |
-| P0-09 | Child account creation | Simple account flow (parent email + child display name), no child email required | Compliant with COPPA; parental consent captured before any data stored |
+**Gallery view**:
+
+```
+Gallery
+  ├── Class Gallery tab (teacher-curated, shared worlds from classmates)
+  └── My Worlds tab (all personal worlds, public and private)
+        └── Each world card shows:
+              - Thumbnail (auto-captured from Play Mode camera)
+              - World title
+              - Creator name (class gallery only)
+              - Reflection note (if written, shown as small italicized text)
+              └── Tap → opens Play Mode (read-only first-person explore)
+```
 
 ---
 
-### P1 — Next Iteration
+### Journey 5 — Teacher Assigning a Challenge
 
-These features significantly improve engagement and classroom value. Target for Version 1.1.
+**Entry point**: Teacher portal → Challenges tab.
 
-| # | Feature | Description | Notes |
-|---|---------|-------------|-------|
-| P1-01 | Creative challenge modes | Pre-designed challenge prompts with optional constraints and progress tracking | See Journey 4 |
-| P1-02 | Undo / redo + versioning | Multi-step undo/redo; named version snapshots saved automatically | Minimum 30 undo steps; versioning UI is non-technical |
-| P1-03 | Teacher dashboard | Class roster, challenge assignment, submission tracking, gallery moderation | Role-based access; teacher login separate from student flow |
-| P1-04 | Sharing and remix | Share world to class gallery; view and remix a copy of another child's world | Original world is never modified; remix is a new copy |
-| P1-05 | Simple animations | Loop animations on objects (spin, bounce, float) via single-tap animation picker | No timeline or keyframe UI; animations are preset loops |
+```
+Teacher Portal → Challenges → "New Challenge"
+  └── Step 1: Write the prompt (text field, max 200 chars)
+        e.g. "Build the ecosystem where your favorite animal lives."
+  └── Step 2 (optional): Pick a starter world for students
+        (select from environment themes or leave blank for free choice)
+  └── Step 3: Set due date (date picker)
+  └── Step 4: Assign to class (dropdown: select class/group)
+  └── Step 5: "Publish Challenge"
+        └── Students see challenge card on their Dashboard
+              └── Card shows: prompt text, teacher name, due date, "Start Building" CTA
+                    └── Clicking CTA launches Journey 2 with the prompt pre-loaded
+```
+
+**Monitoring**:
+
+```
+Teacher Portal → Challenges → [Challenge Name] → Student Progress
+  └── List view, one row per student:
+        [ Name ] [ Status: Not Started / In Progress / Submitted ] [ Last Edit ] [ Actions ]
+              └── "View World" → opens student's world in read-only Play Mode
+                    └── Teacher can flag world for Class Gallery
+```
 
 ---
 
-### P2 — Future
+## 4. Feature List (MVP-Prioritized)
 
-These are high-value future capabilities that require significant infrastructure or design investment.
+### P0 — Must Ship (MVP Scope)
 
-| # | Feature | Description | Notes |
-|---|---------|-------------|-------|
-| P2-01 | Multiplayer worlds | Two or more children build in the same world simultaneously | Requires real-time sync infrastructure; safety architecture review required |
-| P2-02 | Advanced interactions | Scripted object behaviors (if-then logic, triggers, paths) | Entry point for computational thinking curriculum |
-| P2-03 | Curriculum integration | Alignment tags for Common Core, NGSS, and other standards; LMS export | Requires curriculum specialist involvement |
-| P2-04 | Export and 3D printing | Export world as STL or OBJ for 3D printing; screenshot export | Requires geometry pipeline work |
+These features define the core loop. Without any one of them, the product does not function as described.
+
+| # | Feature | Description | Success Criterion |
+|---|---------|-------------|-------------------|
+| P0-1 | **Child Onboarding** | Name entry, starter world selection, auto-entry into builder | First object placed within 60s of landing; no account required |
+| P0-2 | **3D Builder — Canvas** | Drag-and-drop 3D object placement on a flat terrain canvas | Child can place, move, and delete objects via drag and tap |
+| P0-3 | **Object Library** | Curated set of 60–80 3D objects organized by thematic group | Objects load within 500ms; browsable without search on first use |
+| P0-4 | **Environment Themes** | 6 prebuilt environment presets (sky, ground, ambient light) | Switching theme takes under 2 seconds; previews visible before selection |
+| P0-5 | **AI Companion (Spark)** | Side panel with contextual prompts, questions, and variation suggestions | Spark responds within 1.5s; child can dismiss at any time |
+| P0-6 | **Save / Load** | Auto-save every 60s; explicit save with title prompt; load from dashboard | World persists across browser sessions; no data loss on refresh |
+| P0-7 | **Play / Explore Mode** | First-person walkthrough of the completed world | Child can enter and exit Play Mode with one tap; runs at 30fps minimum on mid-range tablet |
+
+---
+
+### P1 — Should Ship (Launch Quality)
+
+These features significantly improve usability and retention. Target: ship within 6 weeks of MVP.
+
+| # | Feature | Description | Success Criterion |
+|---|---------|-------------|-------------------|
+| P1-1 | **Gallery (Class + Personal)** | View shared and personal worlds as thumbnail cards with Play Mode entry | Gallery loads in under 2s; reaction system works without auth friction |
+| P1-2 | **Undo / Redo** | Multi-step undo/redo for object placement actions | Undo/redo works for last 20 actions; keyboard shortcut + button |
+| P1-3 | **Object Color / Texture** | Recolor placed objects from a curated 12-color palette; 3 texture options per object type | Color change is instantaneous; palette is accessible (sufficient contrast) |
+| P1-4 | **Simple Animations** | Toggle idle animations on objects (flag waves, water ripples, clouds drift) | Animations run without frame-rate degradation; toggleable per object |
+
+---
+
+### P2 — Nice to Have (Post-Launch Sprint)
+
+These features broaden the platform's value without being required for core use.
+
+| # | Feature | Description | Success Criterion |
+|---|---------|-------------|-------------------|
+| P2-1 | **Teacher Dashboard** | Assign challenges, monitor student progress, flag worlds for class gallery | Teacher can create and publish a challenge in under 3 minutes |
+| P2-2 | **Sharing & Reactions** | Share worlds to class gallery; emoji reaction system | Sharing is opt-in; reactions limited to 4 preset emoji, no free text |
+| P2-3 | **Remix Mode** | Load a classmate's world as a starting template for your own | Remix creates a copy, does not alter the original; attribution shown |
+| P2-4 | **Creative Challenges** | Rotating prompt cards on dashboard ("Build a world that starts with W") | New challenge appears weekly; accessible from dashboard without teacher |
+
+---
+
+### P3 — Future Roadmap
+
+Not scoped for current development cycle. Captured for strategic alignment.
+
+| # | Feature | Notes |
+|---|---------|-------|
+| P3-1 | **Multiplayer Co-Build** | Real-time shared canvas; requires conflict resolution and moderation infrastructure |
+| P3-2 | **Voice Input** | Child narrates intention; Spark listens and asks back; requires on-device or privacy-compliant ASR |
+| P3-3 | **Curriculum Mapping** | Tag worlds and challenges to learning standards (NGSS, Common Core ELA); requires district partnerships |
+| P3-4 | **Mobile Native App** | iOS/Android app with offline mode; web-first proves concept before native investment |
+| P3-5 | **World Export** | Export as static 3D scene or sharable link outside the platform |
 
 ---
 
 ## 5. Information Architecture
 
-### Site Map
+### Full Screen Hierarchy
 
 ```
-Worldcraft
-├── Landing / Splash
-│   ├── "Start Creating" (guest / new child)
-│   └── "Sign In" (returning child or teacher)
+worldcraftkids.com
+├── /                          Landing Page
+│     └── "Start Building" CTA → Onboarding Flow
 │
-├── Onboarding Flow (new child only)
-│   ├── Step 1: Meet Spark (animated intro)
-│   ├── Step 2: Place your first object (interactive)
-│   ├── Step 3: Pick a theme (theme selector)
-│   └── Step 4: You're ready! (celebration → Builder)
+├── /onboarding                Onboarding Flow (guest session)
+│     ├── Step 1: Name entry
+│     ├── Step 2: Starter world selection (3 cards)
+│     └── Step 3: → /builder (new world, unsaved)
 │
-├── Home (child, authenticated)
-│   ├── My Worlds (thumbnail grid of saved projects)
-│   ├── Challenges (challenge card browser)
-│   └── Explore Gallery (class gallery, view-only)
+├── /dashboard                 Dashboard — My Worlds (requires account after first save)
+│     ├── World cards grid (thumbnail, title, last edited)
+│     ├── "New World" CTA → /builder (new)
+│     ├── Challenge cards (teacher-assigned, if any)
+│     └── Gallery tab → /gallery
 │
-├── World Builder
-│   ├── Scene Viewport (3D canvas)
-│   ├── Object Palette (thematic object library)
-│   ├── Theme Selector (switcher)
-│   ├── Object Controls (move / rotate / scale / color — contextual on selection)
-│   ├── Spark Panel (AI companion prompts)
-│   ├── Play Mode (first-person / orbit camera)
-│   ├── Save / Version Panel
-│   └── Share Dialog
+├── /builder/:worldId          Builder Workspace (core screen)
+│     ├── Canvas (3D viewport, 70%+ of screen)
+│     │     └── Object placement, selection, deletion
+│     ├── Object Library Panel (left or bottom)
+│     │     ├── Thematic groups (tabs: Cozy / Wild / Magical / Urban / Nature / Sky)
+│     │     ├── Search input
+│     │     └── Object thumbnails (drag to canvas)
+│     ├── AI Companion Panel (right side, collapsible)
+│     │     ├── Spark message bubble
+│     │     ├── Child text reply input (optional)
+│     │     └── Variation suggestions (shown contextually)
+│     ├── Properties Panel (bottom bar, contextual)
+│     │     ├── Color palette (shown when object selected)
+│     │     ├── Texture options (shown when object selected)
+│     │     ├── Animation toggle (shown when object selected)
+│     │     └── Object scale slider (min/max constrained per object)
+│     ├── Toolbar (top bar, minimal)
+│     │     ├── World title (editable inline)
+│     │     ├── Environment theme switcher
+│     │     ├── Undo / Redo buttons
+│     │     ├── Save button (manual trigger)
+│     │     └── Play Mode button
+│     └── → /play/:worldId       Play Mode (launched from toolbar)
 │
-├── Challenges
-│   ├── Challenge Browser (card grid by theme and difficulty)
-│   ├── Challenge Detail (intro + start)
-│   └── Challenge Builder (scoped Builder with progress tracking)
+├── /play/:worldId             Play / Explore Mode
+│     ├── First-person 3D walkthrough
+│     ├── WASD / swipe navigation
+│     ├── "Back to Builder" button (overlay, top-left)
+│     └── World title + creator name overlay (top-center)
 │
-├── Gallery
-│   ├── Personal Gallery (my worlds)
-│   ├── Class Gallery (teacher-curated, view-only)
-│   └── World Detail (full-screen view + react with emoji)
+├── /gallery                   Gallery
+│     ├── Class Gallery tab
+│     │     ├── World cards (shared by classmates, teacher-curated)
+│     │     ├── Reaction system (4 emoji, tap-to-react)
+│     │     └── Each card → /play/:worldId (read-only)
+│     └── My Worlds tab
+│           ├── All personal worlds (public and private)
+│           └── Each card → /builder/:worldId (own worlds) or /play/:worldId (others)
 │
-├── Parent / Guardian Portal
-│   ├── Consent Flow (initial setup)
-│   ├── Child Profile Management
-│   ├── Activity Summary (time spent, worlds created)
-│   └── Data & Privacy Settings
-│
-└── Teacher Dashboard
-    ├── Class Roster
-    ├── Challenge Management (create / assign / set due date)
-    ├── Submissions Inbox (review submitted worlds)
-    ├── Gallery Moderation (approve / remove from class gallery)
-    └── Presentation Mode (full-screen gallery for class review)
+└── /teacher                   Teacher Portal (separate authenticated context)
+      ├── /teacher/dashboard    Overview (classes, recent activity)
+      ├── /teacher/challenges   Challenge management
+      │     ├── Challenge list
+      │     ├── New Challenge form
+      │     └── /teacher/challenges/:id/progress   Student progress view
+      └── /teacher/gallery      Class gallery curation
+            └── Flag / unflag worlds for class visibility
 ```
 
-### Navigation Hierarchy
+---
 
-| Level | Child View | Teacher View |
-|-------|-----------|--------------|
-| Primary Nav | Home, Challenges, Gallery | Dashboard, Classes, Challenges, Gallery |
-| Secondary Nav | My Worlds (within Home) | Roster, Submissions (within Classes) |
-| Contextual | Object Controls (within Builder) | Moderation Controls (within Gallery) |
+### Component Ownership Map
 
-### Page Relationships
-
-- **Home → Builder**: Tap "New World" or tap an existing world thumbnail
-- **Challenge Detail → Challenge Builder**: Tap "Start Challenge"
-- **Builder → Gallery**: Tap "Share to Gallery" → world appears in Gallery
-- **Teacher Dashboard → Gallery**: Teacher approves submission → visible in Class Gallery
-- **Class Gallery → World Detail**: Tap any thumbnail → full-screen view
+| Panel / Component | Primary Interaction | Data Dependency |
+|-------------------|--------------------|--------------------|
+| Canvas (3D Viewport) | Drag, tap, rotate (trackpad/touch) | World state (object list, positions) |
+| Object Library Panel | Browse, search, drag | Object catalog (static CDN) |
+| AI Companion Panel | Read, type optional reply | Spark API (world state context) |
+| Properties Panel | Tap color/texture, toggle animation | Selected object state |
+| Toolbar | Tap buttons, edit title inline | World metadata |
+| Play Mode | Navigate via keyboard/swipe | World state (read-only render) |
+| Gallery Cards | Browse, tap reaction | World index (per class/user) |
+| Teacher Portal | Form inputs, list views | Class roster, challenge store |
 
 ---
 
 ## 6. UX/UI Design Direction
 
-### Design Philosophy
+### Visual Identity
 
-Worldcraft uses a **calm, playful, and encouraging** visual language. The interface should feel like a friendly art studio — not a video game or a classroom application. Every element reinforces the child's sense of creative ownership.
+**Aesthetic**: "Cozy Studio" — warm, inviting, and creative without being loud or game-like. Think a child's art room with good light, not a HUD-heavy game interface.
 
----
+**Tone**: Encouraging and spacious. The UI steps back and lets the world (canvas) be the hero.
 
-### Layout and Interaction
-
-| Principle | Specification |
-|-----------|--------------|
-| Tap targets | Minimum 44px × 44px for all interactive elements; 56px for primary actions |
-| Text in UI | Minimal — icons carry primary meaning; text labels used as secondary confirmation |
-| Progressive disclosure | Basic tools visible by default; advanced tools revealed on demand or over time |
-| Visual guidance | Animated arrows, glowing highlights, and Spark's gestures replace written instructions |
-| Responsive breakpoints | Mobile: 375px+; Tablet (primary): 768px+; Desktop: 1280px+ |
-| Orientation | Landscape-first for Builder; portrait supported for Gallery and Home |
-| Feedback | Every tap produces immediate visual + haptic (on supported devices) feedback |
+**Not**: Dark UI, neon colors, achievement banners, progress bars, score counters, anything that feels competitive or evaluative.
 
 ---
 
-### Color Palette
+### Color System
 
-The palette uses warm pastels as the base with vibrant saturated accents for calls to action and celebration states.
+| Token | Value | Usage |
+|-------|-------|-------|
+| `color-primary` | Warm Purple `#7C5CBF` | CTAs, Spark messages, active states |
+| `color-primary-light` | Lavender `#C4B0E8` | Panel backgrounds, hover states |
+| `color-secondary` | Sky Blue `#5AB4D6` | Secondary actions, Play Mode accents |
+| `color-accent` | Coral `#F4785A` | Reactions, celebrate moments, Spark "wow" state |
+| `color-background` | Cream `#FAF7F2` | Page and panel backgrounds |
+| `color-surface` | Soft White `#FFFFFF` | Cards, modals, input fields |
+| `color-text-primary` | Charcoal `#2E2A26` | Body text, labels |
+| `color-text-secondary` | Warm Gray `#7A736B` | Subtitles, placeholders, timestamps |
+| `color-border` | Stone `#E3DDD6` | Dividers, panel borders |
 
-| Role | Color Name | Hex | Usage |
-|------|-----------|-----|-------|
-| Background (primary) | Cream Puff | `#FFF8F0` | Main app background |
-| Background (secondary) | Sky Mist | `#EFF6FF` | Panel backgrounds, cards |
-| Surface | Warm White | `#FFFFFF` | Input fields, modals |
-| Accent (primary) | Sunshine Yellow | `#FFD23F` | Primary buttons, highlights |
-| Accent (secondary) | Coral Bloom | `#FF6B6B` | Secondary actions, warnings |
-| Accent (tertiary) | Mint Breeze | `#4ECDC4` | Success states, Spark |
-| Accent (quaternary) | Lavender Soft | `#C7B8EA` | Fantasy theme accents |
-| Text (primary) | Deep Cocoa | `#2D2D2D` | Headings, body text |
-| Text (secondary) | Stone Grey | `#6B7280` | Labels, secondary info |
-| Text (on dark) | Snow | `#FAFAFA` | Text on colored buttons |
-| Disabled | Pebble | `#D1D5DB` | Inactive states |
-
-**Color accessibility**: All text-on-background combinations meet WCAG AA contrast ratio (minimum 4.5:1 for normal text, 3:1 for large text). High contrast mode available in settings.
-
-**Dark/night mode**: Not in MVP scope. Planned for P2 under accessibility roadmap.
+All foreground/background pairs must meet WCAG AA contrast (4.5:1 for body text, 3:1 for large text and UI components).
 
 ---
 
 ### Typography
 
-| Role | Typeface | Weight | Size (mobile) | Size (desktop) |
-|------|---------|--------|---------------|----------------|
-| Display / World names | Nunito | 800 ExtraBold | 28px | 36px |
-| Headings (H1) | Nunito | 700 Bold | 22px | 28px |
-| Headings (H2) | Nunito | 600 SemiBold | 18px | 22px |
-| Body text | Nunito | 400 Regular | 16px | 16px |
-| Labels / UI | Nunito | 600 SemiBold | 14px | 14px |
-| Spark speech | Nunito | 500 Medium | 16px | 18px |
+**Primary font**: System font stack — `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`
 
-**Rationale**: Nunito is a rounded sans-serif typeface with open apertures and soft letterforms, making it highly legible for emerging readers. It avoids ambiguous letterforms (e.g., `Il1`) common in other typefaces.
+Rationale: Performance-first for a canvas-heavy app; system fonts render crisply across all platforms without flash-of-unstyled-text.
 
-**Minimum body size**: 16px on mobile. Never smaller than 12px for any UI element.
+| Role | Size | Weight | Line Height | Usage |
+|------|------|--------|-------------|-------|
+| Display | 32px | 700 | 1.2 | Onboarding headings, world titles in gallery |
+| Heading | 24px | 600 | 1.3 | Panel section headers |
+| Body | 18px | 400 | 1.6 | Spark messages, descriptions |
+| Label | 14px | 500 | 1.4 | Object names, button text, tooltips |
+| Caption | 12px | 400 | 1.5 | Timestamps, fine print (min usage) |
 
-**Line height**: 1.5× for body text; 1.2× for display and headings.
+**Minimum body size**: 16px on mobile (18px preferred). No text under 12px in any context.
 
 ---
 
-### Component Design
+### Iconography
 
-**Buttons**
-- Primary: Sunshine Yellow background, Deep Cocoa text, 12px border-radius, 56px height on mobile
-- Secondary: transparent with 2px Coral Bloom border
-- Destructive: Coral Bloom background, Snow text
-- Icon-only: 44px × 44px minimum, always include `aria-label`
+- **Style**: Rounded corners, filled shapes, 2px stroke minimum (where outlined)
+- **Size tiers**: 24px (toolbar), 32px (object library thumbnails), 48px (onboarding selection cards)
+- **Set**: Use a single icon family throughout (Phosphor Icons or Lucide — rounded variants)
+- **Labels**: All icons in the toolbar have visible text labels below; icon-only is never the only affordance
 
-**Object Cards (palette items)**
-- 80px × 80px on tablet, 64px × 64px on mobile
-- Rounded corners (16px)
-- Illustrated icon (no photography)
-- Label below icon (12px, optional, toggled by parent setting)
+---
 
-**Spark Panel**
-- Slides up from bottom (mobile) or appears in right sidebar (desktop)
-- Rounded top corners (24px)
-- Warm White background with subtle Mint Breeze border
-- Spark's animated avatar (lottie loop) + speech bubble
+### Layout Principles
 
-**Modals and sheets**
-- Bottom sheet on mobile; centered modal on desktop
-- Max-width 480px; always dismissible by tap outside or close button
-- Never full-screen on desktop
+**Canvas-dominant**: The 3D canvas occupies a minimum of 70% of the viewport width on desktop, and full screen minus the bottom panel on tablet.
+
+**Floating panels**: Object Library and AI Companion panels float over the canvas (with a subtle drop shadow on `color-background`), collapsible to a narrow icon strip to maximize canvas space.
+
+**Responsive tiers**:
+
+| Breakpoint | Layout |
+|------------|--------|
+| 375px (mobile) | Single column; bottom sheet for Object Library; AI Companion collapsed to floating button |
+| 768px (tablet, portrait) | Canvas full-width; bottom panel for objects; right panel for Spark |
+| 1024px (tablet, landscape / laptop) | Canvas 70%; left panel for objects; right panel for Spark |
+| 1280px+ (desktop) | Canvas 75%; left panel wider; right panel with extended Spark history |
+
+**8px base grid**: All spacing in multiples of 8px (8, 16, 24, 32, 40, 48).
+
+---
+
+### Interaction Design
+
+**Touch targets**: Minimum 48x48px for all interactive elements. Draggable objects in the library have a 64x64px thumbnail.
+
+**Primary interaction**: Drag-and-drop from library to canvas. Tap to select; tap again to deselect. Long-press (or right-click) shows context menu (delete, duplicate, properties).
+
+**Drag feedback**: Object previews a ghost image at 60% opacity while dragging; snaps to grid with a subtle "pop" spring animation on release.
+
+**Selection state**: Selected object shows a warm-purple highlight ring (3px, `color-primary`) with resize handles.
+
+**Progressive disclosure**:
+- Default state: canvas + object library only
+- After first object placed: Spark panel appears with a subtle slide-in from right
+- After object selected: Properties panel rises from bottom (slide-up, 200ms ease-out)
+- Advanced options (scale, rotation degrees, material override): revealed behind a "More" chevron, not shown by default
 
 ---
 
 ### Motion and Animation
 
-| Type | Duration | Easing | Notes |
-|------|---------|--------|-------|
-| Button press | 100ms | ease-out | Scale down 0.95 |
-| Panel slide | 250ms | ease-in-out | Bottom sheet entrance |
-| Object placement | 150ms | spring | Bounce-drop into scene |
-| Spark entrance | 300ms | ease-out | Slide + fade |
-| Theme transition | 500ms | ease-in-out | Cross-fade skybox and ground |
-| Celebration | 600ms | spring | Confetti burst, scale |
+**Guiding principle**: Animations celebrate creative moments and provide spatial feedback — never decorative noise.
 
-All animations respect `prefers-reduced-motion`: decorative animations are disabled; functional transitions use opacity-only at 150ms.
+| Interaction | Animation | Duration | Easing |
+|-------------|-----------|----------|--------|
+| Object drop onto canvas | Spring "settle" + scale 0.9→1.05→1.0 | 250ms | Spring (stiffness 280, damping 24) |
+| Spark message arrival | Slide up + fade in | 200ms | ease-out |
+| Panel open/close | Slide + fade | 180ms | ease-in-out |
+| Play Mode enter | Crossfade to full screen | 300ms | ease-in-out |
+| Reaction emoji tap | Scale 1.0→1.4→1.0 + particle burst | 400ms | Spring |
+| World save confirmation | Checkmark draw + brief color flash on button | 500ms | ease-out |
 
----
-
-## 7. Safety & Moderation
-
-### Content Safety Principles
-
-Worldcraft operates under a **child-safe by design** model. Safety measures are built into the product architecture, not applied as afterthought filtering.
-
-| Principle | Implementation |
-|-----------|---------------|
-| Assume a child is always present | All AI output filtered as if a child is the recipient, regardless of account type |
-| Defense in depth | Multiple layers: AI model filtering, application-level rules, teacher moderation, parental controls |
-| Minimal data collection | Collect only what is operationally necessary; no behavioral advertising |
-| Auditability | All AI interactions logged and retainable for parental/teacher review |
+**`prefers-reduced-motion`**: All non-essential animations are disabled. Object placement has a simple opacity flash (100ms) instead of spring. No spring physics run.
 
 ---
 
-### AI Content Filtering (Spark)
+### AI Companion (Spark) UI Specifications
 
-- **Blocklist**: Spark's output is filtered against a curated list of age-inappropriate terms, themes, and concepts before display.
-- **Prompt injection protection**: User-provided text (world names, descriptions) is never inserted directly into AI system prompts.
-- **Safe completion mode**: The AI model is instructed via system prompt to operate in a child-safe creative companion mode. Requests that violate this constraint are silently redirected to a neutral alternative response.
-- **No opinions on real-world topics**: Spark does not comment on news, politics, religion, or any real-world divisive topic.
-- **Response review**: All novel Spark prompt templates are human-reviewed by a child safety expert before deployment.
-- **Rate limiting**: Spark interactions are rate-limited to prevent abuse of the AI endpoint.
+**Visual presence**: A small rounded avatar (40x40px, warm purple, stylized spark icon) with a speech bubble to its right. Does not take up its own panel section — the message bubble floats just above the bottom-right of the canvas in compact mode.
 
----
+**Message bubble**:
+- Background: `color-primary-light` (`#C4B0E8`)
+- Border radius: 16px
+- Max width: 280px
+- Text: `color-text-primary`, body size (18px)
+- Always shows a dismiss ("×") button
+- Messages fade out after 15 seconds if no interaction; Spark does not spam
 
-### Communication Restrictions
+**Input field** (child response):
+- Appears below the bubble when Spark asks an open question
+- Placeholder: "Type what you think..."
+- Max 100 chars; character count visible at 80+
+- Submitting with Enter or tap sends reply; Spark responds within 1.5s
 
-| Feature | Policy |
-|---------|--------|
-| User-to-user direct messaging | Not permitted in MVP or P1. Children cannot send messages to each other. |
-| Gallery reactions | Emoji-only reactions (pre-set list of 6). No free-text comments from children. |
-| Teacher comments | Teachers can add text comments visible only to the individual child. |
-| Parent notifications | Parents receive email summaries; no in-app parent-child messaging. |
-| External links | Zero external links exposed to children within the product. |
-| Social sharing | No public social media sharing. Sharing is restricted to class gallery (teacher-controlled) or private link shared by parent. |
-
----
-
-### Age-Appropriate Language
-
-- All UI text written at a Grade 2 reading level (Flesch-Kincaid target: 70+).
-- All Spark dialogue reviewed by a child literacy consultant.
-- No sarcasm, irony, or ambiguous idioms in AI responses.
-- Spark uses inclusive, gender-neutral language.
-- Emotional language is encouraging and specific: "You added a dragon! Amazing!" not generic "Good job."
+**Variation cards** (shown when Spark offers alternatives):
+- 3 small cards in a horizontal strip, each with a preview thumbnail and 1-line description
+- Tapping a card applies the variation to canvas and closes the strip
 
 ---
 
-### Teacher Oversight Capabilities
+### Component Patterns (shadcn/ui Base)
 
-| Capability | Detail |
-|-----------|--------|
-| Class gallery moderation | Teacher approves or removes any world before it appears in class gallery |
-| Challenge submission review | Teacher reviews all submitted worlds before marking as complete |
-| Spark interaction log | Teacher can view a summary of Spark prompts shown to students in class mode |
-| Student activity summary | Time spent, sessions, worlds created — no granular behavioral tracking |
-| Flagging | Teacher can flag a world for administrator review |
+Use shadcn/ui as the component foundation with the following customizations:
 
----
+| Component | Base | Customization |
+|-----------|------|---------------|
+| Button (primary) | `Button` | `bg-[#7C5CBF]`, rounded-full, min-h-[48px], font-weight 600 |
+| Button (secondary) | `Button variant="outline"` | `border-[#5AB4D6]`, `text-[#5AB4D6]` |
+| Card (world thumbnail) | `Card` | rounded-2xl, 2px border `color-border`, hover: shadow-md scale-[1.02] |
+| Input field | `Input` | rounded-xl, bg-surface, focus ring `color-primary` |
+| Sheet (mobile object library) | `Sheet side="bottom"` | Half-screen, drag handle, rounded-t-2xl |
+| Tooltip | `Tooltip` | Max-width 200px, bg-charcoal, rounded-lg, 12px text |
+| Badge (challenge status) | `Badge` | Rounded-full, color-coded by status |
 
-### COPPA Compliance Considerations
-
-Worldcraft serves children under 13 in the United States and must comply with the Children's Online Privacy Protection Act (COPPA).
-
-| Requirement | Implementation |
-|-------------|---------------|
-| Parental consent | Verifiable parental consent collected before any personal data is stored for a child under 13. Consent flow via parent email with confirmation link. |
-| Data minimization | Only display name, parent email, and world data are collected. No device fingerprinting, location data, or behavioral advertising profiles. |
-| Data access and deletion | Parents can view all data associated with their child's account and request deletion at any time via the Parent Portal or email. |
-| No third-party data sharing | No personal data shared with third-party advertisers or analytics providers. |
-| School-based exception | For classroom use, school operators may provide consent on behalf of parents under the COPPA school exception. Teacher accounts must acknowledge operator responsibility. |
-| Data retention | World data retained for 24 months of inactivity, then deleted. Parent notified by email 30 days before deletion. |
-| Age gate | Date-of-birth or grade-level gate at account creation to identify users under 13. No self-reporting bypass. |
-
-**Note**: This section represents product intent. Legal counsel must review the final implementation for regulatory compliance.
+Install command: `npx shadcn@latest add button card input sheet tooltip badge`
 
 ---
 
-### Advertising and Monetization Safety
+### Accessibility Baseline
 
-- **No advertising of any kind** is shown to children within the product.
-- **No in-app purchases** are surfaced to children directly. Subscription management is accessible only through the Parent Portal.
-- **No dark patterns**: No countdown timers, artificial scarcity, or emotional manipulation to drive upgrades.
-- **No sponsored content** or branded objects within child-facing product areas.
-
----
-
-### Parental Consent Flow
-
-```
-Step 1: Child starts account creation
-  → Enters display name and grade level
-  → System detects age < 13 (based on grade)
-
-Step 2: Parent gate
-  → "Ask your parent or guardian to help you sign up"
-  → Child enters parent's email address
-  → No further setup without parent action
-
-Step 3: Parent receives email
-  → Clear explanation of what data is collected and why
-  → Link to full Privacy Policy (plain language version + legal version)
-  → "Approve" button creates parent account and grants child access
-
-Step 4: Parent portal setup
-  → Parent sets optional time limits and content preferences
-  → Receives weekly activity summary emails (opt-in)
-  → Can revoke consent and delete all data at any time
-
-Step 5: Child account activated
-  → Child receives notification on device: "You're ready to build!"
-  → Onboarding begins
-```
+- WCAG AA for all text and interactive elements
+- All interactive elements keyboard-accessible (Tab + Enter/Space)
+- Object Library navigable via arrow keys when focused
+- Spark messages announced via `aria-live="polite"` region
+- Canvas: accessible name ("3D building canvas"), keyboard object placement mode (arrow keys to move selected object)
+- Color alone is never the only differentiator (always paired with shape, text, or icon)
+- Focus indicators: visible 3px purple ring on all focusable elements (never outline: none without replacement)
 
 ---
 
-*Document maintained by the Worldcraft product team. For questions, contact the product owner.*
+*Document owner: Product — WorldCraft Kids*
+*Next review: Sprint 1 kickoff*

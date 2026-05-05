@@ -1,6 +1,7 @@
 {
   "harness": "oma",
-  "package_manager": "bun",
+  "package_manager": "npm",
+  "judge_runs_spec_visual": 3,
   "axes": {
     "functional": {
       "items": {
@@ -20,31 +21,31 @@
           "pass": 1,
           "score": 3,
           "max": 3,
-          "evidence": "Landing page shows a prominent '🚀 Start Creating' button visible without scrolling, linking to /onboarding."
+          "evidence": "Landing page shows a clear 'Start creating your world' button visible without scrolling alongside a heading and description."
         },
         "journey-builder": {
           "pass": 1,
           "score": 4,
           "max": 4,
-          "evidence": "Three.js Canvas renders (1024x1440) at /builder/new with a sidebar containing shape pickers (Box, Ball, Tube, Cone, Ring) plus Nature, Buildings, and Characters categories."
+          "evidence": "Three.js canvas renders with grid toggle active and an object picker sidebar listing 12 shapes (Cube, Sphere, Cylinder, Cone, Tree, House, Character, Animal, Rock, Flower, Cloud, Star)."
         },
         "journey-ai": {
           "pass": 1,
           "score": 3,
           "max": 3,
-          "evidence": "Spark AI panel opens from sidebar, typed 'help me', received non-empty response: 'Ooh, I got excited and lost my train of thought! Tell me more about your world! 🌟'."
+          "evidence": "Spark AI companion panel opens with chat log, text input accepted 'help me', and returned a non-empty response ('Who would you invite to come visit this place?')."
         },
         "journey-save": {
           "pass": 1,
-          "score": 1.5,
+          "score": 3,
           "max": 3,
-          "evidence": "Save button (💾 Save) exists and is clickable, but localStorage remains empty after save and page reload shows only default state with no persisted world data."
+          "evidence": "Save button triggered 'Saved!' status message and after full page reload the world title 'My World' and builder state persisted at the same URL."
         },
         "journey-gallery": {
           "pass": 1,
           "score": 2,
           "max": 2,
-          "evidence": "Gallery at /gallery renders a grid of 6 world cards (Enchanted Forest, Space Station Alpha, Underwater Kingdom, etc.) with authors and like counts."
+          "evidence": "The /gallery route renders a gallery UI with heading, description, and an empty-state message with a 'Build Something' call-to-action button."
         },
         "lint-clean": {
           "pass": 0,
@@ -59,88 +60,88 @@
           "evidence": "exit 0"
         }
       },
-      "total": 28.5,
+      "total": 30,
       "max": 35
     },
     "spec": {
       "items": {
         "spec-product-concept": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/PRODUCT.md:22-53"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-personas": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/PRODUCT.md:56-111"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-journeys": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/PRODUCT.md:114-258"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-feature-list": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/PRODUCT.md:262-306"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-ia": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/PRODUCT.md:309-379"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-ui-direction": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/PRODUCT.md:382-486"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-tech-arch": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/ARCHITECTURE.md:1-160"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-db-schema": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/ARCHITECTURE.md:752-907"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-ai-prompts": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/AI-SYSTEM.md:1-946"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-safety": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "docs/PRODUCT.md:489-605"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-impl-plan": {
-          "pass": 0,
-          "score": 0,
+          "pass": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": ""
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-starter-code": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "src/app/page.tsx, src/components/builder/Canvas3D.tsx, src/stores/worldStore.ts (37 source files)"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-priority-screens": {
-          "pass": 0,
-          "score": 0,
+          "pass": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": ""
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-real-api-bonus": {
           "pass": true,
@@ -149,46 +150,46 @@
           "evidence": "real SDK/endpoint + env config"
         }
       },
-      "total": 13,
+      "total": 15,
       "max": 15
     },
     "visual": {
       "items": {
         "visual-anti-patterns": {
-          "pass": 1,
-          "score": 4,
+          "pass": 0,
+          "score": 2.3,
           "max": 5,
-          "evidence": "Floating gradient orbs/blobs on landing page (pink circle, blue circle, yellow and purple shapes); no other anti-patterns observed."
+          "evidence": "scores=[ 2 2 3 ] mean=2.3 (over 3 rounds)"
         },
         "visual-child-friendly": {
           "pass": 1,
-          "score": 4,
+          "score": 4.0,
           "max": 5,
-          "evidence": "Large emoji-labeled object tiles, playful tone, warm palette, and minimal text density; bottom toolbar has some icon-only buttons that may challenge younger users."
+          "evidence": "scores=[ 4 4 4 ] mean=4.0 (over 3 rounds)"
         },
         "visual-consistency": {
           "pass": 1,
-          "score": 4,
+          "score": 4.0,
           "max": 5,
-          "evidence": "Consistent warm yellow/orange brand color, rounded typography, and card radii across all pages; minor drift between the AI chat panel styling and the rest."
+          "evidence": "scores=[ 4 4 4 ] mean=4.0 (over 3 rounds)"
         },
         "visual-accessibility": {
           "pass": 0,
-          "score": 2,
+          "score": 2.3,
           "max": 5,
-          "evidence": "Good dark-on-light body text contrast, but orange text on cream is borderline; toolbar and top-bar undo/redo are icon-only without labels; no visible focus rings; responsiveness not demonstrated."
+          "evidence": "scores=[ 3 2 2 ] mean=2.3 (over 3 rounds)"
         }
       },
-      "total": 14,
+      "total": 12.600000000000001,
       "max": 20
     },
     "engineering": {
       "items": {
         "eng-breadth": {
           "pass": true,
-          "score": 3.5,
+          "score": 4.0,
           "max": 4,
-          "evidence": "routes=7 components=13"
+          "evidence": "routes=6 components=16"
         },
         "eng-type-safety": {
           "pass": true,
@@ -200,13 +201,13 @@
           "pass": true,
           "score": 3.5,
           "max": 4,
-          "evidence": "max_depth=9 max_file_lines=316"
+          "evidence": "max_depth=9 max_file_lines=373"
         },
         "eng-transparency": {
-          "pass": true,
-          "score": 3.0,
+          "pass": false,
+          "score": 0.0,
           "max": 4,
-          "evidence": "deferred_markers=2"
+          "evidence": "deferred_markers=0"
         },
         "eng-env-safety": {
           "pass": true,
@@ -215,34 +216,34 @@
           "evidence": "env config present, no hardcoded keys"
         }
       },
-      "total": 18,
+      "total": 15.5,
       "max": 20
     },
     "efficiency": {
       "items": {
         "eff-turns": {
-          "pass": false,
-          "score": 1,
+          "pass": true,
+          "score": 2,
           "max": 4,
-          "evidence": "91 turns"
+          "evidence": "52 turns"
         },
         "eff-time": {
           "pass": false,
           "score": 0,
           "max": 3,
-          "evidence": "1761s"
+          "evidence": "1731s"
         },
         "eff-cost": {
           "pass": true,
-          "score": 1,
+          "score": 2,
           "max": 3,
-          "evidence": "$0.234/file (8.194889450000003 USD / 35 files)"
+          "evidence": "$0.184/file (6.2430938000000005 USD / 34 files)"
         }
       },
-      "total": 2,
+      "total": 4,
       "max": 10
     }
   },
-  "total": 75.5,
+  "total": 77.1,
   "max": 100.0
 }

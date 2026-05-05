@@ -1,0 +1,9 @@
+{
+  "harness": "oma",
+  "items": {
+    "visual-anti-patterns":  { "score": 2, "max": 5, "notes": "Purple-to-blue gradient background on landing and gallery pages; floating decorative orbs/circles on landing page; footer text and AI-panel timestamps appear below 16px" },
+    "visual-child-friendly": { "score": 4, "max": 5, "notes": "Emoji-based object picker, large tappable CTA buttons, playful language, suggestion chips reduce typing, low text density throughout" },
+    "visual-consistency":    { "score": 4, "max": 5, "notes": "Consistent purple accent color, button style, and typography across all pages; toolbar is identical across builder views; landing page is slightly more decorative but cohesive" },
+    "visual-accessibility":  { "score": 3, "max": 5, "notes": "All toolbar and object icons have clear text labels; dark-on-light contrast is generally strong; no focus rings visible in any screenshot; responsive behavior not demonstrated" }
+  }
+}

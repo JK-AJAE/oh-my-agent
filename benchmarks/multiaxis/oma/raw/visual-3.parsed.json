@@ -1,0 +1,9 @@
+{
+  "harness": "oma",
+  "items": {
+    "visual-anti-patterns":  { "score": 3, "max": 5, "notes": "Landing page has a purple-to-blue/lavender gradient background and floating decorative orbs/blobs (purple, blue, green circles); no other anti-patterns observed" },
+    "visual-child-friendly": { "score": 4, "max": 5, "notes": "Large tappable emoji-based object grid, big labeled toolbar buttons, playful Spark prompts, minimal text density; AI chat panel is slightly text-heavy" },
+    "visual-consistency":    { "score": 4, "max": 5, "notes": "Consistent purple accent, button style, and typography across all pages; minor drift in background treatment (decorated landing vs plain builder vs light-blue gallery)" },
+    "visual-accessibility":  { "score": 2, "max": 5, "notes": "Clear text labels accompany all toolbar and object icons; reasonable contrast on primary text; no visible focus rings and gray subtitle text on landing has marginal contrast" }
+  }
+}

@@ -1,7 +1,7 @@
 {
-  "journey-onboard":  {"score": 3, "max": 3, "evidence": "Landing page shows a prominent '🚀 Start Creating' button visible without scrolling, linking to /onboarding."},
-  "journey-builder":  {"score": 4, "max": 4, "evidence": "Three.js Canvas renders (1024x1440) at /builder/new with a sidebar containing shape pickers (Box, Ball, Tube, Cone, Ring) plus Nature, Buildings, and Characters categories."},
-  "journey-ai":       {"score": 3, "max": 3, "evidence": "Spark AI panel opens from sidebar, typed 'help me', received non-empty response: 'Ooh, I got excited and lost my train of thought! Tell me more about your world! 🌟'."},
-  "journey-save":     {"score": 1.5, "max": 3, "evidence": "Save button (💾 Save) exists and is clickable, but localStorage remains empty after save and page reload shows only default state with no persisted world data."},
-  "journey-gallery":  {"score": 2, "max": 2, "evidence": "Gallery at /gallery renders a grid of 6 world cards (Enchanted Forest, Space Station Alpha, Underwater Kingdom, etc.) with authors and like counts."}
+  "journey-onboard":  {"score": 3, "max": 3, "evidence": "Landing page shows a clear 'Start creating your world' button visible without scrolling alongside a heading and description."},
+  "journey-builder":  {"score": 4, "max": 4, "evidence": "Three.js canvas renders with grid toggle active and an object picker sidebar listing 12 shapes (Cube, Sphere, Cylinder, Cone, Tree, House, Character, Animal, Rock, Flower, Cloud, Star)."},
+  "journey-ai":       {"score": 3, "max": 3, "evidence": "Spark AI companion panel opens with chat log, text input accepted 'help me', and returned a non-empty response ('Who would you invite to come visit this place?')."},
+  "journey-save":     {"score": 3, "max": 3, "evidence": "Save button triggered 'Saved!' status message and after full page reload the world title 'My World' and builder state persisted at the same URL."},
+  "journey-gallery":  {"score": 2, "max": 2, "evidence": "The /gallery route renders a gallery UI with heading, description, and an empty-state message with a 'Build Something' call-to-action button."}
 }

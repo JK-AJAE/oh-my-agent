@@ -1,6 +1,7 @@
 {
   "harness": "ecc",
   "package_manager": "pnpm",
+  "judge_runs_spec_visual": 3,
   "axes": {
     "functional": {
       "items": {
@@ -66,81 +67,81 @@
       "items": {
         "spec-product-concept": {
           "pass": 0,
-          "score": 0,
+          "score": 0.33,
           "max": 1,
-          "evidence": "final-reply mentions Worldcraft but only as a feature list, not a substantive product concept summary with problem statement, target audience rationale, or value proposition"
+          "evidence": "pass_votes=001 (1/3 rounds)"
         },
         "spec-personas": {
           "pass": 0,
-          "score": 0,
+          "score": 0.00,
           "max": 1,
-          "evidence": "No persona definitions found in any file or the final reply"
+          "evidence": "pass_votes=000 (0/3 rounds)"
         },
         "spec-journeys": {
           "pass": 0,
-          "score": 0,
+          "score": 0.00,
           "max": 1,
-          "evidence": "No user journey documentation found anywhere in the project"
+          "evidence": "pass_votes=000 (0/3 rounds)"
         },
         "spec-feature-list": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply contains a table of routes/features plus Builder Workspace bullet list with 6+ distinct entries"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-ia": {
-          "pass": 0,
-          "score": 0,
+          "pass": 1,
+          "score": 0.67,
           "max": 1,
-          "evidence": "No information architecture document or section found"
+          "evidence": "pass_votes=011 (2/3 rounds)"
         },
         "spec-ui-direction": {
-          "pass": 0,
-          "score": 0,
+          "pass": 1,
+          "score": 0.67,
           "max": 1,
-          "evidence": "No UX/UI design direction document; final reply mentions Fredoka font and Tailwind but not a substantive design direction"
+          "evidence": "pass_votes=011 (2/3 rounds)"
         },
         "spec-tech-arch": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply Tech Stack section lists 5 distinct technology choices with roles; src/types/world.ts and stores show architecture in code"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-db-schema": {
           "pass": 1,
-          "score": 1,
+          "score": 0.67,
           "max": 1,
-          "evidence": "src/types/world.ts:1-35 defines WorldObject, WorldProject, AiMessage interfaces serving as the data schema"
+          "evidence": "pass_votes=110 (2/3 rounds)"
         },
         "spec-ai-prompts": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "src/app/api/ai/route.ts:39-40 contains full system prompt design plus 15 creative prompts and contextual prompt logic"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-safety": {
           "pass": 0,
-          "score": 0,
+          "score": 0.33,
           "max": 1,
-          "evidence": "No safety or moderation considerations documented; only the system prompt mentions 'children under 12' but no safety policy"
+          "evidence": "pass_votes=010 (1/3 rounds)"
         },
         "spec-impl-plan": {
           "pass": 0,
-          "score": 0,
+          "score": 0.00,
           "max": 1,
-          "evidence": "No implementation plan found in any file or the final reply"
+          "evidence": "pass_votes=000 (0/3 rounds)"
         },
         "spec-starter-code": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "src/ directory contains 25 files across app/, components/, stores/, types/, lib/ forming a complete starter code structure"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-priority-screens": {
           "pass": 1,
-          "score": 1,
+          "score": 1.00,
           "max": 1,
-          "evidence": "final-reply table lists 5 routes (/, /onboarding, /builder, /gallery, /api/ai) as priority screens with descriptions"
+          "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-real-api-bonus": {
           "pass": true,
@@ -149,34 +150,34 @@
           "evidence": "real SDK/endpoint + env config"
         }
       },
-      "total": 8,
+      "total": 9.67,
       "max": 15
     },
     "visual": {
       "items": {
         "visual-anti-patterns": {
           "pass": 1,
-          "score": 3,
+          "score": 3.3,
           "max": 5,
-          "evidence": "Gradient orbs/blobs floating on the landing page (yellow circle, pink square, purple circle, green square); feature card body text on landing page appears smaller than 16px"
+          "evidence": "scores=[ 3 3 4 ] mean=3.3 (over 3 rounds)"
         },
         "visual-child-friendly": {
           "pass": 1,
-          "score": 4,
+          "score": 4.0,
           "max": 5,
-          "evidence": "Large tappable emoji-labeled objects, playful tone in AI buddy, calm pastel palette, minimal text density; sidebar items could be slightly larger"
+          "evidence": "scores=[ 4 4 4 ] mean=4.0 (over 3 rounds)"
         },
         "visual-consistency": {
           "pass": 1,
-          "score": 4,
+          "score": 3.0,
           "max": 5,
-          "evidence": "Consistent type ramp, card radii, and color palette across pages; minor drift in button accent colors between builder (green Save) and landing/gallery (coral primary)"
+          "evidence": "scores=[ 4 3 2 ] mean=3.0 (over 3 rounds)"
         },
         "visual-accessibility": {
           "pass": 0,
-          "score": 2,
+          "score": 2.7,
           "max": 5,
-          "evidence": "Good dark-on-light text contrast on most surfaces and text labels on nearly all buttons; no visible focus rings anywhere, no responsive/narrow-width evidence, and some light-colored button text (Open, suggestion chips) with questionable contrast"
+          "evidence": "scores=[ 2 3 3 ] mean=2.7 (over 3 rounds)"
         }
       },
       "total": 13,
@@ -243,6 +244,6 @@
       "max": 10
     }
   },
-  "total": 68.5,
+  "total": 70.2,
   "max": 100.0
 }
