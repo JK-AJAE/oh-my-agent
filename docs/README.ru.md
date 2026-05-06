@@ -10,13 +10,6 @@
 
 Работает со всеми основными AI IDE: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode и другими.
 
-Вендорные нативные субагенты генерируются из `.agents/agents/`:
-- Claude Code использует `.claude/agents/*.md`
-- Codex CLI использует `.codex/agents/*.toml`
-- Gemini CLI использует `.gemini/agents/*.md`
-
-Когда workflow резолвит агента к тому же вендору, что и текущий рантайм, он должен сначала использовать нативный путь субагента этого вендора. Кросс-вендорные задачи откатываются к `oma agent:spawn`.
-
 ## Быстрый старт
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > Не путайте с APM (Application Performance Monitoring) из `oma-observability`.
 
 ```bash
-# 22 скила, разворачиваются во все обнаруженные runtime
+# Все скилы, разворачиваются во все обнаруженные runtime
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM читает указатель `skills: .agents/skills/` из `.claude-plugin/plugin.json`, поэтому SSOT в `.agents/` — единственный источник, без шага сборки и без зеркал.
 
-APM поставляет только 22 скила. Для workflow, правил, `oma-config.yaml`, хуков детекции ключевых слов и CLI `oma agent:spawn` используйте `bunx oh-my-agent@latest`. На один проект — один способ дистрибуции, иначе всё разъедется.
+APM поставляет только скилы. Для workflow, правил, `oma-config.yaml`, хуков детекции ключевых слов и CLI `oma agent:spawn` используйте `bunx oh-my-agent@latest`. На один проект — один способ дистрибуции, иначе всё разъедется.
 
 </details>
 
@@ -91,6 +84,7 @@ APM поставляет только 22 скила. Для workflow, прави
 | **oma-scholar** | Спутник академических исследований — поиск литературы, рецензирование |
 | **oma-scm** | SCM (управление конфигурацией ПО): ветки, слияния, worktree, базовые линии; Conventional Commits |
 | **oma-search** | Интент-маршрутизатор поиска + оценка доверия — документация, веб, код, локальный |
+| **oma-skill-creator** | Создаёт и проверяет OMA-скилы в формате SSL-lite |
 | **oma-tf-infra** | Мультиоблачный IaC на Terraform (Infrastructure as Code) |
 | **oma-translator** | Естественный мультиязычный перевод |
 

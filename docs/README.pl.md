@@ -10,13 +10,6 @@ Zamiast jednego AI, ktory robi wszystko (i gubi sie w polowie), oh-my-agent rozd
 
 Dziala ze wszystkimi glownymi AI IDE: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode i innymi.
 
-Natywne subagenty dostawcy sa generowane z `.agents/agents/`:
-- Claude Code uzywa `.claude/agents/*.md`
-- Codex CLI uzywa `.codex/agents/*.toml`
-- Gemini CLI uzywa `.gemini/agents/*.md`
-
-Gdy workflow rozwiazuje agenta do tego samego dostawcy co biezacy runtime, powinien najpierw uzyc natywnej sciezki subagenta tego dostawcy. Zadania miedzy dostawcami wracaja do `oma agent:spawn`.
-
 ## Szybki start
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > Nie myl tego z APM (Application Performance Monitoring) z `oma-observability`.
 
 ```bash
-# 22 skille, wdrazane do kazdego wykrytego runtime
+# Wszystkie skille, wdrazane do kazdego wykrytego runtime
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM czyta wskaznik `skills: .agents/skills/` z `.claude-plugin/plugin.json`, wiec SSOT z `.agents/` jest jedynym zrodlem — bez kroku build i bez mirrora.
 
-APM dostarcza tylko 22 skille. Do workflowow, regul, `oma-config.yaml`, hookow detekcji slow kluczowych i CLI `oma agent:spawn` uzyj `bunx oh-my-agent@latest`. W jednym projekcie trzymaj sie jednej dystrybucji, zeby nic sie nie rozjechalo.
+APM dostarcza tylko skille. Do workflowow, regul, `oma-config.yaml`, hookow detekcji slow kluczowych i CLI `oma agent:spawn` uzyj `bunx oh-my-agent@latest`. W jednym projekcie trzymaj sie jednej dystrybucji, zeby nic sie nie rozjechalo.
 
 </details>
 
@@ -91,6 +84,7 @@ Wybierz preset i gotowe:
 | **oma-scholar** | Towarzysz badań akademickich — wyszukiwanie literatury, recenzja naukowa |
 | **oma-scm** | SCM (zarządzanie konfiguracją oprogramowania): branchowanie, merge, worktree, baseline; Conventional Commits |
 | **oma-search** | Router wyszukiwania oparty na intencji + ocena zaufania — dokumentacja, web, kod, lokalnie |
+| **oma-skill-creator** | Tworzy i audytuje skille OMA w formacie SSL-lite |
 | **oma-tf-infra** | Wielochmurowy IaC z Terraform (Infrastructure as Code) |
 | **oma-translator** | Naturalne tlumaczenie wielojezyczne |
 

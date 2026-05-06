@@ -10,13 +10,6 @@ Thay vì một AI làm tất cả mọi thứ (rồi bị lạc hướng giữa 
 
 Hỗ trợ tất cả các AI IDE chính: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode và nhiều hơn nữa.
 
-Sub-agent bản địa của nhà cung cấp được sinh ra từ `.agents/agents/`:
-- Claude Code dùng `.claude/agents/*.md`
-- Codex CLI dùng `.codex/agents/*.toml`
-- Gemini CLI dùng `.gemini/agents/*.md`
-
-Khi workflow phân giải một agent về cùng nhà cung cấp với runtime hiện tại, nó sẽ ưu tiên dùng đường dẫn sub-agent bản địa của nhà cung cấp đó trước. Các tác vụ chéo nhà cung cấp sẽ quay về `oma agent:spawn`.
-
 ## Bắt đầu nhanh
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > Đừng nhầm với APM (Application Performance Monitoring) của `oma-observability`.
 
 ```bash
-# 22 skill, triển khai vào mọi runtime được phát hiện
+# Toàn bộ skill, triển khai vào mọi runtime được phát hiện
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM đọc pointer `skills: .agents/skills/` trong `.claude-plugin/plugin.json`, nên `.agents/` SSOT là nguồn duy nhất — không cần bước build hay mirror.
 
-APM chỉ phân phối 22 skill. Còn workflow, rule, `oma-config.yaml`, hook phát hiện từ khóa và CLI `oma agent:spawn` thì dùng `bunx oh-my-agent@latest`. Mỗi dự án chỉ chọn một cách phân phối thôi, không thì lệch nhau.
+APM chỉ phân phối skill. Còn workflow, rule, `oma-config.yaml`, hook phát hiện từ khóa và CLI `oma agent:spawn` thì dùng `bunx oh-my-agent@latest`. Mỗi dự án chỉ chọn một cách phân phối thôi, không thì lệch nhau.
 
 </details>
 
@@ -91,6 +84,7 @@ Chọn một preset và bạn đã sẵn sàng:
 | **oma-scholar** | Bạn đồng hành nghiên cứu học thuật — tìm tài liệu, bình duyệt |
 | **oma-scm** | SCM (quản lý cấu hình phần mềm): nhánh, merge, worktree, baseline; Conventional Commits |
 | **oma-search** | Bộ định tuyến tìm kiếm theo ý định + điểm tin cậy — tài liệu, web, mã, cục bộ |
+| **oma-skill-creator** | Soạn và kiểm tra skill OMA theo định dạng SSL-lite |
 | **oma-tf-infra** | Terraform IaC đa đám mây (Infrastructure as Code) |
 | **oma-translator** | Dịch thuật đa ngôn ngữ tự nhiên |
 

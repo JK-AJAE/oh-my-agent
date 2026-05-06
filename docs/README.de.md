@@ -10,13 +10,6 @@ Statt dass eine einzige KI alles erledigt (und sich auf halbem Weg verheddert), 
 
 Funktioniert mit allen großen KI-IDEs: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode und weiteren.
 
-Vendor-native Subagenten werden aus `.agents/agents/` generiert:
-- Claude Code verwendet `.claude/agents/*.md`
-- Codex CLI verwendet `.codex/agents/*.toml`
-- Gemini CLI verwendet `.gemini/agents/*.md`
-
-Wenn ein Workflow einen Agenten zum gleichen Vendor wie die aktuelle Runtime auflöst, sollte er zuerst den nativen Subagent-Pfad dieses Vendors verwenden. Vendor-übergreifende Aufgaben fallen auf `oma agent:spawn` zurück.
-
 ## Schnellstart
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > Nicht zu verwechseln mit dem APM (Application Performance Monitoring) von `oma-observability`.
 
 ```bash
-# 22 Skills, in jede erkannte Runtime ausgerollt
+# Alle Skills, in jede erkannte Runtime ausgerollt
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM liest den `skills: .agents/skills/`-Pointer aus `.claude-plugin/plugin.json`, also ist die `.agents/`-SSOT die einzige Quelle — kein Build-Schritt, kein Mirror.
 
-APM liefert nur die 22 Skills. Für Workflows, Regeln, `oma-config.yaml`, Keyword-Detection-Hooks und das `oma agent:spawn`-CLI nimmst du `bunx oh-my-agent@latest`. Pro Projekt eine Distribution wählen, sonst läuft das auseinander.
+APM liefert nur die Skills. Für Workflows, Regeln, `oma-config.yaml`, Keyword-Detection-Hooks und das `oma agent:spawn`-CLI nimmst du `bunx oh-my-agent@latest`. Pro Projekt eine Distribution wählen, sonst läuft das auseinander.
 
 </details>
 
@@ -91,6 +84,7 @@ Wähl ein Preset und los geht's:
 | **oma-scholar** | Begleiter für akademische Forschung — Literaturrecherche, Peer-Review |
 | **oma-scm** | SCM (Software-Konfigurationsmanagement): Branching, Merges, Worktrees, Baselines; Conventional Commits |
 | **oma-search** | Intent-basierter Such-Router + Vertrauensbewertung — Docs, Web, Code, Lokal |
+| **oma-skill-creator** | OMA-Skills im SSL-lite-Format erstellen und prüfen |
 | **oma-tf-infra** | Multi-Cloud IaC mit Terraform (Infrastructure as Code) |
 | **oma-translator** | Natürliche mehrsprachige Übersetzung |
 

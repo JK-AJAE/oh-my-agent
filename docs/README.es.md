@@ -10,13 +10,6 @@ En vez de que una sola IA haga todo (y se pierda a mitad de camino), oh-my-agent
 
 Funciona con todos los IDEs de IA principales: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode y más.
 
-Los subagentes nativos del proveedor se generan desde `.agents/agents/`:
-- Claude Code usa `.claude/agents/*.md`
-- Codex CLI usa `.codex/agents/*.toml`
-- Gemini CLI usa `.gemini/agents/*.md`
-
-Cuando un workflow resuelve un agente al mismo proveedor que el runtime actual, debe usar primero la ruta de subagente nativo de ese proveedor. Las tareas entre proveedores recurren a `oma agent:spawn`.
-
 ## Inicio Rápido
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > No lo confundas con el APM (Application Performance Monitoring) de `oma-observability`.
 
 ```bash
-# 22 skills, desplegados en cada runtime detectado
+# Todos los skills, desplegados en cada runtime detectado
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM lee el puntero `skills: .agents/skills/` de `.claude-plugin/plugin.json`, así que el SSOT en `.agents/` es la única fuente — sin paso de build ni mirror.
 
-APM solo trae los 22 skills. Para workflows, reglas, `oma-config.yaml`, hooks de detección de palabras clave y el CLI `oma agent:spawn`, usa `bunx oh-my-agent@latest`. Elige una sola forma de distribución por proyecto para no acabar con todo desincronizado.
+APM solo trae los skills. Para workflows, reglas, `oma-config.yaml`, hooks de detección de palabras clave y el CLI `oma agent:spawn`, usa `bunx oh-my-agent@latest`. Elige una sola forma de distribución por proyecto para no acabar con todo desincronizado.
 
 </details>
 
@@ -91,6 +84,7 @@ Elige un preset y listo:
 | **oma-scholar** | Compañero de investigación académica — búsqueda bibliográfica, revisión por pares |
 | **oma-scm** | SCM (gestión de configuración del software): ramas, fusiones, worktrees, líneas base; Conventional Commits |
 | **oma-search** | Router de búsqueda basado en intención + puntuación de confianza — docs, web, código, local |
+| **oma-skill-creator** | Crea y audita skills OMA en formato SSL-lite |
 | **oma-tf-infra** | IaC multi-cloud con Terraform (Infrastructure as Code) |
 | **oma-translator** | Traducción multilingüe natural |
 

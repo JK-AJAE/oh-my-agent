@@ -10,13 +10,6 @@ AI 하나에 모든 걸 맡기면 중간에 헤매기 쉽지만, oh-my-agent는 
 
 주요 AI IDE를 모두 지원합니다: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode 등.
 
-벤더 네이티브 서브에이전트는 `.agents/agents/`에서 생성됩니다.
-- Claude Code는 `.claude/agents/*.md` 사용
-- Codex CLI는 `.codex/agents/*.toml` 사용
-- Gemini CLI는 `.gemini/agents/*.md` 사용
-
-워크플로우가 현재 런타임과 같은 벤더의 에이전트를 실행할 때는 해당 벤더의 네이티브 서브에이전트 경로를 먼저 씁니다. 벤더가 다르면 `oma agent:spawn`으로 대체합니다.
-
 ## 빠른 시작
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > `oma-observability`의 APM(Application Performance Monitoring)과는 다릅니다.
 
 ```bash
-# 22개 스킬을 감지된 모든 런타임에 배포
+# 스킬 전체를 감지된 모든 런타임에 배포
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM은 `.claude-plugin/plugin.json`의 `skills: .agents/skills/` 포인터를 읽으므로, `.agents/` SSOT가 유일한 소스입니다(빌드 단계나 미러 없음).
 
-APM은 스킬 22개만 제공합니다. 워크플로우, 규칙, `oma-config.yaml`, 키워드 감지 훅, `oma agent:spawn` CLI는 `bunx oh-my-agent@latest`를 쓰세요. 드리프트를 피하려면 프로젝트당 한 가지 배포 방식만 고르는 게 좋습니다.
+APM은 스킬만 제공합니다. 워크플로우, 규칙, `oma-config.yaml`, 키워드 감지 훅, `oma agent:spawn` CLI는 `bunx oh-my-agent@latest`를 쓰세요. 드리프트를 피하려면 프로젝트당 한 가지 배포 방식만 고르는 게 좋습니다.
 
 </details>
 
@@ -91,6 +84,7 @@ APM은 스킬 22개만 제공합니다. 워크플로우, 규칙, `oma-config.yam
 | **oma-scholar** | 학술 연구 동반자 — 문헌 검색, 동료 평가 |
 | **oma-scm** | 형상관리(SCM)와 Git: 브랜치·머지·워크트리·베이스라인, Conventional Commits |
 | **oma-search** | 의도 기반 검색 라우터와 신뢰 점수 (문서, 웹, 코드, 로컬) |
+| **oma-skill-creator** | OMA 스킬을 SSL-lite 포맷으로 작성하고 검증 |
 | **oma-tf-infra** | 멀티 클라우드 Terraform IaC (Infrastructure as Code) |
 | **oma-translator** | 자연스러운 다국어 번역 |
 

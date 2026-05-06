@@ -10,13 +10,6 @@ AIアシスタントに同僚がいたらいいのに、って思ったことあ
 
 主要なAI IDEすべてに対応: Antigravity、Claude Code、Cursor、Gemini CLI、Codex CLI、OpenCodeなど。
 
-ベンダーネイティブのサブエージェントは `.agents/agents/` から生成されます。
-- Claude Code は `.claude/agents/*.md` を使用
-- Codex CLI は `.codex/agents/*.toml` を使用
-- Gemini CLI は `.gemini/agents/*.md` を使用
-
-ワークフローが現在のランタイムと同じベンダーのエージェントを解決するときは、そのベンダーのネイティブサブエージェントパスを優先します。ベンダーが異なる場合は `oma agent:spawn` にフォールバックします。
-
 ## クイックスタート
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > `oma-observability` の APM（Application Performance Monitoring）とは別物です。
 
 ```bash
-# 22 個のスキルを検出されたすべてのランタイムに展開
+# 全スキルを検出されたすべてのランタイムに展開
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM は `.claude-plugin/plugin.json` の `skills: .agents/skills/` ポインタを読み込むので、`.agents/` SSOT が唯一のソースになります（ビルドステップもミラーも不要）。
 
-APM が配るのはスキル 22 個だけです。ワークフロー、ルール、`oma-config.yaml`、キーワード検出フック、`oma agent:spawn` CLI には `bunx oh-my-agent@latest` を使ってください。プロジェクトごとに配布方式は 1 つに絞り、ずれが出ないようにしましょう。
+APM が配るのはスキル一式だけです。ワークフロー、ルール、`oma-config.yaml`、キーワード検出フック、`oma agent:spawn` CLI には `bunx oh-my-agent@latest` を使ってください。プロジェクトごとに配布方式は 1 つに絞り、ずれが出ないようにしましょう。
 
 </details>
 
@@ -91,6 +84,7 @@ APM が配るのはスキル 22 個だけです。ワークフロー、ルール
 | **oma-scholar** | 学術研究のコンパニオン — 文献検索、ピアレビュー |
 | **oma-scm** | SCM（ソフトウェア構成管理）: ブランチ、マージ、ワークツリー、ベースライン、Conventional Commits |
 | **oma-search** | インテント型検索ルーター＋信頼スコア（ドキュメント、ウェブ、コード、ローカル） |
+| **oma-skill-creator** | OMA スキルを SSL-lite フォーマットで作成・監査 |
 | **oma-tf-infra** | マルチクラウド Terraform IaC（Infrastructure as Code） |
 | **oma-translator** | 自然な多言語翻訳 |
 

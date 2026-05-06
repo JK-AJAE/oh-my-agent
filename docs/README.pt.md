@@ -10,13 +10,6 @@ Em vez de uma unica IA fazendo tudo (e se perdendo no meio do caminho), o oh-my-
 
 Funciona com todas as principais IDEs de IA: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode e mais.
 
-Subagentes nativos de vendor são gerados a partir de `.agents/agents/`:
-- Claude Code usa `.claude/agents/*.md`
-- Codex CLI usa `.codex/agents/*.toml`
-- Gemini CLI usa `.gemini/agents/*.md`
-
-Quando um workflow resolve um agente para o mesmo vendor do runtime atual, ele deve usar primeiro o caminho de subagente nativo daquele vendor. Tarefas cross-vendor caem de volta para `oma agent:spawn`.
-
 ## Inicio Rapido
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > Nao confunda com o APM (Application Performance Monitoring) do `oma-observability`.
 
 ```bash
-# 22 skills, instalados em cada runtime detectado
+# Todos os skills, instalados em cada runtime detectado
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 O APM le o ponteiro `skills: .agents/skills/` do `.claude-plugin/plugin.json`, entao o SSOT em `.agents/` e a unica fonte — sem etapa de build, sem mirror.
 
-O APM so entrega os 22 skills. Para workflows, regras, `oma-config.yaml`, hooks de deteccao de palavras-chave e a CLI `oma agent:spawn`, use `bunx oh-my-agent@latest`. Escolha so um modo de distribuicao por projeto, senao acaba dando ruim.
+O APM so entrega os skills. Para workflows, regras, `oma-config.yaml`, hooks de deteccao de palavras-chave e a CLI `oma agent:spawn`, use `bunx oh-my-agent@latest`. Escolha so um modo de distribuicao por projeto, senao acaba dando ruim.
 
 </details>
 
@@ -91,6 +84,7 @@ Escolha um preset e pronto:
 | **oma-scholar** | Companheiro de pesquisa acadêmica — busca bibliográfica, revisão por pares |
 | **oma-scm** | SCM (gestão de configuração de software): branches, merges, worktrees, baselines; Conventional Commits |
 | **oma-search** | Roteador de busca baseado em intenção + pontuação de confiança — docs, web, código, local |
+| **oma-skill-creator** | Cria e audita skills OMA no formato SSL-lite |
 | **oma-tf-infra** | IaC multi-cloud com Terraform (Infrastructure as Code) |
 | **oma-translator** | Traducao multilingual natural |
 

@@ -10,13 +10,6 @@
 
 ตอนนี้ใช้งานได้กับ AI IDE ชั้นนำทั้งหมดได้แก่: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode และอื่นๆ
 
-Sub-agent แบบ vendor-native ถูกสร้างขึ้นจาก `.agents/agents/`:
-- Claude Code ใช้ `.claude/agents/*.md`
-- Codex CLI ใช้ `.codex/agents/*.toml`
-- Gemini CLI ใช้ `.gemini/agents/*.md`
-
-เมื่อ workflow แก้ไข agent ไปยัง vendor เดียวกับ runtime ปัจจุบัน ระบบจะใช้ path ของ native sub-agent ของ vendor นั้นก่อน งานข้าม vendor จะถอยไปใช้ `oma agent:spawn`
-
 ## Quick Start
 
 ```bash
@@ -42,7 +35,7 @@ bunx oh-my-agent@latest
 > อย่าสับสนกับ APM (Application Performance Monitoring) ของ `oma-observability`
 
 ```bash
-# 22 skills ติดตั้งลงทุก runtime ที่ตรวจพบ
+# ทุก skill ติดตั้งลงทุก runtime ที่ตรวจพบ
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
 apm install first-fluke/oh-my-agent
 
@@ -52,7 +45,7 @@ apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 
 APM อ่าน pointer `skills: .agents/skills/` จาก `.claude-plugin/plugin.json` ดังนั้น `.agents/` SSOT จึงเป็นต้นทางเดียว — ไม่ต้อง build เพิ่ม และไม่ต้อง mirror
 
-APM แจกแค่ 22 skill เท่านั้น ส่วน workflow, rules, `oma-config.yaml`, hook สำหรับตรวจจับคำสำคัญ และ CLI `oma agent:spawn` ให้ใช้ `bunx oh-my-agent@latest` แทน เลือกใช้แค่วิธีเดียวต่อโปรเจกต์ จะได้ไม่ตีกัน
+APM แจกแค่ skill เท่านั้น ส่วน workflow, rules, `oma-config.yaml`, hook สำหรับตรวจจับคำสำคัญ และ CLI `oma agent:spawn` ให้ใช้ `bunx oh-my-agent@latest` แทน เลือกใช้แค่วิธีเดียวต่อโปรเจกต์ จะได้ไม่ตีกัน
 
 </details>
 
@@ -91,6 +84,7 @@ APM แจกแค่ 22 skill เท่านั้น ส่วน workflow, 
 | **oma-scholar** | เพื่อนร่วมวิจัยเชิงวิชาการ — ค้นหาวรรณกรรม, ทบทวนโดยเพื่อนร่วมงาน |
 | **oma-scm** | การจัดการโครงสร้างซอฟต์แวร์ (SCM): แตกกิ่ง (branching), รวมโค้ด (merges), worktrees; รองรับ Conventional Commits |
 | **oma-search** | เราเตอร์ค้นหาตามเจตนา + คะแนนความน่าเชื่อถือ — เอกสาร, เว็บ, โค้ด, โลคัล |
+| **oma-skill-creator** | เขียนและตรวจสอบ OMA skill ในรูปแบบ SSL-lite |
 | **oma-tf-infra** | Multi-cloud Terraform IaC (Infrastructure as Code) |
 | **oma-translator** | การแปลภาษาหลากหลายภาษาอย่างเป็นธรรมชาติ |
 
