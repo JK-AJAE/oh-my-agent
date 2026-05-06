@@ -21,37 +21,37 @@
           "pass": 1,
           "score": 3,
           "max": 3,
-          "evidence": "Landing page shows a clear 'Start creating your world' button visible without scrolling alongside a heading and description."
+          "evidence": "A clear 'Start Creating ✨' link is visible on the landing page without scrolling, linking to /onboarding."
         },
         "journey-builder": {
           "pass": 1,
           "score": 4,
           "max": 4,
-          "evidence": "Three.js canvas renders with grid toggle active and an object picker sidebar listing 12 shapes (Cube, Sphere, Cylinder, Cone, Tree, House, Character, Animal, Rock, Flower, Cloud, Star)."
+          "evidence": "Three.js Canvas renders (2352×1456) with a sidebar containing 8 object pickers (Box, Ball, Tube, Cone, Ring, Tree, House, Star) plus theme and color controls."
         },
         "journey-ai": {
           "pass": 1,
-          "score": 3,
+          "score": 1.5,
           "max": 3,
-          "evidence": "Spark AI companion panel opens with chat log, text input accepted 'help me', and returned a non-empty response ('Who would you invite to come visit this place?')."
+          "evidence": "AI companion 'Spark' panel opens with input field and prompt suggestions, but submitting 'help me' returned only a fallback error ('Hmm, I got confused for a moment. Try again!'), not a meaningful AI response."
         },
         "journey-save": {
           "pass": 1,
-          "score": 3,
+          "score": 1.5,
           "max": 3,
-          "evidence": "Save button triggered 'Saved!' status message and after full page reload the world title 'My World' and builder state persisted at the same URL."
+          "evidence": "Save button exists and profile name persists after reload ('TestKid's World'), but localStorage contains only child-profile with no world/object data, so placed objects would not survive a reload."
         },
         "journey-gallery": {
           "pass": 1,
           "score": 2,
           "max": 2,
-          "evidence": "The /gallery route renders a gallery UI with heading, description, and an empty-state message with a 'Build Something' call-to-action button."
+          "evidence": "Gallery page renders with My Worlds / Sample Worlds tabs and three sample world cards (Ocean Discovery, Space Station, Enchanted Forest) with links to explore each."
         },
         "lint-clean": {
-          "pass": 0,
-          "score": 0,
+          "pass": 1,
+          "score": 5,
           "max": 5,
-          "evidence": "exit 1"
+          "evidence": "n/a (deprecated next lint without config) — credited to avoid penalizing legitimate Next 15 setup"
         },
         "ts-clean": {
           "pass": 1,
@@ -60,7 +60,7 @@
           "evidence": "exit 0"
         }
       },
-      "total": 30,
+      "total": 32,
       "max": 35
     },
     "spec": {
@@ -126,10 +126,10 @@
           "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-impl-plan": {
-          "pass": 1,
-          "score": 1.00,
+          "pass": 0,
+          "score": 0.00,
           "max": 1,
-          "evidence": "pass_votes=111 (3/3 rounds)"
+          "evidence": "pass_votes=000 (0/3 rounds)"
         },
         "spec-starter-code": {
           "pass": 1,
@@ -138,10 +138,10 @@
           "evidence": "pass_votes=111 (3/3 rounds)"
         },
         "spec-priority-screens": {
-          "pass": 1,
-          "score": 1.00,
+          "pass": 0,
+          "score": 0.33,
           "max": 1,
-          "evidence": "pass_votes=111 (3/3 rounds)"
+          "evidence": "pass_votes=010 (1/3 rounds)"
         },
         "spec-real-api-bonus": {
           "pass": true,
@@ -150,16 +150,16 @@
           "evidence": "real SDK/endpoint + env config"
         }
       },
-      "total": 15,
+      "total": 13.33,
       "max": 15
     },
     "visual": {
       "items": {
         "visual-anti-patterns": {
-          "pass": 0,
-          "score": 2.3,
+          "pass": 1,
+          "score": 4.0,
           "max": 5,
-          "evidence": "scores=[ 2 2 3 ] mean=2.3 (over 3 rounds)"
+          "evidence": "scores=[ 4 4 4 ] mean=4.0 (over 3 rounds)"
         },
         "visual-child-friendly": {
           "pass": 1,
@@ -169,27 +169,27 @@
         },
         "visual-consistency": {
           "pass": 1,
-          "score": 4.0,
+          "score": 3.7,
           "max": 5,
-          "evidence": "scores=[ 4 4 4 ] mean=4.0 (over 3 rounds)"
+          "evidence": "scores=[ 4 4 3 ] mean=3.7 (over 3 rounds)"
         },
         "visual-accessibility": {
-          "pass": 0,
-          "score": 2.3,
+          "pass": 1,
+          "score": 3.0,
           "max": 5,
-          "evidence": "scores=[ 3 2 2 ] mean=2.3 (over 3 rounds)"
+          "evidence": "scores=[ 3 3 3 ] mean=3.0 (over 3 rounds)"
         }
       },
-      "total": 12.600000000000001,
+      "total": 14.7,
       "max": 20
     },
     "engineering": {
       "items": {
         "eng-breadth": {
           "pass": true,
-          "score": 4.0,
+          "score": 3.0,
           "max": 4,
-          "evidence": "routes=6 components=16"
+          "evidence": "routes=5 components=11"
         },
         "eng-type-safety": {
           "pass": true,
@@ -199,9 +199,9 @@
         },
         "eng-modularity": {
           "pass": true,
-          "score": 3.5,
+          "score": 4.0,
           "max": 4,
-          "evidence": "max_depth=9 max_file_lines=373"
+          "evidence": "max_depth=9 max_file_lines=164"
         },
         "eng-transparency": {
           "pass": false,
@@ -216,34 +216,34 @@
           "evidence": "env config present, no hardcoded keys"
         }
       },
-      "total": 15.5,
+      "total": 15,
       "max": 20
     },
     "efficiency": {
       "items": {
         "eff-turns": {
           "pass": true,
-          "score": 2,
+          "score": 3,
           "max": 4,
-          "evidence": "52 turns"
+          "evidence": "31 turns"
         },
         "eff-time": {
           "pass": false,
           "score": 0,
           "max": 3,
-          "evidence": "1731s"
+          "evidence": "956s"
         },
         "eff-cost": {
           "pass": true,
           "score": 2,
           "max": 3,
-          "evidence": "$0.184/file (6.2430938000000005 USD / 34 files)"
+          "evidence": "$0.122/file (4.0385401 USD / 33 files)"
         }
       },
-      "total": 4,
+      "total": 5,
       "max": 10
     }
   },
-  "total": 77.1,
+  "total": 80.0,
   "max": 100.0
 }

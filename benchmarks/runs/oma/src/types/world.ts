@@ -1,60 +1,48 @@
-export type ObjectType =
-  | 'cube'
-  | 'sphere'
-  | 'cylinder'
-  | 'cone'
-  | 'tree'
-  | 'house'
-  | 'character'
-  | 'animal'
-  | 'rock'
-  | 'flower'
-  | 'cloud'
-  | 'star';
+export interface Position {
+  x: number;
+  y: number;
+  z: number;
+}
 
-export type EnvironmentTheme =
-  | 'meadow'
-  | 'ocean'
-  | 'space'
-  | 'forest'
-  | 'desert'
-  | 'arctic'
-  | 'city'
-  | 'candy';
+export interface Rotation {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface Scale {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export type ObjectShape =
+  | "box"
+  | "sphere"
+  | "cylinder"
+  | "cone"
+  | "torus"
+  | "tree"
+  | "house"
+  | "star";
 
 export interface WorldObject {
   id: string;
-  type: ObjectType;
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
+  shape: ObjectShape;
+  label: string;
+  position: Position;
+  rotation: Rotation;
+  scale: Scale;
   color: string;
-  name?: string;
 }
 
-export interface World {
-  id: string;
-  userId: string;
-  title: string;
-  description: string;
-  environmentTheme: EnvironmentTheme;
+export interface Environment {
+  theme: string;
+  skyColor: string;
+  groundColor: string;
+}
+
+export interface WorldState {
   objects: WorldObject[];
-  cameraPosition: [number, number, number];
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AIMessage {
-  id: string;
-  role: 'assistant' | 'user';
-  content: string;
-  timestamp: string;
-  type?: 'prompt' | 'suggestion' | 'reflection' | 'celebration';
-}
-
-export interface User {
-  id: string;
-  displayName: string;
-  avatarEmoji: string;
+  environment: Environment;
 }

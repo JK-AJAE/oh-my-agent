@@ -1,9 +1,9 @@
 {
   "harness": "oma",
   "items": {
-    "visual-anti-patterns":  { "score": 2, "max": 5, "notes": "Purple-to-blue gradient background on landing page, floating gradient orbs/blobs on landing page (purple, blue, green circles), footer and gallery subtitle text appears smaller than 16px" },
-    "visual-child-friendly": { "score": 4, "max": 5, "notes": "Large tappable emoji-based object buttons, playful tone in Spark chat, low text density, friendly CTAs, toolbar icons all have text labels; minor deduction for AI chat text density" },
-    "visual-consistency":    { "score": 4, "max": 5, "notes": "Consistent purple accent, pill-shaped buttons, toolbar design, and type hierarchy across pages; slight drift between landing gradient background and builder/gallery backgrounds" },
-    "visual-accessibility":  { "score": 2, "max": 5, "notes": "Clear text labels on all toolbar and object icons; some gray subtitle text on white/light backgrounds appears below 4.5:1 contrast; no visible focus rings; responsiveness not confirmable from screenshots" }
+    "visual-anti-patterns":  { "score": 4, "max": 5, "notes": "One anti-pattern: feature card descriptions on landing and builder labels appear smaller than 16px" },
+    "visual-child-friendly": { "score": 4, "max": 5, "notes": "Large tappable object buttons with emoji icons, minimal text density, playful tone; slight deduction for text-only theme selector buttons that could be more pictorial for young children" },
+    "visual-consistency":    { "score": 4, "max": 5, "notes": "Consistent purple accent, rounded corners, sans-serif type ramp, and light backgrounds across all pages; minor drift between gallery card gradient previews and landing page flat white cards" },
+    "visual-accessibility":  { "score": 3, "max": 5, "notes": "Good dark-on-light contrast and text labels on most buttons; no visible keyboard focus rings, AI send button is icon-only without label, some placeholder text is low contrast" }
   }
 }

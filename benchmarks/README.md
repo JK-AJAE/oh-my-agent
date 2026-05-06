@@ -21,7 +21,7 @@ ANTHROPIC_API_KEY not set — OAuth via the user's logged-in `claude` CLI.
 
 | Rank | Harness | **Total** | Func/35 | Spec/15 | Visual/20 | Eng/20 | Eff/10 |
 |---|---|---|---|---|---|---|---|
-| 🥇 1 | **oma** | **77.1** | 30 | 15 | 12.6 | 15.5 | 4 |
+| 🥇 1 | **oma** | **80** | 32 | 13.3 | 14.7 | 15 | 5 |
 | 🥈 2 | omc | 74.1 | 33.5 | 6.7 | 14.4 | 14.5 | 5 |
 | 🥉 3 | superpowers | 72.9 | 30 | 9.3 | 11.6 | 14 | 8 |
 | 4 | vanilla | 70.7 | 28.5 | 11.7 | 12 | 12.5 | 6 |
@@ -32,7 +32,7 @@ ANTHROPIC_API_KEY not set — OAuth via the user's logged-in `claude` CLI.
 | Harness | Turns | Duration | Cost | Files (src) | Cost / file |
 |---|---|---|---|---|---|
 | vanilla | 42 | 8m 56s | $2.37 | 16 | $0.15 |
-| oma | 52 | 28m 51s | $6.24 | 27 | $0.23 |
+| oma | 31 | 15m 56s | $4.04 | 21 | $0.19 |
 | omc | 61 | 9m 02s | $1.92 | 14 | $0.14 |
 | ecc | 79 | 10m 20s | $3.84 | 22 | $0.17 |
 | superpowers | 39 | 8m 13s | $1.28 | 18 | $0.07 |
@@ -80,13 +80,13 @@ ANTHROPIC_API_KEY not set — OAuth via the user's logged-in `claude` CLI.
 ## Per-harness narrative
 
 
-### 🥇 oma (77.1)
+### 🥇 oma (80)
 
-- **Functional 30/35** — lint -5 (real eslint errors caught at scoring time; oma defers lint enforcement to pre-commit/pre-push hooks — see caveat #4).
-- **Spec 15/15** — passed: `product-concept,personas,journeys,feature-list,ia,ui-direction,tech-arch,db-schema,ai-prompts,safety,impl-plan,starter-code,priority-screens`. real-api bonus 2/2.
-- **Visual 12.6/20** — anti-patterns 2.3/5 (scores=[ 2 2 3 ] mean=2.3 (over 3 rounds)…); accessibility 2.3/5.
-- **Engineering 15.5/20** — breadth: routes=6 components=16. type: strict=true any_count=0. modularity: max_depth=9 max_file_lines=373. transparency markers: 0/4. env: env config present, no hardcoded keys.
-- **Efficiency 4/10** — 52 turns / 28m 51s / $6.24 total ($0.39/file estimated).
+- **Functional 32/35** — save-reload only 1.5/3.
+- **Spec 13.3/15** — passed: `product-concept,personas,journeys,feature-list,ia,ui-direction,tech-arch,db-schema,ai-prompts,safety,starter-code,priority-screens`. failed: `impl-plan`. real-api bonus 2/2.
+- **Visual 14.7/20** — anti-patterns 4/5 (scores=[ 4 4 4 ] mean=4.0 (over 3 rounds)…); accessibility 3/5.
+- **Engineering 15/20** — breadth: routes=5 components=11. type: strict=true any_count=0. modularity: max_depth=9 max_file_lines=164. transparency markers: 0/4. env: env config present, no hardcoded keys.
+- **Efficiency 5/10** — 31 turns / 15m 56s / $4.04 total ($0.37/file estimated).
 
 ### 🥈 omc (74.1)
 

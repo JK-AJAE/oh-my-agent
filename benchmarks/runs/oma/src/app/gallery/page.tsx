@@ -1,110 +1,78 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
-import { ArrowLeft, Eye, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { EmojiAvatar } from '@/components/ui/emoji-avatar';
-import { listWorlds } from '@/lib/storage';
-import type { World } from '@/types/world';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useChildStore } from "@/stores/child-store";
+import { GalleryGrid } from "@/features/gallery/components/gallery-grid";
 
-const THEME_COLORS: Record<string, string> = {
-  meadow: 'bg-green-200',
-  ocean: 'bg-blue-200',
-  space: 'bg-indigo-200',
-  forest: 'bg-emerald-200',
-  desert: 'bg-amber-200',
-  arctic: 'bg-cyan-100',
-  city: 'bg-slate-200',
-  candy: 'bg-pink-200',
-};
+interface ProjectItem {
+  id: string;
+  title: string;
+  createdAt: string;
+  isSample?: boolean;
+}
 
 export default function GalleryPage() {
-  const router = useRouter();
-  const [worlds, setWorlds] = useState<World[]>([]);
+  const profile = useChildStore((s) => s.profile);
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [tab, setTab] = useState<"mine" | "samples">("mine");
 
   useEffect(() => {
-    const all = listWorlds();
-    setWorlds(all.filter((w) => w.isPublic));
-  }, []);
+    async function load() {
+      const params =
+        tab === "mine" && profile ? `?childId=${profile.id}` : "";
+      const res = await fetch(`/api/projects${params}`);
+      const data = await res.json();
+      setProjects(data);
+    }
+    load();
+  }, [tab, profile]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-sky-50 p-6">
-      <header className="mx-auto mb-8 flex max-w-5xl items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-3xl font-bold text-purple-900">Gallery</h1>
-        <p className="ml-auto text-sm text-gray-500">
-          Explore worlds created by others
-        </p>
+    <main className="min-h-screen bg-[var(--color-bg)]">
+      <header className="bg-[var(--color-surface)] border-b border-gray-200 px-4 py-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-xl font-bold text-[var(--color-primary)]">
+              🌍
+            </Link>
+            <h1 className="text-lg font-bold">Gallery</h1>
+          </div>
+          <Link
+            href="/builder"
+            className="px-4 py-2 text-sm font-bold text-white bg-[var(--color-primary)] rounded-full hover:scale-105 transition-transform"
+          >
+            + New World
+          </Link>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-5xl">
-        {worlds.length === 0 ? (
-          <div className="py-20 text-center">
-            <p className="text-6xl">🌍</p>
-            <h2 className="mt-4 text-xl font-bold text-gray-700">
-              No shared worlds yet
-            </h2>
-            <p className="mt-2 text-gray-500">
-              Be the first to share your creation with the world!
-            </p>
-            <Button
-              variant="primary"
-              size="lg"
-              className="mt-6"
-              onClick={() => router.push('/dashboard')}
-            >
-              Build Something
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {worlds.map((world, i) => (
-              <motion.div
-                key={world.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Card
-                  variant="interactive"
-                  className="cursor-pointer overflow-hidden"
-                  onClick={() => router.push(`/play/${world.id}`)}
-                >
-                  <div
-                    className={`h-32 ${THEME_COLORS[world.environmentTheme] ?? 'bg-gray-200'} flex items-center justify-center`}
-                  >
-                    <span className="text-4xl opacity-60">
-                      {world.objects.length > 0 ? '🌎' : '🏗️'}
-                    </span>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="truncate text-lg font-bold text-gray-800">
-                      {world.title || 'Untitled World'}
-                    </h3>
-                    <div className="mt-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <EmojiAvatar emoji="🌟" size="sm" />
-                        <span className="text-sm text-gray-500">
-                          {world.objects.length} objects
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-gray-400">
-                        <Eye className="h-4 w-4" />
-                        <Heart className="h-4 w-4" />
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setTab("mine")}
+            className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+              tab === "mine"
+                ? "bg-[var(--color-primary)] text-white"
+                : "bg-gray-100 text-[var(--color-text-muted)] hover:bg-gray-200"
+            }`}
+          >
+            My Worlds
+          </button>
+          <button
+            onClick={() => setTab("samples")}
+            className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+              tab === "samples"
+                ? "bg-[var(--color-primary)] text-white"
+                : "bg-gray-100 text-[var(--color-text-muted)] hover:bg-gray-200"
+            }`}
+          >
+            Sample Worlds
+          </button>
+        </div>
+
+        <GalleryGrid projects={projects} />
+      </div>
+    </main>
   );
 }

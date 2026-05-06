@@ -1,7 +1,7 @@
 {
-  "journey-onboard":  {"score": 3, "max": 3, "evidence": "Landing page shows a clear 'Start creating your world' button visible without scrolling alongside a heading and description."},
-  "journey-builder":  {"score": 4, "max": 4, "evidence": "Three.js canvas renders with grid toggle active and an object picker sidebar listing 12 shapes (Cube, Sphere, Cylinder, Cone, Tree, House, Character, Animal, Rock, Flower, Cloud, Star)."},
-  "journey-ai":       {"score": 3, "max": 3, "evidence": "Spark AI companion panel opens with chat log, text input accepted 'help me', and returned a non-empty response ('Who would you invite to come visit this place?')."},
-  "journey-save":     {"score": 3, "max": 3, "evidence": "Save button triggered 'Saved!' status message and after full page reload the world title 'My World' and builder state persisted at the same URL."},
-  "journey-gallery":  {"score": 2, "max": 2, "evidence": "The /gallery route renders a gallery UI with heading, description, and an empty-state message with a 'Build Something' call-to-action button."}
+  "journey-onboard":  {"score": 3,   "max": 3, "evidence": "A clear 'Start Creating ✨' link is visible on the landing page without scrolling, linking to /onboarding."},
+  "journey-builder":  {"score": 4,   "max": 4, "evidence": "Three.js Canvas renders (2352×1456) with a sidebar containing 8 object pickers (Box, Ball, Tube, Cone, Ring, Tree, House, Star) plus theme and color controls."},
+  "journey-ai":       {"score": 1.5, "max": 3, "evidence": "AI companion 'Spark' panel opens with input field and prompt suggestions, but submitting 'help me' returned only a fallback error ('Hmm, I got confused for a moment. Try again!'), not a meaningful AI response."},
+  "journey-save":     {"score": 1.5, "max": 3, "evidence": "Save button exists and profile name persists after reload ('TestKid's World'), but localStorage contains only child-profile with no world/object data, so placed objects would not survive a reload."},
+  "journey-gallery":  {"score": 2,   "max": 2, "evidence": "Gallery page renders with My Worlds / Sample Worlds tabs and three sample world cards (Ocean Discovery, Space Station, Enchanted Forest) with links to explore each."}
 }

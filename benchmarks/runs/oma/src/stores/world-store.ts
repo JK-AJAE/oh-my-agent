@@ -1,202 +1,66 @@
-import { create } from 'zustand';
-import { nanoid } from 'nanoid';
-import type { World, WorldObject, ObjectType, EnvironmentTheme } from '@/types/world';
+import { create } from "zustand";
+import type { WorldObject, Environment, WorldState } from "@/types/world";
 
-const MAX_UNDO_STACK = 20;
-
-const DEFAULT_COLORS: Record<ObjectType, string> = {
-  cube: '#4A90D9',
-  sphere: '#E74C3C',
-  cylinder: '#2ECC71',
-  cone: '#F39C12',
-  tree: '#27AE60',
-  house: '#E67E22',
-  character: '#9B59B6',
-  animal: '#F1C40F',
-  rock: '#95A5A6',
-  flower: '#E91E63',
-  cloud: '#ECF0F1',
-  star: '#FFD700',
+const DEFAULT_ENVIRONMENT: Environment = {
+  theme: "meadow",
+  skyColor: "#87CEEB",
+  groundColor: "#7CCD7C",
 };
 
-interface WorldState {
+interface WorldStore {
   objects: WorldObject[];
+  environment: Environment;
   selectedObjectId: string | null;
-  environmentTheme: EnvironmentTheme;
-  title: string;
-  undoStack: WorldObject[][];
-  redoStack: WorldObject[][];
-}
 
-interface WorldActions {
-  addObject: (type: ObjectType, position?: [number, number, number]) => void;
-  selectObject: (id: string | null) => void;
-  updateObject: (id: string, updates: Partial<Omit<WorldObject, 'id'>>) => void;
+  addObject: (obj: WorldObject) => void;
   removeObject: (id: string) => void;
-  moveObject: (id: string, position: [number, number, number]) => void;
-  rotateObject: (id: string, rotation: [number, number, number]) => void;
-  scaleObject: (id: string, scale: [number, number, number]) => void;
-  setEnvironment: (theme: EnvironmentTheme) => void;
-  setTitle: (title: string) => void;
-  undo: () => void;
-  redo: () => void;
-  loadWorld: (world: World) => void;
-  getWorldData: () => Omit<World, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
+  updateObject: (id: string, updates: Partial<WorldObject>) => void;
+  selectObject: (id: string | null) => void;
+  setEnvironment: (env: Environment) => void;
+  resetWorld: () => void;
+  loadWorld: (state: WorldState) => void;
+  getWorldState: () => WorldState;
 }
-
-type WorldStore = WorldState & WorldActions;
 
 export const useWorldStore = create<WorldStore>((set, get) => ({
   objects: [],
+  environment: DEFAULT_ENVIRONMENT,
   selectedObjectId: null,
-  environmentTheme: 'meadow',
-  title: 'My World',
-  undoStack: [],
-  redoStack: [],
 
-  addObject: (type, position = [0, 0, 0]) => {
-    set((state) => {
-      const snapshot = [...state.objects];
-      const undoStack = [...state.undoStack, snapshot].slice(-MAX_UNDO_STACK);
-      const newObject: WorldObject = {
-        id: nanoid(),
-        type,
-        position,
-        rotation: [0, 0, 0],
-        scale: [1, 1, 1],
-        color: DEFAULT_COLORS[type],
-      };
-      return {
-        objects: [...state.objects, newObject],
-        undoStack,
-        redoStack: [],
-      };
-    });
-  },
+  addObject: (obj) =>
+    set((state) => ({ objects: [...state.objects, obj] })),
 
-  selectObject: (id) => {
-    set({ selectedObjectId: id });
-  },
-
-  updateObject: (id, updates) => {
-    set((state) => {
-      const snapshot = [...state.objects];
-      const undoStack = [...state.undoStack, snapshot].slice(-MAX_UNDO_STACK);
-      return {
-        objects: state.objects.map((obj) =>
-          obj.id === id ? { ...obj, ...updates } : obj
-        ),
-        undoStack,
-        redoStack: [],
-      };
-    });
-  },
-
-  removeObject: (id) => {
-    set((state) => {
-      const snapshot = [...state.objects];
-      const undoStack = [...state.undoStack, snapshot].slice(-MAX_UNDO_STACK);
-      return {
-        objects: state.objects.filter((obj) => obj.id !== id),
-        selectedObjectId: state.selectedObjectId === id ? null : state.selectedObjectId,
-        undoStack,
-        redoStack: [],
-      };
-    });
-  },
-
-  moveObject: (id, position) => {
-    set((state) => {
-      const snapshot = [...state.objects];
-      const undoStack = [...state.undoStack, snapshot].slice(-MAX_UNDO_STACK);
-      return {
-        objects: state.objects.map((obj) =>
-          obj.id === id ? { ...obj, position } : obj
-        ),
-        undoStack,
-        redoStack: [],
-      };
-    });
-  },
-
-  rotateObject: (id, rotation) => {
-    set((state) => {
-      const snapshot = [...state.objects];
-      const undoStack = [...state.undoStack, snapshot].slice(-MAX_UNDO_STACK);
-      return {
-        objects: state.objects.map((obj) =>
-          obj.id === id ? { ...obj, rotation } : obj
-        ),
-        undoStack,
-        redoStack: [],
-      };
-    });
-  },
-
-  scaleObject: (id, scale) => {
-    set((state) => {
-      const snapshot = [...state.objects];
-      const undoStack = [...state.undoStack, snapshot].slice(-MAX_UNDO_STACK);
-      return {
-        objects: state.objects.map((obj) =>
-          obj.id === id ? { ...obj, scale } : obj
-        ),
-        undoStack,
-        redoStack: [],
-      };
-    });
-  },
-
-  setEnvironment: (theme) => {
-    set({ environmentTheme: theme });
-  },
-
-  setTitle: (title) => {
-    set({ title });
-  },
-
-  undo: () => {
-    const { undoStack, objects } = get();
-    if (undoStack.length === 0) return;
-    const previous = undoStack[undoStack.length - 1];
+  removeObject: (id) =>
     set((state) => ({
-      objects: previous,
-      undoStack: state.undoStack.slice(0, -1),
-      redoStack: [objects, ...state.redoStack].slice(0, MAX_UNDO_STACK),
-    }));
-  },
+      objects: state.objects.filter((o) => o.id !== id),
+      selectedObjectId: state.selectedObjectId === id ? null : state.selectedObjectId,
+    })),
 
-  redo: () => {
-    const { redoStack, objects } = get();
-    if (redoStack.length === 0) return;
-    const next = redoStack[0];
+  updateObject: (id, updates) =>
     set((state) => ({
-      objects: next,
-      redoStack: state.redoStack.slice(1),
-      undoStack: [...state.undoStack, objects].slice(-MAX_UNDO_STACK),
-    }));
-  },
+      objects: state.objects.map((o) => (o.id === id ? { ...o, ...updates } : o)),
+    })),
 
-  loadWorld: (world) => {
+  selectObject: (id) => set({ selectedObjectId: id }),
+
+  setEnvironment: (env) => set({ environment: env }),
+
+  resetWorld: () =>
     set({
-      objects: world.objects,
-      environmentTheme: world.environmentTheme,
-      title: world.title,
+      objects: [],
+      environment: DEFAULT_ENVIRONMENT,
       selectedObjectId: null,
-      undoStack: [],
-      redoStack: [],
-    });
-  },
+    }),
 
-  getWorldData: () => {
-    const { objects, environmentTheme, title } = get();
-    return {
-      title,
-      description: '',
-      environmentTheme,
-      objects,
-      cameraPosition: [0, 5, 10] as [number, number, number],
-      isPublic: false,
-    };
-  },
+  loadWorld: (state) =>
+    set({
+      objects: state.objects,
+      environment: state.environment,
+      selectedObjectId: null,
+    }),
+
+  getWorldState: () => ({
+    objects: get().objects,
+    environment: get().environment,
+  }),
 }));

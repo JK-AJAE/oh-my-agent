@@ -76,6 +76,34 @@ Accessibility checklist for interactive surfaces:
 
 ---
 
+## React 19 hook patterns
+
+```tsx
+// ✅ Derive in render — no state, no effect
+function ItemCount({ items }: { items: Item[] }) {
+  const count = items.length;
+  return <span>{count}</span>;
+}
+
+// ✅ Initialize once with a lazy initializer
+const [id] = useState(() => crypto.randomUUID());
+
+// ✅ Pass the ref OBJECT (not its current value) to children that need an instance.
+//   The child reads .current inside its own effect or event handler, never in render.
+function Selectable({ targetRef }: { targetRef: React.RefObject<THREE.Object3D> }) {
+  // ...
+}
+
+// ❌ Never: useEffect that calls setState to mirror props/state
+//    eslint: react-hooks/set-state-in-effect
+// useEffect(() => { setCount(items.length); }, [items]);
+
+// ❌ Never: gate JSX on ref.current — it is null on first render, and refs
+//    do not trigger re-renders when they attach
+//    eslint: react-hooks/refs
+// return ref.current ? <Child target={ref.current} /> : null;
+```
+
 ## TanStack Query Hook
 
 ```tsx

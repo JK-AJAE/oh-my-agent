@@ -1,253 +1,148 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { nanoid } from 'nanoid';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { useUserStore } from '@/stores/user-store';
-import { useWorldStore } from '@/stores/world-store';
-import { saveWorld } from '@/lib/storage';
-import type { EnvironmentTheme } from '@/types/world';
-
-const EMOJI_OPTIONS = ['🦊', '🐱', '🦁', '🐸', '🦋', '🌈', '🚀', '🌟', '🎨', '🎵', '🌺', '🐙'];
-
-interface ThemeOption {
-  theme: EnvironmentTheme;
-  emoji: string;
-  title: string;
-  desc: string;
-  borderColor: string;
-  bgColor: string;
-}
-
-const THEME_OPTIONS: ThemeOption[] = [
-  {
-    theme: 'meadow',
-    emoji: '🌿',
-    title: 'Magical Meadow',
-    desc: 'Peaceful fields full of flowers and friendly critters',
-    borderColor: 'border-green-400',
-    bgColor: 'hover:bg-green-50',
-  },
-  {
-    theme: 'ocean',
-    emoji: '🌊',
-    title: 'Ocean Kingdom',
-    desc: 'Dive into a sparkling underwater adventure',
-    borderColor: 'border-blue-400',
-    bgColor: 'hover:bg-blue-50',
-  },
-  {
-    theme: 'space',
-    emoji: '🚀',
-    title: 'Space Adventure',
-    desc: 'Launch rockets and explore the galaxy',
-    borderColor: 'border-violet-400',
-    bgColor: 'hover:bg-violet-50',
-  },
-  {
-    theme: 'candy',
-    emoji: '🍭',
-    title: 'Candy World',
-    desc: 'A sweet land made of lollipops and rainbows',
-    borderColor: 'border-pink-400',
-    bgColor: 'hover:bg-pink-50',
-  },
-];
-
-const slideVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? '60%' : '-60%', opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (dir: number) => ({ x: dir > 0 ? '-60%' : '60%', opacity: 0 }),
-};
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useChildStore } from "@/stores/child-store";
+import { AVATAR_OPTIONS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const prefersReducedMotion = useReducedMotion() ?? false;
-  const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const [name, setName] = useState('');
-  const [emoji, setEmoji] = useState('');
-  const [selectedTheme, setSelectedTheme] = useState<EnvironmentTheme | null>(null);
+  const setProfile = useChildStore((s) => s.setProfile);
+  const [name, setName] = useState("");
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { login } = useUserStore();
-  const { setEnvironment, getWorldData, setTitle } = useWorldStore();
+  const canContinue = name.trim().length > 0 && selectedAvatar !== null;
 
-  function goToStep2() {
-    setDirection(1);
-    setStep(1);
+  async function handleStart() {
+    if (!canContinue || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/children", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), avatarId: selectedAvatar }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error ?? "Something went wrong");
+      }
+
+      const child = (await res.json()) as { id: string; name: string; avatarId: string };
+
+      setProfile({ id: child.id, name: child.name, avatarId: child.avatarId });
+      router.push("/builder");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again!");
+      setIsSubmitting(false);
+    }
   }
-
-  function handleThemeSelect(theme: EnvironmentTheme) {
-    setSelectedTheme(theme);
-
-    const userId = nanoid();
-    const worldId = nanoid();
-
-    login(name.trim(), emoji);
-    setEnvironment(theme);
-    setTitle('My World');
-
-    const worldData = getWorldData();
-    const now = new Date().toISOString();
-    saveWorld(worldId, {
-      id: worldId,
-      userId,
-      ...worldData,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    router.push(`/builder/${worldId}`);
-  }
-
-  const canAdvance = name.trim().length > 0 && emoji !== '';
 
   return (
-    <main
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-10"
-      style={{ background: 'linear-gradient(160deg, #fefce8 0%, #f5f3ff 50%, #e0f2fe 100%)' }}
-    >
-      {/* Progress dots */}
-      <div className="flex gap-2 mb-10" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={2} aria-label={`Step ${step + 1} of 2`}>
-        {[0, 1].map((i) => (
-          <div
-            key={i}
-            className={`h-2.5 rounded-full transition-all duration-300 ${
-              i === step ? 'w-8 bg-primary-600' : i < step ? 'w-2.5 bg-primary-300' : 'w-2.5 bg-primary-200'
-            }`}
+    <main className="min-h-screen flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-8 text-center">
+        <header>
+          <h1 className="text-3xl font-bold mb-2">Welcome, Creator!</h1>
+          <p style={{ color: "var(--color-text-muted)" }}>Tell us a little about you</p>
+        </header>
+
+        {/* Name Input */}
+        <div className="space-y-2">
+          <label htmlFor="name" className="block text-left font-medium text-sm">
+            What should we call you?
+          </label>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name..."
+            maxLength={20}
+            autoComplete="given-name"
+            className="w-full px-4 py-3 text-lg rounded-xl border-2 border-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            style={
+              {
+                "--tw-ring-color": "var(--color-primary)",
+              } as React.CSSProperties
+            }
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--color-primary)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = name.trim() ? "var(--color-primary)" : "";
+            }}
+            aria-required="true"
           />
-        ))}
-      </div>
+        </div>
 
-      <div className="w-full max-w-lg overflow-hidden">
-        <AnimatePresence mode="wait" custom={direction}>
-          {step === 0 && (
-            <motion.div
-              key="step-1"
-              custom={direction}
-              variants={prefersReducedMotion ? {} : slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.35, ease: 'easeInOut' }}
-              className="flex flex-col items-center gap-8"
-            >
-              <div className="text-center">
-                <div className="text-5xl mb-3" aria-hidden="true">👋</div>
-                <h1 className="text-3xl sm:text-4xl font-black text-primary-800 mb-2">
-                  What should we call you?
-                </h1>
-              </div>
-
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name..."
-                maxLength={20}
-                aria-label="Your display name"
-                className="w-full rounded-2xl border-2 border-primary-200 bg-white/80 px-6 py-4 text-2xl font-bold text-primary-800 placeholder:text-primary-300 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all"
-              />
-
-              <div className="w-full">
-                <p className="text-center text-lg font-bold text-primary-700 mb-4">
-                  Pick your look!
-                </p>
-                <div
-                  role="radiogroup"
-                  aria-label="Choose an avatar emoji"
-                  className="grid grid-cols-6 gap-3"
-                >
-                  {EMOJI_OPTIONS.map((e) => (
-                    <button
-                      key={e}
-                      type="button"
-                      role="radio"
-                      aria-checked={emoji === e}
-                      onClick={() => setEmoji(e)}
-                      className={`h-14 w-14 rounded-full text-2xl flex items-center justify-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-300 focus-visible:ring-offset-2 cursor-pointer ${
-                        emoji === e
-                          ? 'ring-4 ring-primary-600 ring-offset-2 bg-primary-50 scale-110'
-                          : 'bg-white/80 hover:bg-primary-50 hover:scale-105'
-                      }`}
-                      aria-label={`Choose ${e} as your avatar`}
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <Button
-                size="lg"
-                variant="primary"
-                className="w-full"
-                disabled={!canAdvance}
-                onClick={goToStep2}
-                aria-label="Continue to choose your world theme"
-              >
-                Next
-              </Button>
-            </motion.div>
-          )}
-
-          {step === 1 && (
-            <motion.div
-              key="step-2"
-              custom={direction}
-              variants={prefersReducedMotion ? {} : slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.35, ease: 'easeInOut' }}
-              className="flex flex-col items-center gap-6"
-            >
-              <div className="text-center">
-                <div className="text-5xl mb-3" aria-hidden="true">🌍</div>
-                <h1 className="text-3xl sm:text-4xl font-black text-primary-800 mb-2">
-                  What do you want to build today?
-                </h1>
-              </div>
-
-              <div
-                role="radiogroup"
-                aria-label="Choose a world theme"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full"
-              >
-                {THEME_OPTIONS.map(({ theme, emoji: themeEmoji, title, desc, borderColor, bgColor }) => (
-                  <Card
-                    key={theme}
-                    variant="interactive"
-                    role="radio"
-                    aria-checked={selectedTheme === theme}
-                    onClick={() => handleThemeSelect(theme)}
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleThemeSelect(theme); }}
-                    className={`border-2 p-5 cursor-pointer transition-all duration-150 ${borderColor} ${bgColor} ${
-                      selectedTheme === theme ? 'ring-4 ring-primary-400 ring-offset-2' : ''
-                    }`}
-                    aria-label={`Choose ${title} theme`}
-                  >
-                    <div className="text-4xl mb-2" aria-hidden="true">{themeEmoji}</div>
-                    <p className="font-black text-lg text-primary-800">{title}</p>
-                    <p className="text-sm text-primary-600/80 mt-1">{desc}</p>
-                  </Card>
-                ))}
-              </div>
-
+        {/* Avatar Picker */}
+        <div className="space-y-2">
+          <p className="text-left font-medium text-sm" id="avatar-group-label">
+            Pick your avatar
+          </p>
+          <div
+            className="grid grid-cols-3 gap-3"
+            role="group"
+            aria-labelledby="avatar-group-label"
+          >
+            {AVATAR_OPTIONS.map((avatar) => (
               <button
+                key={avatar.id}
                 type="button"
-                onClick={() => { setDirection(-1); setStep(0); }}
-                className="text-primary-500 text-sm underline underline-offset-4 hover:text-primary-700 transition-colors"
+                onClick={() => setSelectedAvatar(avatar.id)}
+                aria-label={avatar.label}
+                aria-pressed={selectedAvatar === avatar.id}
+                className={cn(
+                  "p-4 text-3xl rounded-xl border-2 transition-all hover:scale-105",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  selectedAvatar === avatar.id
+                    ? "scale-105"
+                    : "border-gray-200 hover:border-gray-300"
+                )}
+                style={
+                  selectedAvatar === avatar.id
+                    ? ({
+                        borderColor: "var(--color-primary)",
+                        backgroundColor: "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+                      } as React.CSSProperties)
+                    : undefined
+                }
               >
-                Back
+                {avatar.emoji}
               </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            ))}
+          </div>
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <p role="alert" className="text-sm font-medium" style={{ color: "#E74C3C" }}>
+            {error}
+          </p>
+        )}
+
+        {/* Start Button */}
+        <button
+          type="button"
+          onClick={handleStart}
+          disabled={!canContinue || isSubmitting}
+          className="w-full py-4 text-lg font-bold text-white rounded-full disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 transition-transform shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2"
+          style={
+            {
+              backgroundColor: "var(--color-primary)",
+              "--tw-ring-color": "var(--color-primary)",
+            } as React.CSSProperties
+          }
+          aria-disabled={!canContinue || isSubmitting}
+        >
+          {isSubmitting ? "Getting ready..." : "Let's Build! 🚀"}
+        </button>
       </div>
     </main>
   );

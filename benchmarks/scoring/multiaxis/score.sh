@@ -373,10 +373,12 @@ fi
 log "=== AXIS 4: engineering ==="
 eng_json='{}'
 
-count_ts="$(find "$PROJECT_DIR/src" -type f \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null | wc -l | tr -d ' ')"
+# Exclude auto-generated source (Prisma 7+ emits .ts directly into src/generated)
+SRC_FIND_FLAGS=(-type f \( -name '*.ts' -o -name '*.tsx' \) ! -path '*/generated/*' ! -path '*/__generated__/*' ! -path '*/.prisma/*')
+count_ts="$(find "$PROJECT_DIR/src" "${SRC_FIND_FLAGS[@]}" 2>/dev/null | wc -l | tr -d ' ')"
 count_routes="$(find "$PROJECT_DIR/src/app" -type f -name 'page.tsx' 2>/dev/null | wc -l | tr -d ' ')"
-count_components="$(find "$PROJECT_DIR/src" -type d -name 'components' -exec find {} -type f \( -name '*.tsx' -o -name '*.ts' \) \; 2>/dev/null | wc -l | tr -d ' ')"
-count_lines="$(find "$PROJECT_DIR/src" -type f \( -name '*.ts' -o -name '*.tsx' \) -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')"
+count_components="$(find "$PROJECT_DIR/src" -type d -name 'components' ! -path '*/generated/*' -exec find {} -type f \( -name '*.tsx' -o -name '*.ts' \) ! -path '*/generated/*' \; 2>/dev/null | wc -l | tr -d ' ')"
+count_lines="$(find "$PROJECT_DIR/src" "${SRC_FIND_FLAGS[@]}" -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')"
 
 # 4a. eng-breadth — relative to a 6-route, 15-component baseline
 breadth_score=$(awk -v r="$count_routes" -v c="$count_components" 'BEGIN{
@@ -388,7 +390,7 @@ eng_json="$(echo "$eng_json" | jq --argjson m 4 --argjson s "$breadth_score" --a
 
 # 4b. eng-type-safety
 strict=$(jq -r '.compilerOptions.strict // false' "$PROJECT_DIR/tsconfig.json" 2>/dev/null)
-any_count=$(grep -rE ":\s*any\b|<any>" "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" 2>/dev/null | wc -l | tr -d ' ')
+any_count=$(grep -rE ":\s*any\b|<any>" "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" --exclude-dir=generated --exclude-dir=__generated__ --exclude-dir=.prisma 2>/dev/null | wc -l | tr -d ' ')
 ts_score=$(awk -v st="$strict" -v ac="$any_count" -v lines="$count_lines" 'BEGIN{
   base = (st=="true")?2:0
   if (lines==0){ printf "%.1f", base; exit }
@@ -399,8 +401,8 @@ ts_score=$(awk -v st="$strict" -v ac="$any_count" -v lines="$count_lines" 'BEGIN
 eng_json="$(echo "$eng_json" | jq --argjson m 4 --argjson s "$ts_score" --arg e "strict=$strict any_count=$any_count" '. + {"eng-type-safety": {pass: ($s>=2|tostring|test("true")), score:$s, max:$m, evidence:$e}}')"
 
 # 4c. eng-modularity — folder depth + max file size
-max_depth="$(find "$PROJECT_DIR/src" -type d 2>/dev/null | awk -F/ '{print NF-1}' | sort -n | tail -1)"
-max_file_lines="$(find "$PROJECT_DIR/src" -type f \( -name '*.ts' -o -name '*.tsx' \) -exec wc -l {} + 2>/dev/null | sort -n | tail -2 | head -1 | awk '{print $1}')"
+max_depth="$(find "$PROJECT_DIR/src" -type d ! -path '*/generated/*' ! -path '*/__generated__/*' ! -path '*/.prisma/*' 2>/dev/null | awk -F/ '{print NF-1}' | sort -n | tail -1)"
+max_file_lines="$(find "$PROJECT_DIR/src" "${SRC_FIND_FLAGS[@]}" -exec wc -l {} + 2>/dev/null | sort -n | tail -2 | head -1 | awk '{print $1}')"
 mod_score=$(awk -v d="${max_depth:-0}" -v ml="${max_file_lines:-0}" 'BEGIN{
   ds = (d>=5)?2:(d>=3)?1.5:(d>=2)?1:0
   ms = (ml<=200)?2:(ml<=400)?1.5:(ml<=600)?1:0.5
@@ -410,7 +412,7 @@ eng_json="$(echo "$eng_json" | jq --argjson m 4 --argjson s "$mod_score" --arg e
 
 # 4d. eng-transparency — count of deferred markers (TODO / replace with API / mock / MVP)
 marker_count=$(grep -rEi -c "(TODO|MVP[: ]|replace.*with.*API|without.*API.*dependency|mock.*OpenAI|mock.*LLM|deferred|stub)" \
-   "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" 2>/dev/null | awk -F: '{s+=$2}END{print s+0}')
+   "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" --exclude-dir=generated --exclude-dir=__generated__ --exclude-dir=.prisma 2>/dev/null | awk -F: '{s+=$2}END{print s+0}')
 trans_score=$(awk -v c="$marker_count" 'BEGIN{
   s = (c>=3)?4:(c>=2)?3:(c>=1)?2:0
   printf "%.1f", s
@@ -419,8 +421,8 @@ eng_json="$(echo "$eng_json" | jq --argjson m 4 --argjson s "$trans_score" --arg
 
 # 4e. eng-env-safety — no API key hardcoded, env-var pattern present
 hardcode=$(grep -rE "(sk-[a-zA-Z0-9]{20,}|api[_-]?key\s*[:=]\s*['\"][a-zA-Z0-9]{20,})" \
-  "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" -l 2>/dev/null | head -1)
-env_ref=$(grep -rE "(process\.env\.[A-Z_]+)" "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" -l 2>/dev/null | head -1)
+  "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" --exclude-dir=generated --exclude-dir=__generated__ --exclude-dir=.prisma --include="*.js" --include="*.jsx" -l 2>/dev/null | head -1)
+env_ref=$(grep -rE "(process\.env\.[A-Z_]+)" "$PROJECT_DIR/src" --include="*.ts" --include="*.tsx" --exclude-dir=generated --exclude-dir=__generated__ --exclude-dir=.prisma -l 2>/dev/null | head -1)
 if [[ -z "$hardcode" && -n "$env_ref" ]]; then
   env_score=4 ; env_evidence="env config present, no hardcoded keys"
 elif [[ -z "$hardcode" ]]; then

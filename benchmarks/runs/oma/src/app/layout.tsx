@@ -1,19 +1,20 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'WorldCraft Kids',
-  description: 'A creative 3D learning playground where kids build their own worlds',
+  title: "Imagine Worlds - Build Your Dreams in 3D",
+  description:
+    "A creative learning platform where children build amazing 3D worlds with an AI companion.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-screen font-sans">{children}</body>
+    <html lang="en">
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }
