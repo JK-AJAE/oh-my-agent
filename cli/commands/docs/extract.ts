@@ -274,7 +274,18 @@ function looksLikeFilePath(str: string): boolean {
     !str ||
     str.includes(" ") ||
     str.startsWith("http://") ||
-    str.startsWith("https://")
+    str.startsWith("https://") ||
+    // Slash-prefixed tokens (`/plan`, `/work`, `/orchestrate`) are workflow
+    // names in OMA prose, not absolute file paths. Excluding them eliminates
+    // the largest class of v1 false positives (~1,500 in the source repo).
+    /^\/[a-z][\w-]*$/i.test(str) ||
+    // Template-placeholder paths like `plan-{sessionId}.json` or
+    // `progress-{agent}.md` are documentation patterns, not real files.
+    /\{[^}]+\}/.test(str) ||
+    // Trailing-slash refs (`stack/`, `resources/`, `examples/`) are
+    // directory references in prose, not file paths. v1 has no notion of
+    // directory existence, so excluding them avoids false positives.
+    str.endsWith("/")
   ) {
     return false;
   }

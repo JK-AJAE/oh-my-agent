@@ -79,6 +79,13 @@ export function _clearDirListingCache(): void {
   dirListingCache.clear();
 }
 
+// Convention prefixes searched when both doc-relative and repo-root
+// resolution fail. Many OMA docs reference well-known files (e.g.
+// `oma-config.yaml`, `mcp.json`) that actually live under `.agents/`,
+// or skill resources under `.agents/skills/`. Adding these search roots
+// catches the common case without requiring docs to write the full path.
+const FALLBACK_PREFIXES = [".agents", "cli", "docs"];
+
 async function resolveFile(
   target: string,
   docPath: string,
@@ -97,12 +104,20 @@ async function resolveFile(
     return { ok: true };
   }
 
-  // Both failed
+  // 3. Fallback prefixes (.agents/, cli/, docs/)
+  for (const prefix of FALLBACK_PREFIXES) {
+    const prefixedPath = path.resolve(repoRoot, prefix, target);
+    if (existsCaseSensitive(prefixedPath)) {
+      return { ok: true };
+    }
+  }
+
+  // All failed
   const attempted1 = path.relative(repoRoot, docRelPath);
   const attempted2 = path.relative(repoRoot, repoRelPath);
   return {
     ok: false,
-    reason: `file_missing (tried: ${attempted1}, ${attempted2})`,
+    reason: `file_missing (tried: ${attempted1}, ${attempted2}, ${FALLBACK_PREFIXES.map((p) => `${p}/${target}`).join(", ")})`,
   };
 }
 
@@ -329,6 +344,15 @@ function getOmaConfigDeepPaths(): Set<string> {
     "agents.tf-infra",
     "agents.retrieval",
     "session.quota_cap",
+    // Vendor-specific config paths used by skills. These are NOT in the
+    // root OmaConfig schema — they live in vendor adapter configs but
+    // are referenced by docs (oma-image, oma-observability, etc.).
+    // Whitelisted to avoid false positives until v2 introduces a proper
+    // vendor-config schema lookup.
+    "vendors.gemini.strategies",
+    "vendors.codex.strategies",
+    "vendors.claude.strategies",
+    "session.id",
   ]);
   return paths;
 }
