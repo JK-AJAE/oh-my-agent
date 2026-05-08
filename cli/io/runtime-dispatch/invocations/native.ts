@@ -1,0 +1,121 @@
+import type { VendorConfig } from "../../../platform/agent-config.js";
+import type { Invocation } from "../types.js";
+
+export function buildMentionPrompt(
+  agentId: string,
+  promptContent: string,
+): string {
+  return `@${agentId}\n\n${promptContent}`;
+}
+
+export function buildClaudeNativeInvocation(
+  agentId: string,
+  promptContent: string,
+  vendorConfig: VendorConfig,
+): Invocation {
+  const command = vendorConfig.command || "claude";
+  const args = ["--agent", agentId];
+
+  if (vendorConfig.output_format_flag && vendorConfig.output_format) {
+    args.push(vendorConfig.output_format_flag, vendorConfig.output_format);
+  } else if (vendorConfig.output_format_flag) {
+    args.push(vendorConfig.output_format_flag);
+  }
+
+  if (vendorConfig.model_flag && vendorConfig.default_model) {
+    args.push(vendorConfig.model_flag, vendorConfig.default_model);
+  }
+  if (vendorConfig.auto_approve_flag) {
+    args.push(vendorConfig.auto_approve_flag);
+  }
+
+  args.push("-p", promptContent);
+
+  return { command, args, env: { ...process.env } };
+}
+
+export function buildCodexNativeInvocation(
+  agentId: string,
+  promptContent: string,
+  vendorConfig: VendorConfig,
+): Invocation {
+  const command = vendorConfig.command || "codex";
+  const args: string[] = [];
+
+  if (vendorConfig.subcommand) {
+    args.push(vendorConfig.subcommand);
+  }
+  if (vendorConfig.output_format_flag) {
+    args.push(vendorConfig.output_format_flag);
+  }
+  if (vendorConfig.model_flag && vendorConfig.default_model) {
+    args.push(vendorConfig.model_flag, vendorConfig.default_model);
+  }
+  if (vendorConfig.auto_approve_flag) {
+    args.push(vendorConfig.auto_approve_flag);
+  }
+
+  args.push(buildMentionPrompt(agentId, promptContent));
+
+  return { command, args, env: { ...process.env } };
+}
+
+export function buildGeminiNativeInvocation(
+  agentId: string,
+  promptContent: string,
+  vendorConfig: VendorConfig,
+): Invocation {
+  const command = vendorConfig.command || "gemini";
+  const args: string[] = [];
+
+  if (vendorConfig.output_format_flag && vendorConfig.output_format) {
+    args.push(vendorConfig.output_format_flag, vendorConfig.output_format);
+  } else if (vendorConfig.output_format_flag) {
+    args.push(vendorConfig.output_format_flag);
+  }
+  if (vendorConfig.model_flag && vendorConfig.default_model) {
+    args.push(vendorConfig.model_flag, vendorConfig.default_model);
+  }
+  if (vendorConfig.auto_approve_flag) {
+    args.push(vendorConfig.auto_approve_flag);
+  }
+
+  args.push("-p", buildMentionPrompt(agentId, promptContent));
+
+  return { command, args, env: { ...process.env } };
+}
+
+/**
+ * Cursor Agent headless CLI: `cursor agent -p [--output-format …] [--yolo|--force]
+ * [--trust] [--model …] … <prompt>`. The `-p` flag is boolean; prompt is positional.
+ *
+ * https://cursor.com/docs/cli/using
+ */
+export function buildCursorAgentPrintInvocation(
+  agentId: string,
+  promptContent: string,
+  vendorConfig: VendorConfig,
+): Invocation {
+  const command = vendorConfig.command || "cursor";
+  const args: string[] = ["agent", "-p"];
+
+  if (vendorConfig.output_format_flag && vendorConfig.output_format) {
+    args.push(vendorConfig.output_format_flag, vendorConfig.output_format);
+  } else if (vendorConfig.output_format_flag) {
+    args.push(vendorConfig.output_format_flag);
+  }
+  if (vendorConfig.auto_approve_flag) {
+    args.push(vendorConfig.auto_approve_flag);
+  } else {
+    args.push("--yolo");
+  }
+  args.push("--trust");
+
+  if (vendorConfig.model_flag && vendorConfig.default_model) {
+    args.push(vendorConfig.model_flag, vendorConfig.default_model);
+  }
+
+  args.push(buildMentionPrompt(agentId, promptContent));
+
+  return { command, args, env: { ...process.env } };
+}

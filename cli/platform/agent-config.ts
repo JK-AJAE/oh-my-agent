@@ -556,6 +556,7 @@ export function resolvePromptFlag(
     claude: "-p",
     qwen: "-p",
     codex: null,
+    cursor: null,
   };
 
   if (Object.hasOwn(defaults, vendor)) return defaults[vendor] as string | null;

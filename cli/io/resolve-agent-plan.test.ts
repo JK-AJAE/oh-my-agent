@@ -564,6 +564,54 @@ describe("resolveAgentPlanFromConfig — Case 16: custom_presets with extends", 
 });
 
 // ---------------------------------------------------------------------------
+// custom_presets — extends chain edge cases
+// ---------------------------------------------------------------------------
+
+describe("resolveAgentPlanFromConfig — extends chain: circular reference", () => {
+  it("throws ConfigError when two custom presets extend each other", () => {
+    const config = {
+      language: "en",
+      model_preset: "alpha",
+      custom_presets: {
+        alpha: {
+          description: "alpha",
+          extends: "beta",
+          agent_defaults: {},
+        },
+        beta: {
+          description: "beta",
+          extends: "alpha",
+          agent_defaults: {},
+        },
+      },
+    };
+    expect(() => resolveAgentPlanFromConfig("backend", config)).toThrow(
+      ConfigError,
+    );
+    expect(() => resolveAgentPlanFromConfig("backend", config)).toThrow(
+      /Circular extends chain/,
+    );
+  });
+
+  it("throws ConfigError when extends target is neither built-in nor custom", () => {
+    const config = {
+      language: "en",
+      model_preset: "team",
+      custom_presets: {
+        team: {
+          description: "team",
+          extends: "ghost-preset",
+          agent_defaults: {},
+        },
+      },
+    };
+    expect(() => resolveAgentPlanFromConfig("backend", config)).toThrow(
+      /Preset "ghost-preset" referenced in 'extends' is not a built-in preset/,
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
 // buildAgentPlanArgs — Claude
 // ---------------------------------------------------------------------------
 
@@ -585,6 +633,73 @@ describe("buildAgentPlanArgs — Codex", () => {
     expect(plan.cli).toBe("codex");
     expect(plan.cliModel).toBe("gpt-5.5");
     expect(buildAgentPlanArgs(plan)).toEqual(["-m", "gpt-5.5"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildAgentPlanArgs — Gemini
+// ---------------------------------------------------------------------------
+
+describe("buildAgentPlanArgs — Gemini", () => {
+  it("produces --model + --thinking-budget=dynamic for thinking:true", () => {
+    const plan = resolveAgentPlanFromConfig("backend", GEMINI_ONLY_CONFIG);
+    expect(plan.cli).toBe("gemini");
+    const args = buildAgentPlanArgs(plan);
+    expect(args[0]).toBe("--model");
+    expect(args[1]).toBe(plan.cliModel);
+    expect(args).toContain("--thinking-budget=dynamic");
+  });
+
+  it("produces --model only when no thinking flag applies", () => {
+    const plan = resolveAgentPlanFromConfig("orchestrator", GEMINI_ONLY_CONFIG);
+    const args = buildAgentPlanArgs(plan);
+    expect(args).toEqual(["--model", plan.cliModel]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildAgentPlanArgs — Qwen
+// ---------------------------------------------------------------------------
+
+describe("buildAgentPlanArgs — Qwen", () => {
+  it("produces -m + --thinking for thinking:true backend", () => {
+    const plan = resolveAgentPlanFromConfig("backend", QWEN_ONLY_CONFIG);
+    expect(plan.cli).toBe("qwen");
+    expect(buildAgentPlanArgs(plan)).toEqual([
+      "-m",
+      plan.cliModel,
+      "--thinking",
+    ]);
+  });
+
+  it("produces -m + --no-thinking for thinking:false orchestrator", () => {
+    const plan = resolveAgentPlanFromConfig("orchestrator", QWEN_ONLY_CONFIG);
+    expect(buildAgentPlanArgs(plan)).toEqual([
+      "-m",
+      plan.cliModel,
+      "--no-thinking",
+    ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildAgentPlanArgs — antigravity / unknown vendor branches
+// ---------------------------------------------------------------------------
+
+describe("buildAgentPlanArgs — antigravity & unknown", () => {
+  it("antigravity cli yields empty args (no top-level model flag)", () => {
+    const basePlan = resolveAgentPlanFromConfig("backend", CODEX_ONLY_CONFIG);
+    const antigravityPlan = { ...basePlan, cli: "antigravity" as const };
+    expect(buildAgentPlanArgs(antigravityPlan)).toEqual([]);
+  });
+
+  it("unknown cli yields empty args", () => {
+    const basePlan = resolveAgentPlanFromConfig("backend", CODEX_ONLY_CONFIG);
+    const unknownPlan = {
+      ...basePlan,
+      cli: "made-up-vendor" as unknown as typeof basePlan.cli,
+    };
+    expect(buildAgentPlanArgs(unknownPlan)).toEqual([]);
   });
 });
 

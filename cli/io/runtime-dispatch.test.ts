@@ -8,7 +8,11 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { detectRuntimeVendor, planDispatch } from "./runtime-dispatch.js";
+import {
+  buildExternalInvocation,
+  detectRuntimeVendor,
+  planDispatch,
+} from "./runtime-dispatch.js";
 
 const minimalVendorConfig = {
   command: "oma-agent",
@@ -36,10 +40,35 @@ describe("detectRuntimeVendor", () => {
     expect(detectRuntimeVendor({ CLAUDECODE: "1" })).toBe("claude");
   });
 
+  it("returns 'cursor' when OMA_RUNTIME_VENDOR=cursor", () => {
+    expect(detectRuntimeVendor({ OMA_RUNTIME_VENDOR: "cursor" })).toBe(
+      "cursor",
+    );
+  });
+
+  it("returns 'cursor' when CURSOR_AGENT=1", () => {
+    expect(detectRuntimeVendor({ CURSOR_AGENT: "1" })).toBe("cursor");
+  });
+
+  it("returns 'cursor' when CURSOR_TRACE_ID is set", () => {
+    expect(detectRuntimeVendor({ CURSOR_TRACE_ID: "trace-test" })).toBe(
+      "cursor",
+    );
+  });
+
   it("returns 'unknown' when no known env vars are present", () => {
     expect(detectRuntimeVendor({})).toBe("unknown");
   });
 });
+
+const minimalVendorConfigCursor = {
+  command: "cursor",
+  model_flag: "--model",
+  default_model: "composer-2",
+  output_format_flag: "--output-format",
+  output_format: "json",
+  auto_approve_flag: "--yolo",
+};
 
 describe("planDispatch — forced-external runtimes", () => {
   it("returns mode:'external' for qwen runtime", () => {
@@ -125,6 +154,22 @@ describe("planDispatch — regression: native paths unaffected", () => {
     expect(plan.mode).toBe("external");
     expect(plan.runtimeVendor).toBe("unknown");
   });
+
+  it("cursor runtime + cursor target → mode:'native' (cursor agent --print)", () => {
+    const plan = planDispatch(
+      "test-agent",
+      "cursor",
+      minimalVendorConfigCursor,
+      null,
+      "hello",
+      { CURSOR_AGENT: "1" },
+    );
+    expect(plan.mode).toBe("native");
+    expect(plan.runtimeVendor).toBe("cursor");
+    expect(plan.invocation.args[0]).toBe("agent");
+    expect(plan.invocation.args[1]).toBe("-p");
+    expect(plan.invocation.args.at(-1)).toContain("@test-agent");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -205,7 +250,7 @@ describe("planDispatch — plan integration (T10b)", () => {
     // Graceful fallback — dispatch still succeeds, WARN emitted
     expect(plan.mode).toBe("native");
     expect(
-      warnSpy.mock.calls.some((c) =>
+      warnSpy.mock.calls.some((c: readonly unknown[]) =>
         String(c[0]).includes("nonexistent-agent"),
       ),
     ).toBe(true);
@@ -266,9 +311,11 @@ describe("planDispatch — plan integration (T10b)", () => {
 
     // Dispatch succeeds via graceful fallback; WARN logged
     expect(plan.mode).toBeDefined();
-    expect(warnSpy.mock.calls.some((c) => String(c[0]).includes("bogus"))).toBe(
-      true,
-    );
+    expect(
+      warnSpy.mock.calls.some((c: readonly unknown[]) =>
+        String(c[0]).includes("bogus"),
+      ),
+    ).toBe(true);
   });
 
   it("agents override in oma-config.yaml reaches the subprocess (effort propagates)", () => {
@@ -299,5 +346,118 @@ describe("planDispatch — plan integration (T10b)", () => {
         CODEX_CI: "1",
       }),
     ).not.toThrow();
+  });
+});
+
+describe("buildExternalInvocation — vendor branches", () => {
+  it("cursor: prompt is positional, --yolo and --trust appended when no auto_approve_flag", () => {
+    const inv = buildExternalInvocation(
+      "cursor",
+      { command: "cursor", model_flag: "--model", default_model: "composer-2" },
+      null,
+      "hello world",
+    );
+    expect(inv.command).toBe("cursor");
+    expect(inv.args[0]).toBe("agent");
+    expect(inv.args[1]).toBe("-p");
+    expect(inv.args).toContain("--yolo");
+    expect(inv.args).toContain("--trust");
+    expect(inv.args.at(-1)).toBe("hello world");
+  });
+
+  it("cursor: explicit auto_approve_flag overrides default --yolo", () => {
+    const inv = buildExternalInvocation(
+      "cursor",
+      { command: "cursor", auto_approve_flag: "--force" },
+      null,
+      "p",
+    );
+    expect(inv.args).toContain("--force");
+    expect(inv.args).not.toContain("--yolo");
+    expect(inv.args).toContain("--trust");
+  });
+
+  it("gemini: missing auto_approve_flag → falls back to --approval-mode=yolo", () => {
+    const inv = buildExternalInvocation(
+      "gemini",
+      { command: "gemini" },
+      "-p",
+      "hi",
+    );
+    expect(inv.args).toContain("--approval-mode=yolo");
+  });
+
+  it("codex: missing auto_approve_flag → falls back to --full-auto", () => {
+    const inv = buildExternalInvocation(
+      "codex",
+      { command: "codex" },
+      null,
+      "hi",
+    );
+    expect(inv.args).toContain("--full-auto");
+  });
+
+  it("qwen: missing auto_approve_flag → falls back to --yolo", () => {
+    const inv = buildExternalInvocation(
+      "qwen",
+      { command: "qwen" },
+      "-p",
+      "hi",
+    );
+    expect(inv.args).toContain("--yolo");
+  });
+
+  it("isolation_flags split into argv tokens", () => {
+    const inv = buildExternalInvocation(
+      "codex",
+      { command: "codex", isolation_flags: "--sandbox=workspace --no-network" },
+      null,
+      "p",
+    );
+    expect(inv.args).toContain("--sandbox=workspace");
+    expect(inv.args).toContain("--no-network");
+  });
+
+  it("isolation_env: $$ is replaced with current pid", () => {
+    const inv = buildExternalInvocation(
+      "codex",
+      { command: "codex", isolation_env: "OMA_PID=run-$$" },
+      null,
+      "p",
+    );
+    expect(inv.env.OMA_PID).toBe(`run-${process.pid}`);
+  });
+
+  it("subcommand is prepended before option args", () => {
+    const inv = buildExternalInvocation(
+      "codex",
+      { command: "codex", subcommand: "exec" },
+      null,
+      "prompt",
+    );
+    expect(inv.args[0]).toBe("exec");
+  });
+
+  it("no promptFlag → prompt is the trailing positional argument", () => {
+    const inv = buildExternalInvocation(
+      "codex",
+      { command: "codex", subcommand: "exec" },
+      null,
+      "the-prompt",
+    );
+    expect(inv.args.at(-1)).toBe("the-prompt");
+  });
+
+  it("with promptFlag → flag and prompt appended as a pair", () => {
+    const inv = buildExternalInvocation(
+      "gemini",
+      { command: "gemini" },
+      "-p",
+      "the-prompt",
+    );
+    const idx = inv.args.indexOf("-p");
+    expect(idx).toBeGreaterThanOrEqual(0);
+    expect(inv.args[idx + 1]).toBe("the-prompt");
+    expect(inv.args.at(-1)).toBe("the-prompt");
   });
 });
