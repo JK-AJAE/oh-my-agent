@@ -13,6 +13,7 @@ import path from "node:path";
 import pMap from "p-map";
 import { http } from "../../io/http.js";
 import type { DocRef, DocRefsIndex } from "../../types/docs.js";
+import { toPosixPath } from "../../utils/fs-utils.js";
 
 // ---------------------------------------------------------------------------
 // DriftReport types
@@ -113,8 +114,8 @@ async function resolveFile(
   }
 
   // All failed
-  const attempted1 = path.relative(repoRoot, docRelPath);
-  const attempted2 = path.relative(repoRoot, repoRelPath);
+  const attempted1 = toPosixPath(path.relative(repoRoot, docRelPath));
+  const attempted2 = toPosixPath(path.relative(repoRoot, repoRelPath));
   return {
     ok: false,
     reason: `file_missing (tried: ${attempted1}, ${attempted2}, ${FALLBACK_PREFIXES.map((p) => `${p}/${target}`).join(", ")})`,
@@ -235,9 +236,12 @@ function resolveScript(
         if (pkg.scripts && Object.hasOwn(pkg.scripts, scriptName)) {
           return { ok: true };
         }
-        checked.push(path.relative(repoRoot, pkgPath) || "package.json");
+        checked.push(
+          toPosixPath(path.relative(repoRoot, pkgPath)) || "package.json",
+        );
       } catch {
-        parseError = path.relative(repoRoot, pkgPath) || "package.json";
+        parseError =
+          toPosixPath(path.relative(repoRoot, pkgPath)) || "package.json";
       }
     }
 

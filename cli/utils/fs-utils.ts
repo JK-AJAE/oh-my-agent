@@ -1,5 +1,13 @@
 import * as fs from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
+
+/**
+ * Normalize a filesystem path to POSIX (forward-slash) form so reason strings,
+ * cache keys, and report output stay platform-independent on Windows.
+ */
+export function toPosixPath(p: string): string {
+  return sep === "/" ? p : p.split(sep).join("/");
+}
 
 /**
  * Remove path if it exists as a symlink or file (not a real directory).

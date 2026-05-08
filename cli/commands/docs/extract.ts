@@ -22,6 +22,7 @@ import type {
   DocRefsIndex,
   RefKind,
 } from "../../types/docs.js";
+import { toPosixPath } from "../../utils/fs-utils.js";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -126,9 +127,7 @@ function walkMarkdownFiles(
       if (isGitIgnored(absPath, ignoredSet)) continue;
 
       if (entry.isDirectory()) {
-        // Exclude docs/generated/** output dir. Normalize separators so the
-        // check works on Windows (where path.relative returns backslashes).
-        const relDir = path.relative(repoRoot, absPath).replace(/\\/g, "/");
+        const relDir = toPosixPath(path.relative(repoRoot, absPath));
         if (
           relDir === "docs/generated" ||
           relDir.startsWith("docs/generated/")
@@ -593,7 +592,7 @@ async function extractFromFile(
   absPath: string,
   repoRoot: string,
 ): Promise<DocEntry | null> {
-  const relPath = path.relative(repoRoot, absPath).replace(/\\/g, "/");
+  const relPath = toPosixPath(path.relative(repoRoot, absPath));
 
   // Size check
   let stat: fs.Stats;

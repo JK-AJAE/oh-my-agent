@@ -2,6 +2,7 @@ import { execSync, spawn } from "node:child_process";
 import { realpathSync } from "node:fs";
 import process from "node:process";
 import pc from "picocolors";
+import { toPosixPath } from "../utils/fs-utils.js";
 import { http } from "./http.js";
 
 export const PACKAGE_NAME = "oh-my-agent";
@@ -45,7 +46,7 @@ export function getInstallationInfo(
 
   let realPath: string;
   try {
-    realPath = realpathSync(argvPath).replace(/\\/g, "/");
+    realPath = toPosixPath(realpathSync(argvPath));
   } catch {
     return { packageManager: "unknown", isGlobal: false };
   }
@@ -82,7 +83,7 @@ export function getInstallationInfo(
         stdio: ["ignore", "pipe", "ignore"],
       }).trim();
       if (brewPrefix) {
-        const brewRealPath = realpathSync(brewPrefix).replace(/\\/g, "/");
+        const brewRealPath = toPosixPath(realpathSync(brewPrefix));
         if (realPath.startsWith(brewRealPath)) {
           return {
             packageManager: "homebrew",
