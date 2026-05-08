@@ -19,6 +19,7 @@ import {
   isGhAuthenticated,
   isGhInstalled,
 } from "../../io/github.js";
+import { ensureGitignored } from "../../io/gitignore.js";
 import {
   ensureSerenaProject,
   resolveSerenaLanguages,
@@ -750,6 +751,24 @@ export async function install(options: InstallOptions = {}): Promise<void> {
     }
 
     p.log.info(pc.dim("Skipped global HOME-level configuration updates."));
+
+    const gitignoreResult = ensureGitignored(cwd, ["docs/generated/"], {
+      header: "# oma docs generated artifacts",
+    });
+    if (gitignoreResult.added.length > 0) {
+      p.log.success(
+        pc.green(
+          `Added ${gitignoreResult.added.join(", ")} to .gitignore (oma docs writes here).`,
+        ),
+      );
+      p.log.info(
+        pc.dim(
+          "Tip: vendor mirrors are reproducible from .agents/ — consider also " +
+            "ignoring .claude/, .codex/, .qwen/, .cursor/*, .gemini/*, " +
+            ".serena/memories/* if your team treats them as derived.",
+        ),
+      );
+    }
 
     p.outro(pc.green("Done! Open your project in your IDE to use the skills."));
 
