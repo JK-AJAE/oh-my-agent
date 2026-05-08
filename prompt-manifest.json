@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "6.17.1",
-  "releaseDate": "2026-05-08T03:15:58.394Z",
+  "releaseDate": "2026-05-08T05:44:42.207Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -91,18 +91,18 @@
     },
     {
       "path": ".agents/hooks/core/keyword-detector.ts",
-      "sha256": "3084d4a4b3158b77027ede9183c566e3542187894e3fea1217d61d9cf006d2a6",
-      "size": 18650
+      "sha256": "9445c3899b6f414e50e693b79d6e0541098c09ba52b1bf5d899699d5675aaf75",
+      "size": 18655
     },
     {
       "path": ".agents/hooks/core/persistent-mode.ts",
-      "sha256": "d2d6d3a1220e0cb9d6fda0ba7fd2bacab55342ea95eb6f44cf68995ba1bcd702",
-      "size": 7033
+      "sha256": "3112678a4ac99a26be4e8992692f998d7e58a2f92d653d332f81541e5a7b0a02",
+      "size": 7018
     },
     {
       "path": ".agents/hooks/core/skill-injector.ts",
-      "sha256": "32218a22c0559875edfd9713c547e09e426c863b282147eef2fdf31a88c818b4",
-      "size": 12062
+      "sha256": "225bc8bc423d9c94a93abf898ec0b4c870493d7400d786604e128916057115e9",
+      "size": 12180
     },
     {
       "path": ".agents/hooks/core/test-filter.ts",
@@ -1026,8 +1026,8 @@
     },
     {
       "path": ".agents/skills/oma-orchestrator/config/cli-config.yaml",
-      "sha256": "de729781bfd8bf5ee001058f986c614e9c5b3eca67f200b85c9c189d587da213",
-      "size": 1814
+      "sha256": "9159c64f34b28ec4b9e949d95860a950f382a39d46f8693ff42bcb5d75bd557b",
+      "size": 2269
     },
     {
       "path": ".agents/skills/oma-orchestrator/resources/memory-schema.md",
