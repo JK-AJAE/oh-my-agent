@@ -5,7 +5,7 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, sep } from "node:path";
 
 /**
  * True when `repoRoot` is inside a git work tree (or is one).
@@ -75,7 +75,7 @@ export function isInIgnoredSet(
   if (ignoredSet.has(absPath)) return true;
   for (const ignored of ignoredSet) {
     const normalized = ignored.endsWith("/") ? ignored.slice(0, -1) : ignored;
-    if (absPath === normalized || absPath.startsWith(`${normalized}/`)) {
+    if (absPath === normalized || absPath.startsWith(`${normalized}${sep}`)) {
       return true;
     }
   }
