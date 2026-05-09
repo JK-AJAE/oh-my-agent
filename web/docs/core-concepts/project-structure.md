@@ -353,15 +353,22 @@ Registers hooks and permissions for Claude Code. Contains references to the hook
 ### hooks/
 
 **`triggers.json`** — The keyword-to-workflow mapping. Defines:
-- `workflows`: Map of workflow name to `{ persistent: boolean, keywords: { language: [...] } }`
+- `workflows`: Map of workflow name to `{ persistent: boolean, keywords: { language: [...] }, patterns?: { language: [...] } }`. `keywords` are literal phrases; `patterns` are raw regex strings (compiled with `iu` flags).
 - `informationalPatterns`: Phrases that indicate questions (filtered out from auto-detection)
 - `excludedWorkflows`: Workflows that require explicit `/command` invocation
 - `cjkScripts`: Language codes using CJK scripts (ko, ja, zh)
 
+Language sections in `keywords`, `patterns`, and `informationalPatterns` follow this convention:
+- `*` — Universal/English. Always loaded regardless of `language` setting in `.agents/oma-config.yaml`.
+- `en` — Loaded for backward compatibility. Functionally equivalent to `*`. New English content should go in `*`.
+- `ko`/`ja`/`zh`/etc. — Language-specific. Loaded only when `language: <code>` is set in `.agents/oma-config.yaml`.
+
 **`keyword-detector.ts`** — TypeScript hook that:
-1. Scans user input against trigger keywords
-2. Checks for informational patterns
-3. Injects `[OMA WORKFLOW: ...]` or `[OMA PERSISTENT MODE: ...]` into context
+1. Sanitizes input (strips code blocks, quoted strings, pasted system-echo blocks)
+2. Scans cleaned input against trigger `keywords` (literal) and `patterns` (regex)
+3. Checks for informational patterns in a 60-character window around each match
+4. Applies reinforcement guard (suppresses if same workflow triggered 2+ times in 60s)
+5. Injects `[OMA WORKFLOW: ...]` or `[OMA PERSISTENT MODE: ...]` into context
 
 **`persistent-mode.ts`** — Checks for active state files in `.agents/state/` and reinforces persistent workflow execution.
 
