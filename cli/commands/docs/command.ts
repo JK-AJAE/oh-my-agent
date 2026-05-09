@@ -7,6 +7,7 @@ import { ensureGitignored } from "../../io/gitignore.js";
 import { parseOmaConfig } from "../../platform/agent-config.js";
 import type { DocRefsIndex } from "../../types/docs.js";
 import { extractDocRefs, writeDocRefsIndex } from "./extract.js";
+import { detectI18nDrift, summarizeDrift } from "./i18n-drift.js";
 import { renderJson, renderMarkdown } from "./reporter.js";
 import { resolveRefs } from "./resolve.js";
 import { proposeSyncPatches } from "./sync-propose.js";
@@ -275,6 +276,78 @@ export function registerDocsCommands(program: Command): void {
           }
           console.log();
         }
+      }),
+    );
+
+  docs
+    .command("i18n")
+    .description(
+      "Detect drift between English source docs (web/docs) and i18n " +
+        "translations (web/i18n/{lang}/...). Emits structural signals " +
+        "(line count, heading count, last-commit timestamp) per pair so " +
+        "the host LLM can decide which translations need a diff-sync patch. " +
+        "The CLI never edits translations.",
+    )
+    .option(
+      "--json",
+      "Output drift pairs as JSON instead of human-readable markdown",
+    )
+    .option(
+      "--min-severity <level>",
+      "Filter: only emit pairs at-or-above this severity (CRITICAL, HIGH, MEDIUM, LOW)",
+      "MEDIUM",
+    )
+    .action(
+      runAction(async (_options, command) => {
+        const opts = command.opts() as {
+          json?: boolean;
+          minSeverity?: string;
+        };
+        const repoRoot = process.cwd();
+        const minSeverity = (opts.minSeverity ?? "MEDIUM").toUpperCase() as
+          | "CRITICAL"
+          | "HIGH"
+          | "MEDIUM"
+          | "LOW";
+
+        const pairs = detectI18nDrift({ repoRoot, minSeverity });
+
+        if (opts.json) {
+          console.log(JSON.stringify({ pairs }, null, 2));
+          return;
+        }
+
+        if (pairs.length === 0) {
+          console.log(
+            `No i18n drift at severity ≥ ${minSeverity}. All translations in sync.`,
+          );
+          return;
+        }
+
+        const summary = summarizeDrift(pairs);
+        console.log(
+          `\n${summary.total} translation pair(s) drifting at severity ≥ ${minSeverity}.\n`,
+        );
+        console.log(
+          `By severity: CRITICAL=${summary.bySeverity.CRITICAL} HIGH=${summary.bySeverity.HIGH} MEDIUM=${summary.bySeverity.MEDIUM} LOW=${summary.bySeverity.LOW}\n`,
+        );
+        console.log("Top 10 drifting pairs:");
+        for (let i = 0; i < summary.topPairs.length; i++) {
+          const p = summary.topPairs[i];
+          if (!p) continue;
+          const en = p.tgtLines === -1 ? "MISSING" : `${p.tgtLines}L`;
+          console.log(
+            `  ${i + 1}. [${p.severity}] ${p.lang}  ` +
+              `EN=${p.enLines}L TGT=${en} drift=${p.linesDiffPct}% ` +
+              `headings±${p.headingCountDiff}` +
+              `${p.enNewerThanTgt ? " EN-newer" : ""}`,
+          );
+          console.log(`      ${p.target}`);
+        }
+        console.log();
+        console.log(
+          "Pass each pair to `oma-translator` in diff-sync mode (see SKILL.md § Diff-Sync Mode).",
+        );
       }),
     );
 }
