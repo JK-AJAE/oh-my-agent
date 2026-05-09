@@ -129,18 +129,17 @@ Or use slash commands for structured workflows:
 # Install globally
 bun install --global oh-my-agent   # or: brew install oh-my-agent
 
-# Use anywhere
-oma doctor                  # Health check
-oma dashboard               # Real-time agent monitoring
-oma link                    # Regenerate .claude/.codex/.gemini/etc. from .agents/
-oma agent:spawn backend "Build auth API" session-01
+# Use anywhere (sorted alphabetically)
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
-oma retro 7d --compare      # Engineering retrospective with metrics + trends
-oma recap --window 1d       # Cross-tool conversation history recap
-oma search fetch <url>      # Mechanical search with auto-escalating strategies
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # Real-time agent monitoring
+oma doctor                  # Health check
 oma image generate "cat"    # Multi-vendor AI image generation
-oma export cursor           # Project skills as `.cursor/rules` for external IDEs
+oma link                    # Regenerate .claude/.codex/.gemini/etc. from .agents/
 oma model:check             # Detect drift between registered models and live vendor lists
+oma recap --window 1d       # Cross-tool conversation history recap
+oma retro 7d --compare      # Engineering retrospective with metrics + trends
+oma search fetch <url>      # Mechanical search with auto-escalating strategies
 ```
 
 Model selection follows two layers:

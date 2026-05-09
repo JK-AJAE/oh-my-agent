@@ -127,11 +127,16 @@ You: "做一个带用户认证的 TODO 应用"
 bun install --global oh-my-agent   # 或者: brew install oh-my-agent
 
 # 随处使用
-oma doctor                  # 健康检查
-oma dashboard               # 实时 agent 监控
-oma link                    # 从 .agents/ 重新生成 .claude/.codex/.gemini 等
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # 实时 agent 监控
+oma doctor                  # 健康检查
+oma image generate "cat"    # 多供应商 AI 图像生成
+oma link                    # 从 .agents/ 重新生成 .claude/.codex/.gemini 等
+oma model:check             # 检测已注册模型与实时供应商列表的漂移
+oma recap --window 1d       # 跨工具对话历史回顾
+oma retro 7d --compare      # 含指标与趋势的工程复盘
+oma search fetch <url>      # 自动升级策略的机械搜索
 ```
 
 模型选择分两层：

@@ -127,11 +127,16 @@ Hoặc sử dụng slash command cho các workflow có cấu trúc:
 bun install --global oh-my-agent   # hoặc: brew install oh-my-agent
 
 # Sử dụng ở bất kỳ đâu
-oma doctor                  # Kiểm tra sức khỏe hệ thống
-oma dashboard               # Giám sát agent thời gian thực
-oma link                    # Tạo lại .claude/.codex/.gemini/v.v. từ .agents/
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # Giám sát agent thời gian thực
+oma doctor                  # Kiểm tra sức khỏe hệ thống
+oma image generate "cat"    # Tạo ảnh AI đa nhà cung cấp
+oma link                    # Tạo lại .claude/.codex/.gemini/v.v. từ .agents/
+oma model:check             # Phát hiện độ lệch giữa model đã đăng ký và danh sách vendor đang hoạt động
+oma recap --window 1d       # Tóm tắt lịch sử hội thoại đa công cụ
+oma retro 7d --compare      # Retrospective kỹ thuật với metrics + xu hướng
+oma search fetch <url>      # Tìm kiếm máy móc với chiến lược tự leo thang
 ```
 
 Việc chọn model đi theo hai lớp:

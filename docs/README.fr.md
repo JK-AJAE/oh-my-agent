@@ -127,11 +127,16 @@ Ou utilise les slash commands pour des workflows structurés :
 bun install --global oh-my-agent   # ou : brew install oh-my-agent
 
 # Utiliser n'importe où
-oma doctor                  # Bilan de santé
-oma dashboard               # Monitoring des agents en temps réel
-oma link                    # Régénère .claude/.codex/.gemini/etc. depuis .agents/
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # Monitoring des agents en temps réel
+oma doctor                  # Bilan de santé
+oma image generate "cat"    # Génération d'images IA multi-fournisseur
+oma link                    # Régénère .claude/.codex/.gemini/etc. depuis .agents/
+oma model:check             # Détecte la dérive entre modèles enregistrés et listes fournisseurs en direct
+oma recap --window 1d       # Récapitulatif d'historique de conversation inter-outils
+oma retro 7d --compare      # Rétrospective ingénierie avec métriques + tendances
+oma search fetch <url>      # Recherche mécanique avec stratégies à escalade automatique
 ```
 
 La sélection de modèle suit deux couches :

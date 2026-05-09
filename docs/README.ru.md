@@ -127,11 +127,16 @@ APM поставляет только скилы. Для workflow, правил,
 bun install --global oh-my-agent   # или: brew install oh-my-agent
 
 # Использовать где угодно
-oma doctor                  # Проверка здоровья
-oma dashboard               # Мониторинг в реальном времени
-oma link                    # Регенерирует .claude/.codex/.gemini/и т.д. из .agents/
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # Мониторинг в реальном времени
+oma doctor                  # Проверка здоровья
+oma image generate "cat"    # Мультивендорная генерация AI-изображений
+oma link                    # Регенерирует .claude/.codex/.gemini/и т.д. из .agents/
+oma model:check             # Обнаружение расхождений между зарегистрированными моделями и актуальными списками вендоров
+oma recap --window 1d       # Сводка истории диалогов между инструментами
+oma retro 7d --compare      # Инженерная ретроспектива с метриками + трендами
+oma search fetch <url>      # Механический поиск со стратегиями автоэскалации
 ```
 
 Выбор модели работает в два слоя:

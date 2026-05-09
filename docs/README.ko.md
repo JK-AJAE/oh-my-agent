@@ -127,11 +127,16 @@ You: "사용자 인증이 있는 TODO 앱 만들어줘"
 bun install --global oh-my-agent   # 또는: brew install oh-my-agent
 
 # 어디서든 사용
-oma doctor                  # 상태 점검
-oma dashboard               # 실시간 에이전트 모니터링
-oma link                    # .agents/에서 .claude/.codex/.gemini 등 재생성
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # 실시간 에이전트 모니터링
+oma doctor                  # 상태 점검
+oma image generate "cat"    # 멀티 벤더 AI 이미지 생성
+oma link                    # .agents/에서 .claude/.codex/.gemini 등 재생성
+oma model:check             # 등록된 모델과 실제 벤더 목록 사이 드리프트 감지
+oma recap --window 1d       # 도구 간 대화 히스토리 요약
+oma retro 7d --compare      # 메트릭 + 트렌드 기반 엔지니어링 회고
+oma search fetch <url>      # 자동 단계 상승 전략으로 메커니컬 검색
 ```
 
 모델 선택은 두 단계로 이뤄집니다.

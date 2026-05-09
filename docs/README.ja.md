@@ -127,11 +127,16 @@ You: "ユーザー認証付きのTODOアプリを作って"
 bun install --global oh-my-agent   # または: brew install oh-my-agent
 
 # どこでも使える
-oma doctor                  # ヘルスチェック
-oma dashboard               # リアルタイムエージェントモニタリング
-oma link                    # .agents/ から .claude/.codex/.gemini などを再生成
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # リアルタイムエージェントモニタリング
+oma doctor                  # ヘルスチェック
+oma image generate "cat"    # マルチベンダー AI 画像生成
+oma link                    # .agents/ から .claude/.codex/.gemini などを再生成
+oma model:check             # 登録済みモデルとライブベンダーリストのドリフト検知
+oma recap --window 1d       # ツール横断の会話履歴サマリー
+oma retro 7d --compare      # メトリクス + トレンド付きエンジニアリングレトロ
+oma search fetch <url>      # 自動エスカレーション戦略によるメカニカル検索
 ```
 
 モデル選択は2層で行われます。

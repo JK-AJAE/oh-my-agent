@@ -127,11 +127,16 @@ APM แจกแค่ skill เท่านั้น ส่วน workflow, rul
 bun install --global oh-my-agent   # หรือ: brew install oh-my-agent
 
 # ใช้งานได้ทุกที่
-oma doctor                  # ตรวจสอบความพร้อมของระบบ
-oma dashboard               # ตรวจสอบการทำงานของเอเจนต์แบบเรียลไทม์
-oma link                    # สร้าง .claude/.codex/.gemini/ฯลฯ ใหม่จาก .agents/
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # ตรวจสอบการทำงานของเอเจนต์แบบเรียลไทม์
+oma doctor                  # ตรวจสอบความพร้อมของระบบ
+oma image generate "cat"    # สร้างภาพ AI แบบหลายผู้ให้บริการ
+oma link                    # สร้าง .claude/.codex/.gemini/ฯลฯ ใหม่จาก .agents/
+oma model:check             # ตรวจจับความคลาดเคลื่อนระหว่างโมเดลที่ลงทะเบียนกับรายการผู้ให้บริการจริง
+oma recap --window 1d       # สรุปประวัติบทสนทนาข้ามเครื่องมือ
+oma retro 7d --compare      # ย้อนทบทวนงานวิศวกรรมพร้อมเมตริกและเทรนด์
+oma search fetch <url>      # ค้นหาเชิงกลด้วยกลยุทธ์ยกระดับอัตโนมัติ
 ```
 
 การเลือกโมเดลทำงานเป็นสองชั้น:

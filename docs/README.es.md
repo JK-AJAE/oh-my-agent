@@ -127,11 +127,16 @@ O usa slash commands para flujos estructurados:
 bun install --global oh-my-agent   # o: brew install oh-my-agent
 
 # Usar donde sea
-oma doctor                  # Chequeo de salud
-oma dashboard               # Monitoreo de agentes en tiempo real
-oma link                    # Regenera .claude/.codex/.gemini/etc. desde .agents/
-oma agent:spawn backend "Build auth API" session-01
 oma agent:parallel -i backend:"Auth API" frontend:"Login form"
+oma agent:spawn backend "Build auth API" session-01
+oma dashboard               # Monitoreo de agentes en tiempo real
+oma doctor                  # Chequeo de salud
+oma image generate "cat"    # Generación de imágenes IA multi-proveedor
+oma link                    # Regenera .claude/.codex/.gemini/etc. desde .agents/
+oma model:check             # Detecta deriva entre modelos registrados y listas de proveedor en vivo
+oma recap --window 1d       # Resumen del historial de conversación entre herramientas
+oma retro 7d --compare      # Retrospectiva de ingeniería con métricas + tendencias
+oma search fetch <url>      # Búsqueda mecánica con estrategias auto-escaladas
 ```
 
 La selección de modelo sigue dos capas:
