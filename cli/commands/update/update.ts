@@ -11,7 +11,6 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { promptUninstallCompetitors } from "../../utils/competitors.js";
 import {
   isAlreadyStarred,
   isGhAuthenticated,
@@ -22,12 +21,17 @@ import { ensureSerenaProject, inferSerenaLanguages } from "../../io/serena.js";
 import { downloadAndExtract } from "../../io/tarball.js";
 import pkg from "../../package.json";
 import {
+  diffArtifacts,
   fetchRemoteManifest,
   getLocalVersion,
   getNeedsReconcile,
+  hasArtifactChanges,
   hasInstalledProject,
+  readSkillDescription,
+  readWorkflowDescription,
   saveLocalVersion,
   setNeedsReconcile,
+  snapshotArtifacts,
 } from "../../platform/manifest.js";
 import {
   generateCursorRules,
@@ -45,6 +49,7 @@ import {
   readVendorsFromConfig,
   vendorRequiresHomeConsent,
 } from "../../platform/skills-installer.js";
+import { promptUninstallCompetitors } from "../../utils/competitors.js";
 import { isAutoUpdateCliEnabled } from "../../utils/config.js";
 import {
   applyRecommendedSettings,
@@ -234,6 +239,8 @@ export async function update(force = false, ci = false): Promise<void> {
         !force &&
         !hasBackendStack &&
         legacyFiles.some((f) => existsSync(join(backendResourcesDir, f)));
+
+      const beforeArtifacts = snapshotArtifacts(cwd);
 
       cpSync(join(repoDir, ".agents"), join(cwd, ".agents"), {
         recursive: true,
@@ -437,6 +444,47 @@ export async function update(force = false, ci = false): Promise<void> {
           ? pc.green("Reconciled after migrations!")
           : `Updated to version ${pc.cyan(remoteManifest.version)}!`,
       );
+
+      const artifactDiff = diffArtifacts(
+        beforeArtifacts,
+        snapshotArtifacts(cwd),
+      );
+      if (hasArtifactChanges(artifactDiff)) {
+        const lines: string[] = [];
+        if (artifactDiff.addedSkills.length > 0) {
+          lines.push(pc.green("+ Skills"));
+          for (const name of artifactDiff.addedSkills) {
+            const desc = readSkillDescription(cwd, name);
+            lines.push(
+              desc
+                ? `  ${pc.cyan(name)}: ${pc.dim(desc)}`
+                : `  ${pc.cyan(name)}`,
+            );
+          }
+        }
+        if (artifactDiff.addedWorkflows.length > 0) {
+          lines.push(pc.green("+ Workflows"));
+          for (const name of artifactDiff.addedWorkflows) {
+            const desc = readWorkflowDescription(cwd, name);
+            lines.push(
+              desc
+                ? `  ${pc.cyan(name)}: ${pc.dim(desc)}`
+                : `  ${pc.cyan(name)}`,
+            );
+          }
+        }
+        if (artifactDiff.removedSkills.length > 0) {
+          lines.push(
+            `${pc.red("- Skills")}    ${artifactDiff.removedSkills.join(", ")}`,
+          );
+        }
+        if (artifactDiff.removedWorkflows.length > 0) {
+          lines.push(
+            `${pc.red("- Workflows")} ${artifactDiff.removedWorkflows.join(", ")}`,
+          );
+        }
+        ui.note(lines.join("\n"), "What's new");
+      }
 
       if (cliTools.length > 0) {
         const skillNames = getInstalledSkillNames(cwd);

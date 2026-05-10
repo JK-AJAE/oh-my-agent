@@ -1,8 +1,15 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { http, isAxiosError } from "../io/http.js";
 import type { Manifest, ManifestFile } from "../types/index.js";
+import { parseFrontmatter } from "../utils/frontmatter.js";
 import { INSTALLED_SKILLS_DIR, REPO } from "./skills-installer.js";
 
 export function calculateSHA256(content: string): string {
@@ -89,6 +96,95 @@ export async function saveLocalVersion(
   }
 
   writeFileSync(versionFile, JSON.stringify({ version }, null, 2), "utf-8");
+}
+
+export interface ArtifactSnapshot {
+  skills: string[];
+  workflows: string[];
+}
+
+export interface ArtifactDiff {
+  addedSkills: string[];
+  removedSkills: string[];
+  addedWorkflows: string[];
+  removedWorkflows: string[];
+}
+
+export function snapshotArtifacts(targetDir: string): ArtifactSnapshot {
+  const skillsDir = join(targetDir, INSTALLED_SKILLS_DIR);
+  const workflowsDir = join(targetDir, ".agents", "workflows");
+
+  const skills = existsSync(skillsDir)
+    ? readdirSync(skillsDir, { withFileTypes: true })
+        .filter((e) => e.isDirectory() && e.name.startsWith("oma-"))
+        .map((e) => e.name)
+    : [];
+
+  const workflows = existsSync(workflowsDir)
+    ? readdirSync(workflowsDir, { withFileTypes: true })
+        .filter((e) => e.isFile() && e.name.endsWith(".md"))
+        .map((e) => e.name.replace(/\.md$/, ""))
+    : [];
+
+  return { skills: skills.sort(), workflows: workflows.sort() };
+}
+
+export function diffArtifacts(
+  before: ArtifactSnapshot,
+  after: ArtifactSnapshot,
+): ArtifactDiff {
+  const beforeSkills = new Set(before.skills);
+  const afterSkills = new Set(after.skills);
+  const beforeWorkflows = new Set(before.workflows);
+  const afterWorkflows = new Set(after.workflows);
+
+  return {
+    addedSkills: after.skills.filter((s) => !beforeSkills.has(s)),
+    removedSkills: before.skills.filter((s) => !afterSkills.has(s)),
+    addedWorkflows: after.workflows.filter((w) => !beforeWorkflows.has(w)),
+    removedWorkflows: before.workflows.filter((w) => !afterWorkflows.has(w)),
+  };
+}
+
+export function hasArtifactChanges(diff: ArtifactDiff): boolean {
+  return (
+    diff.addedSkills.length > 0 ||
+    diff.removedSkills.length > 0 ||
+    diff.addedWorkflows.length > 0 ||
+    diff.removedWorkflows.length > 0
+  );
+}
+
+export function readArtifactDescription(filePath: string): string {
+  if (!existsSync(filePath)) return "";
+
+  const { frontmatter } = parseFrontmatter(readFileSync(filePath, "utf-8"));
+  const description = frontmatter.description;
+  if (typeof description !== "string") return "";
+
+  const firstSentence =
+    description.trim().split(/(?<=[.!?])\s+/)[0] ?? description.trim();
+  return firstSentence.length > 100
+    ? `${firstSentence.slice(0, 97)}...`
+    : firstSentence;
+}
+
+export function readSkillDescription(
+  targetDir: string,
+  skillName: string,
+): string {
+  return readArtifactDescription(
+    join(targetDir, INSTALLED_SKILLS_DIR, skillName, "SKILL.md"),
+  );
+}
+
+export function readWorkflowDescription(
+  targetDir: string,
+  workflowName: string,
+): string {
+  return readArtifactDescription(
+    join(targetDir, ".agents", "workflows", `${workflowName}.md`),
+  );
 }
 
 export async function fetchRemoteManifest(): Promise<Manifest> {

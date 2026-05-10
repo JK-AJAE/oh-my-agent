@@ -17,6 +17,16 @@ vi.mock("../../platform/manifest.js", () => ({
   hasInstalledProject: vi.fn(() => true),
   saveLocalVersion: vi.fn(async () => {}),
   setNeedsReconcile: vi.fn(() => {}),
+  snapshotArtifacts: vi.fn(() => ({ skills: [], workflows: [] })),
+  diffArtifacts: vi.fn(() => ({
+    addedSkills: [],
+    removedSkills: [],
+    addedWorkflows: [],
+    removedWorkflows: [],
+  })),
+  hasArtifactChanges: vi.fn(() => false),
+  readSkillDescription: vi.fn(() => ""),
+  readWorkflowDescription: vi.fn(() => ""),
 }));
 
 vi.mock("../../io/tarball.js", () => ({
