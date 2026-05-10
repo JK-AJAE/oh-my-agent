@@ -1,13 +1,13 @@
 ---
 title: Introduction
-description: A comprehensive overview of oh-my-agent — the multi-agent orchestration framework that turns AI coding assistants into specialized engineering teams with 21 domain agents, progressive skill loading, and cross-IDE portability.
+description: A comprehensive overview of oh-my-agent, the multi-agent orchestration framework that turns AI coding assistants into specialized engineering teams with 21 domain agents, progressive skill loading, and cross-IDE portability.
 ---
 
 # Introduction
 
-oh-my-agent is a multi-agent orchestration framework for AI-powered IDEs and CLI tools. Instead of relying on a single AI assistant for everything, oh-my-agent decomposes work across 21 specialized agents — each modeled after a real engineering team role with its own tech stack knowledge, execution protocols, error playbooks, and quality checklists.
+oh-my-agent is a multi-agent orchestration framework for AI-powered IDEs and CLI tools. Instead of relying on a single AI assistant for everything, oh-my-agent decomposes work across 21 specialized agents, each modeled after a real engineering team role with its own tech stack knowledge, execution protocols, error playbooks, and quality checklists.
 
-The entire system lives in a portable `.agents/` directory inside your project. Switch between Claude Code, Gemini CLI, Codex CLI, Antigravity IDE, Cursor, or any other supported tool — your agent configuration travels with your code.
+The entire system lives in a portable `.agents/` directory inside your project. Switch between Claude Code, Gemini CLI, Codex CLI, Antigravity IDE, Cursor, or any other supported tool, and your agent configuration travels with your code.
 
 ---
 
@@ -15,9 +15,9 @@ The entire system lives in a portable `.agents/` directory inside your project. 
 
 Traditional AI coding assistants operate as generalists. They handle frontend, backend, database, security, and infrastructure with the same prompt context and the same level of expertise. This leads to:
 
-- **Context dilution** — loading knowledge for every domain wastes the context window
-- **Inconsistent quality** — a generalist can not match a specialist in any single domain
-- **No coordination** — complex features spanning multiple domains get handled sequentially
+- **Context dilution**: loading knowledge for every domain wastes the context window
+- **Inconsistent quality**: a generalist can not match a specialist in any single domain
+- **No coordination**: complex features spanning multiple domains get handled sequentially
 
 oh-my-agent solves this with specialization:
 
@@ -44,7 +44,7 @@ oh-my-agent solves this with specialization:
 | Agent | Role | Tech Stack & Resources |
 |-------|------|----------------------|
 | **oma-frontend** | UI/UX specialist | React, Next.js, TypeScript, TailwindCSS v4, shadcn/ui, FSD-lite architecture. Libraries: luxon (dates), ahooks (hooks), es-toolkit (utils), Jotai (client state), TanStack Query (server state), @tanstack/react-form + Zod (forms), better-auth (auth), nuqs (URL state). Resources: `execution-protocol.md`, `tech-stack.md`, `tailwind-rules.md`, `component-template.tsx`, `snippets.md`, `error-playbook.md`, `checklist.md`, `examples/`. |
-| **oma-backend** | API & server specialist | Clean architecture (Router-Service-Repository-Models). Stack-agnostic — detects Python/Node.js/Rust/Go/Java/Elixir/Ruby/.NET from project manifests. JWT + bcrypt for auth. Resources: `execution-protocol.md`, `orm-reference.md`, `examples.md`, `checklist.md`, `error-playbook.md`. Supports `/stack-set` for generating language-specific `stack/` references. |
+| **oma-backend** | API & server specialist | Clean architecture (Router-Service-Repository-Models). Stack-agnostic; detects Python/Node.js/Rust/Go/Java/Elixir/Ruby/.NET from project manifests. JWT + bcrypt for auth. Resources: `execution-protocol.md`, `orm-reference.md`, `examples.md`, `checklist.md`, `error-playbook.md`. Supports `/stack-set` for generating language-specific `stack/` references. |
 | **oma-mobile** | Cross-platform mobile | Flutter, Dart, Riverpod/Bloc for state management, Dio with interceptors for API calls, GoRouter for navigation. Clean architecture: domain-data-presentation. Material Design 3 (Android) + iOS HIG. 60fps target. Resources: `execution-protocol.md`, `tech-stack.md`, `snippets.md`, `screen-template.dart`, `checklist.md`, `error-playbook.md`. |
 | **oma-db** | Database architecture | SQL, NoSQL, and vector database modeling. Schema design (3NF default), normalization, indexing, transactions, capacity planning, backup strategy. Supports ISO 27001/27002/22301-aware design. Resources: `execution-protocol.md`, `document-templates.md`, `anti-patterns.md`, `vector-db.md`, `iso-controls.md`, `checklist.md`, `error-playbook.md`. |
 
@@ -92,17 +92,17 @@ oh-my-agent solves this with specialization:
 
 oh-my-agent uses a two-layer skill architecture to prevent context window exhaustion:
 
-**Layer 1 — SKILL.md (~800 bytes, always loaded):**
+**Layer 1: SKILL.md (~800 bytes, always loaded)**
 Contains the agent's identity, routing conditions, core rules, and "when to use / when NOT to use" guidance. This is all that is loaded when the agent is not actively working.
 
-**Layer 2 — resources/ (loaded on-demand):**
+**Layer 2: resources/ (loaded on-demand)**
 Contains execution protocols, tech stack references, code snippets, error playbooks, checklists, and examples. These are loaded only when the agent is invoked for a task, and even then, only the resources relevant to the specific task type are loaded (based on the difficulty assessment and task-resource mapping in `context-loading.md`).
 
-This design saves approximately 75% of tokens compared to loading everything upfront. For flash-tier models (128K context), the total resource budget is approximately 3,100 tokens — just 2.4% of the context window.
+This design saves approximately 75% of tokens compared to loading everything upfront. For flash-tier models (128K context), the total resource budget is approximately 3,100 tokens, just 2.4% of the context window.
 
 ---
 
-## .agents/ — The Single Source of Truth (SSOT)
+## .agents/: The Single Source of Truth (SSOT)
 
 Everything oh-my-agent needs lives in the `.agents/` directory:
 
@@ -120,12 +120,12 @@ Everything oh-my-agent needs lives in the `.agents/` directory:
 └── mcp.json                # MCP server configuration
 ```
 
-The `.claude/` directory exists only as an IDE integration layer — it contains symlinks pointing back to `.agents/`, plus hooks for keyword detection and the HUD statusline. The `.serena/memories/` directory holds runtime state during orchestration sessions.
+The `.claude/` directory exists only as an IDE integration layer. It contains symlinks pointing back to `.agents/`, plus hooks for keyword detection and the HUD statusline. The `.serena/memories/` directory holds runtime state during orchestration sessions.
 
 This architecture means your agent configuration is:
-- **Portable** — switch IDEs without reconfiguring
-- **Version-controlled** — commit `.agents/` alongside your code
-- **Shareable** — team members get the same agent setup
+- **Portable**: switch IDEs without reconfiguring
+- **Version-controlled**: commit `.agents/` alongside your code
+- **Shareable**: team members get the same agent setup
 
 ---
 
@@ -181,7 +181,7 @@ The HUD is powered by `.claude/hooks/hud.ts` using Claude Code's `statusLine` ho
 
 ## Automatic Workflow Detection
 
-You do not need to type `/command` to trigger workflows. oh-my-agent's `UserPromptSubmit` hook scans your natural language input against keyword triggers defined in `.claude/hooks/triggers.json` — supporting 11 languages (English, Korean, Japanese, Chinese, Spanish, French, German, Portuguese, Russian, Dutch, Polish).
+You do not need to type `/command` to trigger workflows. oh-my-agent's `UserPromptSubmit` hook scans your natural language input against keyword triggers defined in `.claude/hooks/triggers.json`, supporting 11 languages (English, Korean, Japanese, Chinese, Spanish, French, German, Portuguese, Russian, Dutch, Polish).
 
 - **Actionable input** (e.g., "plan the auth feature") → automatically loads the workflow
 - **Informational input** (e.g., "what is orchestrate?") → filtered out, no workflow triggered
@@ -201,14 +201,14 @@ oh-my-agent is not limited to Claude Code. The hook system supports:
 | **Codex CLI** | Skills auto-loaded, model-mediated parallel requests |
 | **Qwen Code** | Hook support for workflow detection |
 
-Vendor detection happens automatically — agents adapt their spawning method based on the detected runtime environment.
+Vendor detection happens automatically. Agents adapt their spawning method based on the detected runtime environment.
 
 ---
 
 ## What is Next
 
-- **[Installation](./installation.md)** — Three install methods, presets, CLI setup, and verification
-- **[Agents](/docs/core-concepts/agents)** — Deep dive into all 21 agents and charter preflight
-- **[Skills](/docs/core-concepts/skills)** — The two-layer architecture explained
-- **[Workflows](/docs/core-concepts/workflows)** — All 16 workflows with triggers and phases
-- **[Usage Guide](/docs/guide/usage)** — Real examples from single tasks to full orchestration
+- **[Installation](./installation.md)**: Three install methods, presets, CLI setup, and verification
+- **[Agents](/docs/core-concepts/agents)**: Deep dive into all 21 agents and charter preflight
+- **[Skills](/docs/core-concepts/skills)**: The two-layer architecture explained
+- **[Workflows](/docs/core-concepts/workflows)**: All 16 workflows with triggers and phases
+- **[Usage Guide](/docs/guide/usage)**: Real examples from single tasks to full orchestration

@@ -1,6 +1,6 @@
 ---
 title: "Guide: Automated Updates"
-description: Complete GitHub Action documentation for oh-my-agent — setup, all inputs and outputs, detailed examples, and how it works under the hood.
+description: Complete GitHub Action documentation for oh-my-agent, covering setup, all inputs and outputs, detailed examples, and how it works under the hood.
 ---
 
 # Guide: Automated Updates
@@ -49,7 +49,7 @@ That is the minimal configuration. It creates a PR with default settings when a 
 | `force` | string | No | `"false"` | Pass `--force` to `oma update`. When `"true"`, overwrites user-customized config files (`oma-config.yaml`, `mcp.json`) and `stack/` directories. Normally these are preserved. |
 | `pr-title` | string | No | `"chore(deps): update oh-my-agent skills"` | Custom title for the pull request. Only used in `pr` mode. |
 | `pr-labels` | string | No | `"dependencies,automated"` | Comma-separated labels to add to the PR. Only used in `pr` mode. |
-| `commit-message` | string | No | `"chore(deps): update oh-my-agent skills"` | Custom commit message. Used in both modes — as the PR commit message or the direct commit message. |
+| `commit-message` | string | No | `"chore(deps): update oh-my-agent skills"` | Custom commit message. Used in both modes (as the PR commit message or the direct commit message). |
 | `token` | string | No | `${{ github.token }}` | GitHub token for creating PRs. Use a Personal Access Token (PAT) if you need the PR to trigger other workflows (the default `GITHUB_TOKEN` does not trigger workflow runs on PRs it creates). |
 
 ---

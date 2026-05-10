@@ -1,6 +1,6 @@
 ---
 title: "Guide: Existing Project Integration"
-description: Complete guide for adding oh-my-agent to an existing project — CLI path, manual path, verification, SSOT symlink structure, and what the installer does under the hood.
+description: Complete guide for adding oh-my-agent to an existing project, covering CLI path, manual path, verification, SSOT symlink structure, and what the installer does under the hood.
 ---
 
 # Guide: Existing Project Integration
@@ -9,8 +9,8 @@ description: Complete guide for adding oh-my-agent to an existing project — CL
 
 There are two ways to add oh-my-agent to an existing project:
 
-1. **CLI path** — Run `oma` (or `npx oh-my-agent`) and follow the interactive prompts. Recommended for most users.
-2. **Manual path** — Copy files and configure symlinks yourself. Useful for restricted environments or custom setups.
+1. **CLI path**: Run `oma` (or `npx oh-my-agent`) and follow the interactive prompts. Recommended for most users.
+2. **Manual path**: Copy files and configure symlinks yourself. Useful for restricted environments or custom setups.
 
 Both paths produce the same result: a `.agents/` directory (the SSOT) plus vendor-native generated files such as `.claude/agents/`, `.codex/agents/`, and `.gemini/agents/`.
 
@@ -64,10 +64,10 @@ The installer presents these presets:
 
 If you selected a preset that includes the backend skill, you are asked to choose a language variant:
 
-- **Python** — FastAPI/SQLAlchemy (default)
-- **Node.js** — NestJS/Hono + Prisma/Drizzle
-- **Rust** — Axum/Actix-web
-- **Other / Auto-detect** — Configure later with `/stack-set`
+- **Python**: FastAPI/SQLAlchemy (default)
+- **Node.js**: NestJS/Hono + Prisma/Drizzle
+- **Rust**: Axum/Actix-web
+- **Other / Auto-detect**: Configure later with `/stack-set`
 
 ### 6. Configure IDE Symlinks
 
@@ -200,7 +200,7 @@ The doctor command checks:
 
 | Check | What It Verifies |
 |:------|:----------------|
-| **CLI installations** | gemini, claude, codex, qwen — version and availability |
+| **CLI installations** | gemini, claude, codex, qwen (version and availability) |
 | **Authentication** | API key or OAuth status for each CLI |
 | **MCP configuration** | Serena MCP server setup for each CLI environment |
 | **Skill status** | Which skills are installed and whether they are current |
@@ -362,9 +362,9 @@ The installer downloads the latest release tarball from the oh-my-agent GitHub r
 
 `installShared()` copies the `_shared/` directory to `.agents/skills/_shared/`. This includes:
 
-- `core/` — Skill routing, context loading, prompt structure, quality principles, vendor detection, API contracts.
-- `runtime/` — Memory protocol, execution protocols per vendor.
-- `conditional/` — Resources loaded only when specific conditions are met (quality score, exploration loop).
+- `core/`: Skill routing, context loading, prompt structure, quality principles, vendor detection, API contracts.
+- `runtime/`: Memory protocol, execution protocols per vendor.
+- `conditional/`: Resources loaded only when specific conditions are met (quality score, exploration loop).
 
 ### 5. Workflow Installation
 

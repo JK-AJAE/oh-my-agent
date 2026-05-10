@@ -1,4 +1,4 @@
-# oh-my-agent v2 — Demo Recording
+# oh-my-agent v2: Demo Recording
 # Usage: vhs docs/demo/demo.tape (from project root)
 # Requires: brew install vhs (installs ttyd + ffmpeg automatically)
 

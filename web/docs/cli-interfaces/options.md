@@ -1,6 +1,6 @@
 ---
 title: "CLI Options"
-description: Exhaustive reference for all CLI options — global flags, output control, per-command options, and real-world usage patterns.
+description: Exhaustive reference for all CLI options, covering global flags, output control, per-command options, and real-world usage patterns.
 ---
 
 # CLI Options
@@ -96,7 +96,7 @@ oma doctor [--json] [--output <format>] [--profile]
 |:-----|:-----------|:--------|
 | `--json` | Emit JSON instead of formatted text. | `false` |
 | `--output <format>` | Explicit output format (`text` or `json`). See [Output Options](#output-options). | `text` |
-| `--profile` | Show the profile health matrix — resolved model slug, CLI, and auth status per agent from the active `model_preset` and `agents:` overrides. See [Per-Agent Models](../guide/per-agent-models.md). | `false` |
+| `--profile` | Show the profile health matrix (resolved model slug, CLI, and auth status per agent from the active `model_preset` and `agents:` overrides). See [Per-Agent Models](../guide/per-agent-models.md). | `false` |
 
 ### update
 
@@ -143,9 +143,9 @@ oma retro [window] [--json] [--output <format>] [--interactive] [--compare]
 | `--compare` | Compare the current time window against the previous window of the same length. Shows delta metrics (e.g., commits +12, lines added -340). | `false` |
 
 **Window argument format:**
-- `7d` — 7 days
-- `2w` — 2 weeks
-- `1m` — 1 month
+- `7d`: 7 days
+- `2w`: 2 weeks
+- `1m`: 1 month
 - Omit for default (7 days)
 
 ### cleanup
@@ -162,7 +162,7 @@ oma cleanup [--dry-run] [-y | --yes] [--json] [--output <format>]
 **What gets cleaned:**
 1. Orphaned PID files: `/tmp/subagent-*.pid` where the referenced process is no longer running.
 2. Orphaned log files: `/tmp/subagent-*.log` matching dead PIDs.
-3. Gemini Antigravity directories: `.gemini/antigravity/brain/`, `.gemini/antigravity/implicit/`, `.gemini/antigravity/knowledge/` — these accumulate state over time and can grow large.
+3. Gemini Antigravity directories: `.gemini/antigravity/brain/`, `.gemini/antigravity/implicit/`, `.gemini/antigravity/knowledge/`. These accumulate state over time and can grow large.
 
 ### agent:spawn
 
@@ -186,7 +186,7 @@ oma agent:spawn <agent-id> <prompt> <session-id> [-m <vendor>] [-w <workspace>]
 |:-------|:--------|:-----------------|:-----------|
 | gemini | `gemini` | `--approval-mode=yolo` | `-p` |
 | claude | `claude` | (none) | `-p` |
-| codex | `codex` | `--full-auto` | (none — prompt is positional) |
+| codex | `codex` | `--full-auto` | (none; prompt is positional) |
 | qwen | `qwen` | `--yolo` | `-p` |
 
 These defaults can be overridden in `.agents/skills/oma-orchestrator/config/cli-config.yaml`.
@@ -278,7 +278,7 @@ The `search` group ships its own JSON output (no `--json` / `--output` flags). U
 | `media <url>` | `--subs`, `--sub-lang <list>` (default `en`), `--format <spec>`, `--timeout` (default `30`), `--pretty` |
 | `code <query>` | `--host <github\|gitlab>` (default `github`), `--language`, `--repo`, `--limit` (default `20`), `--pretty` |
 | `trust <domain>` | `--pretty` |
-| `doctor` | none — runs binary checks for Chrome / `python3 curl_cffi` / `yt-dlp` / `gh` |
+| `doctor` | none (runs binary checks for Chrome / `python3 curl_cffi` / `yt-dlp` / `gh`) |
 
 **Exit codes:** `0` ok, `1` error, `2` blocked, `3` not-found, `4` invalid-input, `5` auth-required, `6` timeout. Use these in scripts to differentiate transient blockers from invalid inputs.
 

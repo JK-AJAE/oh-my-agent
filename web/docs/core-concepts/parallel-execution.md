@@ -1,15 +1,15 @@
 ---
 title: Parallel Execution
-description: Complete guide to running multiple oh-my-agent agents simultaneously — agent:spawn syntax with all options, agent:parallel inline mode, workspace-aware patterns, multi-CLI configuration, vendor resolution priority, monitoring with dashboards, session ID strategy, and anti-patterns to avoid.
+description: Complete guide to running multiple oh-my-agent agents simultaneously, covering agent:spawn syntax with all options, agent:parallel inline mode, workspace-aware patterns, multi-CLI configuration, vendor resolution priority, monitoring with dashboards, session ID strategy, and anti-patterns to avoid.
 ---
 
 # Parallel Execution
 
-The core advantage of oh-my-agent is running multiple specialized agents simultaneously. While the backend agent implements your API, the frontend agent creates the UI, and the mobile agent builds the app screens — all coordinated through shared memory.
+The core advantage of oh-my-agent is running multiple specialized agents simultaneously. While the backend agent implements your API, the frontend agent creates the UI, and the mobile agent builds the app screens, all coordinated through shared memory.
 
 ---
 
-## agent:spawn — Single Agent Spawning
+## agent:spawn: Single Agent Spawning
 
 ### Basic Syntax
 
@@ -34,7 +34,7 @@ oma agent:spawn <agent-id> <prompt> <session-id> [options]
 | `--model <name>` | `-m` | Override CLI vendor for this specific spawn. Options: `gemini`, `claude`, `codex`, `qwen`. |
 | `--max-turns <n>` | `-t` | Override default turn limit for this agent. |
 | `--json` | | Output result as JSON (useful for scripting). |
-| `--no-wait` | | Fire and forget — return immediately without waiting for completion. |
+| `--no-wait` | | Fire and forget; return immediately without waiting for completion. |
 
 ### Examples
 
@@ -82,13 +82,13 @@ oma agent:spawn frontend "Login + token refresh + dashboard" session-02 -w ./app
 oma agent:spawn mobile "Auth screens + offline token storage" session-02 -w ./apps/mobile &
 wait
 
-# After implementation, run QA (sequential — depends on implementation)
+# After implementation, run QA (sequential; depends on implementation)
 oma agent:spawn qa "Review all implementations for security and accessibility" session-02
 ```
 
 ---
 
-## agent:parallel — Inline Parallel Mode
+## agent:parallel: Inline Parallel Mode
 
 For a cleaner syntax that handles background process management automatically:
 
@@ -169,7 +169,7 @@ Agent(subagent_type="backend-engineer", prompt="...", run_in_background=true)
 Agent(subagent_type="frontend-engineer", prompt="...", run_in_background=true)
 ```
 
-Multiple Agent tool calls in the same message execute as true parallel — no sequential waiting.
+Multiple Agent tool calls in the same message execute as true parallel, with no sequential waiting.
 
 The same dispatch rule applies across vendors:
 
@@ -269,7 +269,7 @@ Session IDs determine:
    oma agent:spawn frontend "task" session-01 -w ./apps/web &
    ```
 
-4. **Monitor actively.** Open a dashboard terminal to catch issues early — a failing agent wastes turns if not caught quickly.
+4. **Monitor actively.** Open a dashboard terminal to catch issues early. A failing agent wastes turns if not caught quickly.
 
 5. **Run QA after implementation.** Spawn the QA agent sequentially after all implementation agents complete:
    ```bash
@@ -289,7 +289,7 @@ Session IDs determine:
 
 2. **Do not exceed MAX_PARALLEL (default 3).** More concurrent agents does not always mean faster results. Each agent needs memory and CPU resources. The default of 3 is tuned for most systems.
 
-3. **Do not skip the plan step.** Spawning agents without a plan leads to misaligned implementations — the frontend builds against one API shape while the backend builds another.
+3. **Do not skip the plan step.** Spawning agents without a plan leads to misaligned implementations, where the frontend builds against one API shape while the backend builds another.
 
 4. **Do not ignore failed agents.** A failed agent's work is incomplete. Check `result-{agent}.md` for the failure reason, fix the prompt, and re-spawn.
 

@@ -1,6 +1,6 @@
 ---
 title: Usage Guide
-description: Comprehensive usage guide for oh-my-agent — quick start, detailed real-world examples covering single tasks, multi-domain projects, bug fixes, design systems, CLI parallel execution, and ultrawork. All workflow commands, auto-detection examples in multiple languages, all 21 skills with use cases, dashboard setup, key concepts, tips, and troubleshooting.
+description: Comprehensive usage guide for oh-my-agent, covering quick start, detailed real-world examples (single tasks, multi-domain projects, bug fixes, design systems, CLI parallel execution, and ultrawork), all workflow commands, auto-detection examples in multiple languages, all 21 skills with use cases, dashboard setup, key concepts, tips, and troubleshooting.
 ---
 
 # How to Use oh-my-agent
@@ -9,7 +9,7 @@ description: Comprehensive usage guide for oh-my-agent — quick start, detailed
 
 1. Open your project in an AI-powered IDE (Claude Code, Gemini CLI, Cursor, Antigravity, etc.)
 2. Skills are auto-detected from `.agents/skills/`
-3. Describe what you want in natural language — oh-my-agent routes to the right agent
+3. Describe what you want in natural language. oh-my-agent routes to the right agent
 4. For multi-agent work, use `/work` or `/orchestrate`
 
 That is the entire workflow. No special syntax required for single-domain tasks.
@@ -26,11 +26,11 @@ Create a login form component with email and password fields, client-side valida
 **What happens:**
 
 1. The `oma-frontend` skill auto-activates (keywords: "form", "component", "Tailwind CSS")
-2. Layer 1 (SKILL.md) is already loaded — agent identity, core rules, library list
+2. Layer 1 (SKILL.md) is already loaded with agent identity, core rules, and library list
 3. Layer 2 resources load on-demand:
-   - `execution-protocol.md` — the 4-step workflow (Analyze, Plan, Implement, Verify)
-   - `snippets.md` — form + Zod validation patterns
-   - `component-template.tsx` — React component structure
+   - `execution-protocol.md`: the 4-step workflow (Analyze, Plan, Implement, Verify)
+   - `snippets.md`: form + Zod validation patterns
+   - `component-template.tsx`: React component structure
 4. Agent outputs a **CHARTER_CHECK**:
    ```
    CHARTER_CHECK:
@@ -47,7 +47,7 @@ Create a login form component with email and password fields, client-side valida
    - Loading skeleton in `src/features/auth/components/skeleton/login-form-skeleton.tsx`
 6. Agent runs the checklist: accessibility (ARIA labels, semantic HTML, keyboard nav), mobile viewport, performance (no CLS), error boundaries
 
-**Output:** A production-ready React component with TypeScript, validation, tests, and accessibility — not just a suggestion.
+**Output:** A production-ready React component with TypeScript, validation, tests, and accessibility, not just a suggestion.
 
 ---
 
@@ -69,7 +69,7 @@ Build a TODO app with user authentication, task CRUD, and a mobile companion app
 /work Build a TODO app with user authentication, task CRUD, and a mobile app
 ```
 
-3. **Step 1 — PM Agent plans:**
+3. **Step 1, PM Agent plans:**
    - Identifies domains: backend (auth API, task CRUD), frontend (login, task list UI), mobile (Flutter app)
    - Defines API contracts: `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `GET /tasks`, `POST /tasks`, `PUT /tasks/:id`, `DELETE /tasks/:id`
    - Creates prioritized task breakdown:
@@ -78,9 +78,9 @@ Build a TODO app with user authentication, task CRUD, and a mobile companion app
      - P2: QA review
    - Saves to `.agents/results/plan-{sessionId}.json`
 
-4. **Step 2 — You review and confirm the plan**
+4. **Step 2, You review and confirm the plan**
 
-5. **Step 3 — Agents spawn by priority:**
+5. **Step 3, Agents spawn by priority:**
    ```bash
    # P0 tier (parallel)
    oma agent:spawn backend "JWT auth API + task CRUD endpoints" session-todo-01 -w ./apps/api &
@@ -93,13 +93,13 @@ Build a TODO app with user authentication, task CRUD, and a mobile companion app
    wait
    ```
 
-6. **Step 4 — QA Agent reviews:**
+6. **Step 4, QA Agent reviews:**
    - Security: OWASP Top 10 compliance (JWT validation, CSRF, SQL injection check)
    - Performance: N+1 query check, pagination verification
    - Accessibility: WCAG 2.1 AA on all frontend components
    - Cross-domain: API contract alignment between frontend, mobile, and backend
 
-7. **Step 5 — Iterate:** If QA finds CRITICAL issues, re-spawn the responsible agent with the QA report.
+7. **Step 5, Iterate:** If QA finds CRITICAL issues, re-spawn the responsible agent with the QA report.
 
 ---
 
@@ -107,28 +107,28 @@ Build a TODO app with user authentication, task CRUD, and a mobile companion app
 
 **You type:**
 ```
-There's a bug — clicking the save button shows "Cannot read property 'map' of undefined" in the task list
+There's a bug. Clicking the save button shows "Cannot read property 'map' of undefined" in the task list
 ```
 
 **What happens:**
 
 1. `oma-debug` activates automatically (keywords: "bug", "error", "Cannot read property")
-2. **Step 1 — Collect:** The error message and context are captured
-3. **Step 2 — Reproduce:** MCP `search_for_pattern` finds the `.map()` call in `src/features/tasks/components/task-list.tsx`
-4. **Step 3 — Diagnose:** MCP `find_referencing_symbols` traces the data flow:
+2. **Step 1, Collect:** The error message and context are captured
+3. **Step 2, Reproduce:** MCP `search_for_pattern` finds the `.map()` call in `src/features/tasks/components/task-list.tsx`
+4. **Step 3, Diagnose:** MCP `find_referencing_symbols` traces the data flow:
    - `useQuery` hook fetches tasks from API
    - Component renders before data arrives
    - `tasks` is `undefined` during loading state
    - Root cause: missing loading state check before `.map()`
-5. **Step 4 — Propose fix:** Present minimal change — add loading state check and null guard
-6. **Step 5 — Implement:**
+5. **Step 4, Propose fix:** Present minimal change by adding loading state check and null guard
+6. **Step 5, Implement:**
    - Add loading skeleton while data fetches
    - Add null check: `tasks?.map()` or early return for loading state
    - Write regression test that verifies component renders correctly when `tasks` is undefined
-7. **Step 6 — Similar pattern scan:** MCP `search_for_pattern` searches for other `.map()` calls on potentially undefined arrays
+7. **Step 6, Similar pattern scan:** MCP `search_for_pattern` searches for other `.map()` calls on potentially undefined arrays
    - Finds 3 similar patterns in `user-list.tsx`, `comment-list.tsx`, `notification-list.tsx`
    - Proactively applies the same fix pattern
-8. **Step 7 — Document:** Bug report written to memory with root cause, fix, and prevention
+8. **Step 7, Document:** Bug report written to memory with root cause, fix, and prevention
 
 ---
 
@@ -142,35 +142,35 @@ Design a dark premium landing page for my B2B SaaS analytics product
 **What happens:**
 
 1. `oma-design` activates (keywords: "design", "landing page", "dark", "premium")
-2. **Phase 1 — SETUP:** Checks for `.design-context.md`. If missing, asks:
+2. **Phase 1, SETUP:** Checks for `.design-context.md`. If missing, asks:
    - What languages does the service support? (en only / + CJK)
    - Target audience? (B2B, technical users, 25-45)
    - Brand personality? (professional / premium)
    - Aesthetic direction? (dark premium)
    - Reference sites? (user provides examples)
    - Accessibility? (WCAG AA)
-3. **Phase 3 — ENHANCE:** If the prompt is vague, transforms it into section-by-section specification
-4. **Phase 4 — PROPOSE:** Presents 3 design directions:
-   - **Direction A: "Midnight Observatory"** — Deep navy (#0f1729), cyan accents (#22d3ee), Inter + JetBrains Mono, bento grid layout, scroll-driven reveals
-   - **Direction B: "Carbon Interface"** — Neutral gray (#18181b), amber accents (#f59e0b), system fonts, chess layout, hover-driven micro-interactions
-   - **Direction C: "Deep Space"** — Pure dark (#0a0a0a), emerald accents (#10b981), Geist + Geist Mono, full-bleed sections, entrance animations
-5. **Phase 5 — GENERATE:** Based on chosen direction, generates:
+3. **Phase 3, ENHANCE:** If the prompt is vague, transforms it into section-by-section specification
+4. **Phase 4, PROPOSE:** Presents 3 design directions:
+   - **Direction A: "Midnight Observatory"**: Deep navy (#0f1729), cyan accents (#22d3ee), Inter + JetBrains Mono, bento grid layout, scroll-driven reveals
+   - **Direction B: "Carbon Interface"**: Neutral gray (#18181b), amber accents (#f59e0b), system fonts, chess layout, hover-driven micro-interactions
+   - **Direction C: "Deep Space"**: Pure dark (#0a0a0a), emerald accents (#10b981), Geist + Geist Mono, full-bleed sections, entrance animations
+5. **Phase 5, GENERATE:** Based on chosen direction, generates:
    - `DESIGN.md` with 6 sections (typography, color, spacing, motion, components, accessibility)
    - CSS custom properties
    - Tailwind config extensions
    - shadcn/ui theme variables
-6. **Phase 6 — AUDIT:** Runs checks for responsive (320px minimum), WCAG 2.2, Nielsen heuristics, AI slop detection
-7. **Phase 7 — HANDOFF:** "Design complete. Run `/orchestrate` to implement with oma-frontend."
+6. **Phase 6, AUDIT:** Runs checks for responsive (320px minimum), WCAG 2.2, Nielsen heuristics, AI slop detection
+7. **Phase 7, HANDOFF:** "Design complete. Run `/orchestrate` to implement with oma-frontend."
 
 ---
 
 ## Example 5: CLI Parallel Execution
 
 ```bash
-# Single agent — simple task
+# Single agent for a simple task
 oma agent:spawn frontend "Add dark mode toggle to the header" session-ui-01
 
-# Three agents in parallel — full-stack feature
+# Three agents in parallel for a full-stack feature
 oma agent:spawn backend "Implement notification API with WebSocket support" session-notif-01 -w ./apps/api &
 oma agent:spawn frontend "Build notification center with real-time updates" session-notif-01 -w ./apps/web &
 oma agent:spawn mobile "Add push notification screens and in-app notification list" session-notif-01 -w ./apps/mobile &
@@ -200,7 +200,7 @@ Cross-vendor tasks still use `oma agent:spawn`.
 
 ---
 
-## Example 6: Ultrawork — Maximum Quality
+## Example 6: Ultrawork for Maximum Quality
 
 **You type:**
 ```
@@ -209,38 +209,38 @@ Cross-vendor tasks still use `oma agent:spawn`.
 
 **What happens (5 phases, 17 steps, 11 review steps):**
 
-**Phase 1 — PLAN (Steps 1-4, PM Agent inline):**
+**Phase 1, PLAN (Steps 1-4, PM Agent inline):**
 - Step 1: Create plan with task breakdown, API contracts, dependencies
-- Step 2: Plan Review — completeness check (are all requirements mapped?)
-- Step 3: Meta Review — self-verify the review was sufficient
-- Step 4: Over-Engineering Review — MVP focus, no unnecessary complexity
+- Step 2: Plan Review (completeness check; are all requirements mapped?)
+- Step 3: Meta Review (self-verify the review was sufficient)
+- Step 4: Over-Engineering Review (MVP focus, no unnecessary complexity)
 - PLAN_GATE: Plan documented, assumptions listed, user confirms
 
-**Phase 2 — IMPL (Step 5, Dev Agents spawned):**
+**Phase 2, IMPL (Step 5, Dev Agents spawned):**
 - Backend agent implements Stripe integration (webhooks, idempotency, error handling)
 - Frontend agent builds checkout flow and payment status UI
 - Step 5.2: Measure baseline Quality Score (tests, lint, typecheck)
 - IMPL_GATE: Build succeeds, tests pass, only planned files modified
 
-**Phase 3 — VERIFY (Steps 6-8, QA Agent spawned):**
-- Step 6: Alignment Review — does implementation match the plan?
-- Step 7: Security/Bug Review — OWASP, npm audit, Stripe security best practices
-- Step 8: Improvement/Regression Review — no regressions introduced
+**Phase 3, VERIFY (Steps 6-8, QA Agent spawned):**
+- Step 6: Alignment Review (does implementation match the plan?)
+- Step 7: Security/Bug Review (OWASP, npm audit, Stripe security best practices)
+- Step 8: Improvement/Regression Review (no regressions introduced)
 - VERIFY_GATE: Zero CRITICAL, zero HIGH, Quality Score >= 75
 
-**Phase 4 — REFINE (Steps 9-13, Debug Agent spawned):**
+**Phase 4, REFINE (Steps 9-13, Debug Agent spawned):**
 - Step 9: Split large files (> 500 lines) and functions (> 50 lines)
-- Step 10: Integration/Reuse Review — eliminate duplicate logic
-- Step 11: Side Effect Review — trace cascade impact with `find_referencing_symbols`
-- Step 12: Full Change Review — naming consistency, style alignment
+- Step 10: Integration/Reuse Review (eliminate duplicate logic)
+- Step 11: Side Effect Review (trace cascade impact with `find_referencing_symbols`)
+- Step 12: Full Change Review (naming consistency, style alignment)
 - Step 13: Clean up dead code
 - REFINE_GATE: Quality Score non-regressed, code clean
 
-**Phase 5 — SHIP (Steps 14-17, QA Agent spawned):**
-- Step 14: Code Quality Review — lint, types, coverage
-- Step 15: UX Flow Verification — end-to-end payment user journey
-- Step 16: Related Issues Review — final cascade impact check
-- Step 17: Deployment Readiness — secrets management, migration scripts, rollback plan
+**Phase 5, SHIP (Steps 14-17, QA Agent spawned):**
+- Step 14: Code Quality Review (lint, types, coverage)
+- Step 15: UX Flow Verification (end-to-end payment user journey)
+- Step 16: Related Issues Review (final cascade impact check)
+- Step 17: Deployment Readiness (secrets management, migration scripts, rollback plan)
 - SHIP_GATE: All checks pass, user gives final approval
 
 ---
@@ -254,7 +254,7 @@ Cross-vendor tasks still use `oma agent:spawn`.
 | `/ultrawork` | Persistent | 5-phase, 17-step quality workflow with 11 review checkpoints | Maximum quality delivery, production-critical code |
 | `/plan` | Non-persistent | PM-driven task breakdown, API contracts, and tracked plan artifacts in `docs/plans/work/` (sequential `NNN-name.md`, Status field for lifecycle) | Before any complex multi-agent work; complex features needing tracked progress and decision logs |
 | `/brainstorm` | Non-persistent | Design-first ideation with 2-3 approach proposals | Before committing to an implementation approach |
-| `/deepinit` | Non-persistent | Full project initialization — AGENTS.md, ARCHITECTURE.md, docs/ | Setting up oh-my-agent in an existing codebase |
+| `/deepinit` | Non-persistent | Full project initialization (AGENTS.md, ARCHITECTURE.md, docs/) | Setting up oh-my-agent in an existing codebase |
 | `/review` | Non-persistent | QA pipeline: OWASP security, performance, accessibility, code quality | Before merging code, pre-deployment review |
 | `/debug` | Non-persistent | Structured debugging: reproduce, diagnose, fix, regression test, scan | Investigating bugs and errors |
 | `/design` | Non-persistent | 7-phase design workflow producing DESIGN.md with tokens | Building design systems, landing pages, UI redesigns |
@@ -304,7 +304,7 @@ oh-my-agent detects workflow keywords in 11 languages. Here are examples showing
 
 ---
 
-## All 14 Skills — Quick Reference
+## All 14 Skills: Quick Reference
 
 | Skill | Best For | Primary Output |
 |-------|---------|---------------|
@@ -355,7 +355,7 @@ Features:
 ### Recommended Layout
 
 Use 3 terminals:
-1. **Dashboard terminal:** `oma dashboard` — continuous monitoring
+1. **Dashboard terminal:** `oma dashboard` for continuous monitoring
 2. **Command terminal:** Agent spawn commands, workflow commands
 3. **Build terminal:** Test runs, build logs, git operations
 
@@ -370,10 +370,10 @@ Skills load in two layers to save tokens. Layer 1 (SKILL.md, ~800 bytes) is alwa
 ### Token Optimization
 
 Beyond progressive disclosure, oh-my-agent optimizes tokens through:
-- **Context budget management** — no full file reads; use `find_symbol` instead of `read_file`
-- **Lazy resource loading** — load error playbooks only on errors, checklists only at verification
-- **Difficulty-based branching** — Simple tasks skip analysis and use minimal checklists
-- **Progress tracking** — agents record read files to prevent re-reads
+- **Context budget management**: no full file reads; use `find_symbol` instead of `read_file`
+- **Lazy resource loading**: load error playbooks only on errors, checklists only at verification
+- **Difficulty-based branching**: Simple tasks skip analysis and use minimal checklists
+- **Progress tracking**: agents record read files to prevent re-reads
 
 ### CLI Spawning
 
@@ -387,11 +387,11 @@ When you run `oma agent:spawn`, the CLI:
 
 ### Serena Memory
 
-Agents coordinate through shared memory files at `.serena/memories/`. The orchestrator writes `orchestrator-session.md` (session state) and `task-board.md` (task assignments). Each agent writes its own `progress-{agent}.md` (turn-by-turn updates) and `result-{agent}.md` (final output). Memory tools are configurable — defaults are `read_memory`, `write_memory`, `edit_memory` via Serena MCP.
+Agents coordinate through shared memory files at `.serena/memories/`. The orchestrator writes `orchestrator-session.md` (session state) and `task-board.md` (task assignments). Each agent writes its own `progress-{agent}.md` (turn-by-turn updates) and `result-{agent}.md` (final output). Memory tools are configurable; defaults are `read_memory`, `write_memory`, `edit_memory` via Serena MCP.
 
 ### Workspaces
 
-The `-w` flag on `agent:spawn` isolates an agent to a specific directory. This is critical for parallel execution — without workspace isolation, two agents might modify the same file simultaneously, creating conflicts. Standard workspace layout: `./apps/api` (backend), `./apps/web` (frontend), `./apps/mobile` (mobile).
+The `-w` flag on `agent:spawn` isolates an agent to a specific directory. This is critical for parallel execution. Without workspace isolation, two agents might modify the same file simultaneously, creating conflicts. Standard workspace layout: `./apps/api` (backend), `./apps/web` (frontend), `./apps/mobile` (mobile).
 
 ---
 
@@ -424,7 +424,7 @@ The `-w` flag on `agent:spawn` isolates an agent to a specific directory. This i
 | Problem | Cause | Fix |
 |---------|-------|-----|
 | Skills not detected in IDE | `.agents/skills/` missing or no `SKILL.md` files | Run the installer (`bunx oh-my-agent@latest`), verify symlinks in `.claude/skills/`, restart IDE |
-| CLI not found when spawning | AI CLI not installed globally | `which gemini` / `which claude` — install missing CLIs per the installation guide |
+| CLI not found when spawning | AI CLI not installed globally | Run `which gemini` / `which claude`, then install missing CLIs per the installation guide |
 | Agents producing conflicting code | No workspace isolation | Use separate workspaces: `-w ./apps/api`, `-w ./apps/web` |
 | Dashboard shows "No agents detected" | Agents have not written to memory yet | Wait for agents to start (first write at turn 1), or verify session ID matches |
 | Web dashboard will not start | Dependencies not installed | Run `bun install` in the web/ directory first |

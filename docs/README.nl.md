@@ -6,7 +6,7 @@
 
 Ooit gewenst dat je AI-assistent collega's had? Dat is precies wat oh-my-agent doet.
 
-In plaats van een enkele AI die alles doet (en halverwege de draad kwijtraakt), verdeelt oh-my-agent het werk over **gespecialiseerde agents** — frontend, backend, architecture, QA, PM, DB, mobile, infra, debug, design en meer. Elk van hen kent zijn domein door en door, heeft eigen tools en checklists, en blijft in zijn eigen baan.
+In plaats van een enkele AI die alles doet (en halverwege de draad kwijtraakt), verdeelt oh-my-agent het werk over **gespecialiseerde agents**: frontend, backend, architecture, QA, PM, DB, mobile, infra, debug, design en meer. Elk van hen kent zijn domein door en door, heeft eigen tools en checklists, en blijft in zijn eigen baan.
 
 Werkt met alle grote AI IDE's: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode en meer.
 
@@ -30,7 +30,7 @@ bunx oh-my-agent@latest
 ### Installatie via Agent Package Manager
 
 <details>
-<summary>Microsofts <a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM) — alleen skills. Klik om uit te klappen.</summary>
+<summary>Microsofts <a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM): alleen skills. Klik om uit te klappen.</summary>
 
 > Niet te verwarren met de APM (Application Performance Monitoring) van `oma-observability`.
 
@@ -43,7 +43,7 @@ apm install first-fluke/oh-my-agent
 apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 ```
 
-APM leest de `skills: .agents/skills/`-pointer in `.claude-plugin/plugin.json`, dus de `.agents/`-SSOT is de enige bron — geen build-stap, geen mirror.
+APM leest de `skills: .agents/skills/`-pointer in `.claude-plugin/plugin.json`, dus de `.agents/`-SSOT is de enige bron, zonder build-stap en zonder mirror.
 
 APM levert alleen de skills. Voor workflows, regels, `oma-config.yaml`, keyword-detection-hooks en de `oma agent:spawn`-CLI gebruik je `bunx oh-my-agent@latest`. Kies per project één distributie, anders loopt het uit elkaar.
 
@@ -121,7 +121,7 @@ Of gebruik slash commands voor gestructureerde workflows:
 | 5 | `/docs` | Documentatie-drift verifiëren en synchroniseren via `oma-docs` |
 | 6 | `/scm` | SCM- en Git-workflow met ondersteuning voor Conventional Commits |
 
-**Autodetectie**: Je hebt de slash commands niet eens nodig — woorden als "architectuur", "plan", "review" en "debug" in je bericht (in 11 talen!) activeren automatisch de juiste workflow.
+**Autodetectie**: Je hebt de slash commands niet eens nodig. Woorden als "architectuur", "plan", "review" en "debug" in je bericht (in 11 talen!) activeren automatisch de juiste workflow.
 
 ## CLI
 
@@ -152,12 +152,12 @@ Modelselectie volgt twee lagen:
 
 > [Meer lezen →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
 
-- **Draagbaar** — `.agents/` reist mee met je project, niet opgesloten in een IDE
-- **Rolgebaseerd** — Agents gemodelleerd als een echt engineeringteam, niet een stapel prompts
-- **Token-efficient** — Tweelaags skill-ontwerp bespaart ~75% tokens
-- **Kwaliteit eerst** — Charter preflight, quality gates en review-workflows ingebouwd
-- **Multi-vendor** — Mix Gemini, Claude, Codex en Qwen per agent-type
-- **Observeerbaar** — Terminal- en webdashboards voor realtime monitoring
+- **Draagbaar**: `.agents/` reist mee met je project, niet opgesloten in een IDE
+- **Rolgebaseerd**: agents gemodelleerd als een echt engineeringteam, niet een stapel prompts
+- **Token-efficient**: tweelaags skill-ontwerp bespaart ~75% tokens
+- **Kwaliteit eerst**: Charter preflight, quality gates en review-workflows ingebouwd
+- **Multi-vendor**: mix Gemini, Claude, Codex en Qwen per agent-type
+- **Observeerbaar**: terminal- en webdashboards voor realtime monitoring
 
 ## Architectuur
 
@@ -208,9 +208,9 @@ flowchart TD
 
 ## Meer informatie
 
-- **[Uitgebreide documentatie](./AGENTS_SPEC.md)** — Volledige technische spec en architectuur
-- **[Ondersteunde agents](./SUPPORTED_AGENTS.md)** — Agent-ondersteuningsmatrix per IDE
-- **[Webdocs](https://first-fluke.github.io/oh-my-agent/)** — Handleidingen, tutorials en CLI-referentie
+- **[Uitgebreide documentatie](./AGENTS_SPEC.md)**: volledige technische spec en architectuur
+- **[Ondersteunde agents](./SUPPORTED_AGENTS.md)**: agent-ondersteuningsmatrix per IDE
+- **[Webdocs](https://first-fluke.github.io/oh-my-agent/)**: handleidingen, tutorials en CLI-referentie
 
 ## Sponsors
 

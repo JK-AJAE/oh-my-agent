@@ -122,8 +122,8 @@ draw_dashboard \
   "  ${CYAN}backend${RESET}        ${CYAN}● running${RESET}  " "       ${BOLD}3${RESET}" \
   "  ${CYAN}frontend${RESET}       ${CYAN}● running${RESET}  " "       ${BOLD}2${RESET}" \
   "  ${DIM}qa${RESET}             ${DIM}○ blocked${RESET}  " "       ${DIM}-${RESET}" \
-  "  ${CYAN}[backend]${RESET}  Turn 3 — Setting up SQLAlchemy models" \
-  "  ${CYAN}[frontend]${RESET} Turn 2 — Creating component structure"
+  "  ${CYAN}[backend]${RESET}  Turn 3: Setting up SQLAlchemy models" \
+  "  ${CYAN}[frontend]${RESET} Turn 2: Creating component structure"
 sleep 1.2
 
 # Dashboard Frame 2: Progress
@@ -131,8 +131,8 @@ draw_dashboard \
   "  ${CYAN}backend${RESET}        ${CYAN}● running${RESET}  " "       ${BOLD}7${RESET}" \
   "  ${CYAN}frontend${RESET}       ${CYAN}● running${RESET}  " "       ${BOLD}6${RESET}" \
   "  ${DIM}qa${RESET}             ${DIM}○ blocked${RESET}  " "       ${DIM}-${RESET}" \
-  "  ${CYAN}[backend]${RESET}  Turn 7 — Implementing JWT token rotation" \
-  "  ${CYAN}[frontend]${RESET} Turn 6 — Adding form validation with Zod"
+  "  ${CYAN}[backend]${RESET}  Turn 7: Implementing JWT token rotation" \
+  "  ${CYAN}[frontend]${RESET} Turn 6: Adding form validation with Zod"
 sleep 1.2
 
 # Dashboard Frame 3: More progress
@@ -140,8 +140,8 @@ draw_dashboard \
   "  ${CYAN}backend${RESET}        ${CYAN}● running${RESET}  " "      ${BOLD}12${RESET}" \
   "  ${CYAN}frontend${RESET}       ${CYAN}● running${RESET}  " "      ${BOLD}14${RESET}" \
   "  ${DIM}qa${RESET}             ${DIM}○ blocked${RESET}  " "       ${DIM}-${RESET}" \
-  "  ${CYAN}[backend]${RESET}  Turn 12 — Added rate limiting + tests" \
-  "  ${CYAN}[frontend]${RESET} Turn 14 — Integrating API client"
+  "  ${CYAN}[backend]${RESET}  Turn 12: Added rate limiting + tests" \
+  "  ${CYAN}[frontend]${RESET} Turn 14: Integrating API client"
 sleep 1.2
 
 # Dashboard Frame 4: Frontend done
@@ -149,8 +149,8 @@ draw_dashboard \
   "  ${CYAN}backend${RESET}        ${CYAN}● running${RESET}  " "      ${BOLD}15${RESET}" \
   "  ${GREEN}frontend${RESET}       ${GREEN}✓ completed${RESET}" "      ${BOLD}18${RESET}" \
   "  ${DIM}qa${RESET}             ${DIM}○ blocked${RESET}  " "       ${DIM}-${RESET}" \
-  "  ${GREEN}[frontend]${RESET} ✓ Completed — All criteria met" \
-  "  ${CYAN}[backend]${RESET}  Turn 15 — Writing integration tests"
+  "  ${GREEN}[frontend]${RESET} ✓ Completed: all criteria met" \
+  "  ${CYAN}[backend]${RESET}  Turn 15: Writing integration tests"
 sleep 1.2
 
 # Dashboard Frame 5: Backend done, QA starts
@@ -158,8 +158,8 @@ draw_dashboard \
   "  ${GREEN}backend${RESET}        ${GREEN}✓ completed${RESET}" "      ${BOLD}20${RESET}" \
   "  ${GREEN}frontend${RESET}       ${GREEN}✓ completed${RESET}" "      ${BOLD}18${RESET}" \
   "  ${CYAN}qa${RESET}             ${CYAN}● running${RESET}  " "       ${BOLD}1${RESET}" \
-  "  ${GREEN}[backend]${RESET}  ✓ Completed — All criteria met" \
-  "  ${CYAN}[qa]${RESET}       Turn 1 — Starting OWASP Top 10 audit"
+  "  ${GREEN}[backend]${RESET}  ✓ Completed: all criteria met" \
+  "  ${CYAN}[qa]${RESET}       Turn 1: Starting OWASP Top 10 audit"
 sleep 1.2
 
 # Dashboard Frame 6: QA progressing
@@ -167,7 +167,7 @@ draw_dashboard \
   "  ${GREEN}backend${RESET}        ${GREEN}✓ completed${RESET}" "      ${BOLD}20${RESET}" \
   "  ${GREEN}frontend${RESET}       ${GREEN}✓ completed${RESET}" "      ${BOLD}18${RESET}" \
   "  ${CYAN}qa${RESET}             ${CYAN}● running${RESET}  " "       ${BOLD}5${RESET}" \
-  "  ${CYAN}[qa]${RESET}       Turn 5 — Checking XSS, CSRF, SQL injection" \
+  "  ${CYAN}[qa]${RESET}       Turn 5: Checking XSS, CSRF, SQL injection" \
   "  ${CYAN}[qa]${RESET}       Found: 0 critical, 1 medium issue"
 sleep 1.2
 
@@ -176,6 +176,6 @@ draw_dashboard \
   "  ${GREEN}backend${RESET}        ${GREEN}✓ completed${RESET}" "      ${BOLD}20${RESET}" \
   "  ${GREEN}frontend${RESET}       ${GREEN}✓ completed${RESET}" "      ${BOLD}18${RESET}" \
   "  ${GREEN}qa${RESET}             ${GREEN}✓ completed${RESET}" "       ${BOLD}8${RESET}" \
-  "  ${GREEN}[qa]${RESET}       ✓ Completed — 0 critical, 1 medium (documented)" \
+  "  ${GREEN}[qa]${RESET}       ✓ Completed: 0 critical, 1 medium (documented)" \
   "  ${GREEN}${BOLD}[system] All agents completed successfully ✓${RESET}"
 sleep 2.5

@@ -1,6 +1,6 @@
 ---
 title: "CLI Commands"
-description: Complete reference for every oh-my-agent CLI command — syntax, options, examples, organized by category.
+description: Complete reference for every oh-my-agent CLI command, covering syntax, options, examples, organized by category.
 ---
 
 # CLI Commands
@@ -57,7 +57,7 @@ oma doctor [--json] [--output <format>] [--profile]
 |:-----|:-----------|
 | `--json` | Output as JSON |
 | `--output <format>` | Output format (`text` or `json`) |
-| `--profile` | Show profile health matrix — displays the resolved model slug, CLI, and auth status per agent from the active `model_preset` and `agents:` overrides. See [Per-Agent Models](../guide/per-agent-models.md). |
+| `--profile` | Show profile health matrix. Displays the resolved model slug, CLI, and auth status per agent from the active `model_preset` and `agents:` overrides. See [Per-Agent Models](../guide/per-agent-models.md). |
 
 **What it checks:**
 - CLI installations: gemini, claude, codex, qwen (version and path).
@@ -168,7 +168,7 @@ Use this after editing `.agents/agents/`, `.agents/workflows/`, `.agents/rules/`
 
 ### setup (workflow)
 
-The `/setup` workflow (invoked inside an agent session) provides interactive configuration of language, CLI installations, MCP connections, and agent-CLI mapping. This is different from `oma` (the installer) — `/setup` configures an already-installed instance.
+The `/setup` workflow (invoked inside an agent session) provides interactive configuration of language, CLI installations, MCP connections, and agent-CLI mapping. This is different from `oma` (the installer): `/setup` configures an already-installed instance.
 ---
 
 ## Monitoring & Metrics
@@ -411,9 +411,9 @@ oma agent:status <session-id> [agent-ids...] [-r <root>]
 | `-r, --root <path>` | Root path for memory checks | Current directory |
 
 **Status values:**
-- `completed` — Result file exists (with optional status header).
-- `running` — PID file exists and process is alive.
-- `crashed` — PID file exists but process is dead, or no PID/result file found.
+- `completed`: Result file exists (with optional status header).
+- `running`: PID file exists and process is alive.
+- `crashed`: PID file exists but process is dead, or no PID/result file found.
 
 **Output format:** One line per agent: `{agent-id}:{status}`
 
@@ -450,7 +450,7 @@ oma agent:parallel [tasks...] [-m <vendor>] [-i | --inline] [--no-wait]
 |:-----|:-----------|
 | `-m, --model <vendor>` | CLI vendor override for all agents |
 | `-i, --inline` | Inline mode: specify tasks as `agent:task[:workspace]` arguments |
-| `--no-wait` | Background mode — start agents and return immediately |
+| `--no-wait` | Background mode (start agents and return immediately) |
 
 **YAML tasks file format:**
 ```yaml
@@ -733,7 +733,7 @@ oma viz --json
 
 ### search
 
-Mechanical search primitives — fetch, metadata, RSS, media, code, and trust scoring. Aliased as `oma s`. All subcommands output JSON to stdout (one object per line, or pretty-printed with `--pretty`).
+Mechanical search primitives covering fetch, metadata, RSS, media, code, and trust scoring. Aliased as `oma s`. All subcommands output JSON to stdout (one object per line, or pretty-printed with `--pretty`).
 
 ```
 oma search <subcommand> ...

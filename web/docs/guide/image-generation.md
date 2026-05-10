@@ -1,6 +1,6 @@
 ---
 title: "Guide: Image Generation"
-description: Complete guide to oh-my-agent image generation — multi-vendor dispatch via Codex (gpt-image-2), Pollinations (flux/zimage, free), and Gemini, with reference images, cost guardrails, output layout, troubleshooting, and shared invocation patterns.
+description: Complete guide to oh-my-agent image generation, covering multi-vendor dispatch via Codex (gpt-image-2), Pollinations (flux/zimage, free), and Gemini, with reference images, cost guardrails, output layout, troubleshooting, and shared invocation patterns.
 ---
 
 # Image Generation
@@ -20,10 +20,10 @@ The skill auto-activates on keywords like *image*, *illustration*, *visual asset
 
 ## When NOT to Use
 
-- Editing or retouching an existing image — out of scope (use a dedicated tool)
-- Generating videos or audio — out of scope
-- Inline SVG / vector composition from structured data — use a templating skill
-- Simple resize / format conversion — use an image library, not a generation pipeline
+- Editing or retouching an existing image (out of scope; use a dedicated tool)
+- Generating videos or audio (out of scope)
+- Inline SVG / vector composition from structured data (use a templating skill)
+- Simple resize / format conversion (use an image library, not a generation pipeline)
 
 ---
 
@@ -34,7 +34,7 @@ The skill is CLI-first: when a vendor's native CLI can return raw image bytes, t
 | Vendor | Strategy | Models | Trigger | Cost |
 |---|---|---|---|---|
 | `pollinations` | Direct HTTP | Free: `flux`, `zimage`. Credit-gated: `qwen-image`, `wan-image`, `gpt-image-2`, `klein`, `kontext`, `gptimage`, `gptimage-large` | `POLLINATIONS_API_KEY` set (free signup at https://enter.pollinations.ai) | Free for `flux` / `zimage` |
-| `codex` | CLI-first — `codex exec` via ChatGPT OAuth | `gpt-image-2` | `codex login` (no API key needed) | Charged to your ChatGPT plan |
+| `codex` | CLI-first via `codex exec` (ChatGPT OAuth) | `gpt-image-2` | `codex login` (no API key needed) | Charged to your ChatGPT plan |
 | `gemini` | CLI-first → direct API fallback | `gemini-2.5-flash-image`, `gemini-3.1-flash-image-preview` | `gemini auth login` or `GEMINI_API_KEY` + billing | Disabled by default; requires billing |
 
 `pollinations` is the default vendor because `flux` / `zimage` are free, so auto-triggering on keywords is safe.
@@ -44,7 +44,7 @@ The skill is CLI-first: when a vendor's native CLI can return raw image bytes, t
 ## Quick Start
 
 ```bash
-# Free, zero-config — uses pollinations/flux
+# Free, zero-config (uses pollinations/flux)
 oma image generate "minimalist sunrise over mountains"
 
 # Compare every authenticated vendor in parallel
@@ -69,13 +69,13 @@ oma image list-vendors
 
 ## Use as a Skill
 
-`oma-image` is a skill — it auto-activates from natural language and can also be invoked explicitly. There are three entry points.
+`oma-image` is a skill that auto-activates from natural language and can also be invoked explicitly. There are three entry points.
 
 ### 1. Natural Language (auto-activation)
 
 Inside Claude Code, Codex CLI, or Gemini CLI, just describe the image. The skill matches keywords like *image*, *illustration*, *visual asset*, *concept art*, *hero shot*, *thumbnail*, *product photo*.
 
-You don't need to remember CLI flags — say it in plain language and the skill maps it to the right options:
+You don't need to remember CLI flags. Say it in plain language and the skill maps it to the right options:
 
 | You say | Skill infers |
 |---|---|
@@ -104,7 +104,7 @@ The agent runs the [Clarification Protocol](#clarification-protocol), amplifies 
 /oma-image -n 3 --quality high --out ./hero "minimalist dashboard hero illustration"
 ```
 
-Every CLI flag (`--vendor`, `-n`, `--size`, `-r`, `--dry-run`, …) works in the slash command — it is forwarded to the same `oma image generate` pipeline.
+Every CLI flag (`--vendor`, `-n`, `--size`, `-r`, `--dry-run`, …) works in the slash command and is forwarded to the same `oma image generate` pipeline.
 
 ### 3. From Another Skill (shared infrastructure)
 
@@ -114,7 +114,7 @@ Other skills (design, marketing, docs) call the pipeline as shared infrastructur
 oma image generate "<prompt>" --format json
 ```
 
-The manifest written to stdout includes output paths, vendor, model, and cost — easy to parse and chain.
+The manifest written to stdout includes output paths, vendor, model, and cost, making it easy to parse and chain.
 
 ---
 
@@ -171,9 +171,9 @@ oma image generate -r a.png,b.png "blend these styles" --vendor gemini
 
 ### Where Attached Images Live
 
-- **Claude Code** — `~/.claude/image-cache/<session>/N.png`, surfaced in system messages as `[Image: source: <path>]`. Session-scoped: copy to a durable location if you want to reuse it later.
-- **Antigravity** — workspace upload directory (the IDE shows the exact path)
-- **Codex CLI as host** — must be passed explicitly; in-conversation attachments are not forwarded
+- **Claude Code**: `~/.claude/image-cache/<session>/N.png`, surfaced in system messages as `[Image: source: <path>]`. Session-scoped; copy to a durable location if you want to reuse it later.
+- **Antigravity**: workspace upload directory (the IDE shows the exact path)
+- **Codex CLI as host**: must be passed explicitly; in-conversation attachments are not forwarded
 
 When the user attaches an image and asks to generate or edit one based on it, the calling agent **must** forward it via `--reference <path>` rather than describing it in prose. If the local CLI is too old to support `--reference`, run `oma update` and retry.
 
@@ -194,18 +194,18 @@ Every run writes to `.agents/results/images/` with a timestamped, hash-suffixed 
     └── manifest.json
 ```
 
-`manifest.json` records the vendor, model, prompt (or its SHA-256), size, quality, and cost — every run is reproducible from the manifest alone.
+`manifest.json` records the vendor, model, prompt (or its SHA-256), size, quality, and cost, so every run is reproducible from the manifest alone.
 
 ---
 
 ## Cost, Safety, and Cancellation
 
-1. **Cost guardrail** — runs estimated at ≥ `$0.20` ask for confirmation. Bypass with `-y` or `OMA_IMAGE_YES=1`. Default `pollinations` (flux/zimage) is free, so the prompt is skipped for it automatically.
-2. **Path safety** — output paths outside `$PWD` require `--allow-external-out` to avoid surprising writes.
-3. **Cancellable** — `Ctrl+C` (SIGINT/SIGTERM) aborts every in-flight provider call and the orchestrator together.
-4. **Deterministic outputs** — `manifest.json` is always written next to the images.
-5. **Max `n` = 5** — a wall-time bound, not a quota.
-6. **Exit codes** — aligned with `oma search fetch`: `0` ok, `1` general, `2` safety, `3` not-found, `4` invalid-input, `5` auth-required, `6` timeout.
+1. **Cost guardrail**: runs estimated at ≥ `$0.20` ask for confirmation. Bypass with `-y` or `OMA_IMAGE_YES=1`. Default `pollinations` (flux/zimage) is free, so the prompt is skipped for it automatically.
+2. **Path safety**: output paths outside `$PWD` require `--allow-external-out` to avoid surprising writes.
+3. **Cancellable**: `Ctrl+C` (SIGINT/SIGTERM) aborts every in-flight provider call and the orchestrator together.
+4. **Deterministic outputs**: `manifest.json` is always written next to the images.
+5. **Max `n` = 5**: a wall-time bound, not a quota.
+6. **Exit codes**: aligned with `oma search fetch`: `0` ok, `1` general, `2` safety, `3` not-found, `4` invalid-input, `5` auth-required, `6` timeout.
 
 ---
 
@@ -214,21 +214,21 @@ Every run writes to `.agents/results/images/` with a timestamped, hash-suffixed 
 Before invoking `oma image generate`, the calling agent runs this checklist. If anything is missing and not inferable, it asks first or amplifies the prompt and shows the expansion for approval.
 
 **Required:**
-- **Subject** — what is the primary thing in the image? (object, person, scene)
-- **Setting / backdrop** — where is it?
+- **Subject**: what is the primary thing in the image? (object, person, scene)
+- **Setting / backdrop**: where is it?
 
 **Strongly recommended (ask if absent and not inferable):**
-- **Style** — photorealistic, illustration, 3D render, oil painting, concept art, flat vector?
-- **Mood / lighting** — bright vs moody, warm vs cool, dramatic vs minimal
-- **Usage context** — hero image, icon, thumbnail, product shot, poster?
-- **Aspect ratio** — square, portrait, or landscape
+- **Style**: photorealistic, illustration, 3D render, oil painting, concept art, flat vector?
+- **Mood / lighting**: bright vs moody, warm vs cool, dramatic vs minimal
+- **Usage context**: hero image, icon, thumbnail, product shot, poster?
+- **Aspect ratio**: square, portrait, or landscape
 
 For a brief prompt like *"a red apple"*, the agent does **not** ask follow-up questions. Instead it amplifies inline and shows the user:
 
 > User: "a red apple"
 > Agent: "I'll generate this as: *a single glossy red apple centered on a clean white background, soft studio lighting, photorealistic, shallow depth of field, 1024×1024*. Shall I proceed, or would you like a different style/composition?"
 
-When the user has authored a complete creative brief (≥ 2 of: subject + style + lighting + composition), their prompt is respected verbatim — no clarification, no amplification.
+When the user has authored a complete creative brief (≥ 2 of: subject + style + lighting + composition), their prompt is respected verbatim, with no clarification and no amplification.
 
 **Output language.** Generation prompts are sent to the provider in English (image models are trained predominantly on English captions). If the user wrote in another language, the agent translates and shows the translation during amplification so the user can correct any misreading.
 
@@ -238,12 +238,12 @@ When the user has authored a complete creative brief (≥ 2 of: subject + style 
 
 - **Project config:** `config/image-config.yaml`
 - **Environment variables:**
-  - `OMA_IMAGE_DEFAULT_VENDOR` — overrides the default vendor (otherwise `pollinations`)
-  - `OMA_IMAGE_DEFAULT_OUT` — overrides the default output directory
-  - `OMA_IMAGE_YES` — `1` to bypass cost confirmation
-  - `POLLINATIONS_API_KEY` — required for the pollinations vendor (free signup)
-  - `GEMINI_API_KEY` — required when the gemini vendor falls back to the direct API
-  - `OMA_IMAGE_GEMINI_STRATEGIES` — comma-separated escalation order for gemini (`mcp,stream,api`)
+  - `OMA_IMAGE_DEFAULT_VENDOR`: overrides the default vendor (otherwise `pollinations`)
+  - `OMA_IMAGE_DEFAULT_OUT`: overrides the default output directory
+  - `OMA_IMAGE_YES`: `1` to bypass cost confirmation
+  - `POLLINATIONS_API_KEY`: required for the pollinations vendor (free signup)
+  - `GEMINI_API_KEY`: required when the gemini vendor falls back to the direct API
+  - `OMA_IMAGE_GEMINI_STRATEGIES`: comma-separated escalation order for gemini (`mcp,stream,api`)
 
 ---
 
@@ -263,6 +263,6 @@ When the user has authored a complete creative brief (≥ 2 of: subject + style 
 
 ## Related
 
-- [Skills](/docs/core-concepts/skills) — the two-layer skill architecture that powers `oma-image`
-- [CLI Commands](/docs/cli-interfaces/commands) — full `oma image` command reference
-- [CLI Options](/docs/cli-interfaces/options) — global option matrix
+- [Skills](/docs/core-concepts/skills): the two-layer skill architecture that powers `oma-image`
+- [CLI Commands](/docs/cli-interfaces/commands): full `oma image` command reference
+- [CLI Options](/docs/cli-interfaces/options): global option matrix

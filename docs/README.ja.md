@@ -30,7 +30,7 @@ bunx oh-my-agent@latest
 ### Agent Package Manager でインストール
 
 <details>
-<summary>Microsoft の <a href="https://github.com/microsoft/apm">Agent Package Manager</a>（APM）— スキルだけを配布する仕組み。クリックで展開。</summary>
+<summary>Microsoft の <a href="https://github.com/microsoft/apm">Agent Package Manager</a>（APM）はスキルだけを配布する仕組み。クリックで展開。</summary>
 
 > `oma-observability` の APM（Application Performance Monitoring）とは別物です。
 

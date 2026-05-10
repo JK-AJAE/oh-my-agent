@@ -1,15 +1,15 @@
 ---
 title: Installation
-description: Complete installation guide for oh-my-agent — three install methods, all six presets with their skill lists, CLI tool requirements for all four vendors, post-install configuration, oma-config.yaml fields, and verification with oma doctor.
+description: Complete installation guide for oh-my-agent, covering three install methods, all six presets with their skill lists, CLI tool requirements for all four vendors, post-install configuration, oma-config.yaml fields, and verification with oma doctor.
 ---
 
 # Installation
 
 ## Prerequisites
 
-- **An AI-powered IDE or CLI** — at least one of: Claude Code, Gemini CLI, Codex CLI, Qwen CLI, Antigravity IDE, Cursor, or OpenCode
-- **bun** — JavaScript runtime and package manager (auto-installed by the install script if missing)
-- **uv** — Python package manager for Serena MCP (auto-installed if missing)
+- **An AI-powered IDE or CLI**: at least one of Claude Code, Gemini CLI, Codex CLI, Qwen CLI, Antigravity IDE, Cursor, or OpenCode
+- **bun**: JavaScript runtime and package manager (auto-installed by the install script if missing)
+- **uv**: Python package manager for Serena MCP (auto-installed if missing)
 
 ---
 
@@ -150,7 +150,7 @@ oma star # Star the repository
 
 ## AI CLI Tool Installation
 
-You need at least one AI CLI tool installed. oh-my-agent supports four vendors, and you can mix them — using different CLIs for different agents via the agent-CLI mapping.
+You need at least one AI CLI tool installed. oh-my-agent supports four vendors, and you can mix them by using different CLIs for different agents via the agent-CLI mapping.
 
 ### Gemini CLI
 

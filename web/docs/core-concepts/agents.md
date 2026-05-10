@@ -1,11 +1,11 @@
 ---
 title: Agents
-description: Complete reference for all 22 oh-my-agent agents — their domains, tech stacks, resource files, capabilities, charter preflight protocol, two-layer skill loading, scoped execution rules, quality gates, workspace strategy, orchestration flow, and runtime memory.
+description: Complete reference for all 22 oh-my-agent agents, covering their domains, tech stacks, resource files, capabilities, charter preflight protocol, two-layer skill loading, scoped execution rules, quality gates, workspace strategy, orchestration flow, and runtime memory.
 ---
 
 # Agents
 
-Agents in oh-my-agent are specialized engineering roles. Each agent has a defined domain, tech stack knowledge, resource files, quality gates, and execution constraints. Agents are not generic chatbots — they are scoped workers that stay in their lane and follow structured protocols.
+Agents in oh-my-agent are specialized engineering roles. Each agent has a defined domain, tech stack knowledge, resource files, quality gates, and execution constraints. Agents are not generic chatbots. They are scoped workers that stay in their lane and follow structured protocols.
 
 The agent definitions under `.agents/agents/` are the source of truth. OMA projects them into vendor-native files for runtimes that support custom subagents:
 
@@ -15,7 +15,7 @@ The agent definitions under `.agents/agents/` are the source of truth. OMA proje
 
 When a workflow maps an agent to the same vendor as the current runtime, it should use that runtime's native agent file first. Cross-vendor tasks fall back to `oma agent:spawn`.
 
-> **Per-agent model dispatch** — each agent resolves to a specific model slug, CLI vendor, and reasoning effort through `model_preset` (and optional `agents:` overrides) in `.agents/oma-config.yaml`. See [Per-Agent Models](../guide/per-agent-models.md) for configuration details and [`oma doctor --profile`](../cli-interfaces/commands.md#doctor) to inspect the live matrix.
+> **Per-agent model dispatch:** each agent resolves to a specific model slug, CLI vendor, and reasoning effort through `model_preset` (and optional `agents:` overrides) in `.agents/oma-config.yaml`. See [Per-Agent Models](../guide/per-agent-models.md) for configuration details and [`oma doctor --profile`](../cli-interfaces/commands.md#doctor) to inspect the live matrix.
 
 ---
 
@@ -57,7 +57,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 - One clarifying question at a time (not batches)
 - Always propose 2-3 approaches with a recommended option
 - Section-by-section design with user confirmation at each step
-- YAGNI — design only what is needed
+- YAGNI: design only what is needed
 
 **Workflow:** 6 phases: Context exploration, Questions, Approaches, Design, Documentation (saves to `docs/plans/`), Transition to `/plan`.
 
@@ -67,7 +67,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-architecture
 
-**Domain:** Software/system architecture — module and service boundaries, tradeoff analysis, stakeholder synthesis, decision records.
+**Domain:** Software/system architecture, including module and service boundaries, tradeoff analysis, stakeholder synthesis, and decision records.
 
 **When to use:** Choosing or reviewing system architecture, defining module/service/ownership boundaries, comparing architectural options with explicit tradeoffs, investigating architectural pain (change amplification, hidden dependencies, awkward APIs), prioritizing architecture investments or refactors, writing architecture recommendations or ADRs.
 
@@ -90,7 +90,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-pm
 
-**Domain:** Product management — requirements analysis, task decomposition, API contracts.
+**Domain:** Product management, including requirements analysis, task decomposition, and API contracts.
 
 **When to use:** Breaking down complex features, determining feasibility, prioritizing work, defining API contracts.
 
@@ -112,7 +112,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-frontend
 
-**Domain:** Web UI — React, Next.js, TypeScript with FSD-lite architecture.
+**Domain:** Web UI built with React, Next.js, and TypeScript on FSD-lite architecture.
 
 **When to use:** Building user interfaces, components, client-side logic, styling, form validation, API integration.
 
@@ -139,7 +139,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 - shadcn/ui first, extend via cva, never modify `components/ui/*` directly
 - Design tokens 1:1 mapping (never hardcode colors)
 - Proxy over middleware (Next.js 16+ uses `proxy.ts`, not `middleware.ts` for proxy logic)
-- No prop drilling beyond 3 levels — use Jotai atoms
+- No prop drilling beyond 3 levels; use Jotai atoms instead
 - Absolute imports with `@/` mandatory
 - FCP target < 1s
 - Responsive breakpoints: 320px, 768px, 1024px, 1440px
@@ -185,7 +185,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-mobile
 
-**Domain:** Cross-platform mobile apps — Flutter, React Native.
+**Domain:** Cross-platform mobile apps using Flutter and React Native.
 
 **When to use:** Native mobile apps (iOS + Android), mobile-specific UI patterns, platform features (camera, GPS, push notifications), offline-first architecture.
 
@@ -207,7 +207,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-db
 
-**Domain:** Database architecture — SQL, NoSQL, vector databases.
+**Domain:** Database architecture across SQL, NoSQL, and vector databases.
 
 **When to use:** Schema design, ERD, normalization, indexing, transactions, capacity planning, backup strategy, migration design, vector DB/RAG architecture, anti-pattern review, compliance-aware design (ISO 27001/27002/22301).
 
@@ -318,7 +318,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-qa
 
-**Domain:** Quality assurance — security, performance, accessibility, code quality.
+**Domain:** Quality assurance covering security, performance, accessibility, and code quality.
 
 **When to use:** Final review before deployment, security audits, performance analysis, accessibility compliance, test coverage analysis.
 
@@ -333,7 +333,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 **Core rules:**
 - Every finding must include file:line, description, and fix
 - Run automated tools first (npm audit, bandit, lighthouse)
-- No false positives — every finding must be reproducible
+- No false positives; every finding must be reproducible
 - Provide remediation code, not just descriptions
 
 **Resources:** `execution-protocol.md`, `iso-quality.md`, `checklist.md`, `self-check.md`, `error-playbook.md`, `examples.md`.
@@ -358,9 +358,9 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 - Document in `.agents/results/`
 
 **Serena MCP tools used:**
-- `find_symbol("functionName")` — locate the function
-- `find_referencing_symbols("Component")` — find all usages
-- `search_for_pattern("error pattern")` — find similar issues
+- `find_symbol("functionName")`: locate the function
+- `find_referencing_symbols("Component")`: find all usages
+- `search_for_pattern("error pattern")`: find similar issues
 
 **Resources:** `execution-protocol.md`, `common-patterns.md`, `debugging-checklist.md`, `bug-report-template.md`, `error-playbook.md`, `examples.md`.
 
@@ -423,7 +423,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-scm
 
-**Domain:** Software configuration management (SCM) and Git — branching, merges, worktrees, baselines, audit readiness, plus Conventional Commits.
+**Domain:** Software configuration management (SCM) and Git, covering branching, merges, worktrees, baselines, audit readiness, and Conventional Commits.
 
 **When to use:** After code changes (`/scm`), merge conflicts, branch strategy, releases/tags, or any repo CM question.
 
@@ -450,7 +450,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 **Core rules:**
 - Always present the plan for user confirmation before spawning agents
-- One priority tier at a time — wait for completion before next tier
+- One priority tier at a time; wait for completion before next tier
 - User approves each gate transition
 - QA review is mandatory before merging
 - Issue remediation loop for CRITICAL/HIGH findings
@@ -463,21 +463,21 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 
 ### oma-search
 
-**Domain:** Intent-based search router with domain trust scoring — routes queries to Context7 (docs), native web search, `gh`/`glab` (code), Serena (local).
+**Domain:** Intent-based search router with domain trust scoring. Routes queries to Context7 (docs), native web search, `gh`/`glab` (code), Serena (local).
 
 **When to use:** Finding official library/framework documentation, web research for tutorials/examples/comparisons/solutions, GitHub/GitLab code search for implementation patterns, any query where the search channel is unclear (auto-routing), other skills that need search infrastructure (shared invocation).
 
 **When NOT to use:** Local-only codebase exploration (use Serena MCP directly), Git history or blame analysis (use oma-scm), full architecture research (use oma-architecture, which may invoke this skill internally).
 
 **Core rules:**
-- Classify intent before searching — every query goes through IntentClassifier first
-- One query, one best route — avoid redundant multi-route unless intent is ambiguous
-- Trust score every result — all non-local results get domain trust labels from the registry
+- Classify intent before searching; every query goes through IntentClassifier first
+- One query, one best route; avoid redundant multi-route unless intent is ambiguous
+- Trust score every result; all non-local results get domain trust labels from the registry
 - Flags override classifier: `--docs`, `--code`, `--web`, `--strict`, `--wide`, `--gitlab`
 - Fail forward: if the primary route fails, fall back gracefully (docs→web, web→`oma search fetch` strategies)
 - No additional MCP required: Context7 for docs, runtime-native for web, CLI for code, Serena for local
 - Vendor-agnostic web search: use whatever the current runtime provides (WebSearch, Google, Bing)
-- Domain-level trust only — no sub-path or page-level scoring
+- Domain-level trust only; no sub-path or page-level scoring
 
 **Resources:** `SKILL.md`, `resources/` directory with intent classifier, route definitions, and trust registry.
 
@@ -498,7 +498,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 4. Extract themes (features worked on, bugs fixed, tools explored)
 5. Render themed daily/period summary
 
-**Resources:** `SKILL.md` — defers heavy work to the `oma recap` CLI.
+**Resources:** `SKILL.md`. Defers heavy work to the `oma recap` CLI.
 
 ---
 
@@ -511,11 +511,11 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 **When NOT to use:** PDF files (use oma-pdf), XLSX/DOCX (out of scope), generating/editing HWP (out of scope), already-text files (use Read tool directly).
 
 **Core rules:**
-- Use `bunx kordoc@latest` to run — no installation required; always pass `@latest` or a pinned version
+- Use `bunx kordoc@latest` to run (no installation required); always pass `@latest` or a pinned version
 - Default output format is Markdown
 - If no output directory is specified, output to the same directory as the input
 - kordoc handles structure preservation (headings, tables, nested tables, footnotes, hyperlinks, images)
-- Security defenses (ZIP bomb, XXE, SSRF, XSS) are provided by kordoc — do not add custom ones
+- Security defenses (ZIP bomb, XXE, SSRF, XSS) are provided by kordoc; do not add custom ones
 - For encrypted or DRM-locked HWP, report the limitation to the user clearly
 - Post-process with `resources/flatten-tables.ts` to convert HTML `<table>` blocks to GFM pipe tables and strip Hancom font Private Use Area characters
 
@@ -532,7 +532,7 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 **When NOT to use:** Generating/creating PDFs (use appropriate document tools), editing existing PDFs (out of scope), simple reading of already-text files (use Read tool directly).
 
 **Core rules:**
-- Use `uvx opendataloader-pdf` to run — no installation required
+- Use `uvx opendataloader-pdf` to run (no installation required)
 - Default output format is Markdown
 - If no output directory is specified, output to the same directory as the input PDF
 - Preserve document structure (headings, tables, lists, images)
@@ -577,10 +577,10 @@ In subagent mode (CLI-spawned), agents cannot ask users directly. LOW proceeds, 
 
 Each agent's knowledge is split across two layers:
 
-**Layer 1 — SKILL.md (~800 bytes):**
+**Layer 1: SKILL.md (~800 bytes)**
 Always loaded. Contains frontmatter (name, description), when to use / not use, core rules, architecture overview, library list, and references to Layer 2 resources.
 
-**Layer 2 — resources/ (loaded on-demand):**
+**Layer 2: resources/ (loaded on-demand)**
 Loaded only when the agent is actively working, and only the resources matching the task type and difficulty:
 
 | Difficulty | Resources Loaded |
@@ -590,9 +590,9 @@ Loaded only when the agent is actively working, and only the resources matching 
 | **Complex** | execution-protocol.md + examples.md + tech-stack.md + snippets.md |
 
 Additional resources are loaded during execution as needed:
-- `checklist.md` — at the Verify step
-- `error-playbook.md` — only when errors occur
-- `common-checklist.md` — for final verification of Complex tasks
+- `checklist.md`: at the Verify step
+- `error-playbook.md`: only when errors occur
+- `common-checklist.md`: for final verification of Complex tasks
 
 ---
 
@@ -633,9 +633,9 @@ oma agent:spawn frontend "Build login form" session-01 -w ./apps/web
 When running a multi-agent workflow (`/orchestrate` or `/work`):
 
 1. **PM Agent** decomposes the request into domain-specific tasks with priorities (P0, P1, P2) and dependencies
-2. **Session initialized** — session ID generated, `orchestrator-session.md` and `task-board.md` created in memory
+2. **Session initialized**: session ID generated, `orchestrator-session.md` and `task-board.md` created in memory
 3. **P0 tasks** spawned in parallel (up to MAX_PARALLEL concurrent agents)
-4. **Progress monitored** — orchestrator polls `progress-{agent}.md` files every POLL_INTERVAL
+4. **Progress monitored**: orchestrator polls `progress-{agent}.md` files every POLL_INTERVAL
 5. **P1 tasks** spawned after P0 completes, and so on
 6. **Verification loop** runs for each completed agent (self-review -> automated verify -> cross-review by QA)
 7. **Results collected** from all `result-{agent}.md` files
@@ -647,7 +647,7 @@ When running a multi-agent workflow (`/orchestrate` or `/work`):
 
 Agents are defined in two locations:
 
-**`.agents/agents/`** — Contains the abstract source-of-truth agent definitions, including:
+**`.agents/agents/`**: Contains the abstract source-of-truth agent definitions, including:
 - `backend-engineer.md`
 - `frontend-engineer.md`
 - `mobile-engineer.md`
@@ -660,7 +660,7 @@ Agents are defined in two locations:
 
 These files define the agent's identity, execution protocol reference, CHARTER_CHECK template, architecture summary, and rules. They are used when spawning subagents via the Task/Agent tool (Claude Code) or CLI.
 
-**Vendor-native projections** — OMA materializes the source definitions into runtime-specific agent files:
+**Vendor-native projections**: OMA materializes the source definitions into runtime-specific agent files:
 - `.claude/agents/*.md`
 - `.codex/agents/*.toml`
 - `.gemini/agents/*.md`

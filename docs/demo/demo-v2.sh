@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Demo simulation for oh-my-agent v2 — VHS recording
+# Demo simulation for oh-my-agent v2 (VHS recording)
 set -e
 
 BOLD="\033[1m"
@@ -141,8 +141,8 @@ draw_dashboard \
   "  ${CYAN}frontend${RESET}       claude    ${CYAN}● running${RESET}  " "       ${BOLD}2${RESET}" \
   "  ${CYAN}db${RESET}             qwen      ${CYAN}● running${RESET}  " "       ${BOLD}1${RESET}" \
   "  ${DIM}qa${RESET}             codex     ${DIM}○ blocked${RESET}  " "       ${DIM}-${RESET}" \
-  "  ${CYAN}[backend]${RESET}  Turn 3 — Setting up SQLAlchemy models" \
-  "  ${CYAN}[frontend]${RESET} Turn 2 — Creating component structure"
+  "  ${CYAN}[backend]${RESET}  Turn 3: Setting up SQLAlchemy models" \
+  "  ${CYAN}[frontend]${RESET} Turn 2: Creating component structure"
 sleep 1.3
 
 # Frame 2: Progress
@@ -151,8 +151,8 @@ draw_dashboard \
   "  ${CYAN}frontend${RESET}       claude    ${CYAN}● running${RESET}  " "       ${BOLD}7${RESET}" \
   "  ${CYAN}db${RESET}             qwen      ${CYAN}● running${RESET}  " "       ${BOLD}5${RESET}" \
   "  ${DIM}qa${RESET}             codex     ${DIM}○ blocked${RESET}  " "       ${DIM}-${RESET}" \
-  "  ${CYAN}[backend]${RESET}  Turn 8 — Implementing JWT token rotation" \
-  "  ${CYAN}[db]${RESET}       Turn 5 — Creating migration scripts"
+  "  ${CYAN}[backend]${RESET}  Turn 8: Implementing JWT token rotation" \
+  "  ${CYAN}[db]${RESET}       Turn 5: Creating migration scripts"
 sleep 1.3
 
 # Frame 3: db completed
@@ -161,8 +161,8 @@ draw_dashboard \
   "  ${CYAN}frontend${RESET}       claude    ${CYAN}● running${RESET}  " "      ${BOLD}14${RESET}" \
   "  ${GREEN}db${RESET}             qwen      ${GREEN}✓ completed${RESET}" "       ${BOLD}9${RESET}" \
   "  ${CYAN}qa${RESET}             codex     ${CYAN}● running${RESET}  " "       ${BOLD}1${RESET}" \
-  "  ${GREEN}[db]${RESET}       ✓ Completed — Schema + migrations ready" \
-  "  ${CYAN}[qa]${RESET}       Turn 1 — Starting OWASP Top 10 audit"
+  "  ${GREEN}[db]${RESET}       ✓ Completed: schema + migrations ready" \
+  "  ${CYAN}[qa]${RESET}       Turn 1: Starting OWASP Top 10 audit"
 sleep 1.3
 
 # Frame 4: frontend completed
@@ -171,8 +171,8 @@ draw_dashboard \
   "  ${GREEN}frontend${RESET}       claude    ${GREEN}✓ completed${RESET}" "      ${BOLD}18${RESET}" \
   "  ${GREEN}db${RESET}             qwen      ${GREEN}✓ completed${RESET}" "       ${BOLD}9${RESET}" \
   "  ${CYAN}qa${RESET}             codex     ${CYAN}● running${RESET}  " "       ${BOLD}4${RESET}" \
-  "  ${GREEN}[frontend]${RESET} ✓ Completed — All acceptance criteria met" \
-  "  ${CYAN}[backend]${RESET}  Turn 16 — Writing integration tests"
+  "  ${GREEN}[frontend]${RESET} ✓ Completed: all acceptance criteria met" \
+  "  ${CYAN}[backend]${RESET}  Turn 16: Writing integration tests"
 sleep 1.3
 
 # Frame 5: backend completed, qa progressing
@@ -181,8 +181,8 @@ draw_dashboard \
   "  ${GREEN}frontend${RESET}       claude    ${GREEN}✓ completed${RESET}" "      ${BOLD}18${RESET}" \
   "  ${GREEN}db${RESET}             qwen      ${GREEN}✓ completed${RESET}" "       ${BOLD}9${RESET}" \
   "  ${CYAN}qa${RESET}             codex     ${CYAN}● running${RESET}  " "       ${BOLD}6${RESET}" \
-  "  ${GREEN}[backend]${RESET}  ✓ Completed — JWT + rate limiting + tests" \
-  "  ${CYAN}[qa]${RESET}       Turn 6 — Checking XSS, CSRF, SQL injection"
+  "  ${GREEN}[backend]${RESET}  ✓ Completed: JWT + rate limiting + tests" \
+  "  ${CYAN}[qa]${RESET}       Turn 6: Checking XSS, CSRF, SQL injection"
 sleep 1.3
 
 # Frame 6: All done!
@@ -191,6 +191,6 @@ draw_dashboard \
   "  ${GREEN}frontend${RESET}       claude    ${GREEN}✓ completed${RESET}" "      ${BOLD}18${RESET}" \
   "  ${GREEN}db${RESET}             qwen      ${GREEN}✓ completed${RESET}" "       ${BOLD}9${RESET}" \
   "  ${GREEN}qa${RESET}             codex     ${GREEN}✓ completed${RESET}" "       ${BOLD}8${RESET}" \
-  "  ${GREEN}[qa]${RESET}       ✓ Completed — 0 critical, 1 medium (documented)" \
+  "  ${GREEN}[qa]${RESET}       ✓ Completed: 0 critical, 1 medium (documented)" \
   "  ${GREEN}${BOLD}  [system] All 4 agents completed successfully ✓${RESET}"
 sleep 2.5

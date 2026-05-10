@@ -6,7 +6,7 @@
 
 Chcialbys, zeby Twoj asystent AI mial wspolpracownikow? Wlasnie to robi oh-my-agent.
 
-Zamiast jednego AI, ktory robi wszystko (i gubi sie w polowie), oh-my-agent rozdziela prace miedzy **wyspecjalizowanych agentow** — frontend, backend, architecture, QA, PM, DB, mobile, infra, debug, design i innych. Kazdy doskonale zna swoja dziedzine, ma wlasne narzedzia i checklisty, i nie wychodzi poza swoj zakres.
+Zamiast jednego AI, ktory robi wszystko (i gubi sie w polowie), oh-my-agent rozdziela prace miedzy **wyspecjalizowanych agentow**: frontend, backend, architecture, QA, PM, DB, mobile, infra, debug, design i innych. Kazdy doskonale zna swoja dziedzine, ma wlasne narzedzia i checklisty, i nie wychodzi poza swoj zakres.
 
 Dziala ze wszystkimi glownymi AI IDE: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode i innymi.
 
@@ -30,7 +30,7 @@ bunx oh-my-agent@latest
 ### Instalacja przez Agent Package Manager
 
 <details>
-<summary><a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM) od Microsoftu — dystrybucja tylko ze skillami. Kliknij, zeby rozwinac.</summary>
+<summary><a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM) od Microsoftu: dystrybucja tylko ze skillami. Kliknij, zeby rozwinac.</summary>
 
 > Nie myl tego z APM (Application Performance Monitoring) z `oma-observability`.
 
@@ -43,7 +43,7 @@ apm install first-fluke/oh-my-agent
 apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 ```
 
-APM czyta wskaznik `skills: .agents/skills/` z `.claude-plugin/plugin.json`, wiec SSOT z `.agents/` jest jedynym zrodlem — bez kroku build i bez mirrora.
+APM czyta wskaznik `skills: .agents/skills/` z `.claude-plugin/plugin.json`, wiec SSOT z `.agents/` jest jedynym zrodlem, bez kroku build i bez mirrora.
 
 APM dostarcza tylko skille. Do workflowow, regul, `oma-config.yaml`, hookow detekcji slow kluczowych i CLI `oma agent:spawn` uzyj `bunx oh-my-agent@latest`. W jednym projekcie trzymaj sie jednej dystrybucji, zeby nic sie nie rozjechalo.
 
@@ -121,7 +121,7 @@ Lub uzyj slash commands do ustrukturyzowanych workflow:
 | 5 | `/docs` | Weryfikacja i synchronizacja dryfu dokumentacji przez `oma-docs` |
 | 6 | `/scm` | Workflow SCM i Git oraz wsparcie Conventional Commits |
 
-**Autodetekcja**: Nie musisz nawet uzywac slash commands — slowa takie jak "architektura", "plan", "review" i "debug" w Twojej wiadomosci (w 11 jezykach!) automatycznie uruchamiaja odpowiedni workflow.
+**Autodetekcja**: Nie musisz nawet uzywac slash commands. Slowa takie jak "architektura", "plan", "review" i "debug" w Twojej wiadomosci (w 11 jezykach!) automatycznie uruchamiaja odpowiedni workflow.
 
 ## CLI
 
@@ -152,12 +152,12 @@ Wybor modelu przebiega w dwoch warstwach:
 
 > [Czytaj więcej →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
 
-- **Przenosny** — `.agents/` wedruje z Twoim projektem, nie jest uwieziony w jednym IDE
-- **Oparty na rolach** — Agenci zamodelowani jak prawdziwy zespol inzynierski, nie sterta promptow
-- **Oszczedny z tokenami** — Dwuwarstwowy design umiejetnosci oszczedza ~75% tokenow
-- **Jakosc przede wszystkim** — Charter preflight, quality gates i workflow rewizji wbudowane
-- **Multi-vendor** — Mieszaj Gemini, Claude, Codex i Qwen dla roznych typow agentow
-- **Obserwowalny** — Dashboardy w terminalu i w przegladarce do monitoringu w czasie rzeczywistym
+- **Przenosny**: `.agents/` wedruje z Twoim projektem, nie jest uwieziony w jednym IDE
+- **Oparty na rolach**: agenci zamodelowani jak prawdziwy zespol inzynierski, nie sterta promptow
+- **Oszczedny z tokenami**: dwuwarstwowy design umiejetnosci oszczedza ~75% tokenow
+- **Jakosc przede wszystkim**: Charter preflight, quality gates i workflow rewizji wbudowane
+- **Multi-vendor**: mieszaj Gemini, Claude, Codex i Qwen dla roznych typow agentow
+- **Obserwowalny**: dashboardy w terminalu i w przegladarce do monitoringu w czasie rzeczywistym
 
 ## Architektura
 
@@ -208,9 +208,9 @@ flowchart TD
 
 ## Dowiedz sie wiecej
 
-- **[Szczegolowa dokumentacja](./AGENTS_SPEC.md)** — Pelna specyfikacja techniczna i architektura
-- **[Wspierani agenci](./SUPPORTED_AGENTS.md)** — Macierz wsparcia agentow w roznych IDE
-- **[Dokumentacja webowa](https://first-fluke.github.io/oh-my-agent/)** — Poradniki, tutoriale i referencja CLI
+- **[Szczegolowa dokumentacja](./AGENTS_SPEC.md)**: pelna specyfikacja techniczna i architektura
+- **[Wspierani agenci](./SUPPORTED_AGENTS.md)**: macierz wsparcia agentow w roznych IDE
+- **[Dokumentacja webowa](https://first-fluke.github.io/oh-my-agent/)**: poradniki, tutoriale i referencja CLI
 
 ## Sponsorzy
 

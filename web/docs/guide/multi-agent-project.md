@@ -1,13 +1,13 @@
 ---
 title: "Guide: Multi-Agent Projects"
-description: Complete guide for coordinating multiple domain agents across frontend, backend, database, mobile, and QA — from planning through merge.
+description: Complete guide for coordinating multiple domain agents across frontend, backend, database, mobile, and QA, from planning through merge.
 ---
 
 # Guide: Multi-Agent Projects
 
 ## When to Use Multi-Agent Coordination
 
-Your feature spans multiple domains — backend API + frontend UI + database schema + mobile client + QA review. A single agent cannot handle the full scope, and you need the domains to progress in parallel without stepping on each other's files.
+Your feature spans multiple domains: backend API + frontend UI + database schema + mobile client + QA review. A single agent cannot handle the full scope, and you need the domains to progress in parallel without stepping on each other's files.
 
 Multi-agent coordination is the right choice when:
 
@@ -24,7 +24,7 @@ If your task fits entirely within one domain, use the specific agent directly in
 
 The recommended multi-agent workflow follows a strict four-step pipeline.
 
-### Step 1: /plan — Requirements and Task Decomposition
+### Step 1: /plan for Requirements and Task Decomposition
 
 The `/plan` workflow runs inline (no subagent spawning) and produces a structured plan.
 
@@ -34,28 +34,28 @@ The `/plan` workflow runs inline (no subagent spawning) and produces a structure
 
 What happens:
 
-1. **Gather requirements** — The PM agent asks about target users, core features, constraints, and deployment targets.
-2. **Analyze technical feasibility** — Uses MCP code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to scan the existing codebase for reusable code and architecture patterns.
-3. **Define API contracts** — Designs endpoint contracts (method, path, request/response schemas, auth, error responses) and saves them to `.agents/skills/_shared/core/api-contracts/`.
-4. **Decompose into tasks** — Breaks the project into actionable tasks, each with: assigned agent, title, acceptance criteria, priority (P0-P3), and dependencies.
-5. **Review plan with user** — Presents the full plan for confirmation. The workflow will not proceed without explicit user approval.
-6. **Save plan** — Writes the approved plan to `.agents/results/plan-{sessionId}.json` and records a summary in memory.
+1. **Gather requirements**: The PM agent asks about target users, core features, constraints, and deployment targets.
+2. **Analyze technical feasibility**: Uses MCP code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to scan the existing codebase for reusable code and architecture patterns.
+3. **Define API contracts**: Designs endpoint contracts (method, path, request/response schemas, auth, error responses) and saves them to `.agents/skills/_shared/core/api-contracts/`.
+4. **Decompose into tasks**: Breaks the project into actionable tasks, each with assigned agent, title, acceptance criteria, priority (P0-P3), and dependencies.
+5. **Review plan with user**: Presents the full plan for confirmation. The workflow will not proceed without explicit user approval.
+6. **Save plan**: Writes the approved plan to `.agents/results/plan-{sessionId}.json` and records a summary in memory.
 
 The output `.agents/results/plan-{sessionId}.json` is the input for both `/work` and `/orchestrate`.
 
-### Step 2: /work or /orchestrate — Execution
+### Step 2: /work or /orchestrate for Execution
 
 You have two execution paths:
 
 | Aspect | /work | /orchestrate |
 |:-------|:-----------|:-------------|
-| **Interaction** | Interactive — user confirms at each stage | Automated — runs to completion |
+| **Interaction** | Interactive (user confirms at each stage) | Automated (runs to completion) |
 | **PM planning** | Built-in (Step 2 runs PM agent) | Requires plan from /plan |
 | **User checkpoint** | After plan review (Step 3) | Before starting (plan must exist) |
-| **Persistent mode** | Yes — cannot be terminated until complete | Yes — cannot be terminated until complete |
+| **Persistent mode** | Yes (cannot be terminated until complete) | Yes (cannot be terminated until complete) |
 | **Best for** | First-time use, complex projects needing oversight | Repeat runs, well-defined tasks |
 
-#### /work — Interactive Multi-Agent Pipeline
+#### /work: Interactive Multi-Agent Pipeline
 
 ```
 /work
@@ -63,13 +63,13 @@ You have two execution paths:
 
 1. Analyzes the user's request and identifies involved domains.
 2. Runs the PM agent for task decomposition (creates plan-\{sessionId\}.json).
-3. Presents plan for user confirmation — **blocks until confirmed**.
+3. Presents plan for user confirmation. **Blocks until confirmed.**
 4. Spawns agents by priority tier (P0 first, then P1, etc.), with each same-priority task running in parallel.
 5. Monitors agent progress via memory files.
 6. Runs QA agent review on all deliverables (OWASP Top 10, performance, accessibility, code quality).
-7. If QA finds CRITICAL or HIGH issues, re-spawns the responsible agent with QA findings. Repeats up to 2 times per issue. If the same issue persists, activates the **Exploration Loop** — generates 2-3 alternative approaches, spawns the same agent type with different hypothesis prompts in separate workspaces, QA scores each, and the best result is adopted.
+7. If QA finds CRITICAL or HIGH issues, re-spawns the responsible agent with QA findings. Repeats up to 2 times per issue. If the same issue persists, activates the **Exploration Loop**: generates 2-3 alternative approaches, spawns the same agent type with different hypothesis prompts in separate workspaces, QA scores each, and the best result is adopted.
 
-#### /orchestrate — Automated Parallel Execution
+#### /orchestrate: Automated Parallel Execution
 
 ```
 /orchestrate
@@ -80,10 +80,10 @@ You have two execution paths:
 3. Creates `orchestrator-session.md` and `task-board.md` in the memory directory.
 4. Spawns agents per priority tier, each getting: task description, API contracts, and context.
 5. Monitors progress by polling `progress-{agent}.md` files.
-6. Verifies each completed agent via `verify.sh` — PASS (exit 0) accepts, FAIL (exit 1) re-spawns with error context (max 2 retries), and persistent failure triggers the Exploration Loop.
+6. Verifies each completed agent via `verify.sh`. PASS (exit 0) accepts; FAIL (exit 1) re-spawns with error context (max 2 retries); persistent failure triggers the Exploration Loop.
 7. Collects all `result-{agent}.md` files and compiles a final report.
 
-### Step 3: agent:spawn — CLI-Level Agent Management
+### Step 3: agent:spawn for CLI-Level Agent Management
 
 The `agent:spawn` command is the low-level mechanism that workflows call internally. You can also use it directly:
 
@@ -110,7 +110,7 @@ See [Per-Agent Models](./per-agent-models.md) for configuration details.
 
 **Prompt resolution:** The `<prompt>` argument can be either inline text or a file path. If the path resolves to an existing file, its contents are read and used as the prompt. The CLI also injects vendor-specific execution protocols from `.agents/skills/_shared/runtime/execution-protocols/{vendor}.md`.
 
-### Step 4: /review — QA Verification
+### Step 4: /review for QA Verification
 
 ```
 /review
@@ -118,13 +118,13 @@ See [Per-Agent Models](./per-agent-models.md) for configuration details.
 
 The review workflow runs a full QA pipeline:
 
-1. **Identify scope** — Asks what to review (specific files, feature branch, or entire project).
-2. **Automated security checks** — Runs `npm audit`, `bandit`, or equivalent.
-3. **OWASP Top 10 manual review** — Injection, broken auth, sensitive data, access control, misconfig, insecure deserialization, vulnerable components, insufficient logging.
-4. **Performance analysis** — N+1 queries, missing indexes, unbounded pagination, memory leaks, unnecessary re-renders, bundle sizes.
-5. **Accessibility** — WCAG 2.1 AA: semantic HTML, ARIA, keyboard nav, color contrast, focus management.
-6. **Code quality** — Naming, error handling, test coverage, TypeScript strict mode, unused imports, async/await patterns.
-7. **Report** — Findings categorized as CRITICAL / HIGH / MEDIUM / LOW with `file:line`, description, and remediation code.
+1. **Identify scope**: Asks what to review (specific files, feature branch, or entire project).
+2. **Automated security checks**: Runs `npm audit`, `bandit`, or equivalent.
+3. **OWASP Top 10 manual review**: Injection, broken auth, sensitive data, access control, misconfig, insecure deserialization, vulnerable components, insufficient logging.
+4. **Performance analysis**: N+1 queries, missing indexes, unbounded pagination, memory leaks, unnecessary re-renders, bundle sizes.
+5. **Accessibility**: WCAG 2.1 AA, including semantic HTML, ARIA, keyboard nav, color contrast, focus management.
+6. **Code quality**: Naming, error handling, test coverage, TypeScript strict mode, unused imports, async/await patterns.
+7. **Report**: Findings categorized as CRITICAL / HIGH / MEDIUM / LOW with `file:line`, description, and remediation code.
 
 For large scopes, the workflow delegates to the QA agent subagent. With the `--fix` option, it enters a Fix-Verify Loop: spawn domain agents to fix CRITICAL/HIGH issues, re-review, repeat up to 3 times.
 
@@ -308,7 +308,7 @@ Starting `/orchestrate` without a plan file. The workflow will refuse to proceed
 
 ### 2. Overlapping Workspaces
 
-Assigning two agents to the same workspace directory. This causes file conflicts — one agent's changes overwrite another's. Always use separate workspace directories.
+Assigning two agents to the same workspace directory. This causes file conflicts where one agent's changes overwrite another's. Always use separate workspace directories.
 
 ### 3. Missing API Contracts
 
@@ -336,15 +336,15 @@ Using `agent:spawn` directly without running the verification script afterward. 
 
 After all agents complete their individual tasks, cross-domain integration must be validated:
 
-1. **API contract alignment** — MCP tools (`find_symbol`, `search_for_pattern`) verify that backend implementations match the contracts consumed by frontend and mobile.
+1. **API contract alignment**: MCP tools (`find_symbol`, `search_for_pattern`) verify that backend implementations match the contracts consumed by frontend and mobile.
 
-2. **Type consistency** — TypeScript types, Python dataclasses, or Dart models shared across domains must use consistent field names and types.
+2. **Type consistency**: TypeScript types, Python dataclasses, or Dart models shared across domains must use consistent field names and types.
 
-3. **Authentication flow** — If the backend implements JWT auth, the frontend must correctly send tokens in headers, and the mobile app must store and refresh them appropriately.
+3. **Authentication flow**: If the backend implements JWT auth, the frontend must correctly send tokens in headers, and the mobile app must store and refresh them appropriately.
 
-4. **Error handling** — All consumers of an API must handle the documented error responses. If the backend returns `{ "error": "unauthorized", "code": 401 }`, all clients must handle this format.
+4. **Error handling**: All consumers of an API must handle the documented error responses. If the backend returns `{ "error": "unauthorized", "code": 401 }`, all clients must handle this format.
 
-5. **Database schema alignment** — If the database agent creates migrations, the backend ORM models must match the schema exactly.
+5. **Database schema alignment**: If the database agent creates migrations, the backend ORM models must match the schema exactly.
 
 The QA agent's Alignment Review (Step 6 in ultrawork, Step 6 in work) performs this cross-domain validation systematically.
 

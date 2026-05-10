@@ -42,14 +42,14 @@ Abstract agent definitions in `.agents/agents/` are vendor-neutral (name, descri
 Claude Code extends beyond symlinks with a full native adapter layer:
 
 - **`CLAUDE.md`** at project root (auto-loaded by Claude Code)
-- **`.claude/skills/`** — 12 thin router SKILL.md files that delegate to `.agents/workflows/` (they contain routing logic only, not workflow content). Skills are explicitly invoked via slash commands, not keyword-auto-activated.
-- **`.claude/agents/`** — generated subagent definitions from `.agents/agents/*.md`
-- **`.codex/agents/`** — generated Codex custom agents for same-vendor native dispatch
-- **`.gemini/agents/`** — generated Gemini native agents for same-vendor native dispatch
-- **`stack/`** — generated backend stack artifacts (SSOT exception, created by `/stack-set` or `oma install` variant)
-- **Native loop patterns** — Review Loop, Issue Remediation Loop, Phase Gate Loop via Task tool
+- **`.claude/skills/`**: 12 thin router SKILL.md files that delegate to `.agents/workflows/` (they contain routing logic only, not workflow content). Skills are explicitly invoked via slash commands, not keyword-auto-activated.
+- **`.claude/agents/`**: generated subagent definitions from `.agents/agents/*.md`
+- **`.codex/agents/`**: generated Codex custom agents for same-vendor native dispatch
+- **`.gemini/agents/`**: generated Gemini native agents for same-vendor native dispatch
+- **`stack/`**: generated backend stack artifacts (SSOT exception, created by `/stack-set` or `oma install` variant)
+- **Native loop patterns**: Review Loop, Issue Remediation Loop, Phase Gate Loop via Task tool
 - Domain skills remain as symlinks from `.agents/skills/` (coexist with thin router workflow skills)
-- `.agents/` is never modified — all native files reference it as the source of truth
+- `.agents/` is never modified; all native files reference it as the source of truth
 
 ## Current Design Principle
 

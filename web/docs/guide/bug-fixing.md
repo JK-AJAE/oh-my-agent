@@ -45,21 +45,21 @@ The more context you provide upfront, the fewer back-and-forth questions the deb
 
 Severity determines how the bug is handled and how quickly it should be fixed.
 
-### P0 — Critical (Immediate Response)
+### P0: Critical (Immediate Response)
 
 **Definition:** Production is down, data is being lost or corrupted, security breach is active.
 
 **Response expectation:** Drop everything. This is the only task until resolved.
 
 **Examples:**
-- Authentication system is bypassed — all users can access admin endpoints.
-- Database migration corrupted the users table — accounts are inaccessible.
+- Authentication system is bypassed; all users can access admin endpoints.
+- Database migration corrupted the users table; accounts are inaccessible.
 - Payment processing is double-charging customers.
 - API endpoint returns other users' personal data.
 
 **Debug approach:** Skip the full template. Provide the error message and any stack trace. The workflow starts immediately at Step 2 (Reproduce).
 
-### P1 — High (Same Session)
+### P1: High (Same Session)
 
 **Definition:** A core feature is broken for a significant number of users. Workaround may exist but is not acceptable long-term.
 
@@ -73,7 +73,7 @@ Severity determines how the bug is handled and how quickly it should be fixed.
 
 **Debug approach:** Full 5-step loop. QA review recommended after fix.
 
-### P2 — Medium (This Sprint)
+### P2: Medium (This Sprint)
 
 **Definition:** A feature works but with degraded behavior. Affects usability but not functionality.
 
@@ -87,7 +87,7 @@ Severity determines how the bug is handled and how quickly it should be fixed.
 
 **Debug approach:** Full 5-step loop. Include in QA regression suite.
 
-### P3 — Low (Backlog)
+### P3: Low (Backlog)
 
 **Definition:** Cosmetic issue, edge case, or minor inconvenience.
 
@@ -105,7 +105,7 @@ Severity determines how the bug is handled and how quickly it should be fixed.
 
 ## The 5-Step Debug Loop in Detail
 
-The `/debug` workflow executes these steps in strict order. It uses MCP code analysis tools throughout — never raw file reads or grep.
+The `/debug` workflow executes these steps in strict order. It uses MCP code analysis tools throughout, never raw file reads or grep.
 
 ### Step 1: Collect Error Information
 
@@ -121,7 +121,7 @@ If an error message is already provided in the prompt, the workflow proceeds imm
 
 **Tools used:** `search_for_pattern` with the error message or stack trace keywords, `find_symbol` to locate the exact function and file.
 
-The goal is to locate the error in the codebase — find the exact line where the exception is thrown, the exact function that produces wrong output, or the exact condition that causes the unexpected behavior.
+The goal is to locate the error in the codebase: find the exact line where the exception is thrown, the exact function that produces wrong output, or the exact condition that causes the unexpected behavior.
 
 This step transforms a user-reported symptom ("the page crashes") into a codebase-level location (`src/api/users.ts:47, deleteUser() throws TypeError`).
 
@@ -157,8 +157,8 @@ The workflow presents:
 
 Two actions happen in this step:
 
-1. **Implement the fix** — The approved minimal change is applied.
-2. **Write a regression test** — A test that:
+1. **Implement the fix**: The approved minimal change is applied.
+2. **Write a regression test**: A test that:
    - Reproduces the original bug (the test must fail without the fix)
    - Verifies the fix works (the test must pass with the fix)
    - Prevents the same bug from recurring in future changes
@@ -173,7 +173,7 @@ After the fix is applied, the workflow scans the entire codebase for the same pa
 
 For example, if the bug was caused by accessing `user.organization.id` without checking if `organization` is null, the scan looks for all other instances of `organization.id` access without null checks.
 
-**Subagent delegation criteria** — The workflow spawns a `debug-investigator` subagent when:
+**Subagent delegation criteria:** The workflow spawns a `debug-investigator` subagent when:
 - The error spans multiple domains (e.g., both frontend and backend affected).
 - The similar pattern scan scope covers 10+ files.
 - Deep dependency tracing is needed to fully diagnose the issue.
@@ -277,13 +277,13 @@ The regression test cannot be written because the test infrastructure is broken,
 
 After applying the fix and regression test, verify:
 
-- [ ] **Regression test fails without the fix** — Revert the fix temporarily and confirm the test catches the bug.
-- [ ] **Regression test passes with the fix** — Apply the fix and confirm the test passes.
-- [ ] **Existing tests still pass** — Run the full test suite to verify no regressions.
-- [ ] **Build succeeds** — Compile/build the project to catch type errors or import issues.
-- [ ] **Similar patterns scanned** — Step 6 has been completed and all found instances are either fixed or documented.
-- [ ] **Fix is minimal** — Only the necessary lines were changed. No unrelated refactoring was included.
-- [ ] **Root cause documented** — The memory file records: symptom, root cause, fix applied, files changed, regression test location, and similar patterns found.
+- [ ] **Regression test fails without the fix**: Revert the fix temporarily and confirm the test catches the bug.
+- [ ] **Regression test passes with the fix**: Apply the fix and confirm the test passes.
+- [ ] **Existing tests still pass**: Run the full test suite to verify no regressions.
+- [ ] **Build succeeds**: Compile/build the project to catch type errors or import issues.
+- [ ] **Similar patterns scanned**: Step 6 has been completed and all found instances are either fixed or documented.
+- [ ] **Fix is minimal**: Only the necessary lines were changed. No unrelated refactoring was included.
+- [ ] **Root cause documented**: The memory file records the symptom, root cause, fix applied, files changed, regression test location, and similar patterns found.
 
 ---
 

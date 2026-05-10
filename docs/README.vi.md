@@ -6,7 +6,7 @@
 
 Bạn đã bao giờ ước trợ lý AI của mình có đồng nghiệp chưa? Đó chính là điều oh-my-agent làm được.
 
-Thay vì một AI làm tất cả mọi thứ (rồi bị lạc hướng giữa chừng), oh-my-agent phân chia công việc cho các **agent chuyên biệt** — frontend, backend, architecture, QA, PM, DB, mobile, infra, debug, design và nhiều hơn nữa. Mỗi agent hiểu sâu lĩnh vực của mình, có công cụ và checklist riêng, và chỉ tập trung vào phần việc được giao.
+Thay vì một AI làm tất cả mọi thứ (rồi bị lạc hướng giữa chừng), oh-my-agent phân chia công việc cho các **agent chuyên biệt**: frontend, backend, architecture, QA, PM, DB, mobile, infra, debug, design và nhiều hơn nữa. Mỗi agent hiểu sâu lĩnh vực của mình, có công cụ và checklist riêng, và chỉ tập trung vào phần việc được giao.
 
 Hỗ trợ tất cả các AI IDE chính: Antigravity, Claude Code, Cursor, Gemini CLI, Codex CLI, OpenCode và nhiều hơn nữa.
 
@@ -30,7 +30,7 @@ bunx oh-my-agent@latest
 ### Cài đặt qua Agent Package Manager
 
 <details>
-<summary><a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM) của Microsoft — bản phân phối chỉ có skill. Click để mở rộng.</summary>
+<summary><a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM) của Microsoft: bản phân phối chỉ có skill. Click để mở rộng.</summary>
 
 > Đừng nhầm với APM (Application Performance Monitoring) của `oma-observability`.
 
@@ -43,7 +43,7 @@ apm install first-fluke/oh-my-agent
 apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 ```
 
-APM đọc pointer `skills: .agents/skills/` trong `.claude-plugin/plugin.json`, nên `.agents/` SSOT là nguồn duy nhất — không cần bước build hay mirror.
+APM đọc pointer `skills: .agents/skills/` trong `.claude-plugin/plugin.json`, nên `.agents/` SSOT là nguồn duy nhất, không cần bước build hay mirror.
 
 APM chỉ phân phối skill. Còn workflow, rule, `oma-config.yaml`, hook phát hiện từ khóa và CLI `oma agent:spawn` thì dùng `bunx oh-my-agent@latest`. Mỗi dự án chỉ chọn một cách phân phối thôi, không thì lệch nhau.
 
@@ -121,7 +121,7 @@ Hoặc sử dụng slash command cho các workflow có cấu trúc:
 | 5 | `/docs` | Xác minh và đồng bộ trôi tài liệu qua `oma-docs` |
 | 6 | `/scm` | Quy trình SCM và Git, hỗ trợ Conventional Commits |
 
-**Tự động phát hiện**: Bạn không nhất thiết cần slash command — các từ khóa như "kiến trúc", "kế hoạch", "đánh giá", "debug" trong tin nhắn (hỗ trợ 11 ngôn ngữ!) sẽ tự động kích hoạt workflow phù hợp.
+**Tự động phát hiện**: Bạn không nhất thiết cần slash command. Các từ khóa như "kiến trúc", "kế hoạch", "đánh giá", "debug" trong tin nhắn (hỗ trợ 11 ngôn ngữ!) sẽ tự động kích hoạt workflow phù hợp.
 
 ## CLI
 
@@ -152,12 +152,12 @@ Việc chọn model đi theo hai lớp:
 
 > [Đọc thêm lý do →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
 
-- **Di động** — `.agents/` đi cùng dự án, không bị ràng buộc vào một IDE
-- **Dựa trên vai trò** — Agent được mô hình hóa như đội kỹ thuật thực, không phải một đống prompt
-- **Tiết kiệm token** — Thiết kế skill 2 lớp tiết kiệm ~75% token
-- **Ưu tiên chất lượng** — Charter preflight, quality gate và review workflow được tích hợp sẵn
-- **Đa nhà cung cấp** — Kết hợp Gemini, Claude, Codex và Qwen theo loại agent
-- **Có thể quan sát** — Dashboard terminal và web để giám sát thời gian thực
+- **Di động**: `.agents/` đi cùng dự án, không bị ràng buộc vào một IDE
+- **Dựa trên vai trò**: agent được mô hình hóa như đội kỹ thuật thực, không phải một đống prompt
+- **Tiết kiệm token**: thiết kế skill 2 lớp tiết kiệm ~75% token
+- **Ưu tiên chất lượng**: Charter preflight, quality gate và review workflow được tích hợp sẵn
+- **Đa nhà cung cấp**: kết hợp Gemini, Claude, Codex và Qwen theo loại agent
+- **Có thể quan sát**: dashboard terminal và web để giám sát thời gian thực
 
 ## Kiến trúc
 
@@ -208,9 +208,9 @@ flowchart TD
 
 ## Tìm hiểu thêm
 
-- **[Tài liệu chi tiết](./AGENTS_SPEC.md)** — Đặc tả kỹ thuật và kiến trúc đầy đủ
-- **[Agent được hỗ trợ](./SUPPORTED_AGENTS.md)** — Ma trận hỗ trợ agent theo IDE
-- **[Tài liệu web](https://first-fluke.github.io/oh-my-agent/)** — Hướng dẫn, tutorial và CLI reference
+- **[Tài liệu chi tiết](./AGENTS_SPEC.md)**: đặc tả kỹ thuật và kiến trúc đầy đủ
+- **[Agent được hỗ trợ](./SUPPORTED_AGENTS.md)**: ma trận hỗ trợ agent theo IDE
+- **[Tài liệu web](https://first-fluke.github.io/oh-my-agent/)**: hướng dẫn, tutorial và CLI reference
 
 ## Nhà tài trợ
 

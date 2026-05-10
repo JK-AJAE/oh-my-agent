@@ -1,11 +1,11 @@
 ---
 title: Workflows
-description: Complete reference for all 16 oh-my-agent workflows — slash commands, persistent vs non-persistent modes, trigger keywords in 11 languages, phases and steps, files read and written, auto-detection mechanics via triggers.json and keyword-detector.ts, informational pattern filtering, and persistent mode state management.
+description: Complete reference for all 16 oh-my-agent workflows, covering slash commands, persistent vs non-persistent modes, trigger keywords in 11 languages, phases and steps, files read and written, auto-detection mechanics via triggers.json and keyword-detector.ts, informational pattern filtering, and persistent mode state management.
 ---
 
 # Workflows
 
-Workflows are structured multi-step processes triggered by slash commands or natural language keywords. They define how agents collaborate on tasks — from single-phase utilities to complex 5-phase quality gates.
+Workflows are structured multi-step processes triggered by slash commands or natural language keywords. They define how agents collaborate on tasks, from single-phase utilities to complex 5-phase quality gates.
 
 There are 16 workflows, 4 of which are persistent (they maintain state and cannot be accidentally interrupted).
 
@@ -47,14 +47,14 @@ Persistent workflows keep running until all tasks are done. They maintain state 
 Noun whitelist (15): app, api, service, server, cli, tool, website, dashboard, system, feature, backend, frontend, prototype, mvp, bot.
 
 **Steps:**
-1. **Step 0 — Preparation:** Read coordination skill, context-loading guide, memory protocol. Detect vendor.
-2. **Step 1 — Load/Create Plan:** Check for `.agents/results/plan-{sessionId}.json`. If missing, prompt user to run `/plan` first.
-3. **Step 2 — Initialize Session:** Load `oma-config.yaml`, display CLI mapping table, generate session ID (`session-YYYYMMDD-HHMMSS`), create `orchestrator-session.md` and `task-board.md` in memory.
-4. **Step 3 — Spawn Agents:** For each priority tier (P0 first, then P1...), spawn agents using vendor-appropriate method (Agent tool for Claude Code, `oma agent:spawn` for Gemini/Antigravity, model-mediated for Codex). Never exceed MAX_PARALLEL.
-5. **Step 4 — Monitor:** Poll `progress-{agent}.md` files, update `task-board.md`. Watch for completions, failures, crashes.
-6. **Step 5 — Verify:** Run `verify.sh {agent-type} {workspace}` per completed agent. On failure, re-spawn with error context (max 2 retries). After 2 retries, activate Exploration Loop: generate 2-3 hypotheses, spawn parallel experiments, score, keep best.
-7. **Step 6 — Collect:** Read all `result-{agent}.md` files, compile summary.
-8. **Step 7 — Final Report:** Present session summary. If Quality Score was measured, include Experiment Ledger summary and auto-generate lessons.
+1. **Step 0, Preparation:** Read coordination skill, context-loading guide, memory protocol. Detect vendor.
+2. **Step 1, Load/Create Plan:** Check for `.agents/results/plan-{sessionId}.json`. If missing, prompt user to run `/plan` first.
+3. **Step 2, Initialize Session:** Load `oma-config.yaml`, display CLI mapping table, generate session ID (`session-YYYYMMDD-HHMMSS`), create `orchestrator-session.md` and `task-board.md` in memory.
+4. **Step 3, Spawn Agents:** For each priority tier (P0 first, then P1...), spawn agents using vendor-appropriate method (Agent tool for Claude Code, `oma agent:spawn` for Gemini/Antigravity, model-mediated for Codex). Never exceed MAX_PARALLEL.
+5. **Step 4, Monitor:** Poll `progress-{agent}.md` files, update `task-board.md`. Watch for completions, failures, crashes.
+6. **Step 5, Verify:** Run `verify.sh {agent-type} {workspace}` per completed agent. On failure, re-spawn with error context (max 2 retries). After 2 retries, activate Exploration Loop: generate 2-3 hypotheses, spawn parallel experiments, score, keep best.
+7. **Step 6, Collect:** Read all `result-{agent}.md` files, compile summary.
+8. **Step 7, Final Report:** Present session summary. If Quality Score was measured, include Experiment Ledger summary and auto-generate lessons.
 
 **Files read:** `.agents/results/plan-{sessionId}.json`, `.agents/oma-config.yaml`, `progress-{agent}.md`, `result-{agent}.md`.
 **Files written:** `orchestrator-session.md`, `task-board.md` (memory), final report.
@@ -81,15 +81,15 @@ Noun whitelist (15): app, api, service, server, cli, tool, website, dashboard, s
 | German | "koordinieren", "schritt für schritt" |
 
 **Steps:**
-1. **Step 0 — Preparation:** Read skills, context-loading, memory protocol. Record session start.
-2. **Step 1 — Analyze Requirements:** Identify involved domains. If single domain, suggest direct agent use.
-3. **Step 2 — PM Agent Planning:** PM decomposes requirements, defines API contracts, creates prioritized task breakdown, saves to `.agents/results/plan-{sessionId}.json`.
-4. **Step 3 — Review Plan:** Present plan to user. **Must get confirmation before proceeding.**
-5. **Step 4 — Spawn Agents:** Spawn by priority tier, parallel within same tier, separate workspaces.
-6. **Step 5 — Monitor:** Poll progress files, verify API contract alignment between agents.
-7. **Step 6 — QA Review:** Spawn QA agent for security (OWASP), performance, accessibility, code quality.
-8. **Step 6.1 — Quality Score** (conditional): Measure and record baseline.
-9. **Step 7 — Iterate:** If CRITICAL/HIGH issues found, re-spawn responsible agents. If same issue persists after 2 attempts, activate Exploration Loop.
+1. **Step 0, Preparation:** Read skills, context-loading, memory protocol. Record session start.
+2. **Step 1, Analyze Requirements:** Identify involved domains. If single domain, suggest direct agent use.
+3. **Step 2, PM Agent Planning:** PM decomposes requirements, defines API contracts, creates prioritized task breakdown, saves to `.agents/results/plan-{sessionId}.json`.
+4. **Step 3, Review Plan:** Present plan to user. **Must get confirmation before proceeding.**
+5. **Step 4, Spawn Agents:** Spawn by priority tier, parallel within same tier, separate workspaces.
+6. **Step 5, Monitor:** Poll progress files, verify API contract alignment between agents.
+7. **Step 6, QA Review:** Spawn QA agent for security (OWASP), performance, accessibility, code quality.
+8. **Step 6.1, Quality Score** (conditional): Measure and record baseline.
+9. **Step 7, Iterate:** If CRITICAL/HIGH issues found, re-spawn responsible agents. If same issue persists after 2 attempts, activate Exploration Loop.
 
 **When to use:** Features spanning multiple domains where you want step-by-step control and user approval at each gate.
 
@@ -154,18 +154,18 @@ Noun whitelist (15): app, api, service, server, cli, tool, website, dashboard, s
 | German | "hör nicht auf", "bis zur fertigstellung", "alles fertigstellen" |
 
 **Phases:**
-1. **Phase 0 — INIT:** Load prerequisites (context-loading, memory protocol, judge protocol). Define verifiable completion criteria (each must be mechanically verifiable — test pass, build success, file exists). Present criteria for user confirmation. Initialize session with `max_iterations: 5`.
-2. **Phase 1 — WORK:** Execute ultrawork (PLAN → IMPL → VERIFY → REFINE → SHIP) as a single iteration.
-3. **Phase 2 — JUDGE:** Independent verifier checks each completion criterion against actual project state (run tests, check builds, verify file existence). Score each criterion as PASS/FAIL with evidence.
-4. **Phase 3 — DECIDE:** If all criteria PASS → end loop, generate final report. If any FAIL → increment iteration counter, feed failure context back, return to Phase 1.
+1. **Phase 0, INIT:** Load prerequisites (context-loading, memory protocol, judge protocol). Define verifiable completion criteria (each must be mechanically verifiable, such as test pass, build success, or file exists). Present criteria for user confirmation. Initialize session with `max_iterations: 5`.
+2. **Phase 1, WORK:** Execute ultrawork (PLAN → IMPL → VERIFY → REFINE → SHIP) as a single iteration.
+3. **Phase 2, JUDGE:** Independent verifier checks each completion criterion against actual project state (run tests, check builds, verify file existence). Score each criterion as PASS/FAIL with evidence.
+4. **Phase 3, DECIDE:** If all criteria PASS → end loop, generate final report. If any FAIL → increment iteration counter, feed failure context back, return to Phase 1.
 5. **Safeguards:** Loop stops if `current_iteration >= max_iterations` (default 5), or if the same criterion fails 3 consecutive times with the same root cause (stuck detection).
 
-**Key difference from /ultrawork:** Ultrawork is a single-pass 5-phase workflow. Ralph wraps ultrawork in a retry loop with an independent judge that objectively verifies completion — it keeps going until the work is actually done, not just "reviewed."
+**Key difference from /ultrawork:** Ultrawork is a single-pass 5-phase workflow. Ralph wraps ultrawork in a retry loop with an independent judge that objectively verifies completion. It keeps going until the work is actually done, not just "reviewed."
 
 **Files read:** `.agents/workflows/ralph/resources/judge-protocol.md`, all ultrawork files.
 **Files written:** `session-ralph.md` (memory), iteration logs, final report.
 
-**When to use:** When you need guaranteed completion — the agent must keep working until verifiable criteria pass, not just do one pass and report.
+**When to use:** When you need guaranteed completion. The agent must keep working until verifiable criteria pass, not just do one pass and report.
 
 ---
 
@@ -213,7 +213,7 @@ Noun whitelist (15): app, api, service, server, cli, tool, website, dashboard, s
 
 ### /architecture
 
-**Description:** Software architecture workflow — diagnose architecture problems, select the right analysis method (diagnostic routing / design-twice / ATAM / CBAM / ADR), compare options, synthesize stakeholder input, and produce a recommendation, review, or ADR.
+**Description:** Software architecture workflow that diagnoses architecture problems, selects the right analysis method (diagnostic routing / design-twice / ATAM / CBAM / ADR), compares options, synthesizes stakeholder input, and produces a recommendation, review, or ADR.
 
 **Trigger keywords:**
 | Language | Keywords |
@@ -339,7 +339,7 @@ Noun whitelist (15): app, api, service, server, cli, tool, website, dashboard, s
 
 ### /pdf
 
-**Description:** Convert PDF to Markdown using `opendataloader-pdf` — extracts text, tables, headings, and images with correct reading order.
+**Description:** Convert PDF to Markdown using `opendataloader-pdf`. Extracts text, tables, headings, and images with correct reading order.
 
 **Trigger keywords:** None (invoked explicitly with an input file path).
 
@@ -391,9 +391,9 @@ oh-my-agent uses a `UserPromptSubmit` hook that runs before each user message is
 
 1. User types natural language input
 2. Hook checks if explicit `/command` is present (if so, skip detection to avoid duplication)
-3. Hook sanitizes input (strips code blocks, quoted strings, pasted system-echo blocks) then scans against `.agents/hooks/core/triggers.json` — both keyword lists (literal phrases) and `patterns` (raw regex). A reinforcement guard suppresses re-triggers if the same workflow fired 2+ times in the last 60 seconds.
+3. Hook sanitizes input (strips code blocks, quoted strings, pasted system-echo blocks) then scans against `.agents/hooks/core/triggers.json`, including both keyword lists (literal phrases) and `patterns` (raw regex). A reinforcement guard suppresses re-triggers if the same workflow fired 2+ times in the last 60 seconds.
 4. If a match is found, check if the input matches informational patterns
-5. If informational (e.g., "what is orchestrate?"), filter it out — no workflow triggers
+5. If informational (e.g., "what is orchestrate?"), filter it out (no workflow triggers)
 6. If actionable, inject `[OMA WORKFLOW: {workflow-name}]` into the context
 7. The agent reads the injected tag and loads the corresponding workflow file from `.agents/workflows/`
 
@@ -403,15 +403,15 @@ oh-my-agent uses a `UserPromptSubmit` hook that runs before each user message is
 
 | Section | Behavior |
 |---------|----------|
-| `*` | Universal — always loaded regardless of `language` setting in `.agents/oma-config.yaml`. Use for English content (lingua franca) and truly cross-language tokens (e.g. workflow name `"orchestrate"`). |
-| `en` | English — loaded for backward compatibility. Functionally equivalent to `*`. New English content should go in `*`. |
-| `ko`, `ja`, `zh`, `es`, `fr`, `de`, `pt`, `ru`, `nl`, `pl` | Language-specific — loaded only when `language: <lang>` is set in `.agents/oma-config.yaml`. |
+| `*` | Universal: always loaded regardless of `language` setting in `.agents/oma-config.yaml`. Use for English content (lingua franca) and truly cross-language tokens (e.g. workflow name `"orchestrate"`). |
+| `en` | English: loaded for backward compatibility. Functionally equivalent to `*`. New English content should go in `*`. |
+| `ko`, `ja`, `zh`, `es`, `fr`, `de`, `pt`, `ru`, `nl`, `pl` | Language-specific: loaded only when `language: <lang>` is set in `.agents/oma-config.yaml`. |
 
 **Implication**: If you set `language: en` in `.agents/oma-config.yaml`, only `*` and `en` patterns load. Korean/Japanese/etc. natural-language triggers will not fire even if the user types in those languages. To enable a non-English language, set `language: <code>` accordingly. The English fallback in `*` always remains active.
 
 ### Pattern Field (Raw Regex)
 
-In addition to literal `keywords`, each workflow can declare `patterns` — raw regex strings compiled with `iu` flags. Patterns enable multi-token intent matching that would otherwise require combinatorial keyword lists.
+In addition to literal `keywords`, each workflow can declare `patterns`, raw regex strings compiled with `iu` flags. Patterns enable multi-token intent matching that would otherwise require combinatorial keyword lists.
 
 ```jsonc
 {
@@ -429,8 +429,8 @@ In addition to literal `keywords`, each workflow can declare `patterns` — raw 
 ```
 
 Authoring rules:
-- Strings are compiled directly — escape backslashes once for JSON, once for regex (`\\b`, `\\s+`)
-- No automatic word-boundary wrapping — pattern authors handle `\b` themselves
+- Strings are compiled directly; escape backslashes once for JSON, once for regex (`\\b`, `\\s+`)
+- No automatic word-boundary wrapping; pattern authors handle `\b` themselves
 - Invalid regex is silently skipped at runtime (visible at config edit time via test failures)
 
 ### Informational Pattern Filtering
@@ -445,8 +445,8 @@ The `informationalPatterns` section of `.agents/hooks/core/triggers.json` define
 | `zh` | "是什么", "什么是", "怎么", "解释" |
 
 If the input matches both a workflow trigger and an informational pattern, the informational pattern takes priority and no workflow is triggered. This is what blocks prompts like:
-- `"How do you build a TODO app?"` — `how do` in `*` blocks the orchestrate intent regex
-- `"orchestrate 트리거 해주면 되나요?"` (under `language: ko`) — `트리거` in `ko` blocks the orchestrate keyword
+- `"How do you build a TODO app?"`: `how do` in `*` blocks the orchestrate intent regex
+- `"orchestrate 트리거 해주면 되나요?"` (under `language: ko`): `트리거` in `ko` blocks the orchestrate keyword
 
 ### Excluded Workflows
 

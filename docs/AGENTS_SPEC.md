@@ -87,15 +87,15 @@ Vendor-neutral agent definitions live under:
 
 Each definition contains only portable fields:
 
-- `name` — agent identifier (e.g., `backend-engineer`)
-- `description` — role summary
-- `skills` — list of domain skills the agent may use
+- `name`: agent identifier (e.g., `backend-engineer`)
+- `description`: role summary
+- `skills`: list of domain skills the agent may use
 
 These definitions contain no vendor-specific fields (no Claude `allowed_tools`, no Codex `model`, etc.). The CLI generates vendor-adapted files from these abstractions:
 
-- `.claude/agents/*.md` (Claude Code — Markdown with frontmatter)
-- `.codex/agents/*.toml` (Codex CLI — TOML format)
-- `.gemini/agents/*.md` (Gemini CLI — Markdown format)
+- `.claude/agents/*.md` (Claude Code, Markdown with frontmatter)
+- `.codex/agents/*.toml` (Codex CLI, TOML format)
+- `.gemini/agents/*.md` (Gemini CLI, Markdown format)
 
 Antigravity IDE reads `.agents/agents/` directly but does not support custom subagent spawning.
 
@@ -126,7 +126,7 @@ Typical examples:
 - CLI mappings
 - MCP bridge settings
 
-### `agent_cli_mapping` — dual format
+### `agent_cli_mapping`: dual format
 
 `agent_cli_mapping` in `.agents/oma-config.yaml` accepts two value shapes so legacy configs keep working:
 
@@ -154,7 +154,7 @@ Compatibility directories are projections, not separate sources of truth:
 - `.cursor/skills/`
 - `.github/skills/`
 
-Where supported, these should point back to `.agents/` via symlinks or equivalent generated views. Vendor skill files (e.g., `.claude/skills/*/SKILL.md`) are thin routers — they contain only the routing logic to load the corresponding `.agents/workflows/*.md` source of truth, not the full workflow content.
+Where supported, these should point back to `.agents/` via symlinks or equivalent generated views. Vendor skill files (e.g., `.claude/skills/*/SKILL.md`) are thin routers; they contain only the routing logic to load the corresponding `.agents/workflows/*.md` source of truth, not the full workflow content.
 
 ### Claude Code Native Adapter
 
@@ -178,7 +178,7 @@ Claude Code uses a hybrid model beyond simple symlinks:
 - **Subagents**: `.claude/agents/*.md` definitions generated from `.agents/agents/*.md` abstractions, spawned via Agent tool
 - **CLAUDE.md**: project-level integration file auto-loaded by Claude Code
 
-All native files reference `.agents/` — they never replace or duplicate it.
+All native files reference `.agents/`; they never replace or duplicate it.
 
 ## Same-Vendor Native Dispatch
 

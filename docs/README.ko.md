@@ -30,7 +30,7 @@ bunx oh-my-agent@latest
 ### Agent Package Manager로 설치
 
 <details>
-<summary>Microsoft의 <a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM) — 스킬 전용 배포. 클릭하면 펼쳐집니다.</summary>
+<summary>Microsoft의 <a href="https://github.com/microsoft/apm">Agent Package Manager</a> (APM): 스킬 전용 배포. 클릭하면 펼쳐집니다.</summary>
 
 > `oma-observability`의 APM(Application Performance Monitoring)과는 다릅니다.
 

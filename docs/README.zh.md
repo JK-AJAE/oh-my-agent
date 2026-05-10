@@ -30,7 +30,7 @@ bunx oh-my-agent@latest
 ### 通过 Agent Package Manager 安装
 
 <details>
-<summary>Microsoft 的 <a href="https://github.com/microsoft/apm">Agent Package Manager</a>（APM）—— 只分发 skill。点击展开。</summary>
+<summary>Microsoft 的 <a href="https://github.com/microsoft/apm">Agent Package Manager</a>（APM）：只分发 skill。点击展开。</summary>
 
 > 别和 `oma-observability` 的 APM（Application Performance Monitoring）搞混。
 

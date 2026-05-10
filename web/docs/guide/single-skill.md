@@ -1,11 +1,11 @@
 ---
 title: "Guide: Single Skill Execution"
-description: Detailed guide for single-domain tasks in oh-my-agent — when to use, preflight checklist, prompt template with explanation, real examples for frontend, backend, mobile, and database tasks, expected execution flow, quality gate checklist, and escalation signals.
+description: Detailed guide for single-domain tasks in oh-my-agent, covering when to use, preflight checklist, prompt template with explanation, real examples for frontend, backend, mobile, and database tasks, expected execution flow, quality gate checklist, and escalation signals.
 ---
 
 # Single Skill Execution
 
-Single skill execution is the fast path — one agent, one domain, one focused task. No orchestration overhead, no multi-agent coordination. The skill auto-activates from your natural language prompt.
+Single skill execution is the fast path: one agent, one domain, one focused task. No orchestration overhead, no multi-agent coordination. The skill auto-activates from your natural language prompt.
 
 ---
 
@@ -13,10 +13,10 @@ Single skill execution is the fast path — one agent, one domain, one focused t
 
 Use this when your task meets ALL of these criteria:
 
-- **Owned by one domain** — the entire task belongs to frontend, backend, mobile, database, design, infrastructure, or another single domain
-- **Self-contained** — no cross-domain API contract changes, no backend changes needed for a frontend task
-- **Clear scope** — you know what the output should be (a component, an endpoint, a schema, a fix)
-- **No coordination** — other agents do not need to run before or after
+- **Owned by one domain**: the entire task belongs to frontend, backend, mobile, database, design, infrastructure, or another single domain
+- **Self-contained**: no cross-domain API contract changes, no backend changes needed for a frontend task
+- **Clear scope**: you know what the output should be (a component, an endpoint, a schema, a fix)
+- **No coordination**: other agents do not need to run before or after
 
 **Examples of single-skill tasks:**
 - Build one UI component
@@ -41,7 +41,7 @@ Before prompting, answer these four questions (they map to the [Prompt Structure
 
 | Element | Question | Why It Matters |
 |---------|----------|----------------|
-| **Goal** | What specific artifact should be created or changed? | Prevents ambiguity — "add a button" vs "add a form with validation" |
+| **Goal** | What specific artifact should be created or changed? | Prevents ambiguity (e.g., "add a button" vs "add a form with validation") |
 | **Context** | What stack, framework, and conventions apply? | Agent detects from project files, but explicit is better |
 | **Constraints** | What rules must be followed? (style, security, performance, compatibility) | Without constraints, agents use defaults that may not match your project |
 | **Done When** | What acceptance criteria will you check? | Gives the agent a target and you a verification checklist |
@@ -69,10 +69,10 @@ Add tests for: <critical test cases>.
 
 | Part | Purpose | Example |
 |------|---------|---------|
-| `Build <specific artifact>` | The Goal — what to create | "Build a user registration form component" |
-| `using <stack/framework>` | The Context — tech stack | "using React + TypeScript + Tailwind CSS" |
+| `Build <specific artifact>` | The Goal (what to create) | "Build a user registration form component" |
+| `using <stack/framework>` | The Context (tech stack) | "using React + TypeScript + Tailwind CSS" |
 | `Constraints:` | Rules the agent must follow | "accessible labels, no external form libraries, client-side validation only" |
-| `Acceptance criteria:` | Done When — verifiable outcomes | "1) email format validation 2) password strength indicator 3) submit disabled while invalid" |
+| `Acceptance criteria:` | Done When (verifiable outcomes) | "1) email format validation 2) password strength indicator 3) submit disabled while invalid" |
 | `Add tests for:` | Test requirements | "valid/invalid submit paths, edge cases for email validation" |
 
 ---
@@ -159,7 +159,7 @@ Add tests for: auth required, pagination, status filter, empty results.
    ```
 6. **Implementation:**
    - Repository: `TaskRepository.find_by_user(user_id, cursor, status, limit)` with parameterized query
-   - Service: `TaskService.get_user_tasks(user_id, cursor, status, limit)` — business logic wrapper
+   - Service: `TaskService.get_user_tasks(user_id, cursor, status, limit)` (business logic wrapper)
    - Router: `GET /api/tasks` with JWT auth middleware, input validation, response formatting
    - Tests: auth required returns 401, pagination returns correct cursor, filter works, empty returns 200 with empty array
 
@@ -256,12 +256,12 @@ After the agent delivers its output, verify these items before accepting:
 
 ### Universal Checks (All Agents)
 
-- [ ] **Behavior matches acceptance criteria** — every criterion from your prompt is satisfied
-- [ ] **Tests cover happy path and key edge cases** — not just the happy path
-- [ ] **No unrelated file changes** — only files relevant to the task were modified
-- [ ] **Shared modules not broken** — imports, types, and interfaces used by other code still work
-- [ ] **Charter was followed** — the "Must NOT do" constraints were respected
-- [ ] **Lint, typecheck, build pass** — run your project's standard checks
+- [ ] **Behavior matches acceptance criteria**: every criterion from your prompt is satisfied
+- [ ] **Tests cover happy path and key edge cases**: not just the happy path
+- [ ] **No unrelated file changes**: only files relevant to the task were modified
+- [ ] **Shared modules not broken**: imports, types, and interfaces used by other code still work
+- [ ] **Charter was followed**: the "Must NOT do" constraints were respected
+- [ ] **Lint, typecheck, build pass**: run your project's standard checks
 
 ### Frontend-Specific
 
@@ -302,7 +302,7 @@ Watch for these signals that indicate you should switch from single-skill to mul
 
 | Signal | What It Means | Action |
 |--------|--------------|--------|
-| Agent says "this requires a backend change" | Task has cross-domain dependencies | Switch to `/work` — add backend agent |
+| Agent says "this requires a backend change" | Task has cross-domain dependencies | Switch to `/work` and add backend agent |
 | Agent's CHARTER_CHECK shows "Must NOT do" items that are actually needed | Scope exceeds one domain | Plan the full feature with `/plan` first |
 | Fix cascades into 3+ files across different layers | One fix affects multiple domains | Use `/debug` with broader scope, or `/work` |
 | Agent discovers an API contract mismatch | Frontend/backend disagreement | Run `/plan` to define contracts, then re-spawn both agents |

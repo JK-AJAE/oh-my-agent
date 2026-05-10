@@ -11,7 +11,7 @@ oh-my-agent provides two real-time dashboards for monitoring agent activity duri
 
 | Command | Interface | URL | Technology |
 |:--------|:---------|:----|:-----------|
-| `oma dashboard` | Terminal (TUI) | N/A — renders in your terminal | chokidar file watcher, picocolors rendering |
+| `oma dashboard` | Terminal (TUI) | N/A (renders in your terminal) | chokidar file watcher, picocolors rendering |
 | `oma dashboard:web` | Browser | `http://localhost:9847` | HTTP server, WebSocket, chokidar file watcher |
 
 Both dashboards watch the same data source: `.serena/memories/` directory.
@@ -46,11 +46,11 @@ Renders a box-drawing UI directly in the terminal. Updates automatically when me
 ```
 
 **Status symbols:**
-- `●` (green) — running
-- `✓` (cyan) — completed
-- `✗` (red) — failed
-- `○` (yellow) — blocked
-- `◌` (dim) — pending
+- `●` (green): running
+- `✓` (cyan): completed
+- `✗` (red): failed
+- `○` (yellow): blocked
+- `◌` (dim): pending
 
 ### Web Dashboard
 
@@ -106,7 +106,7 @@ For multi-agent workflows, the recommended setup uses three terminal panes:
 
 **Terminal 1** runs your primary agent session (Gemini CLI, Claude Code, Codex, etc.) where you interact with workflows like `/orchestrate` or `/work`.
 
-**Terminal 2** runs the dashboard for passive monitoring. It updates automatically — no interaction needed.
+**Terminal 2** runs the dashboard for passive monitoring. It updates automatically with no interaction needed.
 
 **Terminal 3** is for ad-hoc commands: checking agent status, running verifications, viewing stats, or debugging issues.
 
@@ -133,15 +133,15 @@ The dashboards read from the `.serena/memories/` directory. This directory is po
 
 The dashboard uses multiple strategies to extract information:
 
-1. **Session detection** — Looks for `orchestrator-session.md` first, then falls back to the most recently modified `session-*.md` file. Parses status from keywords: `RUNNING`, `IN PROGRESS`, `COMPLETED`, `DONE`, `FAILED`, `ERROR`.
+1. **Session detection**: Looks for `orchestrator-session.md` first, then falls back to the most recently modified `session-*.md` file. Parses status from keywords: `RUNNING`, `IN PROGRESS`, `COMPLETED`, `DONE`, `FAILED`, `ERROR`.
 
-2. **Task board parsing** — Reads `task-board.md` as a Markdown table. Extracts agent name, status, and task description from columns.
+2. **Task board parsing**: Reads `task-board.md` as a Markdown table. Extracts agent name, status, and task description from columns.
 
-3. **Agent discovery** — If no task board exists, discovers agents by scanning all `.md` files for `**Agent**: {name}` patterns, `Agent: {name}` lines, or filenames containing `_agent` or `-agent`.
+3. **Agent discovery**: If no task board exists, discovers agents by scanning all `.md` files for `**Agent**: {name}` patterns, `Agent: {name}` lines, or filenames containing `_agent` or `-agent`.
 
-4. **Turn counting** — For each discovered agent, reads `progress-{agent}.md` files and extracts the turn number from `turn: N` patterns.
+4. **Turn counting**: For each discovered agent, reads `progress-{agent}.md` files and extracts the turn number from `turn: N` patterns.
 
-5. **Activity feed** — Lists the 5 most recently modified `.md` files, extracts the last meaningful line (headers, status lines, action items) as the activity message.
+5. **Activity feed**: Lists the 5 most recently modified `.md` files, extracts the last meaningful line (headers, status lines, action items) as the activity message.
 
 ---
 
@@ -150,16 +150,16 @@ The dashboard uses multiple strategies to extract information:
 ### Session Status
 
 The top section displays:
-- **Session ID** — Extracted from session files (format: `session-YYYYMMDD-HHMMSS`).
-- **Status** — Color-coded: green for RUNNING, cyan for COMPLETED, red for FAILED, yellow for UNKNOWN.
+- **Session ID**: Extracted from session files (format: `session-YYYYMMDD-HHMMSS`).
+- **Status**: Color-coded: green for RUNNING, cyan for COMPLETED, red for FAILED, yellow for UNKNOWN.
 
 ### Task Board
 
 The agent table shows every detected agent with:
-- **Agent name** — The domain identifier (backend, frontend, mobile, qa, debug, pm).
-- **Status** — Current state with visual indicator (running/completed/failed/blocked/pending).
-- **Turn** — The agent's current turn number (how many iterations it has completed). Extracted from progress files.
-- **Task** — Brief description of what the agent is working on (truncated to fit).
+- **Agent name**: The domain identifier (backend, frontend, mobile, qa, debug, pm).
+- **Status**: Current state with visual indicator (running/completed/failed/blocked/pending).
+- **Turn**: The agent's current turn number (how many iterations it has completed). Extracted from progress files.
+- **Task**: Brief description of what the agent is working on (truncated to fit).
 
 ### Agent Progress
 
@@ -247,12 +247,12 @@ The dashboard detects completion by the presence of this file and updates the ag
 
 Before considering a multi-agent session complete, verify through the dashboard:
 
-- [ ] **All agents show "completed"** — No agents stuck in "running" or "blocked" state.
-- [ ] **No agents show "failed"** — If any failed, check logs and re-spawn.
-- [ ] **QA agent has completed its review** — Look for `result-qa-agent.md` or `result-qa.md`.
-- [ ] **Zero CRITICAL/HIGH findings** — Check the QA result file for severity counts.
-- [ ] **Session status is COMPLETED** — The session file should show final status.
-- [ ] **Activity feed shows final report** — The last activity should be the summary report.
+- [ ] **All agents show "completed"**: No agents stuck in "running" or "blocked" state.
+- [ ] **No agents show "failed"**: If any failed, check logs and re-spawn.
+- [ ] **QA agent has completed its review**: Look for `result-qa-agent.md` or `result-qa.md`.
+- [ ] **Zero CRITICAL/HIGH findings**: Check the QA result file for severity counts.
+- [ ] **Session status is COMPLETED**: The session file should show final status.
+- [ ] **Activity feed shows final report**: The last activity should be the summary report.
 
 ---
 
