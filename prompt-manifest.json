@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "7.12.1",
-  "releaseDate": "2026-05-13T06:01:49.635Z",
+  "releaseDate": "2026-05-15T06:34:17.276Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -131,8 +131,8 @@
     },
     {
       "path": ".agents/hooks/core/triggers.json",
-      "sha256": "d6a65e417044b85d97ee233dcd7ff6f1e6c83d23242e3c874c28b4a2cdd632a9",
-      "size": 74033
+      "sha256": "6b07674a8ddd4848f6a67ef151c84cceb72605ed95458676efe8ca085451de4b",
+      "size": 74881
     },
     {
       "path": ".agents/hooks/core/types.ts",
@@ -223,6 +223,11 @@
       "path": ".agents/rules/infrastructure.md",
       "sha256": "dd1918ca6f9b5add9001b73f558636a50c80e5be8aa8844c9bb87c2232b64439",
       "size": 1583
+    },
+    {
+      "path": ".agents/rules/market.md",
+      "sha256": "cfe8b5b849643623647219a3fb6ee78daa22913d6f53cb681a3b4f2bd3ab2efa",
+      "size": 1966
     },
     {
       "path": ".agents/rules/mobile.md",
@@ -895,6 +900,76 @@
       "size": 4290
     },
     {
+      "path": ".agents/skills/oma-market/SKILL.md",
+      "sha256": "2fe904974d0fbc2ecba086f5e68f5e2a7379139c2c59029515939e5fbeafd6a3",
+      "size": 10625
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/checklist.md",
+      "sha256": "f5be97e6efa4667bbcea66aae707d7241b222ba0295c016471ed4d216ce1238b",
+      "size": 1247
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/error-playbook.md",
+      "sha256": "e6805fa49423b6f24196b7da82ccd53ffe2827748562ace8c7ee5afc5b0c89c8",
+      "size": 2312
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/examples.md",
+      "sha256": "d7dec08cdd1146b2858b353898e3a601e76747747ae248eca80cca9a1859c7f8",
+      "size": 9519
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/execution-protocol.md",
+      "sha256": "7d1993a28450dab9163765fd40d89c9b5c1e4c5b4a64209fcc1d10f141d4b5e4",
+      "size": 4132
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/frameworks/pestel.md",
+      "sha256": "1e2725b8c2b0262f679da19b20901f9d849e6ecf39e46d0bdf98298579be4552",
+      "size": 2928
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/frameworks/porters-5f.md",
+      "sha256": "7bb1611284369446c48ce030b7b7d2799d69695da08e19ee1d200fade2959533",
+      "size": 2925
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/frameworks/swot.md",
+      "sha256": "3939bbdb5e14d90e7f26b23d62ac753967d1059ef107662d4c30cbe8dd80a3ec",
+      "size": 2510
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/intent-rules.md",
+      "sha256": "626da6294dada7c062be8e5fbb32589062486733fd5ea24d66ea259de8e2beb6",
+      "size": 2514
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/operator-packs/competitor.md",
+      "sha256": "a0bdf35903eb8f2f72f8162a3bed7f64cf5facf07b170e13b60d4f7c31d082c5",
+      "size": 1287
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/operator-packs/discovery.md",
+      "sha256": "8e1e8b64518dbc95cc199d8f5212d58111a6709d5e1bcb3882fe0669eaf37577",
+      "size": 1248
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/operator-packs/pain.md",
+      "sha256": "b538faca1f64b423e03d3ab2bcc4b6ecba5cbed80f8fdbabccec3e235f696741",
+      "size": 1476
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/operator-packs/positive.md",
+      "sha256": "076dc92dcc5c908b6b019a8f5be2148bf8279ec218db1fe3fa878e8f67ad57a2",
+      "size": 1252
+    },
+    {
+      "path": ".agents/skills/oma-market/resources/output-laws.md",
+      "sha256": "c983bf6825ce6f034d261d11c3623f72a1f52e667d86088009790089efca0c75",
+      "size": 5508
+    },
+    {
       "path": ".agents/skills/oma-mobile/SKILL.md",
       "sha256": "e9643ca8a58c579e5ed477543fd1b90b3cd2a8f1762ce0bbbe602dc867dab7e3",
       "size": 6283
@@ -1554,8 +1629,8 @@
     "algorithm": "sha256"
   },
   "metadata": {
-    "skillCount": 27,
+    "skillCount": 28,
     "workflowCount": 21,
-    "totalFiles": 309
+    "totalFiles": 324
   }
 }
