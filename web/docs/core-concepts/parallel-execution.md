@@ -32,6 +32,7 @@ oma agent:spawn <agent-id> <prompt> <session-id> [options]
 |------|-------|-------------|
 | `--workspace <path>` | `-w` | Working directory for the agent. Agents only modify files within this directory. |
 | `--model <name>` | `-m` | Override CLI vendor for this specific spawn. Options: `gemini`, `claude`, `codex`, `qwen`. |
+| `--isolation <mode>` | | Per-spawn isolation. `worktree` creates a fresh git worktree at `${tmpdir}/oma-worktrees/{sessionId}/{agentId}` on branch `oma/{sessionId}/{agentId}` and runs the agent there. Useful for hypothesis spawns or when parallel agents touch shared files. Worktree is retained after exit; merge / discard commands are printed for manual review. |
 | `--max-turns <n>` | `-t` | Override default turn limit for this agent. |
 | `--json` | | Output result as JSON (useful for scripting). |
 | `--no-wait` | | Fire and forget; return immediately without waiting for completion. |
@@ -53,6 +54,9 @@ oma agent:spawn backend "Implement payment gateway integration" session-01 -t 30
 
 # Use a prompt file instead of inline text
 oma agent:spawn backend ./prompts/auth-api.md session-01 -w ./apps/api
+
+# Run inside an isolated git worktree (hypothesis spawn pattern)
+oma agent:spawn backend "Try a Drizzle-based rewrite" session-01 --isolation worktree
 ```
 
 ---

@@ -245,6 +245,14 @@ oma stats [--json] [--output <format>] [--reset]
 - Files changed, lines added, lines removed
 - Last updated timestamp
 
+**Cost telemetry** (aggregated across every `session-cost-*.md` file under `.serena/memories/`):
+- Total input tokens (prompt character approximation, no output tokens yet)
+- Total spawns
+- Estimated USD using a conservative per-vendor input-token rate table (Claude $3/M, Codex $5/M, Gemini $0.3/M, Qwen $0/M, Cursor $5/M, Antigravity $0.3/M)
+- Per-vendor breakdown (tokens · spawns · USD)
+
+The estimate is a floor, not a billing-accurate amount. Configure `session.quota_cap` in `.agents/oma-config.yaml` to enforce hard budgets at spawn time; see the Why oh-my-agent page in Getting Started for the quality-first arsenal these caps belong to.
+
 Metrics are stored in `.serena/metrics.json`. Data is collected from git stats and memory files.
 
 **Examples:**
@@ -353,7 +361,7 @@ oma retro 7d --json
 Spawn a subagent process.
 
 ```
-oma agent:spawn <agent-id> <prompt> <session-id> [-m <vendor>] [-w <workspace>]
+oma agent:spawn <agent-id> <prompt> <session-id> [-m <vendor>] [-w <workspace>] [--isolation <mode>]
 ```
 
 **Arguments:**
@@ -370,6 +378,7 @@ oma agent:spawn <agent-id> <prompt> <session-id> [-m <vendor>] [-w <workspace>]
 |:-----|:-----------|
 | `-m, --model <vendor>` | CLI vendor override: `gemini`, `claude`, `codex`, `qwen` |
 | `-w, --workspace <path>` | Working directory for the agent. Auto-detected from monorepo config if omitted. |
+| `--isolation <mode>` | Per-spawn isolation mode. Currently supports `worktree`: creates a fresh git worktree at `${tmpdir}/oma-worktrees/{sessionId}/{agentId}` on branch `oma/{sessionId}/{agentId}` and runs the agent there. The worktree is retained after exit; merge or discard commands are printed for manual review (no auto-merge). |
 
 **Vendor resolution order:** `--model` flag > `agents:` override in `oma-config.yaml` > active `model_preset` agent defaults.
 
@@ -388,6 +397,10 @@ oma agent:spawn backend "Implement auth" session-20260324-143000 -m claude -w ./
 
 # Mobile agent with auto-detected workspace
 oma agent:spawn mobile "Add biometric login" session-20260324-143000
+
+# Run inside an isolated git worktree (useful for hypothesis spawns or
+# when parallel agents would touch shared files)
+oma agent:spawn backend "Try a Drizzle-based rewrite" session-20260324-143000 --isolation worktree
 ```
 
 ### agent:status
@@ -667,6 +680,49 @@ oma verify frontend -w ./apps/web
 
 # JSON output for CI
 oma verify backend --json
+```
+
+### vault
+
+Manage API keys and other secrets in the OS keychain (macOS Keychain, Linux Secret Service, or Windows Credential Manager), backed by `@napi-rs/keyring`. Values never appear in shell history or environment files; only key names are tracked in `~/.config/oma/vault-index.json` so `oma vault list` can enumerate without exposing secret values.
+
+```
+oma vault store <name> [--value <value>]
+oma vault get <name>
+oma vault list [--json]
+oma vault rm <name>
+```
+
+**Sub-commands:**
+
+| Sub-command | Description |
+|:------------|:-----------|
+| `store <name>` | Prompts for a secret value (hidden input) and writes it under `name` in the OS keychain. `--value <value>` accepts the value inline for non-interactive use (visible in shell history; prefer the prompt). |
+| `get <name>` | Prints the stored value to stdout with no decoration so it can be used inside shells: `export ANTHROPIC_API_KEY=$(oma vault get anthropic)`. Exits with code `2` when the key does not exist. |
+| `list` | Lists stored key names with their `createdAt` timestamps. Values are never displayed. |
+| `rm <name>` | Removes the secret from the keychain and the index. |
+
+**Key name rules:** 1-64 characters from `[A-Za-z0-9._-]`. Examples: `anthropic`, `openai-prod`, `github_pat`, `sentry.dsn`.
+
+**Native dependency:** The `@napi-rs/keyring` native module is loaded lazily; if it fails to load (for example, headless Linux without `libsecret` or `gnome-keyring`), the command surfaces an explicit error with an install hint instead of falling back silently.
+
+**Examples:**
+```bash
+# Store with a hidden interactive prompt
+oma vault store anthropic
+
+# Non-interactive (note: value is visible in shell history)
+oma vault store openai --value sk-test-...
+
+# Use in a shell pipeline
+export ANTHROPIC_API_KEY=$(oma vault get anthropic)
+oma agent:spawn backend "Refactor /api/auth" session-20260517-150000
+
+# List entries (names only)
+oma vault list
+
+# Remove
+oma vault rm anthropic
 ```
 
 ### cleanup
