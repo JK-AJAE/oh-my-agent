@@ -78,7 +78,13 @@ describe("update cursor vendor adaptations", () => {
   afterEach(() => {
     process.chdir(originalCwd);
     for (const root of tempRoots) {
-      rmSync(root, { recursive: true, force: true });
+      // Windows holds locks on a just-released cwd briefly — retry to avoid EBUSY flake.
+      rmSync(root, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 100,
+      });
     }
     tempRoots.length = 0;
   });
