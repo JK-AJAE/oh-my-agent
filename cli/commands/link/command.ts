@@ -10,7 +10,7 @@ export function registerLink(program: Command): void {
     )
     .action(
       runAction((vendors: string[]) => {
-        link(vendors.length > 0 ? vendors : undefined);
+        link({ vendorFilter: vendors.length > 0 ? vendors : undefined });
       }),
     );
 }
