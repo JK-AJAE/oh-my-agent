@@ -35,6 +35,28 @@ jobs:
       - name: Build
         run: bun run --cwd cli build
 
+      - name: Smoke test install.sh (skip bunx)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        env:
+          OMA_INSTALL_NO_RUN: "1"
+        run: |
+          bash ./cli/install.sh
+          export PATH="${HOME}/.local/bin:${HOME}/.bun/bin:${PATH}"
+          if ! command -v bun >/dev/null 2>&1; then
+            echo "bun should be on PATH after install.sh" >&2
+            exit 1
+          fi
+          if ! command -v uv >/dev/null 2>&1; then
+            echo "uv should be on PATH after install.sh" >&2
+            exit 1
+          fi
+          if ! command -v serena >/dev/null 2>&1; then
+            echo "serena should be on PATH after install.sh" >&2
+            exit 1
+          fi
+          echo "install.sh smoke test passed (bun + uv + serena resolved)"
+
       - name: Validate install.ps1 syntax
         if: matrix.os == 'windows-latest'
         shell: pwsh
@@ -64,4 +86,8 @@ jobs:
             Write-Error "uv should be on PATH after install.ps1"
             exit 1
           }
-          Write-Host "install.ps1 smoke test passed (bun + uv resolved)"
+          if (-not (Get-Command serena -ErrorAction SilentlyContinue)) {
+            Write-Error "serena should be on PATH after install.ps1"
+            exit 1
+          }
+          Write-Host "install.ps1 smoke test passed (bun + uv + serena resolved)"
