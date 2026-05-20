@@ -100,7 +100,7 @@ export async function runGenerate({
         color.red(
           `--reference is not supported by vendor(s): ${unsupported
             .map((p) => p.name)
-            .join(", ")}. Use --vendor codex or --vendor gemini.`,
+            .join(", ")}. Use --vendor codex or --vendor antigravity.`,
         ),
       );
       return 4;
@@ -166,7 +166,7 @@ export async function runGenerate({
               .map((p) => p.name)
               .join(
                 ", ",
-              )}). Install/enable codex or gemini, or drop --reference.`,
+              )}). Install/enable codex or antigravity, or drop --reference.`,
           ),
         );
         return 4;
@@ -462,7 +462,7 @@ function normalizeReferenceOption(raw: unknown): string[] {
     .filter(Boolean);
 }
 
-const REFERENCE_SUPPORTED_VENDORS = new Set(["codex", "gemini"]);
+const REFERENCE_SUPPORTED_VENDORS = new Set(["codex", "antigravity"]);
 
 function supportsReference(vendor: string): boolean {
   return REFERENCE_SUPPORTED_VENDORS.has(vendor);

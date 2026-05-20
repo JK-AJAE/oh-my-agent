@@ -26,13 +26,15 @@ export interface StrategyAttempt {
   duration_ms?: number;
 }
 
+export type ImageMime = "image/png" | "image/jpeg" | "image/webp" | "image/gif";
+
 export interface GenerateResult {
   vendor: string;
   model: string;
   strategy: string;
   strategyAttempts: StrategyAttempt[];
   filePath: string;
-  mime: "image/png";
+  mime: ImageMime;
   durationMs: number;
   costUsd?: number;
 }

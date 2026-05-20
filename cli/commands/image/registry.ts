@@ -1,6 +1,6 @@
 import type { ImageConfig } from "./config.js";
+import { AntigravityProvider } from "./providers/antigravity.js";
 import { CodexProvider } from "./providers/codex.js";
-import { GeminiProvider } from "./providers/gemini.js";
 import { PollinationsProvider } from "./providers/pollinations.js";
 import type { HealthResult, VendorProvider } from "./types.js";
 
@@ -46,7 +46,7 @@ export function defaultRegistry(config?: ImageConfig): Registry {
   cached = new Registry();
   const enabled = (name: string) => config?.vendors[name]?.enabled !== false;
   if (enabled("codex")) cached.register(new CodexProvider(config));
-  if (enabled("gemini")) cached.register(new GeminiProvider(config));
+  if (enabled("antigravity")) cached.register(new AntigravityProvider(config));
   if (enabled("pollinations"))
     cached.register(new PollinationsProvider(config));
   return cached;

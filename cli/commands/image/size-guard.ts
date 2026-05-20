@@ -12,7 +12,7 @@ export interface SizeGuardErr {
 
 export type SizeGuardResult = SizeGuardOk | SizeGuardErr;
 
-// gpt-image-2 documented constraints. Other providers (pollinations, gemini)
+// gpt-image-2 documented constraints. Other providers (pollinations, antigravity)
 // have their own validators; this guard enforces the union expressible to the
 // CLI's `--size` flag. Keep it close to gpt-image-2 because that's the most
 // permissive vendor wired in: 16-pixel grid, aspect between 1:3 and 3:1,

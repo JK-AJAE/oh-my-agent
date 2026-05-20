@@ -17,7 +17,7 @@ const stubConfig: ImageConfig = {
   defaultTimeoutSec: 180,
   vendors: {
     codex: { enabled: true, model: "gpt-image-2" },
-    gemini: { enabled: true, model: "gemini-2.5-flash-image" },
+    antigravity: { enabled: true, model: "gemini-2.5-flash-image" },
   },
   costGuardrail: {
     estimateThresholdUsd: 0.2,
@@ -25,12 +25,12 @@ const stubConfig: ImageConfig = {
       codex: {
         "gpt-image-2": { low: 0.02, medium: 0.03, high: 0.04, auto: 0.03 },
       },
-      gemini: {
+      antigravity: {
         "gemini-2.5-flash-image": {
-          low: 0.04,
-          medium: 0.04,
-          high: 0.04,
-          auto: 0.04,
+          low: 0,
+          medium: 0,
+          high: 0,
+          auto: 0,
         },
       },
     },
@@ -52,10 +52,13 @@ class StubProvider implements VendorProvider {
 
 describe("estimateCost", () => {
   it("sums per-image cost across providers and counts", () => {
-    const providers = [new StubProvider("codex"), new StubProvider("gemini")];
+    const providers = [
+      new StubProvider("codex"),
+      new StubProvider("antigravity"),
+    ];
     const modelByVendor = {
       codex: "gpt-image-2",
-      gemini: "gemini-2.5-flash-image",
+      antigravity: "gemini-2.5-flash-image",
     };
     const total = estimateCost({
       config: stubConfig,
@@ -64,15 +67,18 @@ describe("estimateCost", () => {
       quality: "high",
       count: 3,
     });
-    // codex high $0.04 * 3 + gemini high $0.04 * 3 = $0.24
-    expect(total).toBeCloseTo(0.24, 5);
+    // codex high $0.04 * 3 + antigravity (free) * 3 = $0.12
+    expect(total).toBeCloseTo(0.12, 5);
   });
 
-  it("applies per-reference surcharge for gemini only", () => {
-    const providers = [new StubProvider("codex"), new StubProvider("gemini")];
+  it("ignores reference count for free vendors", () => {
+    const providers = [
+      new StubProvider("codex"),
+      new StubProvider("antigravity"),
+    ];
     const modelByVendor = {
       codex: "gpt-image-2",
-      gemini: "gemini-2.5-flash-image",
+      antigravity: "gemini-2.5-flash-image",
     };
     const totalNoRef = estimateCost({
       config: stubConfig,
@@ -90,9 +96,9 @@ describe("estimateCost", () => {
       count: 1,
       referenceCount: 2,
     });
-    // codex $0.04 + gemini $0.04 = $0.08 base; gemini surcharge $0.01 * 2 = $0.02
-    expect(totalNoRef).toBeCloseTo(0.08, 5);
-    expect(totalWithRef).toBeCloseTo(0.1, 5);
+    // antigravity has zero per-image and no per-reference surcharge.
+    expect(totalNoRef).toBeCloseTo(0.04, 5);
+    expect(totalWithRef).toBeCloseTo(0.04, 5);
   });
 
   it("falls back to auto when quality key missing", () => {

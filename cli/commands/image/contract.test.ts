@@ -43,11 +43,11 @@ describe("manifest contract (schema v1)", () => {
 
   it("records failed runs with error kind and message", () => {
     const run: ManifestRun = {
-      vendor: "gemini",
+      vendor: "antigravity",
       model: "gemini-2.5-flash-image",
       strategy: "unknown",
       strategy_attempts: [
-        { strategy: "stream", status: "failed", reason: "rate-limit" },
+        { strategy: "agy-print", status: "failed", reason: "rate-limit" },
       ],
       files: [],
       duration_ms: 120,

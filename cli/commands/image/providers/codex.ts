@@ -210,16 +210,22 @@ interface Captured {
   timedOut?: boolean;
 }
 
+export interface RunCaptureOptions {
+  cwd?: string;
+}
+
 export function runCapture(
   bin: string,
   args: string[],
   signal?: AbortSignal,
   timeoutMs?: number,
+  options?: RunCaptureOptions,
 ): Promise<Captured> {
   return new Promise((resolve) => {
     const child = spawn(bin, args, {
       stdio: ["ignore", "pipe", "pipe"],
       signal,
+      cwd: options?.cwd,
     });
     let stdout = "";
     let stderr = "";

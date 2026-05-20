@@ -16,7 +16,7 @@ const stubConfig: ImageConfig = {
   vendors: {
     pollinations: { enabled: true, model: "flux" },
     codex: { enabled: true, model: "gpt-image-2" },
-    gemini: { enabled: true, model: "gemini-2.5-flash-image" },
+    antigravity: { enabled: true, model: "gemini-2.5-flash-image" },
   },
   costGuardrail: { estimateThresholdUsd: 0.2, perImageUsd: {} },
   compare: { folderPattern: "x", manifest: true },

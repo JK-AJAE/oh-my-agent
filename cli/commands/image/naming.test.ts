@@ -95,14 +95,32 @@ describe("buildOutputFilename", () => {
 
   it("multi-image filename appends 1-based index", () => {
     const name = buildOutputFilename({
-      vendor: "gemini",
-      model: "gemini-2.5-flash-image",
+      vendor: "codex",
+      model: "gpt-image-2",
       runShortid: "xy9ef0",
       index: 0,
       total: 3,
       ext: "png",
     });
-    expect(name).toBe("gemini-gemini-2.5-flash-image-xy9ef0-1.png");
+    expect(name).toBe("codex-gpt-image-2-xy9ef0-1.png");
+  });
+
+  it("omits model segment when model is empty or undefined", () => {
+    const fromEmpty = buildOutputFilename({
+      vendor: "antigravity",
+      model: "",
+      runShortid: "xy9ef0",
+      total: 1,
+      ext: "jpg",
+    });
+    const fromUndefined = buildOutputFilename({
+      vendor: "antigravity",
+      runShortid: "xy9ef0",
+      total: 1,
+      ext: "jpg",
+    });
+    expect(fromEmpty).toBe("antigravity-xy9ef0.jpg");
+    expect(fromUndefined).toBe("antigravity-xy9ef0.jpg");
   });
 
   it("sanitizes malicious model names", () => {

@@ -28,11 +28,11 @@ export function registerImageCommand(program: Command): void {
   image
     .command("generate <prompt...>")
     .description(
-      "Generate images via pollinations (flux/zimage, free), codex (gpt-image-2, ChatGPT OAuth), or gemini (needs API key + billing, disabled by default)",
+      "Generate images via pollinations (flux/zimage, free), codex (gpt-image-2, ChatGPT OAuth), or antigravity (gemini nano-banana via `agy` CLI, free with Gemini Code Assist sign-in)",
     )
     .option(
       "--vendor <name>",
-      "Vendor: auto | pollinations | codex | gemini | all",
+      "Vendor: auto | pollinations | codex | antigravity | all",
       "auto",
     )
     .option(
@@ -44,14 +44,10 @@ export function registerImageCommand(program: Command): void {
     .option("--out <dir>", "Output directory")
     .option("--allow-external-out", "Allow --out paths outside $PWD")
     .option("--model <name>", "Vendor-specific model override")
-    .option(
-      "--strategy <list>",
-      "Gemini fallback order, comma-separated (mcp,stream,api)",
-    )
     .option("--timeout <seconds>", "Per-image timeout")
     .option(
       "-r, --reference <path>",
-      "Reference image path; repeatable (-r a.png -r b.png) or comma-separated. Supported on codex and gemini vendors.",
+      "Reference image path; repeatable (-r a.png -r b.png) or comma-separated. Supported on codex and antigravity vendors.",
       collectReference,
       [] as string[],
     )

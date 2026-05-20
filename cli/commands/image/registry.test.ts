@@ -81,7 +81,7 @@ describe("defaultRegistry", () => {
       defaultTimeoutSec: 180,
       vendors: {
         codex: { enabled: true, model: "gpt-image-2" },
-        gemini: { enabled: true, model: "gemini-2.5-flash-image" },
+        antigravity: { enabled: true, model: "gemini-2.5-flash-image" },
         pollinations: { enabled: true, model: "flux" },
         ...overrides,
       },
@@ -96,13 +96,13 @@ describe("defaultRegistry", () => {
     resetRegistry();
     const registry = defaultRegistry(
       makeConfig({
-        gemini: { enabled: false, model: "gemini-2.5-flash-image" },
+        antigravity: { enabled: false, model: "gemini-2.5-flash-image" },
       }),
     );
     const names = registry.list().map((p) => p.name);
     expect(names).toContain("codex");
     expect(names).toContain("pollinations");
-    expect(names).not.toContain("gemini");
+    expect(names).not.toContain("antigravity");
     resetRegistry();
   });
 
@@ -111,7 +111,7 @@ describe("defaultRegistry", () => {
     const registry = defaultRegistry(makeConfig({}));
     const names = registry.list().map((p) => p.name);
     expect(names).toEqual(
-      expect.arrayContaining(["codex", "gemini", "pollinations"]),
+      expect.arrayContaining(["codex", "antigravity", "pollinations"]),
     );
     resetRegistry();
   });

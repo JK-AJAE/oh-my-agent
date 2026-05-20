@@ -50,7 +50,7 @@ export function sanitizeModelForFilename(model: string): string {
 
 export interface OutputNameArgs {
   vendor: string;
-  model: string;
+  model?: string;
   runShortid: string;
   index?: number;
   total: number;
@@ -58,8 +58,11 @@ export interface OutputNameArgs {
 }
 
 export function buildOutputFilename(args: OutputNameArgs): string {
-  const safeModel = sanitizeModelForFilename(args.model);
-  const base = `${args.vendor}-${safeModel}-${args.runShortid}`;
+  const modelSegment =
+    args.model && args.model.length > 0
+      ? `-${sanitizeModelForFilename(args.model)}`
+      : "";
+  const base = `${args.vendor}${modelSegment}-${args.runShortid}`;
   const suffix = args.total > 1 ? `-${(args.index ?? 0) + 1}` : "";
   return `${base}${suffix}.${args.ext}`;
 }

@@ -38,12 +38,14 @@ const DEFAULTS: ImageConfig = {
   defaultTimeoutSec: 180,
   vendors: {
     codex: { enabled: true, model: "gpt-image-2", extra_args: [] },
-    gemini: {
-      // Disabled by default — Gemini image models require billing on AI Studio
-      // or Vertex AI. Flip to true after enabling billing + setting GEMINI_API_KEY.
-      enabled: false,
-      model: "gemini-2.5-flash-image",
-      strategies: ["mcp", "stream", "api"],
+    antigravity: {
+      // Antigravity CLI (`agy`) is an agentic CLI that drives its own image
+      // generation tool over the Gemini Code Assist subscription. The exact
+      // model agy chooses internally is opaque to us — we don't pass a model
+      // hint, don't record one in the manifest, and don't embed one in
+      // filenames. No API key, no per-image charge.
+      enabled: true,
+      model: "",
     },
     pollinations: {
       enabled: true,
@@ -56,13 +58,8 @@ const DEFAULTS: ImageConfig = {
       codex: {
         "gpt-image-2": { low: 0.02, medium: 0.03, high: 0.04, auto: 0.03 },
       },
-      gemini: {
-        "gemini-2.5-flash-image": {
-          low: 0.04,
-          medium: 0.04,
-          high: 0.04,
-          auto: 0.04,
-        },
+      antigravity: {
+        "": { low: 0, medium: 0, high: 0, auto: 0 },
       },
       pollinations: {
         flux: { low: 0, medium: 0, high: 0, auto: 0 },
@@ -165,12 +162,6 @@ function applyEnvOverrides(cfg: ImageConfig): void {
   }
   if (process.env.OMA_IMAGE_DEFAULT_OUT) {
     cfg.defaultOutputDir = process.env.OMA_IMAGE_DEFAULT_OUT;
-  }
-  if (process.env.OMA_IMAGE_GEMINI_STRATEGIES) {
-    const list = process.env.OMA_IMAGE_GEMINI_STRATEGIES.split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (cfg.vendors.gemini) cfg.vendors.gemini.strategies = list;
   }
 }
 

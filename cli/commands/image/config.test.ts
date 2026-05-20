@@ -10,12 +10,10 @@ describe("loadConfig", () => {
   beforeEach(() => {
     tmp = mkdtempSync(path.join(os.tmpdir(), "oma-image-cfg-"));
     delete process.env.OMA_IMAGE_DEFAULT_VENDOR;
-    delete process.env.OMA_IMAGE_GEMINI_STRATEGIES;
   });
   afterEach(() => {
     rmSync(tmp, { recursive: true, force: true });
     delete process.env.OMA_IMAGE_DEFAULT_VENDOR;
-    delete process.env.OMA_IMAGE_GEMINI_STRATEGIES;
   });
 
   it("returns defaults when config file absent", async () => {
@@ -23,7 +21,9 @@ describe("loadConfig", () => {
     expect(cfg.defaultVendor).toBe("auto");
     expect(cfg.defaultSize).toBe("1024x1024");
     expect(cfg.vendors.codex?.model).toBe("gpt-image-2");
-    expect(cfg.vendors.gemini?.strategies).toEqual(["mcp", "stream", "api"]);
+    // antigravity has no caller-visible model — agy picks one internally.
+    expect(cfg.vendors.antigravity?.model).toBe("");
+    expect(cfg.vendors.antigravity?.enabled).toBe(true);
   });
 
   it("reads YAML snake_case keys into camelCase", async () => {
@@ -65,11 +65,9 @@ naming:
     expect(cfg.naming.singleFolderPattern).toBe("s-{shortid}");
   });
 
-  it("applies env overrides for vendor and gemini strategies", async () => {
-    process.env.OMA_IMAGE_DEFAULT_VENDOR = "gemini";
-    process.env.OMA_IMAGE_GEMINI_STRATEGIES = "stream,api";
+  it("applies env override for default vendor", async () => {
+    process.env.OMA_IMAGE_DEFAULT_VENDOR = "antigravity";
     const cfg = await loadConfig(tmp);
-    expect(cfg.defaultVendor).toBe("gemini");
-    expect(cfg.vendors.gemini?.strategies).toEqual(["stream", "api"]);
+    expect(cfg.defaultVendor).toBe("antigravity");
   });
 });
