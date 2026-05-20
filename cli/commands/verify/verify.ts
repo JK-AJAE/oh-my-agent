@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 import type { VerifyCheck, VerifyResult } from "../../types/index.js";
+import { checkClosure } from "../../utils/skill-outputs.js";
 
 export type AgentType =
   | "backend"
@@ -452,6 +453,35 @@ function checkPmPlan(workspace: string): VerifyCheck {
   }
 }
 
+function checkDeclaredOutputs(
+  workspace: string,
+  agentType: string,
+): VerifyCheck {
+  const result = checkClosure(workspace, agentType);
+  if (!result.hasStructuredOutputs) {
+    return createCheck(
+      "Declared outputs",
+      "skip",
+      "No structured outputs block",
+    );
+  }
+  if (result.missingRequired.length === 0) {
+    return createCheck(
+      "Declared outputs",
+      "pass",
+      `${result.declared.length} declared, all required artifacts present`,
+    );
+  }
+  const missing = result.missingRequired
+    .map((d) => `${d.name} (${d.artifact})`)
+    .join(", ");
+  return createCheck(
+    "Declared outputs",
+    "fail",
+    `Missing required: ${missing}`,
+  );
+}
+
 function runAgentChecks(
   agentType: AgentType,
   workspace: string,
@@ -517,6 +547,7 @@ export function collectVerifyReport(
   checks.push(checkCharterPreflight(workspace, agentType));
   checks.push(checkHardcodedSecrets(workspace));
   checks.push(checkTodoComments(workspace));
+  checks.push(checkDeclaredOutputs(workspace, agentType));
   checks.push(...runAgentChecks(agentType, workspace));
 
   const passed = checks.filter((c) => c.status === "pass").length;
