@@ -1,0 +1,44 @@
+---
+name: "swiftui-view-refactor"
+description: "Refactor SwiftUI views into smaller components with stable, explicit data flow."
+category: "custom-skill"
+trigger: "/swiftui-view-refactor"
+---
+
+# SwiftUI View Refactor
+
+## Overview
+Refactor SwiftUI views toward small, explicit, stable view types. Default to vanilla SwiftUI: local state in the view, shared dependencies in the environment, business logic in services/models, and view models only when the request or existing code clearly requires one.
+
+## When to Use
+- When cleaning up a large SwiftUI view or splitting long `body` implementations.
+- When you need smaller subviews, explicit dependency injection, or better Observation usage.
+
+## Core Guidelines
+
+### 1) View ordering (top → bottom)
+- Enforce this ordering unless the existing file has a stronger local convention you must preserve.
+- Environment
+- `private`/`public` `let`
+- `@State` / other stored properties
+- computed `var` (non-view)
+- `init`
+- `body`
+- computed view builders / other view helpers
+- helper / async functions
+
+### 2) Default to MV, not MVVM
+- Views should be lightweight state expressions and orchestration points, not containers for business logic.
+- Favor `@State`, `@Environment`, `@Query`, `.task`, `.task(id:)`, and `onChange` before reaching for a view model.
+- Inject services and shared models via `@Environment`; keep domain logic in services/models, not in the view body.
+- Do not introduce a view model just to mirror local view state or wrap environment dependencies.
+- If a screen is getting large, split the UI into subviews before inventing a new view model layer.
+
+### 3) Strongly prefer dedicated subview types over computed `some View` helpers
+- Flag `body` properties that are longer than roughly one screen or contain multiple logical sections.
+- Prefer extracting dedicated `View` types for non-trivial sections, especially when they have state, async work, branching, or deserve their own preview.
+- Keep computed `some View` helpers rare and small. Do not build an entire screen out of `private var header: some View`-style fragments.
+- Pass small, explicit inputs (data, bindings, callbacks) into extracted subviews instead of handing down the entire parent state.
+- If an extracted subview becomes reusable or independently meaningful, move it to its own file.
+
+Prefer:

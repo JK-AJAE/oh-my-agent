@@ -1,0 +1,63 @@
+---
+name: "buywhere-product-catalog"
+description: "Use BuyWhere's MCP and API surfaces to add product search, price comparison, and deal discovery to AI shopping agents."
+category: "custom-skill"
+trigger: "/buywhere-product-catalog"
+---
+
+# BuyWhere Product Catalog
+
+## Overview
+
+BuyWhere gives AI agents a product-catalog surface for shopping flows, price comparison, and deal discovery. Use this skill when you want an agent to connect product search or merchant-aware commerce actions through BuyWhere's MCP setup path or API onboarding flow.
+
+The safest public starting points are the live developer portal, API key signup flow, MCP guide, and the official Cursor plugin repository.
+
+## When to Use This Skill
+
+- Use when you want to add structured product search to an AI shopping or recommendation agent.
+- Use when the user asks for BuyWhere MCP setup in Cursor, Claude Desktop, or a custom agent runtime.
+- Use when you need a concrete onboarding path for BuyWhere API keys, MCP configuration, or plugin discovery.
+
+## How It Works
+
+### Step 1: Choose the integration surface
+
+Start from the public BuyWhere entry point that matches the user's setup:
+
+- Developer portal: `https://buywhere.ai/developers/`
+- API key signup: `https://buywhere.ai/api-keys/`
+- MCP integration guide: `https://api.buywhere.ai/docs/guides/mcp`
+- Cursor plugin repo: `https://github.com/BuyWhere/buywhere-cursor-plugin`
+
+### Step 2: Confirm the user's runtime
+
+Ask which host the user is integrating with before giving setup instructions:
+
+- Cursor or another MCP-capable coding assistant
+- Claude Desktop
+- A custom MCP client
+- A direct REST API integration
+
+Do not assume the same config file or launch command works across all hosts.
+
+### Step 3: Guide the first successful connection
+
+Prefer a minimal first-run path:
+
+1. Get a BuyWhere API key.
+2. Follow the MCP or plugin setup path for the host runtime.
+3. Run one simple product-search request before expanding to comparison or deal workflows.
+
+### Step 4: Expand into commerce workflows
+
+Once the first query works, help the user branch into the next layer:
+
+- product search and discovery
+- price comparison across merchants
+- deal discovery flows
+- shopping-agent orchestration that routes users to merchant destinations
+
+## Examples
+
+### Example 1: Cursor plugin discovery

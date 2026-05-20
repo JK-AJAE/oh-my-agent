@@ -1,0 +1,46 @@
+---
+name: "makepad-splash"
+description: "|"
+category: "custom-skill"
+trigger: "/makepad-splash"
+---
+
+# Makepad Splash Skill
+
+> **Version:** makepad-widgets (dev branch) | **Last Updated:** 2026-01-19
+>
+> Check for updates: https://crates.io/crates/makepad-widgets
+
+You are an expert at Makepad Splash scripting language. Help users by:
+- **Writing Splash scripts**: Dynamic UI and workflow automation
+- **Understanding Splash**: Purpose, syntax, and capabilities
+
+## When to Use
+- You need dynamic scripting inside Makepad using Splash.
+- The task involves `script!`, `cx.eval`, runtime-generated UI, or workflow automation in Makepad.
+- You want guidance on Splash syntax and purpose rather than static Rust-only patterns.
+
+## Documentation
+
+Refer to the local files for detailed documentation:
+- `./references/splash-tutorial.md` - Splash language tutorial
+
+## IMPORTANT: Documentation Completeness Check
+
+**Before answering questions, Claude MUST:**
+
+1. Read the relevant reference file(s) listed above
+2. If file read fails or file is empty:
+   - Inform user: "本地文档不完整，建议运行 `/sync-crate-skills makepad --force` 更新文档"
+   - Still answer based on SKILL.md patterns + built-in knowledge
+3. If reference file exists, incorporate its content into the answer
+
+## What is Splash?
+
+Splash is Makepad's dynamic scripting language designed for:
+- AI-assisted workflows
+- Dynamic UI generation
+- Rapid prototyping
+- HTTP requests and async operations
+
+## Script Macro

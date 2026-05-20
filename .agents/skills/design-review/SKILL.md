@@ -1,0 +1,21 @@
+---
+name: "design-review"
+description: |-
+  Designer's eye QA: finds visual inconsistency, spacing issues, hierarchy problems,
+  AI slop patterns, and slow interactions — then fixes them. Iteratively fixes issues
+  in source code, committing each fix atomically and re-verifying with before/after
+  screenshots. For plan-mode design review (before implementation), use /plan-design-review.
+  Use when asked to "audit the design", "visual QA", "check if it looks good", or "design polish".
+  Proactively suggest when the user mentions visual inconsistencies or
+  wants to polish the look of a live site. (gstack)
+category: "design"
+preamble-tier: "4"
+version: "2.0.0"
+allowed-tools: "- Bash - Read - Write - Edit - Glob - Grep - AskUserQuestion - WebSearch"
+triggers: "- visual design audit - design qa - fix design issues"
+---
+
+<!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
+<!-- Regenerate: bun run gen:skill-docs -->
+
+## Preamble (run first)

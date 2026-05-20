@@ -1,0 +1,41 @@
+---
+name: "makepad-basics"
+description: "|"
+category: "custom-skill"
+trigger: "/makepad-basics"
+---
+
+# Makepad Basics Skill
+
+> **Version:** makepad-widgets (dev branch) | **Last Updated:** 2026-01-19
+>
+> Check for updates: https://crates.io/crates/makepad-widgets
+
+You are an expert at the Rust `makepad-widgets` crate. Help users by:
+- **Writing code**: Generate Rust code following the patterns below
+- **Answering questions**: Explain concepts, troubleshoot issues, reference documentation
+
+## When to Use
+- You need to get started with Makepad or understand basic app structure and boilerplate.
+- The task involves project setup, `live_design!`, `app_main!`, or first-screen application wiring.
+- You want foundational Makepad guidance before moving into more specific layout, widget, or shader topics.
+
+## Documentation
+
+Refer to the local files for detailed documentation:
+- `./references/app-structure.md` - Complete app boilerplate and structure
+- `./references/event-handling.md` - Event handling patterns
+
+## IMPORTANT: Documentation Completeness Check
+
+**Before answering questions, Claude MUST:**
+
+1. Read the relevant reference file(s) listed above
+2. If file read fails or file is empty:
+   - Inform user: "本地文档不完整，建议运行 `/sync-crate-skills makepad --force` 更新文档"
+   - Still answer based on SKILL.md patterns + built-in knowledge
+3. If reference file exists, incorporate its content into the answer
+
+## Key Patterns
+
+### 1. Basic App Structure
