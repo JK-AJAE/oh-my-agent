@@ -3,17 +3,15 @@ import {
   type Dirent,
   existsSync,
   lstatSync,
-  mkdirSync,
   readdirSync,
   readFileSync,
   readlinkSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { VENDORS } from "../../constants/vendors.js";
 import {
   isAlreadyStarred,
   isGhAuthenticated,
@@ -26,25 +24,16 @@ import {
 import { downloadAndExtract } from "../../io/tarball.js";
 import { getLocalVersion, saveLocalVersion } from "../../platform/manifest.js";
 import {
-  generateCursorRules,
-  mergeRulesIndexForVendor,
-} from "../../platform/rules.js";
-import {
   CLI_SKILLS_DIR,
   createCliSymlinks,
-  ensureCursorMcpSymlink,
   getAllSkills,
   getVendorDisplayPath,
   INSTALLED_SKILLS_DIR,
-  installCodexWorkflowSkills,
   installConfigs,
-  installCopilotWorkflowPrompts,
   installRules,
   installShared,
   installSkill,
-  installVendorAdaptations,
   installWorkflows,
-  isHookVendor,
   PRESETS,
   REPO,
   type SkillTargetSpec,
@@ -54,24 +43,7 @@ import {
 import type { CliTool, CliVendor } from "../../types/index.js";
 import { promptUninstallCompetitors } from "../../utils/competitors.js";
 import { isTelemetryEnabled } from "../../utils/config.js";
-import {
-  applyRecommendedSettings,
-  needsSettingsUpdate,
-} from "../../vendors/claude/settings.js";
-import {
-  applyRecommendedCodexSettings,
-  needsCodexSettingsUpdate,
-  parseCodexConfig,
-  serializeCodexConfig,
-} from "../../vendors/codex/settings.js";
-import {
-  applyRecommendedGeminiSettings,
-  needsGeminiSettingsUpdate,
-} from "../../vendors/gemini/settings.js";
-import {
-  applyRecommendedQwenSettings,
-  needsQwenSettingsUpdate,
-} from "../../vendors/qwen/settings.js";
+import { link } from "../link/link.js";
 import { runMigrations } from "../migrations/index.js";
 
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -514,7 +486,6 @@ export async function install(options: InstallOptions = {}): Promise<void> {
   }
 
   const vendors = selectedVendors as CliVendor[];
-  const hookVendors = vendors.filter(isHookVendor);
 
   // Build selectedClis from CLI_SKILLS_DIR (data-driven). Vendors with
   // base: "home" require explicit consent; other vendors are added directly.
@@ -553,6 +524,8 @@ export async function install(options: InstallOptions = {}): Promise<void> {
 
   spinner.start("Installing skills...");
 
+  let linkResult: ReturnType<typeof link> | null = null;
+
   try {
     try {
       // Clean up dangling symlinks in vendor skill directories before
@@ -569,12 +542,6 @@ export async function install(options: InstallOptions = {}): Promise<void> {
 
       installShared(repoDir, cwd);
       installWorkflows(repoDir, cwd);
-      if (vendors.includes("codex")) {
-        installCodexWorkflowSkills(repoDir, cwd);
-      }
-      if (vendors.includes("copilot")) {
-        installCopilotWorkflowPrompts(repoDir, cwd);
-      }
       installRules(repoDir, cwd);
       installConfigs(repoDir, cwd, false);
 
@@ -584,86 +551,6 @@ export async function install(options: InstallOptions = {}): Promise<void> {
       }
 
       spinner.stop("Skills installed!");
-
-      // Install vendor-specific adaptations (agents, routers, hooks, CLAUDE.md)
-      spinner.start("Installing vendor adaptations...");
-      installVendorAdaptations(repoDir, cwd, hookVendors);
-      const telemetryOptions = { telemetry: isTelemetryEnabled(cwd) };
-      if (vendors.includes("claude")) {
-        const claudeSettingsPath = join(cwd, ".claude", "settings.json");
-        let claudeSettings: unknown = {};
-        if (existsSync(claudeSettingsPath)) {
-          try {
-            claudeSettings = JSON.parse(
-              readFileSync(claudeSettingsPath, "utf-8"),
-            );
-          } catch {
-            claudeSettings = {};
-          }
-        }
-        if (needsSettingsUpdate(claudeSettings, telemetryOptions)) {
-          applyRecommendedSettings(claudeSettings, telemetryOptions);
-          writeFileSync(
-            claudeSettingsPath,
-            `${JSON.stringify(claudeSettings, null, 2)}\n`,
-          );
-        }
-      }
-      if (vendors.includes("gemini")) {
-        const geminiSettingsPath = join(cwd, ".gemini", "settings.json");
-        let geminiSettings: unknown = {};
-        if (existsSync(geminiSettingsPath)) {
-          try {
-            geminiSettings = JSON.parse(
-              readFileSync(geminiSettingsPath, "utf-8"),
-            );
-          } catch {
-            geminiSettings = {};
-          }
-        }
-        if (needsGeminiSettingsUpdate(geminiSettings, telemetryOptions)) {
-          applyRecommendedGeminiSettings(geminiSettings, telemetryOptions);
-          writeFileSync(
-            geminiSettingsPath,
-            `${JSON.stringify(geminiSettings, null, 2)}\n`,
-          );
-        }
-      }
-      if (vendors.includes("qwen")) {
-        const qwenSettingsPath = join(cwd, ".qwen", "settings.json");
-        let qwenSettings: unknown = {};
-        if (existsSync(qwenSettingsPath)) {
-          try {
-            qwenSettings = JSON.parse(readFileSync(qwenSettingsPath, "utf-8"));
-          } catch {
-            qwenSettings = {};
-          }
-        }
-        if (needsQwenSettingsUpdate(qwenSettings, telemetryOptions)) {
-          const next = applyRecommendedQwenSettings(
-            qwenSettings,
-            telemetryOptions,
-          );
-          mkdirSync(dirname(qwenSettingsPath), { recursive: true });
-          writeFileSync(qwenSettingsPath, `${JSON.stringify(next, null, 2)}\n`);
-        }
-      }
-      if (vendors.includes("codex")) {
-        const codexConfigPath = join(cwd, ".codex", "config.toml");
-        const rawToml = existsSync(codexConfigPath)
-          ? readFileSync(codexConfigPath, "utf-8")
-          : "";
-        const codexSettings = parseCodexConfig(rawToml);
-        if (needsCodexSettingsUpdate(codexSettings, telemetryOptions)) {
-          const next = applyRecommendedCodexSettings(
-            codexSettings,
-            telemetryOptions,
-          );
-          mkdirSync(dirname(codexConfigPath), { recursive: true });
-          writeFileSync(codexConfigPath, `${serializeCodexConfig(next)}\n`);
-        }
-      }
-      spinner.stop("Vendor adaptations installed!");
 
       // Patch oma-config.yaml with selected language, model_preset, and vendors.
       // Uses regex-level replacement to preserve user-edited fields (timezone, etc.).
@@ -694,6 +581,21 @@ export async function install(options: InstallOptions = {}): Promise<void> {
         writeFileSync(userPrefsPath, prefs);
         writeVendorsToConfig(cwd, vendors);
       }
+
+      // Reconcile all vendor adaptations via the link kernel. agy HUD,
+      // Claude .mcp.json seeding, vendor settings (Claude / Gemini / Qwen /
+      // Codex telemetry-aware), Codex / Copilot workflow skills, Cursor MCP
+      // + rules, and doc merging are all owned by link(). install handles
+      // its own CLI skill symlinks below with the explicit consent list
+      // (`selectedClis`), so we skip link's auto-detection here.
+      spinner.start("Installing vendor adaptations...");
+      linkResult = link({
+        vendorFilter: vendors,
+        quiet: true,
+        telemetry: isTelemetryEnabled(cwd),
+        refreshSymlinks: false,
+      });
+      spinner.stop("Vendor adaptations installed!");
 
       const bundledVersion = await getLocalVersion(repoDir);
       if (bundledVersion) {
@@ -736,34 +638,21 @@ export async function install(options: InstallOptions = {}): Promise<void> {
       "Installed",
     );
 
-    // --- Vendor-specific rules export ---
+    // Surface link kernel's work to the user. Cursor export, doc merging,
+    // and agy wiring are all done inside link() above — these messages are
+    // for parity with the previous install UX.
     if (vendors.includes("cursor")) {
-      ensureCursorMcpSymlink(cwd);
-      const cursorExported = generateCursorRules(cwd);
-      if (cursorExported.length > 0) {
-        p.log.success(
-          pc.green(
-            `Cursor rules exported (${cursorExported.length} rules → .cursor/rules/)`,
-          ),
-        );
-      }
+      p.log.success(pc.green("Cursor rules exported (.cursor/rules/)"));
     }
-
-    // Merge usage guide + rules index into single-file vendor docs
-    const mergedFiles = new Set<string>();
-    for (const v of VENDORS) {
-      if (!vendors.includes(v)) continue;
-      const target =
-        v === "claude"
-          ? "CLAUDE.md"
-          : v === "gemini"
-            ? "GEMINI.md"
-            : "AGENTS.md";
-      if (mergedFiles.has(target)) continue;
-      if (mergeRulesIndexForVendor(cwd, v)) {
-        mergedFiles.add(target);
-        p.log.success(pc.green(`oma guide merged into ${target}`));
-      }
+    for (const target of linkResult?.mergedDocs ?? []) {
+      p.log.success(pc.green(`oma guide merged into ${target}`));
+    }
+    if (linkResult?.agyInstalled) {
+      p.log.success(
+        pc.green("Antigravity HUD installed (~/.gemini/antigravity-cli/)"),
+      );
+    } else if (linkResult?.agySkipReason) {
+      p.log.warn(`agy: ${linkResult.agySkipReason}`);
     }
 
     // --- Serena Project Setup ---

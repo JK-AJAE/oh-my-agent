@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
 import {
@@ -33,22 +33,7 @@ import {
   setNeedsReconcile,
   snapshotArtifacts,
 } from "../../platform/manifest.js";
-import {
-  generateCursorRules,
-  mergeRulesIndexForVendor,
-} from "../../platform/rules.js";
-import {
-  createCliSymlinks,
-  detectExistingCliSymlinkDirs,
-  ensureCursorMcpConfig,
-  getInstalledSkillNames,
-  installCodexWorkflowSkills,
-  installVendorAdaptations,
-  isHookVendor,
-  REPO,
-  readVendorsFromConfig,
-  vendorRequiresHomeConsent,
-} from "../../platform/skills-installer.js";
+import { REPO } from "../../platform/skills-installer.js";
 import { promptUninstallCompetitors } from "../../utils/competitors.js";
 import {
   isAutoUpdateCliEnabled,
@@ -60,24 +45,7 @@ import {
   formatGeminiDeprecationWarning,
   usesGeminiCli,
 } from "../../utils/gemini-deprecation.js";
-import {
-  applyRecommendedSettings,
-  needsSettingsUpdate,
-} from "../../vendors/claude/settings.js";
-import {
-  applyRecommendedCodexSettings,
-  needsCodexSettingsUpdate,
-  parseCodexConfig,
-  serializeCodexConfig,
-} from "../../vendors/codex/settings.js";
-import {
-  applyRecommendedGeminiSettings,
-  needsGeminiSettingsUpdate,
-} from "../../vendors/gemini/settings.js";
-import {
-  applyRecommendedQwenSettings,
-  needsQwenSettingsUpdate,
-} from "../../vendors/qwen/settings.js";
+import { link } from "../link/link.js";
 import { runMigrations } from "../migrations/index.js";
 
 /** Thin UI abstraction: interactive (@clack/prompts) vs CI (plain console) */
@@ -320,114 +288,15 @@ export async function update(force = false, ci = false): Promise<void> {
         );
       }
 
-      // Update vendor adaptations for configured vendors (from oma-config.yaml)
-      const configuredVendors = readVendorsFromConfig(cwd);
-      const hookVendors = configuredVendors.filter(isHookVendor);
-      if (configuredVendors.includes("codex")) {
-        installCodexWorkflowSkills(repoDir, cwd);
-      }
-      installVendorAdaptations(repoDir, cwd, hookVendors);
-      const telemetryOptions = { telemetry: isTelemetryEnabled(cwd) };
-      if (configuredVendors.includes("claude")) {
-        const claudeSettingsPath = join(cwd, ".claude", "settings.json");
-        let claudeSettings: unknown = {};
-        if (existsSync(claudeSettingsPath)) {
-          try {
-            claudeSettings = JSON.parse(
-              readFileSync(claudeSettingsPath, "utf-8"),
-            );
-          } catch {
-            claudeSettings = {};
-          }
-        }
-        if (needsSettingsUpdate(claudeSettings, telemetryOptions)) {
-          applyRecommendedSettings(claudeSettings, telemetryOptions);
-          writeFileSync(
-            claudeSettingsPath,
-            `${JSON.stringify(claudeSettings, null, 2)}\n`,
-          );
-        }
-      }
-      if (configuredVendors.includes("gemini")) {
-        const geminiSettingsPath = join(cwd, ".gemini", "settings.json");
-        let geminiSettings: unknown = {};
-        if (existsSync(geminiSettingsPath)) {
-          try {
-            geminiSettings = JSON.parse(
-              readFileSync(geminiSettingsPath, "utf-8"),
-            );
-          } catch {
-            geminiSettings = {};
-          }
-        }
-        if (needsGeminiSettingsUpdate(geminiSettings, telemetryOptions)) {
-          applyRecommendedGeminiSettings(geminiSettings, telemetryOptions);
-          writeFileSync(
-            geminiSettingsPath,
-            `${JSON.stringify(geminiSettings, null, 2)}\n`,
-          );
-        }
-      }
-      if (configuredVendors.includes("qwen")) {
-        const qwenSettingsPath = join(cwd, ".qwen", "settings.json");
-        let qwenSettings: unknown = {};
-        if (existsSync(qwenSettingsPath)) {
-          try {
-            qwenSettings = JSON.parse(readFileSync(qwenSettingsPath, "utf-8"));
-          } catch {
-            qwenSettings = {};
-          }
-        }
-        if (needsQwenSettingsUpdate(qwenSettings, telemetryOptions)) {
-          const next = applyRecommendedQwenSettings(
-            qwenSettings,
-            telemetryOptions,
-          );
-          mkdirSync(dirname(qwenSettingsPath), { recursive: true });
-          writeFileSync(qwenSettingsPath, `${JSON.stringify(next, null, 2)}\n`);
-        }
-      }
-      if (configuredVendors.includes("codex")) {
-        const codexConfigPath = join(cwd, ".codex", "config.toml");
-        const rawToml = existsSync(codexConfigPath)
-          ? readFileSync(codexConfigPath, "utf-8")
-          : "";
-        const codexSettings = parseCodexConfig(rawToml);
-        if (needsCodexSettingsUpdate(codexSettings, telemetryOptions)) {
-          const next = applyRecommendedCodexSettings(
-            codexSettings,
-            telemetryOptions,
-          );
-          mkdirSync(dirname(codexConfigPath), { recursive: true });
-          writeFileSync(codexConfigPath, `${serializeCodexConfig(next)}\n`);
-        }
-      }
-
-      // --- Vendor-specific rules export ---
-      if (configuredVendors.includes("cursor")) {
-        ensureCursorMcpConfig(cwd);
-        generateCursorRules(cwd);
-      }
-      const mergedFiles = new Set<string>();
-      for (const v of [
-        "claude",
-        "gemini",
-        "codex",
-        "cursor",
-        "qwen",
-      ] as const) {
-        if (!configuredVendors.includes(v)) continue;
-        const target =
-          v === "claude"
-            ? "CLAUDE.md"
-            : v === "gemini"
-              ? "GEMINI.md"
-              : "AGENTS.md";
-        if (mergedFiles.has(target)) continue;
-        if (mergeRulesIndexForVendor(cwd, v)) {
-          mergedFiles.add(target);
-        }
-      }
+      // Reconcile all vendor adaptations via the link kernel. agy HUD,
+      // Claude .mcp.json seeding, vendor settings (Claude / Gemini / Qwen /
+      // Codex telemetry-aware), Cursor MCP + rules, doc merging, and CLI
+      // skill symlinks are all owned by link() — adding a new vendor only
+      // requires changes in cli/commands/link/link.ts.
+      const linkResult = link({
+        quiet: true,
+        telemetry: isTelemetryEnabled(cwd),
+      });
 
       // Vendor adaptations complete — clear reconcile flag
       if (needsReconcile) {
@@ -470,8 +339,6 @@ export async function update(force = false, ci = false): Promise<void> {
         "Skipped global HOME-level configuration updates during project update.",
         "Notice",
       );
-
-      const cliTools = detectExistingCliSymlinkDirs(cwd);
 
       spinner.stop(
         isReconcileOnly
@@ -520,25 +387,13 @@ export async function update(force = false, ci = false): Promise<void> {
         ui.note(lines.join("\n"), "What's new");
       }
 
-      if (cliTools.length > 0) {
-        const skillNames = getInstalledSkillNames(cwd);
-        if (skillNames.length > 0) {
-          // Gate HOME-write vendors on the recorded consent (oma-config
-          // vendors list). update never re-prompts; missing record means
-          // the user never consented, so we silently skip.
-          const recordedVendors = readVendorsFromConfig(cwd);
-          const safeCliTools = cliTools.filter(
-            (cli) =>
-              !vendorRequiresHomeConsent(cli) || recordedVendors.includes(cli),
-          );
-          const { created } = createCliSymlinks(cwd, safeCliTools, skillNames);
-          if (created.length > 0) {
-            ui.note(
-              created.map((s) => `${pc.green("→")} ${s}`).join("\n"),
-              "Symlinks updated",
-            );
-          }
-        }
+      if (linkResult.symlinksCreated.length > 0) {
+        ui.note(
+          linkResult.symlinksCreated
+            .map((s) => `${pc.green("→")} ${s}`)
+            .join("\n"),
+          "Symlinks updated",
+        );
       }
 
       const postUpdateOmaConfig = loadOmaConfig(cwd);

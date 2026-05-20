@@ -48,6 +48,7 @@ vi.mock("../../platform/rules.js", () => ({
 vi.mock("../../platform/skills-installer.js", () => ({
   REPO: "first-fluke/oh-my-agent",
   installCodexWorkflowSkills: vi.fn(),
+  installCopilotWorkflowPrompts: vi.fn(),
   installVendorAdaptations: vi.fn(),
   detectExistingCliSymlinkDirs: vi.fn(() => []),
   getInstalledSkillNames: vi.fn(() => []),
@@ -117,7 +118,8 @@ describe("update cursor vendor adaptations", () => {
     const firstInstallCall = (
       skills.installVendorAdaptations as unknown as ReturnType<typeof vi.fn>
     ).mock.calls[0];
-    expect(firstInstallCall?.[0]).toBe(repoDir);
+    // link kernel always passes (cwd, cwd) — sourceDir == targetDir == project.
+    expect(firstInstallCall?.[0]).toContain(projectDir);
     expect(firstInstallCall?.[1]).toContain(projectDir);
     expect(firstInstallCall?.[2]).toEqual(["cursor"]);
     const cursorRulesCall = (
@@ -149,7 +151,8 @@ describe("update cursor vendor adaptations", () => {
     const secondInstallCall = (
       skills.installVendorAdaptations as unknown as ReturnType<typeof vi.fn>
     ).mock.calls[0];
-    expect(secondInstallCall?.[0]).toBe(repoDir);
+    // link kernel always passes (cwd, cwd) — sourceDir == targetDir == project.
+    expect(secondInstallCall?.[0]).toContain(projectDir);
     expect(secondInstallCall?.[1]).toContain(projectDir);
     expect(secondInstallCall?.[2]).toEqual(["codex", "cursor"]);
     const secondCursorRulesCall = (
