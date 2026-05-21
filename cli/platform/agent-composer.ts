@@ -18,6 +18,8 @@ import {
   generateClaudeRules,
   mergeRulesIndexForVendor,
 } from "./rules.js";
+import { webScraper, skillWriter } from "./tools/selfEvolution.js";
+
 
 // =============================================================================
 // Spec path resolution (V6 자율 진화 플랜)
@@ -48,6 +50,8 @@ export const TOOL_MAPPING: Record<string, Record<string, string>> = {
     glob: "glob",
     ask: "ask_user",
     memory: "save_memory",
+    webscraper: "webScraper",
+    skillwriter: "skillWriter",
   },
   claude: {
     read: "Read",
@@ -56,6 +60,8 @@ export const TOOL_MAPPING: Record<string, Record<string, string>> = {
     bash: "Bash",
     grep: "Grep",
     glob: "Glob",
+    webscraper: "webScraper",
+    skillwriter: "skillWriter",
   },
   cursor: {
     read: "read_file",
@@ -64,6 +70,8 @@ export const TOOL_MAPPING: Record<string, Record<string, string>> = {
     bash: "run_shell_command",
     grep: "grep_search",
     glob: "glob",
+    webscraper: "webScraper",
+    skillwriter: "skillWriter",
   },
 };
 
@@ -618,3 +626,14 @@ export function installVendorAgents(
     writeFileSync(join(destDir, output.fileName), output.content);
   }
 }
+
+// =============================================================================
+// Self-Evolution Tool Binding
+// =============================================================================
+export function getEvolutionTools(repoRoot: string) {
+  return {
+    webScraper,
+    skillWriter: (payload: any) => skillWriter(payload, repoRoot),
+  };
+}
+
