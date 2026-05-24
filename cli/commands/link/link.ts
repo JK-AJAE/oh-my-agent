@@ -2,14 +2,15 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import pc from "picocolors";
 import { VENDORS } from "../../constants/vendors.js";
+import { getInstallMode } from "../../platform/install-context.js";
 import {
-  generateCursorRules,
+  applyCursorRules,
   mergeRulesIndexForVendor,
 } from "../../platform/rules.js";
 import {
-  createCliSymlinks,
+  applyCursorMcpConfig,
+  createVendorSymlinks,
   detectExistingCliSymlinkDirs,
-  ensureCursorMcpConfig,
   getInstalledSkillNames,
   installCodexWorkflowSkills,
   installCopilotWorkflowPrompts,
@@ -20,27 +21,29 @@ import {
 } from "../../platform/skills-installer.js";
 import type { CliTool, CliVendor } from "../../types/index.js";
 import { isTelemetryEnabled, loadSerenaConfig } from "../../utils/config.js";
+import { safeWriteJson } from "../../utils/safe-write.js";
 import { installAntigravityHud } from "../../vendors/antigravity/hud.js";
+import { applyAntigravityMcpConfig } from "../../vendors/antigravity/mcp.js";
 import {
-  applyRecommendedClaudeMcp,
+  applyClaudeMcp,
   needsClaudeMcpUpdate,
 } from "../../vendors/claude/mcp.js";
 import {
-  applyRecommendedSettings,
-  needsSettingsUpdate,
+  applyClaudeSettings,
+  needsClaudeSettingsUpdate,
 } from "../../vendors/claude/settings.js";
 import {
-  applyRecommendedCodexSettings,
+  applyCodexSettings,
   needsCodexSettingsUpdate,
   parseCodexConfig,
   serializeCodexConfig,
 } from "../../vendors/codex/settings.js";
 import {
-  applyRecommendedGeminiSettings,
+  applyGeminiSettings,
   needsGeminiSettingsUpdate,
 } from "../../vendors/gemini/settings.js";
 import {
-  applyRecommendedQwenSettings,
+  applyQwenSettings,
   needsQwenSettingsUpdate,
 } from "../../vendors/qwen/settings.js";
 
@@ -170,13 +173,9 @@ export function link(opts: LinkOptions = {}): LinkResult {
         claudeSettings = {};
       }
     }
-    if (needsSettingsUpdate(claudeSettings, telemetryOptions)) {
-      applyRecommendedSettings(claudeSettings, telemetryOptions);
-      mkdirSync(dirname(claudeSettingsPath), { recursive: true });
-      writeFileSync(
-        claudeSettingsPath,
-        `${JSON.stringify(claudeSettings, null, 2)}\n`,
-      );
+    if (needsClaudeSettingsUpdate(claudeSettings, telemetryOptions)) {
+      applyClaudeSettings(claudeSettings, telemetryOptions);
+      safeWriteJson(claudeSettingsPath, claudeSettings);
     }
   }
 
@@ -196,12 +195,8 @@ export function link(opts: LinkOptions = {}): LinkResult {
       }
     }
     if (needsGeminiSettingsUpdate(geminiSettings, telemetryOptions)) {
-      applyRecommendedGeminiSettings(geminiSettings, telemetryOptions);
-      mkdirSync(dirname(geminiSettingsPath), { recursive: true });
-      writeFileSync(
-        geminiSettingsPath,
-        `${JSON.stringify(geminiSettings, null, 2)}\n`,
-      );
+      applyGeminiSettings(geminiSettings, telemetryOptions);
+      safeWriteJson(geminiSettingsPath, geminiSettings);
     }
     // Override serena entry for bridge mode (settings.ts only knows stdio).
     if (serenaCfg.mode === "bridge" && serenaCfg.bridgeHost === "gemini") {
@@ -219,7 +214,7 @@ export function link(opts: LinkOptions = {}): LinkResult {
           : {};
       mcpServers.serena = { url: serenaCfg.bridgeUrl };
       parsed.mcpServers = mcpServers;
-      writeFileSync(geminiSettingsPath, `${JSON.stringify(parsed, null, 2)}\n`);
+      safeWriteJson(geminiSettingsPath, parsed);
     }
   }
 
@@ -235,9 +230,8 @@ export function link(opts: LinkOptions = {}): LinkResult {
       }
     }
     if (needsQwenSettingsUpdate(qwenSettings, telemetryOptions)) {
-      const next = applyRecommendedQwenSettings(qwenSettings, telemetryOptions);
-      mkdirSync(dirname(qwenSettingsPath), { recursive: true });
-      writeFileSync(qwenSettingsPath, `${JSON.stringify(next, null, 2)}\n`);
+      const next = applyQwenSettings(qwenSettings, telemetryOptions);
+      safeWriteJson(qwenSettingsPath, next);
     }
   }
 
@@ -255,10 +249,7 @@ export function link(opts: LinkOptions = {}): LinkResult {
       : "";
     const codexSettings = parseCodexConfig(rawToml);
     if (needsCodexSettingsUpdate(codexSettings, telemetryOptions)) {
-      const next = applyRecommendedCodexSettings(
-        codexSettings,
-        telemetryOptions,
-      );
+      const next = applyCodexSettings(codexSettings, telemetryOptions);
       mkdirSync(dirname(codexConfigPath), { recursive: true });
       writeFileSync(codexConfigPath, `${serializeCodexConfig(next)}\n`);
     }
@@ -294,8 +285,8 @@ export function link(opts: LinkOptions = {}): LinkResult {
       }
     }
     if (!claudeMcpExists || needsClaudeMcpUpdate(claudeMcp)) {
-      const next = applyRecommendedClaudeMcp(claudeMcp);
-      writeFileSync(claudeMcpPath, `${JSON.stringify(next, null, 2)}\n`);
+      const next = applyClaudeMcp(claudeMcp);
+      safeWriteJson(claudeMcpPath, next);
     }
   }
 
@@ -315,12 +306,28 @@ export function link(opts: LinkOptions = {}): LinkResult {
         console.log(`${pc.yellow("⚠")} agy: ${agyResult.reason}`);
       }
     }
+
+    // 4e. Antigravity MCP — agy reads from a dedicated `mcp_config.json`
+    //     (separate from legacy ~/.gemini/settings.json mcpServers key).
+    //     Project: <cwd>/.agents/mcp_config.json
+    //     Global:  ~/.gemini/antigravity-cli/mcp_config.json
+    //     Mirrors oma's SSOT mcp.json so users get the same servers without
+    //     manual setup. See docs/oma-config-semantics.md.
+    try {
+      const mode = getInstallMode();
+      const written = applyAntigravityMcpConfig(cwd, mode);
+      if (written && !quiet) {
+        console.log(`${pc.green("✓")} agy mcp_config.json: ${written}`);
+      }
+    } catch {
+      // getInstallMode may not be set in some test contexts — skip silently.
+    }
   }
 
   // 5. Cursor-specific: MCP config (regular file, serena with --context=ide) + rules
   if (configuredVendors.includes("cursor")) {
-    ensureCursorMcpConfig(cwd);
-    generateCursorRules(cwd);
+    applyCursorMcpConfig(cwd);
+    applyCursorRules(cwd);
   }
 
   // 6. Merge vendor documentation (CLAUDE.md, GEMINI.md, AGENTS.md)
@@ -350,7 +357,7 @@ export function link(opts: LinkOptions = {}): LinkResult {
           !vendorRequiresHomeConsent(cli) || recordedVendors.includes(cli),
       );
       if (skillNames.length > 0 && safeCliTools.length > 0) {
-        const { created } = createCliSymlinks(cwd, safeCliTools, skillNames);
+        const { created } = createVendorSymlinks(cwd, safeCliTools, skillNames);
         symlinksCreated.push(...created);
       }
     }

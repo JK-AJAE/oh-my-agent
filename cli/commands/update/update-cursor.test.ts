@@ -6,6 +6,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 let extractedRepoDir = "";
 let cleanupMock: ReturnType<typeof vi.fn>;
 let configuredVendorsForTest: string[] = [];
+let mockInstallRoot = "";
+
+vi.mock("../../platform/install-context.js", () => ({
+  getInstallRoot: vi.fn(() => mockInstallRoot),
+  getInstallMode: vi.fn(() => "project"),
+  _resetInstallContext: vi.fn(),
+}));
 
 vi.mock("../../platform/manifest.js", () => ({
   fetchRemoteManifest: vi.fn(async () => ({
@@ -41,7 +48,7 @@ vi.mock("../commands/migrations/index.js", () => ({
 }));
 
 vi.mock("../../platform/rules.js", () => ({
-  generateCursorRules: vi.fn(() => []),
+  applyCursorRules: vi.fn(() => []),
   mergeRulesIndexForVendor: vi.fn(() => true),
 }));
 
@@ -52,8 +59,9 @@ vi.mock("../../platform/skills-installer.js", () => ({
   installVendorAdaptations: vi.fn(),
   detectExistingCliSymlinkDirs: vi.fn(() => []),
   getInstalledSkillNames: vi.fn(() => []),
+  createVendorSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
   createCliSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
-  ensureCursorMcpConfig: vi.fn(),
+  applyCursorMcpConfig: vi.fn(),
   readVendorsFromConfig: vi.fn(() => configuredVendorsForTest),
   isHookVendor: vi.fn((v: string) =>
     ["claude", "codex", "cursor", "gemini", "qwen"].includes(v),
@@ -78,6 +86,7 @@ describe("update cursor vendor adaptations", () => {
 
   afterEach(() => {
     process.chdir(originalCwd);
+    mockInstallRoot = "";
     for (const root of tempRoots) {
       // Windows holds locks on a just-released cwd briefly — retry to avoid EBUSY flake.
       rmSync(root, {
@@ -110,10 +119,11 @@ describe("update cursor vendor adaptations", () => {
     const projectDir = makeTempRoot("oma-update-cursor-project-");
     const repoDir = makeTempRoot("oma-update-cursor-repo-");
     extractedRepoDir = repoDir;
+    mockInstallRoot = projectDir;
     writeRepoConfig(repoDir, ["cursor"]);
 
     process.chdir(projectDir);
-    await update(false, true);
+    await update({ ci: true });
 
     const firstInstallCall = (
       skills.installVendorAdaptations as unknown as ReturnType<typeof vi.fn>
@@ -123,12 +133,12 @@ describe("update cursor vendor adaptations", () => {
     expect(firstInstallCall?.[1]).toContain(projectDir);
     expect(firstInstallCall?.[2]).toEqual(["cursor"]);
     const cursorRulesCall = (
-      rules.generateCursorRules as unknown as ReturnType<typeof vi.fn>
+      rules.applyCursorRules as unknown as ReturnType<typeof vi.fn>
     ).mock.calls[0];
     expect(cursorRulesCall?.[0]).toContain(projectDir);
 
     const mcpLinkCall = (
-      skills.ensureCursorMcpConfig as unknown as ReturnType<typeof vi.fn>
+      skills.applyCursorMcpConfig as unknown as ReturnType<typeof vi.fn>
     ).mock.calls[0];
     expect(mcpLinkCall?.[0]).toContain(projectDir);
 
@@ -143,10 +153,11 @@ describe("update cursor vendor adaptations", () => {
     const projectDir = makeTempRoot("oma-update-cursor-codex-project-");
     const repoDir = makeTempRoot("oma-update-cursor-codex-repo-");
     extractedRepoDir = repoDir;
+    mockInstallRoot = projectDir;
     writeRepoConfig(repoDir, ["codex", "cursor"]);
 
     process.chdir(projectDir);
-    await update(false, true);
+    await update({ ci: true });
 
     const secondInstallCall = (
       skills.installVendorAdaptations as unknown as ReturnType<typeof vi.fn>
@@ -156,12 +167,12 @@ describe("update cursor vendor adaptations", () => {
     expect(secondInstallCall?.[1]).toContain(projectDir);
     expect(secondInstallCall?.[2]).toEqual(["codex", "cursor"]);
     const secondCursorRulesCall = (
-      rules.generateCursorRules as unknown as ReturnType<typeof vi.fn>
+      rules.applyCursorRules as unknown as ReturnType<typeof vi.fn>
     ).mock.calls[0];
     expect(secondCursorRulesCall?.[0]).toContain(projectDir);
 
     expect(
-      (skills.ensureCursorMcpConfig as unknown as ReturnType<typeof vi.fn>).mock
+      (skills.applyCursorMcpConfig as unknown as ReturnType<typeof vi.fn>).mock
         .calls.length,
     ).toBeGreaterThan(0);
 
@@ -181,6 +192,7 @@ describe("update cursor vendor adaptations", () => {
     const projectDir = makeTempRoot("oma-update-fail-project-");
     const repoDir = makeTempRoot("oma-update-fail-repo-");
     extractedRepoDir = repoDir;
+    mockInstallRoot = projectDir;
     writeRepoConfig(repoDir, ["codex"]);
 
     (
@@ -193,7 +205,7 @@ describe("update cursor vendor adaptations", () => {
 
     process.chdir(projectDir);
 
-    await expect(update(false, true)).rejects.toThrow("ENOENT");
+    await expect(update({ ci: true })).rejects.toThrow("ENOENT");
     expect(manifest.saveLocalVersion).not.toHaveBeenCalled();
   });
 });
