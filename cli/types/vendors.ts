@@ -9,7 +9,15 @@ import type { VENDORS } from "../constants/vendors.js";
 export type VendorType = (typeof VENDORS)[number];
 
 /** CLI tools that support skill symlinking. */
-export const CLI_TOOLS = ["claude", "copilot", "hermes"] as const;
+export const CLI_TOOLS = [
+  "claude",
+  "codex",
+  "copilot",
+  "cursor",
+  "gemini",
+  "hermes",
+  "qwen",
+] as const;
 export type CliTool = (typeof CLI_TOOLS)[number];
 
 /** All CLI tools including non-hook vendors. */
