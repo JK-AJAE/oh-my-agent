@@ -49,9 +49,17 @@ const skillsState = vi.hoisted(() => ({
   INSTALLED_SKILLS_DIR: ".agents/skills",
   REPO: "first-fluke/oh-my-agent",
   CLI_SKILLS_DIR: {
-    claude: { base: "project", path: ".claude/skills" },
-    copilot: { base: "project", path: ".github/skills" },
-    hermes: { base: "home", path: ".hermes/skills/oma" },
+    claude: { projectPath: ".claude/skills", homePath: ".claude/skills" },
+    codex: { projectPath: ".codex/skills", homePath: ".codex/skills" },
+    copilot: { projectPath: ".github/skills", homePath: ".copilot/skills" },
+    cursor: { projectPath: ".cursor/skills", homePath: ".cursor/skills" },
+    gemini: { projectPath: ".gemini/skills", homePath: ".gemini/skills" },
+    hermes: {
+      projectPath: ".hermes/skills/oma",
+      homePath: ".hermes/skills/oma",
+      requiresHomeConsent: true,
+    },
+    qwen: { projectPath: ".qwen/skills", homePath: ".qwen/skills" },
   },
   getAllSkills: vi.fn(() => [
     { name: "oma-frontend", desc: "Frontend skill" },
@@ -65,6 +73,13 @@ const skillsState = vi.hoisted(() => ({
   installConfigs: vi.fn(),
   installSkill: vi.fn(),
   installVendorAdaptations: vi.fn(),
+  createVendorSymlinks: vi.fn<
+    (
+      targetDir: string,
+      cliTools: string[],
+      skillNames: string[],
+    ) => { created: string[]; skipped: string[] }
+  >(() => ({ created: [], skipped: [] })),
   createCliSymlinks: vi.fn<
     (
       targetDir: string,
@@ -72,8 +87,8 @@ const skillsState = vi.hoisted(() => ({
       skillNames: string[],
     ) => { created: string[]; skipped: string[] }
   >(() => ({ created: [], skipped: [] })),
-  ensureCursorMcpSymlink: vi.fn(),
-  ensureCursorMcpConfig: vi.fn(),
+  applyCursorMcpSymlink: vi.fn(),
+  applyCursorMcpConfig: vi.fn(),
   readVendorsFromConfig: vi.fn(() => []),
   vendorRequiresHomeConsent: vi.fn((cli: string) => cli === "hermes"),
   getVendorDisplayPath: vi.fn((cli: string) =>
@@ -94,7 +109,7 @@ const miscState = vi.hoisted(() => ({
   })),
   getLocalVersion: vi.fn(async () => null),
   saveLocalVersion: vi.fn(async () => {}),
-  generateCursorRules: vi.fn(() => []),
+  applyCursorRules: vi.fn(() => []),
   mergeRulesIndexForVendor: vi.fn(() => false),
   ensureSerenaProject: vi.fn(() => ({ configured: false, registered: false })),
   resolveSerenaLanguages: vi.fn(() => ["typescript"]),
@@ -130,14 +145,21 @@ vi.mock("../../platform/manifest.js", () => ({
   saveLocalVersion: miscState.saveLocalVersion,
 }));
 vi.mock("../../platform/rules.js", () => ({
-  generateCursorRules: miscState.generateCursorRules,
+  applyCursorRules: miscState.applyCursorRules,
   mergeRulesIndexForVendor: miscState.mergeRulesIndexForVendor,
 }));
 vi.mock("../../io/serena.js", () => ({
   ensureSerenaProject: miscState.ensureSerenaProject,
   resolveSerenaLanguages: miscState.resolveSerenaLanguages,
 }));
+vi.mock("../../utils/install-lock.js", () => ({
+  acquireLock: vi.fn(() => ({ ok: true, release: () => {} })),
+}));
 
+import {
+  _resetInstallContext,
+  setInstallContext,
+} from "../../platform/install-context.js";
 import { install } from "../install/install.js";
 
 describe("install home policy", () => {
@@ -147,6 +169,9 @@ describe("install home policy", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    _resetInstallContext();
+    setInstallContext({ installRoot: process.cwd(), mode: "project" });
 
     process.env.HOME = "/tmp/test-home";
     // Force interactive mode regardless of host env (GitHub Actions sets
@@ -180,6 +205,7 @@ describe("install home policy", () => {
     else process.env.CI = originalCi;
     if (originalOmaYes === undefined) delete process.env.OMA_YES;
     else process.env.OMA_YES = originalOmaYes;
+    _resetInstallContext();
     vi.restoreAllMocks();
   });
 
@@ -219,9 +245,9 @@ describe("install home policy", () => {
 
     await install();
 
-    const symlinkCalls = skillsState.createCliSymlinks.mock.calls;
+    const symlinkCalls = skillsState.createVendorSymlinks.mock.calls;
     expect(symlinkCalls.length).toBeGreaterThan(0);
-    // hermes must not be in the cliTools array passed to createCliSymlinks
+    // hermes must not be in the cliTools array passed to createVendorSymlinks
     for (const call of symlinkCalls) {
       const cliTools = call[1];
       expect(cliTools).not.toContain("hermes");
@@ -237,7 +263,7 @@ describe("install home policy", () => {
 
     await install();
 
-    const symlinkCalls = skillsState.createCliSymlinks.mock.calls;
+    const symlinkCalls = skillsState.createVendorSymlinks.mock.calls;
     const allCliTools = symlinkCalls.flatMap((c) => c[1]);
     expect(allCliTools).toContain("hermes");
   });
@@ -275,5 +301,161 @@ describe("install home policy", () => {
     expect(
       writes.some((path) => path.startsWith("/tmp/test-home/.gemini/")),
     ).toBe(false);
+  });
+});
+
+// ── Task 45 — EC-12: cwd === homedir() guard tests ────────────────────────────
+
+describe("install EC-12 — cwd equals homedir guard", () => {
+  // The EC-12 guard lives at install.ts line ~269:
+  //   if (getInstallMode() === "project" && process.cwd() === homedir()) { ... }
+  //
+  // Spy infrastructure: process.cwd and process.exit are spied per test.
+  // The promptState mock is already wired up via vi.mock("@clack/prompts").
+
+  let cwdSpy: ReturnType<typeof vi.spyOn>;
+  let exitSpy: ReturnType<typeof vi.spyOn>;
+
+  // Stable home value for all EC-12 tests — must NOT equal process.env.HOME
+  // that was set by beforeEach (/tmp/test-home), so we pick the same value.
+  const fakeHome = "/tmp/test-home";
+
+  beforeEach(() => {
+    // vi.clearAllMocks doesn't always clear hoisted mock call history across
+    // nested describes — clear explicitly to prevent test bleeding.
+    promptState.cancel.mockClear();
+    promptState.confirm.mockClear();
+    // Throw on exit so install() stops at the EC-12 guard instead of running
+    // the rest of the flow (multiselect mocks etc. would otherwise fire).
+    exitSpy = vi.spyOn(process, "exit").mockImplementation(((code: number) => {
+      throw new Error(`__EXIT__${code}`);
+    }) as never);
+  });
+
+  afterEach(() => {
+    cwdSpy?.mockRestore();
+    exitSpy?.mockRestore();
+  });
+
+  it("EC-12-1: non-interactive + cwd=HOME + project mode => cancel + exit(1)", async () => {
+    // Make cwd() === homedir()
+    cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(fakeHome);
+
+    // Set HOME env so homedir() resolves to fakeHome
+    process.env.HOME = fakeHome;
+    process.env.CI = "true"; // non-interactive
+
+    _resetInstallContext();
+    setInstallContext({ installRoot: process.cwd(), mode: "project" });
+
+    await expect(install()).rejects.toThrow(/__EXIT__1/);
+
+    expect(promptState.cancel).toHaveBeenCalledWith(
+      expect.stringContaining("--global"),
+    );
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it("EC-12-2: interactive + cwd=HOME + project mode + confirm=false => prompt fires + exit(0)", async () => {
+    cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(fakeHome);
+    process.env.HOME = fakeHome;
+    delete process.env.CI;
+
+    _resetInstallContext();
+    setInstallContext({ installRoot: process.cwd(), mode: "project" });
+
+    // First confirm call = EC-12 consent prompt => user declines
+    promptState.confirm.mockResolvedValueOnce(false);
+
+    await expect(install()).rejects.toThrow(/__EXIT__0/);
+
+    // EC-12 confirm must have been called
+    expect(promptState.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining("HOME"),
+      }),
+    );
+    expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
+  it("EC-12-3: interactive + cwd=HOME + project mode + confirm=true => install proceeds past guard", async () => {
+    cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(fakeHome);
+    process.env.HOME = fakeHome;
+    delete process.env.CI;
+
+    _resetInstallContext();
+    setInstallContext({ installRoot: process.cwd(), mode: "project" });
+
+    // EC-12 consent: user approves
+    promptState.confirm.mockResolvedValueOnce(true);
+    // Subsequent confirms (global consent, etc.): decline to keep the test minimal
+    promptState.confirm.mockResolvedValue(false);
+
+    // install may complete or throw later; we only care the EC-12 prompt fired
+    // and exit(1) was NOT called via the EC-12 abort path.
+    try {
+      await install();
+    } catch {
+      // ignore: any later exit() throws are fine
+    }
+
+    // The first confirm was the EC-12 prompt; install continued past it
+    expect(promptState.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining("HOME") }),
+    );
+    // exit should NOT have been called with 1 (EC-12 abort path)
+    expect(exitSpy).not.toHaveBeenCalledWith(1);
+  });
+
+  it("EC-12-4: cwd=HOME + global mode => no EC-12 cancel", async () => {
+    cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(fakeHome);
+    process.env.HOME = fakeHome;
+    process.env.CI = "true";
+    process.env.OMA_YES = "1";
+
+    _resetInstallContext();
+    // Global mode — EC-12 guard only fires in project mode
+    setInstallContext({ installRoot: fakeHome, mode: "global" });
+
+    try {
+      await install({ yes: true });
+    } catch {
+      // ignore late exits
+    }
+
+    // EC-12 cancel message must NOT have been emitted
+    const cancelCalls = (promptState.cancel as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const hasEc12Cancel = cancelCalls.some((args: unknown[]) =>
+      String(args[0]).includes("Refusing to install in HOME without"),
+    );
+    expect(hasEc12Cancel).toBe(false);
+  });
+
+  it("EC-12-5: cwd != HOME + project mode => install proceeds normally past guard", async () => {
+    // cwd is a temp dir, not HOME — EC-12 guard must not fire
+    cwdSpy = vi.spyOn(process, "cwd").mockReturnValue("/tmp/my-project");
+    process.env.HOME = fakeHome;
+    process.env.CI = "true";
+    process.env.OMA_YES = "1";
+
+    _resetInstallContext();
+    setInstallContext({ installRoot: "/tmp/my-project", mode: "project" });
+
+    try {
+      await install({ yes: true });
+    } catch {
+      // ignore late exits
+    }
+
+    // Confirm must NOT have been called for EC-12 (no HOME equality)
+    const ec12CancelCalls = (
+      promptState.cancel as ReturnType<typeof vi.fn>
+    ).mock.calls.filter((args: unknown[]) =>
+      String(args[0]).includes("Refusing to install in HOME without"),
+    );
+    expect(ec12CancelCalls).toHaveLength(0);
+    // exit(1) via EC-12 path must not have fired
+    expect(exitSpy).not.toHaveBeenCalledWith(1);
   });
 });

@@ -9,6 +9,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
+import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
@@ -22,10 +23,18 @@ import {
   resolveSerenaLanguages,
 } from "../../io/serena.js";
 import { downloadAndExtract } from "../../io/tarball.js";
-import { getLocalVersion, saveLocalVersion } from "../../platform/manifest.js";
+import {
+  getInstallMode,
+  getInstallRoot,
+} from "../../platform/install-context.js";
+import {
+  getLocalVersion,
+  readVersionInstallMode,
+  saveLocalVersion,
+} from "../../platform/manifest.js";
 import {
   CLI_SKILLS_DIR,
-  createCliSymlinks,
+  createVendorSymlinks,
   getAllSkills,
   getVendorDisplayPath,
   INSTALLED_SKILLS_DIR,
@@ -43,6 +52,7 @@ import {
 import type { CliTool, CliVendor } from "../../types/index.js";
 import { promptUninstallCompetitors } from "../../utils/competitors.js";
 import { isTelemetryEnabled } from "../../utils/config.js";
+import { acquireLock } from "../../utils/install-lock.js";
 import { link } from "../link/link.js";
 import { runMigrations } from "../migrations/index.js";
 
@@ -189,9 +199,63 @@ export function getExistingPreset(targetDir: string): string | null {
   }
 }
 
+/**
+ * Detects if the current process is running inside Windows Subsystem for Linux
+ * by checking the Microsoft/WSL signature in /proc/version.
+ */
+export function detectWsl(
+  readProcVersion: () => string = () => readFileSync("/proc/version", "utf-8"),
+): boolean {
+  if (process.platform !== "linux") return false;
+  try {
+    return /microsoft|wsl/i.test(readProcVersion());
+  } catch {
+    return false;
+  }
+}
+
 export async function install(options: InstallOptions = {}): Promise<void> {
   const nonInteractive = isNonInteractive(options);
   const explicitYes = isExplicitYes(options);
+
+  // Task 27 — sudo + HOME refusal (EC-5)
+  const isLinuxOrMac = process.platform !== "win32";
+  if (
+    isLinuxOrMac &&
+    typeof process.geteuid === "function" &&
+    process.geteuid() === 0 &&
+    typeof process.env.SUDO_USER === "string" &&
+    process.env.SUDO_USER.length > 0
+  ) {
+    p.cancel(
+      "Refusing to install under sudo. Re-run as the target user (without sudo) — oma writes to your HOME and runs as your user.",
+    );
+    process.exit(1);
+  }
+
+  // Task 29 — CI + --global warning (EC-15)
+  if (
+    getInstallMode() === "global" &&
+    (process.env.CI === "true" || process.env.CI === "1")
+  ) {
+    p.log.warn(
+      "Running `oma install --global` in CI. This will modify the CI user's HOME. Proceeding because --yes / non-interactive mode is set.",
+    );
+    // Continue — no abort.
+  }
+
+  // Task 26 — context-bound installRoot (replaces process.cwd())
+  const installRoot = getInstallRoot();
+
+  // Task 38 — install/update lock (aborts on concurrent run; auto-clears stale)
+  const lockResult = acquireLock(installRoot);
+  if (!lockResult.ok) {
+    p.cancel(
+      `Another oma install/update is running (pid=${lockResult.held.pid}). Try again in a moment.`,
+    );
+    process.exit(1);
+  }
+  const releaseLock = lockResult.release;
 
   console.clear();
   p.intro(pc.bgMagenta(pc.white(" 🛸 oh-my-agent ")));
@@ -200,8 +264,79 @@ export async function install(options: InstallOptions = {}): Promise<void> {
     p.log.info(pc.dim("Non-interactive mode — using defaults."));
   }
 
+  // Task 28 — cwd === homedir() warning when NOT --global (EC-12)
+  if (getInstallMode() === "project" && process.cwd() === homedir()) {
+    if (nonInteractive) {
+      p.cancel(
+        "Refusing to install in HOME without --global. Re-run with --global, or cd to a project directory first.",
+      );
+      process.exit(1);
+    } else {
+      const homeConsent = await p.confirm({
+        message:
+          "You're running oma in your HOME directory without --global. This will scatter files in ~/. Are you sure?",
+        initialValue: false,
+      });
+      if (p.isCancel(homeConsent) || !homeConsent) {
+        p.cancel("Cancelled.");
+        process.exit(0);
+      }
+    }
+  }
+
+  // Task 30 — WSL detection + PowerShell HOME guidance (T2.13)
+  if (getInstallMode() === "global" && detectWsl()) {
+    p.log.info(
+      pc.dim(
+        "WSL detected: your $HOME (" +
+          installRoot +
+          ") is the WSL Linux home and is distinct from your Windows %USERPROFILE%. " +
+          "oma will install only to the WSL HOME. " +
+          "If you want a Windows-side install, re-run this command from PowerShell.",
+      ),
+    );
+  }
+
+  // Task 26 — HOME consent for global mode
+  if (getInstallMode() === "global") {
+    if (!nonInteractive) {
+      const globalConsent = await p.confirm({
+        message: `You're about to install oh-my-agent globally to ${installRoot}/.agents/. This will modify ~/.claude/, ~/.codex/, etc. Proceed?`,
+        initialValue: false,
+      });
+      if (p.isCancel(globalConsent) || !globalConsent) {
+        p.cancel("Cancelled.");
+        process.exit(0);
+      }
+    }
+
+    // Task 31 — First-run --global explanatory prompt (T2.6)
+    // "First run" = no global-mode marker in _version.json yet.
+    const priorMode = readVersionInstallMode(installRoot);
+    if (priorMode !== "global" && !nonInteractive) {
+      p.note(
+        [
+          "This is your first global install of oh-my-agent.",
+          "Scope:",
+          "  - SSOT: ~/.agents/  (all skills, workflows, rules)",
+          "  - Vendor configs: ~/.claude/, ~/.codex/, ~/.gemini/, ~/.qwen/  (symlinks + settings)",
+          "  - Lock file: ~/.agents/_install.lock",
+          "Existing per-project installs are not affected.",
+        ].join("\n"),
+      );
+      const firstRunConsent = await p.confirm({
+        message: "Proceed with the global install?",
+        initialValue: false,
+      });
+      if (p.isCancel(firstRunConsent) || !firstRunConsent) {
+        p.cancel("Cancelled.");
+        process.exit(0);
+      }
+    }
+  }
+
   // Run all migrations (legacy dirs, shared layout, config rename)
-  const migrationActions = runMigrations(process.cwd());
+  const migrationActions = runMigrations(installRoot);
   if (migrationActions.length > 0) {
     p.note(
       migrationActions.map((m) => `${pc.green("✓")} ${m}`).join("\n"),
@@ -212,7 +347,7 @@ export async function install(options: InstallOptions = {}): Promise<void> {
   // Detect and offer to remove competing tools (skipped in non-interactive
   // mode — destructive HOME-level operation should stay opt-in).
   if (!nonInteractive) {
-    await promptUninstallCompetitors(process.cwd());
+    await promptUninstallCompetitors(installRoot);
   }
 
   const spinner = p.spinner();
@@ -233,7 +368,7 @@ export async function install(options: InstallOptions = {}): Promise<void> {
   spinner.stop("Downloaded!");
 
   const languages = scanLanguages(repoDir);
-  const existingLanguage = getExistingLanguage(process.cwd());
+  const existingLanguage = getExistingLanguage(installRoot);
   const initialLanguage = languages.some(
     (option) => option.value === existingLanguage,
   )
@@ -290,7 +425,7 @@ export async function install(options: InstallOptions = {}): Promise<void> {
     },
   ];
 
-  const existingPreset = getExistingPreset(process.cwd());
+  const existingPreset = getExistingPreset(installRoot);
   const initialPreset = BUILT_IN_PRESET_OPTIONS.some(
     (o) => o.value === existingPreset,
   )
@@ -386,8 +521,6 @@ export async function install(options: InstallOptions = {}): Promise<void> {
     selectedSkills = PRESETS[projectType as string] ?? [];
   }
 
-  const cwd = process.cwd();
-
   // Ask for language variant when backend skill is selected
   const variantSelections: Record<string, string> = {};
   if (selectedSkills.includes("oma-backend")) {
@@ -466,7 +599,7 @@ export async function install(options: InstallOptions = {}): Promise<void> {
       const spec = (CLI_SKILLS_DIR as Record<string, SkillTargetSpec>)[
         opt.value
       ];
-      return !spec || spec.base !== "home";
+      return !spec || !spec.requiresHomeConsent;
     })
     .map((v) => v.value);
 
@@ -488,7 +621,7 @@ export async function install(options: InstallOptions = {}): Promise<void> {
   const vendors = selectedVendors as CliVendor[];
 
   // Build selectedClis from CLI_SKILLS_DIR (data-driven). Vendors with
-  // base: "home" require explicit consent; other vendors are added directly.
+  // requiresHomeConsent require explicit consent; other vendors are added directly.
   const cliToolKeys = Object.keys(CLI_SKILLS_DIR) as CliTool[];
   const requestedClis = vendors.filter((v): v is CliTool =>
     (cliToolKeys as string[]).includes(v),
@@ -535,26 +668,32 @@ export async function install(options: InstallOptions = {}): Promise<void> {
         ".codex/skills",
         ".gemini/skills",
         ".github/skills",
+        ".qwen/skills",
       ];
       for (const relDir of vendorSkillDirs) {
-        cleanDanglingSymlinks(join(cwd, relDir));
+        cleanDanglingSymlinks(join(installRoot, relDir));
       }
 
-      installShared(repoDir, cwd);
-      installWorkflows(repoDir, cwd);
-      installRules(repoDir, cwd);
-      installConfigs(repoDir, cwd, false);
+      installShared(repoDir, installRoot);
+      installWorkflows(repoDir, installRoot);
+      installRules(repoDir, installRoot);
+      installConfigs(repoDir, installRoot, false);
 
       for (const skillName of selectedSkills) {
         spinner.message(`Installing ${pc.cyan(skillName)}...`);
-        installSkill(repoDir, skillName, cwd, variantSelections[skillName]);
+        installSkill(
+          repoDir,
+          skillName,
+          installRoot,
+          variantSelections[skillName],
+        );
       }
 
       spinner.stop("Skills installed!");
 
       // Patch oma-config.yaml with selected language, model_preset, and vendors.
       // Uses regex-level replacement to preserve user-edited fields (timezone, etc.).
-      const userPrefsPath = join(cwd, ".agents", "oma-config.yaml");
+      const userPrefsPath = join(installRoot, ".agents", "oma-config.yaml");
       if (existsSync(userPrefsPath)) {
         let prefs = readFileSync(userPrefsPath, "utf-8");
 
@@ -579,7 +718,7 @@ export async function install(options: InstallOptions = {}): Promise<void> {
         }
 
         writeFileSync(userPrefsPath, prefs);
-        writeVendorsToConfig(cwd, vendors);
+        writeVendorsToConfig(installRoot, vendors);
       }
 
       // Reconcile all vendor adaptations via the link kernel. agy HUD,
@@ -592,17 +731,17 @@ export async function install(options: InstallOptions = {}): Promise<void> {
       linkResult = link({
         vendorFilter: vendors,
         quiet: true,
-        telemetry: isTelemetryEnabled(cwd),
+        telemetry: isTelemetryEnabled(installRoot),
         refreshSymlinks: false,
       });
       spinner.stop("Vendor adaptations installed!");
 
       const bundledVersion = await getLocalVersion(repoDir);
       if (bundledVersion) {
-        await saveLocalVersion(cwd, bundledVersion);
+        await saveLocalVersion(installRoot, bundledVersion);
       }
 
-      const postInstallMigrations = runMigrations(cwd);
+      const postInstallMigrations = runMigrations(installRoot);
       if (postInstallMigrations.length > 0) {
         p.note(
           postInstallMigrations.map((m) => `${pc.green("✓")} ${m}`).join("\n"),
@@ -613,13 +752,17 @@ export async function install(options: InstallOptions = {}): Promise<void> {
       cleanup();
     }
 
-    const cliSymlinks = createCliSymlinks(cwd, selectedClis, selectedSkills);
+    const cliSymlinks = createVendorSymlinks(
+      installRoot,
+      selectedClis,
+      selectedSkills,
+    );
 
     p.note(
       [
         ...selectedSkills.map((s) => `${pc.green("✓")} ${s}`),
         "",
-        pc.dim(`Location: ${join(cwd, INSTALLED_SKILLS_DIR)}`),
+        pc.dim(`Location: ${join(installRoot, INSTALLED_SKILLS_DIR)}`),
         ...(cliSymlinks.created.length > 0
           ? [
               "",
@@ -661,7 +804,10 @@ export async function install(options: InstallOptions = {}): Promise<void> {
         selectedSkills,
         variantSelections["oma-backend"],
       );
-      const { configured, registered } = ensureSerenaProject(cwd, serenaLangs);
+      const { configured, registered } = ensureSerenaProject(
+        installRoot,
+        serenaLangs,
+      );
       if (configured) {
         p.log.success(
           pc.green(`Serena project configured (${serenaLangs.join(", ")})`),
@@ -674,9 +820,35 @@ export async function install(options: InstallOptions = {}): Promise<void> {
 
     p.log.info(pc.dim("Skipped global HOME-level configuration updates."));
 
-    p.outro(pc.green("Done! Open your project in your IDE to use the skills."));
+    // Task 26 — stamp install mode into _version.json (schemaVersion=2).
+    // The mode field lets `oma doctor` distinguish project vs global installs
+    // and lets backwards-compatible callers fall back to "project" when absent.
+    const bundledVersionFinal = await getLocalVersion(installRoot).catch(
+      () => null,
+    );
+    if (bundledVersionFinal) {
+      await saveLocalVersion(
+        installRoot,
+        bundledVersionFinal,
+        getInstallMode(),
+      );
+    }
 
-    if (isGhInstalled() && isGhAuthenticated() && !isAlreadyStarred()) {
+    // Task 32 — Outro next-steps guidance (T2.7)
+    p.note(
+      [
+        "1. Open your project in your IDE",
+        "2. Type /orchestrate to spawn a multi-agent workflow",
+        "3. Run `oma doctor` if anything looks off",
+      ].join("\n"),
+      "Next steps",
+    );
+    p.outro(pc.green("Done!"));
+
+    // Task 33 — Skip GitHub star prompt when --global + --yes (T2.3)
+    if (getInstallMode() === "global" && explicitYes) {
+      p.log.info(pc.dim("Skipped GitHub star prompt (--global + --yes)."));
+    } else if (isGhInstalled() && isGhAuthenticated() && !isAlreadyStarred()) {
       // Auto-star on explicit `--yes` / OMA_YES (user opted in to "yes
       // everything"). Stay silent on auto-detected CI to avoid drive-by
       // stars from build runners that happen to have gh auth.
@@ -708,5 +880,7 @@ export async function install(options: InstallOptions = {}): Promise<void> {
     spinner.stop("Installation failed");
     p.log.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
+  } finally {
+    releaseLock();
   }
 }

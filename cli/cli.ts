@@ -22,12 +22,17 @@ import { registerSearchCommand } from "./commands/search/index.js";
 import { registerSkillsCommand } from "./commands/skills/command.js";
 import { registerStar } from "./commands/star/command.js";
 import { registerStats } from "./commands/stats/command.js";
+import { registerUninstall } from "./commands/uninstall/command.js";
 import { registerUpdate } from "./commands/update/command.js";
 import { registerVault } from "./commands/vault/command.js";
 import { registerVerify } from "./commands/verify/command.js";
 import { registerVisualize } from "./commands/visualize/command.js";
 import { startDashboard } from "./dashboard.js";
 import pkg from "./package.json";
+import {
+  resolveInstallContext,
+  setInstallContext,
+} from "./platform/install-context.js";
 import { startTerminalDashboard } from "./terminal-dashboard.js";
 import { printDescribe, runAction } from "./utils/cli-framework.js";
 
@@ -39,12 +44,19 @@ program
   .name("oh-my-agent")
   .description("Multi-Agent Orchestrator for AI IDEs")
   .version(VERSION)
+  .option("-g, --global", "operate on the user's HOME install (~/.agents/)")
   .showSuggestionAfterError()
   .showHelpAfterError()
   .addHelpText(
     "after",
     "\nAliases:\n  oma  Alias for oh-my-agent after global installation.\n",
   );
+
+program.hook("preAction", () => {
+  const opts = program.opts<{ global?: boolean }>();
+  const ctx = resolveInstallContext({ global: opts.global === true });
+  setInstallContext(ctx);
+});
 
 registerDefaultInstallAction(program);
 registerInstall(program);
@@ -80,6 +92,7 @@ program
   );
 
 registerAuthStatus(program);
+registerUninstall(program);
 registerUpdate(program);
 registerLink(program);
 registerMarketCommand(program);
