@@ -1,10 +1,18 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { registerParser } from "../registry.js";
 import type { NormalizedEntry } from "../schema.js";
+import {
+  findResponse,
+  inWindow,
+  type PairMessage,
+  pathToProjectName,
+  preview,
+  readJsonlSync,
+} from "./shared.js";
 
 const CURSOR_CHATS = join(homedir(), ".cursor", "chats");
 const CURSOR_PROJECTS = join(homedir(), ".cursor", "projects");
@@ -262,8 +270,15 @@ export function projectSlugToPath(slug: string): string | null {
 }
 
 export function workspacePathToProjectName(workspacePath: string): string {
-  const parts = workspacePath.split("/").filter(Boolean);
-  return parts[parts.length - 1] ?? workspacePath;
+  return pathToProjectName(workspacePath) ?? workspacePath;
+}
+
+function toPairMessage(msg: CursorMessage): PairMessage {
+  if (msg.role === "user") return { role: "user", text: msg.content };
+  if (msg.role === "assistant") {
+    return { role: "assistant", text: msg.content };
+  }
+  return { role: "other", text: msg.content };
 }
 
 function buildChatHashProjectMap(): Map<string, string> {
@@ -343,22 +358,17 @@ function entriesFromAgentTranscript(
   const project = projectSlugToName(file.projectSlug);
 
   const messages: CursorMessage[] = [];
-  for (const line of readFileSync(file.filePath, "utf-8").split("\n")) {
-    if (!line.trim()) continue;
-    try {
-      const row = JSON.parse(line) as {
-        role?: string;
-        message?: { content?: unknown };
-      };
-      if (row.role !== "user" && row.role !== "assistant") continue;
-      const content = extractMessageContent(row.message?.content);
-      if (content) {
-        messages.push({ role: row.role, content });
-      }
-    } catch {
-      // skip malformed lines
+  for (const row of readJsonlSync<{
+    role?: string;
+    message?: { content?: unknown };
+  }>(file.filePath)) {
+    if (row.role !== "user" && row.role !== "assistant") continue;
+    const content = extractMessageContent(row.message?.content);
+    if (content) {
+      messages.push({ role: row.role, content });
     }
   }
+  const pairs = messages.map(toPairMessage);
 
   const userOrdinals = messages
     .map((msg, index) => (msg.role === "user" ? index : -1))
@@ -380,18 +390,10 @@ function entriesFromAgentTranscript(
         : birthMs + ((endMs - birthMs) * userIndex) / (userOrdinals.length - 1);
     userIndex++;
 
-    if (timestamp < start || timestamp >= end) continue;
+    if (!inWindow(timestamp, start, end)) continue;
 
-    let response: string | undefined;
-    for (let j = i + 1; j < messages.length; j++) {
-      const next = messages[j];
-      if (!next) continue;
-      if (next.role === "user") break;
-      if (next.role === "assistant" && next.content.trim()) {
-        response = next.content.slice(0, 200);
-        break;
-      }
-    }
+    const responseText = findResponse(pairs, i, "first");
+    const response = responseText ? preview(responseText) : undefined;
 
     entries.push({
       tool: "cursor",
@@ -413,9 +415,10 @@ function entriesFromStore(
   hashProjectMap: Map<string, string>,
 ): NormalizedEntry[] {
   const createdAt = store.meta.createdAt ?? 0;
-  if (createdAt < start || createdAt >= end) return [];
+  if (!inWindow(createdAt, start, end)) return [];
 
   const project = resolveStoreProject(store, hashProjectMap);
+  const pairs = store.messages.map(toPairMessage);
   const entries: NormalizedEntry[] = [];
   for (let i = 0; i < store.messages.length; i++) {
     const msg = store.messages[i];
@@ -424,11 +427,8 @@ function entriesFromStore(
     const prompt = extractUserPrompt(msg.content);
     if (!prompt) continue;
 
-    let response: string | undefined;
-    const next = store.messages[i + 1];
-    if (next?.role === "assistant" && next.content) {
-      response = next.content.slice(0, 200);
-    }
+    const responseText = findResponse(pairs, i, "immediate");
+    const response = responseText ? preview(responseText) : undefined;
 
     entries.push({
       tool: "cursor",

@@ -244,7 +244,7 @@ oma recap [--window <period>] [--date <date>] [--tool <tools>] [--top <n>] [--so
 |:-----|:-----------|:--------|
 | `--window <period>` | Time window: `1d`, `3d`, `7d`, `2w`, `30d`. Ignored when `--date` is set. | `1d` |
 | `--date <date>` | Specific date (`YYYY-MM-DD`). Takes precedence over `--window`. | |
-| `--tool <tools>` | Filter sessions by tool. Comma-separated: `claude`, `codex`, `qwen`, `cursor`. | all tools |
+| `--tool <tools>` | Filter sessions by tool. Comma-separated: `claude`, `codex`, `qwen`, `cursor`, `antigravity`. | all tools |
 | `--top <n>` | Show only top N projects/topics in the summary. | unlimited |
 | `--sort <metric>` | Sort sessions by `count` or `duration`. | `count` |
 | `--mermaid` | Output a Mermaid Gantt chart instead of the default summary. | `false` |

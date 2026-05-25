@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { registerParser } from "../registry.js";
 import type { NormalizedEntry } from "../schema.js";
+import { findResponse, inWindow, type PairMessage, preview } from "./shared.js";
 
 const GEMINI_BASE = join(homedir(), ".gemini", "tmp");
 
@@ -26,6 +27,28 @@ function findSessionFiles(): Array<{ path: string; project: string }> {
   return files;
 }
 
+interface GeminiMessage {
+  type?: string;
+  timestamp?: string;
+  content?: Array<{ text?: string }>;
+  model?: string;
+}
+
+function messageText(msg: GeminiMessage): string {
+  return (msg.content || [])
+    .map((p) => p.text || "")
+    .filter(Boolean)
+    .join(" ");
+}
+
+function toPairMessage(msg: GeminiMessage): PairMessage {
+  if (msg.type === "user") return { role: "user", text: messageText(msg) };
+  if (msg.type === "gemini") {
+    return { role: "assistant", text: messageText(msg) };
+  }
+  return { role: "other", text: "" };
+}
+
 registerParser({
   name: "gemini",
 
@@ -43,40 +66,27 @@ registerParser({
       try {
         const data = JSON.parse(readFileSync(file, "utf-8"));
         const sessionId = data.sessionId || undefined;
-        const messages = data.messages || [];
+        const messages: GeminiMessage[] = data.messages || [];
+        const pairs = messages.map(toPairMessage);
 
         for (let i = 0; i < messages.length; i++) {
           const msg = messages[i];
-          if (msg.type !== "user") continue;
+          if (msg?.type !== "user") continue;
 
           const ts = msg.timestamp ? new Date(msg.timestamp).getTime() : 0;
-          if (Number.isNaN(ts) || ts < start || ts >= end) continue;
+          if (!inWindow(ts, start, end)) continue;
 
-          const parts = msg.content || [];
-          const text = parts
-            .map((p: { text?: string }) => p.text || "")
-            .filter(Boolean)
-            .join(" ");
+          const text = messageText(msg);
           if (!text) continue;
 
-          // Grab next gemini response
-          let response: string | undefined;
-          const next = messages[i + 1];
-          if (next?.type === "gemini") {
-            const rParts = next.content || [];
-            const rText = rParts
-              .map((p: { text?: string }) => p.text || "")
-              .filter(Boolean)
-              .join(" ");
-            if (rText) response = rText.slice(0, 200);
-          }
+          const response = findResponse(pairs, i, "immediate");
 
           entries.push({
             tool: "gemini",
             timestamp: ts,
             project,
             prompt: text,
-            response,
+            response: response ? preview(response) : undefined,
             sessionId,
             metadata: msg.model ? { model: msg.model } : undefined,
           });

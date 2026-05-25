@@ -6,6 +6,7 @@ export const toolNames = [
   "gemini",
   "qwen",
   "cursor",
+  "antigravity",
 ] as const;
 
 export type ToolName = (typeof toolNames)[number];

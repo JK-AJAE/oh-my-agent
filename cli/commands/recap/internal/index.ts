@@ -8,6 +8,7 @@ import "./parsers/codex.js";
 import "./parsers/gemini.js";
 import "./parsers/qwen.js";
 import "./parsers/cursor.js";
+import "./parsers/antigravity.js";
 
 export interface RecapOptions {
   window?: string;

@@ -281,7 +281,7 @@ oma recap [--window <period>] [--date <date>] [--tool <tools>] [--top <n>] [--so
 |:-----|:-----------|:--------|
 | `--window <period>` | Time window: `1d`, `3d`, `7d`, `2w`, `30d` | `1d` |
 | `--date <date>` | Specific date (`YYYY-MM-DD`); takes precedence over `--window` | |
-| `--tool <tools>` | Comma-separated filter: `claude,codex,qwen,cursor` | all |
+| `--tool <tools>` | Comma-separated filter: `claude,codex,qwen,cursor,antigravity` | all |
 | `--top <n>` | Show top N projects/topics | |
 | `--sort <metric>` | Sort by `count` or `duration` | `count` |
 | `--mermaid` | Output as Mermaid Gantt chart | |

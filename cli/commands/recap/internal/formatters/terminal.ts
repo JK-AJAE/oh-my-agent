@@ -10,6 +10,7 @@ const TOOL_COLORS: Record<ToolName, (s: string) => string> = {
   codex: pc.green,
   qwen: pc.magenta,
   cursor: pc.gray,
+  antigravity: pc.cyan,
 };
 
 function toolBadge(tool: ToolName): string {
