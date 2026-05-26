@@ -57,6 +57,21 @@ function expectPromptOutput(vendor: Vendor, raw: string): void {
   );
 }
 
+function getAdditionalContext(vendor: Vendor, raw: string): string {
+  const parsed = JSON.parse(raw) as Record<string, unknown>;
+  if (vendor === "claude" || vendor === "antigravity") {
+    return parsed.additionalContext as string;
+  }
+  if (vendor === "cursor") {
+    return parsed.additionalContext as string;
+  }
+  const hookSpecificOutput = parsed.hookSpecificOutput as Record<
+    string,
+    unknown
+  >;
+  return hookSpecificOutput.additionalContext as string;
+}
+
 function readIndex(projectDir: string): { active: Record<string, string> } {
   return JSON.parse(
     readFileSync(
@@ -209,5 +224,61 @@ describe("L1 hook vendor probe", () => {
         join(projectDir, ".agents", "state", "sessions", sid, "meta.json"),
       ),
     ).toBe(true);
+  });
+
+  it("Claude close-reopen keeps the OMA sid and injects an L1-only snapshot", () => {
+    const firstInput = {
+      hook_event_name: "UserPromptSubmit",
+      sessionId: "claude-session-1",
+      prompt: "work",
+    };
+    const env = { CLAUDE_PROJECT_DIR: projectDir };
+
+    expectPromptOutput(
+      "claude",
+      runHook("keyword-detector.ts", firstInput, env),
+    );
+    expectPromptOutput("claude", runHook("state-boundary.ts", firstInput, env));
+
+    const firstIndex = readIndex(projectDir);
+    const sid = firstIndex.active.main;
+    expect(sid).toMatch(/^oma-/);
+    if (!sid) throw new Error("expected active main sid");
+
+    const reopenedInput = {
+      hook_event_name: "UserPromptSubmit",
+      sessionId: "claude-session-2",
+      prompt: "continue",
+    };
+    const reopenedOutput = runHook("state-boundary.ts", reopenedInput, env);
+    expectPromptOutput("claude", reopenedOutput);
+    const additionalContext = getAdditionalContext("claude", reopenedOutput);
+    expect(additionalContext).toContain("[OMA STATE SNAPSHOT]");
+    expect(additionalContext).toContain(`sid: ${sid}`);
+    expect(additionalContext).toContain("boundary");
+
+    const reopenedIndex = readIndex(projectDir);
+    expect(reopenedIndex.active.main).toBe(sid);
+
+    const events = readEvents(projectDir, sid);
+    expect(events.map((event) => event.kind)).toEqual([
+      "session.created",
+      "boundary",
+      "boundary",
+    ]);
+    expect(events[2]).toMatchObject({
+      sid,
+      kind: "boundary",
+      vendor: "claude",
+      vendorSid: "claude-session-2",
+      payload: {
+        reason: "vendor-session-transition",
+        fromVendor: "claude",
+        fromVendorSid: "claude-session-1",
+        toVendor: "claude",
+        toVendorSid: "claude-session-2",
+        previousSid: sid,
+      },
+    });
   });
 });
