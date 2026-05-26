@@ -72,38 +72,46 @@ Write-Host "버전 확인: oma --version" -ForegroundColor Green
 ---
 
 ## 3. 원본(first-fluke/oh-my-agent)과 버전 동기화하는 방법
-커스텀 버전(`oh-my-agent-custom`)을 공식 원본 저장소의 최신 버전과 항상 맞추려면 아래 방법을 사용합니다.
+현재 커스텀 저장소(`oh-my-agent-custom`)는 포크(Fork)가 아닌 **독립 저장소로 복사하여 생성**되었으므로, GitHub 웹 UI의 [Sync Fork] 버튼을 사용할 수 없습니다. 
+따라서 로컬 컴퓨터의 Git CLI에서 원본 저장소를 `upstream`으로 등록하고 직접 병합(Merge)하는 방식을 사용해야 합니다.
 
-### 방법 A. GitHub Web UI 이용 (가장 간편)
-1. 본인의 깃허브 저장소 페이지([JK-AJAE/oh-my-agent-custom](https://github.com/JK-AJAE/oh-my-agent-custom))에 접속합니다.
-2. 브랜치 정보 아래에 있는 **[Sync Fork]** 버튼을 누른 뒤 **[Update branch]**를 클릭합니다.
-3. 로컬 컴퓨터(또는 타 컴퓨터) 터미널로 돌아와 수동으로 최신 코드를 당긴 후 업데이트를 진행합니다:
-   ```powershell
-   cd e:\신규프로젝트\oh-my-agent-manual
-   .\update.ps1
-   ```
+### 동기화 순서 (Git CLI 기준)
 
-### 방법 B. 로컬 Git에서 upstream 직접 연동
-로컬 터미널에서 원본 저장소(`upstream`)를 등록하여 명령어로 직접 병합합니다.
+#### Step 1. 원본 저장소를 upstream 원격지로 추가 (최초 1회만 실행)
+로컬 저장소 폴더로 이동한 뒤, 공식 원본 저장소를 `upstream`이라는 이름으로 등록합니다:
+```powershell
+cd e:\신규프로젝트\oh-my-agent-custom
+git remote add upstream https://github.com/first-fluke/oh-my-agent.git
+```
+- 등록 확인: `git remote -v` 명령을 실행해 `upstream` 주소가 정상적으로 출력되는지 확인합니다.
 
-1. **원본 저장소를 upstream으로 추가** (최초 1회):
-   ```powershell
-   cd e:\신규프로젝트\oh-my-agent-custom
-   git remote add upstream https://github.com/first-fluke/oh-my-agent.git
-   ```
-2. **동기화 및 병합**:
-   ```powershell
-   git fetch upstream
-   git checkout main
-   git merge upstream/main
-   ```
-3. **병합된 코드를 본인 원격 저장소에 푸시**:
-   ```powershell
-   git push origin main
-   ```
-4. **업데이트 스크립트 실행**하여 로컬 CLI 반영:
-   ```powershell
-   cd e:\신규프로젝트\oh-my-agent-manual
-   .\update.ps1
-   ```
+#### Step 2. 원본 최신 코드 동기화 및 병합
+원본의 최신 업데이트를 가져와 내 main 브랜치에 병합합니다:
+```powershell
+# 1. 원본 저장소의 변경사항 다운로드
+git fetch upstream
+
+# 2. 로컬 main 브랜치로 전환
+git checkout main
+
+# 3. 원본의 main 브랜치를 내 main 브랜치에 병합
+git merge upstream/main
+```
+> **[참고] 병합 거부 에러(fatal: refusing to merge unrelated histories) 발생 시:**
+> 독립 저장소로 시작했기 때문에 두 저장소의 초기 히스토리가 달라 병합이 거부될 수 있습니다. 이 경우 아래와 같이 `--allow-unrelated-histories` 옵션을 추가하여 병합을 허용해주십시오:
+> ```powershell
+> git merge upstream/main --allow-unrelated-histories
+> ```
+
+#### Step 3. 병합된 최신 버전을 본인 깃허브에 푸시
+```powershell
+git push origin main
+```
+
+#### Step 4. 로컬 전역 CLI 빌드 및 업데이트 적용
+```powershell
+cd e:\신규프로젝트\oh-my-agent-manual
+.\update.ps1
+```
+
 
