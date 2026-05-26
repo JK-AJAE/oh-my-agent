@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
-  "version": "8.10.0",
-  "releaseDate": "2026-05-26T13:57:22.570Z",
+  "version": "8.10.1",
+  "releaseDate": "2026-05-26T14:37:37.922Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -396,7 +396,7 @@
     },
     {
       "path": ".agents/skills/_version.json",
-      "sha256": "17e73c8fe9dc6300826f972c564412e8ec377aa76103a795c4b03fc04d844d17",
+      "sha256": "204445228e4478fbe08993d30c7f877bfb66ee6bb629b6603104a14ed3420dde",
       "size": 25
     },
     {
@@ -1551,8 +1551,8 @@
     },
     {
       "path": ".agents/skills/oma-slide/resources/assets/viewport-base.css",
-      "sha256": "b95ea3e729e60c1868a9a5351431a2a2e01c8d3de8e8c07b677ad9350507250f",
-      "size": 7608
+      "sha256": "9f5938d66b897a2f89a3a6817e196c336c36007258a15fce7ad61b1858ac35ce",
+      "size": 8039
     },
     {
       "path": ".agents/skills/oma-slide/resources/design-doctrine.md",
