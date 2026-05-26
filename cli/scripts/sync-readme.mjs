@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const REPOSITORY_URL = "https://github.com/first-fluke/oh-my-agent";
+const REPOSITORY_URL = "https://github.com/JK-AJAE/oh-my-agent-custom";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const cliDir = resolve(scriptDir, "..");
 const rootReadmePath = resolve(cliDir, "..", "README.md");

@@ -57,7 +57,7 @@
   "scripts": {
     "sync:readme": "node ./scripts/sync-readme.mjs",
     "generate:skill-data": "node ./scripts/generate-skill-data.mjs",
-    "build": "bun run generate:skill-data && bun run sync:readme && bun build cli.ts --outfile bin/cli.js --target node --minify --external @napi-rs/keyring",
+    "build": "node ./scripts/generate-skill-data.mjs && node ./scripts/sync-readme.mjs && npx esbuild cli.ts --bundle --outfile=bin/cli.js --platform=node --target=node22 --minify --external:@napi-rs/keyring --format=esm --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
     "dev": "bun run generate:skill-data && bun run cli.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write --unsafe .",
@@ -100,12 +100,13 @@
     "@types/node": "^24",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.4",
+    "esbuild": "^0.28.0",
     "typescript": "^6",
     "vitest": "^4.0.18"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/first-fluke/oh-my-agent"
+    "url": "https://github.com/JK-AJAE/oh-my-agent-custom"
   },
   "antigravity": {
     "skillsPath": ".agents/skills",
