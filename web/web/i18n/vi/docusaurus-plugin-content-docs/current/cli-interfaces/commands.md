@@ -667,7 +667,7 @@ Star oh-my-agent trên GitHub.
 oma star
 ```
 
-Không có tùy chọn. Cần cài và xác thực `gh` CLI. Star repository `first-fluke/oh-my-agent`.
+Không có tùy chọn. Cần cài và xác thực `gh` CLI. Star repository `JK-AJAE/oh-my-agent-custom`.
 
 **Ví dụ:**
 ```bash

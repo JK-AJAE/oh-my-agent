@@ -7,26 +7,26 @@ Thank you to all our sponsors who help maintain and improve oh-my-agent!
 <!-- Logo (max-width: 160px) + link -->
 <!-- <a href="https://example.com"><img src="https://example.com/logo.png" width="160" alt="Company Name"></a> -->
 
-*Become our first Champion sponsor! → [Sponsor](https://github.com/sponsors/first-fluke)*
+*Become our first Champion sponsor! → [Sponsor](https://github.com/sponsors/JK-AJAE)*
 
 ## 🛸 Booster ($30/mo)
 
 <!-- Logo (max-width: 100px) + link -->
 <!-- <a href="https://example.com"><img src="https://example.com/logo.png" width="100" alt="Company Name"></a> -->
 
-*Become a Booster! → [Sponsor](https://github.com/sponsors/first-fluke)*
+*Become a Booster! → [Sponsor](https://github.com/sponsors/JK-AJAE)*
 
 ## ☕ Contributor ($10/mo)
 
 <!-- Name + optional link -->
 
-*Become a Contributor! → [Sponsor](https://github.com/sponsors/first-fluke)*
+*Become a Contributor! → [Sponsor](https://github.com/sponsors/JK-AJAE)*
 
 ## 🐣 Supporter ($3/mo)
 
 <!-- Name -->
 
-*Every contribution counts! → [Sponsor](https://github.com/sponsors/first-fluke)*
+*Every contribution counts! → [Sponsor](https://github.com/sponsors/JK-AJAE)*
 
 ---
 
@@ -36,6 +36,6 @@ Thank you to all our sponsors who help maintain and improve oh-my-agent!
 
 ---
 
-Want to support this project? [Become a sponsor →](https://github.com/sponsors/first-fluke)
+Want to support this project? [Become a sponsor →](https://github.com/sponsors/JK-AJAE)
 
 You can also support us via [Buy Me a Coffee](https://buymeacoffee.com/firstfluke).

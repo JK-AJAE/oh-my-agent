@@ -49,9 +49,9 @@ description: Пять harness'ов Claude Code собрали один и тот
 
 | vanilla | oma | omc | ecc | superpowers |
 |---|---|---|---|---|
-| ![vanilla](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/superpowers/01-landing.png) |
+| ![vanilla](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/superpowers/01-landing.png) |
 
-Полные поэкранные сравнения (конструктор миров, AI-панель, галерея, состояние save→reload) доступны в [отчёте бенчмарков на GitHub](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks).
+Полные поэкранные сравнения (конструктор миров, AI-панель, галерея, состояние save→reload) доступны в [отчёте бенчмарков на GitHub](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks).
 
 ---
 
@@ -65,7 +65,7 @@ description: Пять harness'ов Claude Code собрали один и тот
 | **Инженерия** | 20 | широта кода, TS strict, максимальный размер файла + глубина папок, маркеры отложенных заглушек, отсутствие захардкоженных ключей | статический анализ (jq + grep + find) |
 | **Эффективность** | 10 | количество ходов до завершения, время по часам, стоимость за файл | JSON-результат `claude -p` |
 
-Судьи по спецификации и визуальной части запускаются 3 раза на каждый harness через `judge-multi.sh`, а оценки по каждому пункту усредняются по раундам. Реализация находится в [`benchmarks/scoring/multiaxis/`](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks/scoring/multiaxis).
+Судьи по спецификации и визуальной части запускаются 3 раза на каждый harness через `judge-multi.sh`, а оценки по каждому пункту усредняются по раундам. Реализация находится в [`benchmarks/scoring/multiaxis/`](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks/scoring/multiaxis).
 
 ---
 
@@ -99,4 +99,4 @@ done
   $(pwd)
 ```
 
-Полное описание по каждому harness'у, исходные оценки и скриншоты поддерживаются в [`benchmarks/README.md`](https://github.com/first-fluke/oh-my-agent/blob/main/benchmarks/README.md) — этот файл генерируется `build-report.sh` из `multiaxis/*.json` каждого запуска, поэтому всегда синхронизирован с последними артефактами оценки.
+Полное описание по каждому harness'у, исходные оценки и скриншоты поддерживаются в [`benchmarks/README.md`](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/benchmarks/README.md) — этот файл генерируется `build-report.sh` из `multiaxis/*.json` каждого запуска, поэтому всегда синхронизирован с последними артефактами оценки.

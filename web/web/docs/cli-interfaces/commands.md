@@ -942,7 +942,7 @@ Star oh-my-agent on GitHub.
 oma star
 ```
 
-No options. Requires `gh` CLI to be installed and authenticated. Stars the `first-fluke/oh-my-agent` repository.
+No options. Requires `gh` CLI to be installed and authenticated. Stars the `JK-AJAE/oh-my-agent-custom` repository.
 
 **Example:**
 ```bash

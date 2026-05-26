@@ -633,7 +633,7 @@ oma viz --json
 oma star
 ```
 
-无选项。需要安装并认证 `gh` CLI。为 `first-fluke/oh-my-agent` 仓库加星。
+无选项。需要安装并认证 `gh` CLI。为 `JK-AJAE/oh-my-agent-custom` 仓库加星。
 
 **示例：**
 ```bash

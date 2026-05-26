@@ -52,7 +52,7 @@ function effortLevelMeetsRecommended(actual: unknown): boolean {
 export const RECOMMENDED_ATTRIBUTION = {
   commit:
     "Generated with oh-my-agent\n\nCo-Authored-By: First Fluke <our.first.fluke@gmail.com>",
-  pr: "Generated with [oh-my-agent](https://github.com/first-fluke/oh-my-agent)",
+  pr: "Generated with [oh-my-agent](https://github.com/JK-AJAE/oh-my-agent-custom)",
 } as const;
 
 /**

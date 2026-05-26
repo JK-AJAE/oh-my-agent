@@ -1,6 +1,6 @@
 import type { CliTool, CliVendor } from "../types/index.js";
 
-export const REPO = "first-fluke/oh-my-agent";
+export const REPO = "JK-AJAE/oh-my-agent-custom";
 export const INSTALLED_SKILLS_DIR = ".agents/skills";
 
 /**

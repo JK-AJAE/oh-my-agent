@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # oh-my-agent installer (macOS/Linux only)
-# Usage: curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
 set -euo pipefail
 
 # ── Colors ──────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ detect_platform() {
     Darwin) PLATFORM="macOS" ;;
     Linux)  PLATFORM="Linux" ;;
     MINGW*|MSYS*|CYGWIN*)
-      fail "Windows: use the PowerShell installer instead.\n\n  irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex"
+      fail "Windows: use the PowerShell installer instead.\n\n  irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex"
       ;;
     *)      fail "Unsupported OS: $OS" ;;
   esac

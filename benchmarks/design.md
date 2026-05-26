@@ -11,7 +11,7 @@ Compare oh-my-agent against other Claude Code harnesses by running an identical 
 | ID | Harness | Repository | Install Method |
 |---|---|---|---|
 | vanilla | Claude Code (no harness) | - | (none) |
-| oma | oh-my-agent | first-fluke/oh-my-agent | `bunx oh-my-agent@latest` |
+| oma | oh-my-agent | JK-AJAE/oh-my-agent-custom | `bunx oh-my-agent@latest` |
 | omc | oh-my-claudecode | Yeachan-Heo/oh-my-claudecode | Plugin marketplace |
 | ecc | everything-claude-code | affaan-m/everything-claude-code | `./install.sh --profile full` |
 | superpowers | superpowers | obra/superpowers | Plugin marketplace |

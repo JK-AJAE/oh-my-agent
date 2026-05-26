@@ -633,7 +633,7 @@ oh-my-agent auf GitHub mit einem Stern markieren.
 oma star
 ```
 
-Keine Optionen. Erfordert die installierte und authentifizierte `gh`-CLI. Markiert das Repository `first-fluke/oh-my-agent` mit einem Stern.
+Keine Optionen. Erfordert die installierte und authentifizierte `gh`-CLI. Markiert das Repository `JK-AJAE/oh-my-agent-custom` mit einem Stern.
 
 **Beispiel:**
 ```bash

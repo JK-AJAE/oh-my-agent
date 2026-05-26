@@ -1,6 +1,6 @@
 # oh-my-agent: Portable Multi-Agent Harness
 
-[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/first-fluke/oh-my-agent?style=flat&logo=github)](https://github.com/first-fluke/oh-my-agent) [![License](https://img.shields.io/github/license/first-fluke/oh-my-agent)](https://github.com/first-fluke/oh-my-agent/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/first-fluke/oh-my-agent?label=updated&logo=git)](https://github.com/first-fluke/oh-my-agent/commits/main)
+[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/JK-AJAE/oh-my-agent-custom?style=flat&logo=github)](https://github.com/JK-AJAE/oh-my-agent-custom) [![License](https://img.shields.io/github/license/JK-AJAE/oh-my-agent-custom)](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/JK-AJAE/oh-my-agent-custom?label=updated&logo=git)](https://github.com/JK-AJAE/oh-my-agent-custom/commits/main)
 
 [English](../README.md) | [中文](./README.zh.md) | [Português](./README.pt.md) | [日本語](./README.ja.md) | [Français](./README.fr.md) | [Español](./README.es.md) | [Nederlands](./README.nl.md) | [Polski](./README.pl.md) | [Русский](./README.ru.md) | [Deutsch](./README.de.md) | [Tiếng Việt](./README.vi.md) | [ภาษาไทย](./README.th.md)
 
@@ -14,12 +14,12 @@ AI 하나에 모든 걸 맡기면 중간에 헤매기 쉽지만, oh-my-agent는 
 
 ```bash
 # macOS / Linux — bun, uv, serena가 없으면 자동으로 설치됩니다
-curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell) — bun, uv, serena가 없으면 자동으로 설치됩니다
-irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
 ```
 
 ```bash
@@ -37,10 +37,10 @@ bunx oh-my-agent@latest
 ```bash
 # 스킬 전체를 감지된 모든 런타임에 배포
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
-apm install first-fluke/oh-my-agent
+apm install JK-AJAE/oh-my-agent-custom
 
 # 스킬 하나만
-apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
+apm install JK-AJAE/oh-my-agent-custom/.agents/skills/oma-frontend
 ```
 
 APM은 스킬만 제공합니다. 워크플로우, 규칙, `oma-config.yaml`, 키워드 감지 훅, `oma agent:spawn` CLI는 `bunx oh-my-agent@latest`를 쓰세요. 드리프트를 피하려면 프로젝트당 한 가지 배포 방식만 고르는 게 좋습니다.
@@ -212,7 +212,7 @@ oma search fetch <url>      # 자동 단계 상승 전략으로 메커니컬 검
 
 ## 왜 oh-my-agent인가?
 
-> [자세한 배경 보기 →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
+> [자세한 배경 보기 →](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589)
 
 - **이식성**: `.agents/`가 프로젝트와 함께 움직이며, 특정 IDE에 묶이지 않습니다
 - **역할 기반**: 프롬프트 뭉치가 아니라 실제 엔지니어링 팀처럼 설계했습니다
@@ -277,7 +277,7 @@ flowchart TD
 
 - **[상세 문서](./AGENTS_SPEC.md)**: 전체 기술 스펙과 아키텍처
 - **[지원 에이전트](./SUPPORTED_AGENTS.md)**: IDE별 에이전트 지원 현황
-- **[웹 문서](https://first-fluke.github.io/oh-my-agent/)**: 가이드, 튜토리얼, CLI 레퍼런스
+- **[웹 문서](https://JK-AJAE.github.io/oh-my-agent/)**: 가이드, 튜토리얼, CLI 레퍼런스
 
 ## 스폰서
 
@@ -286,12 +286,12 @@ flowchart TD
 > **마음에 드셨나요?** 스타를 눌러주세요!
 >
 > ```bash
-> gh api --method PUT /user/starred/first-fluke/oh-my-agent
+> gh api --method PUT /user/starred/JK-AJAE/oh-my-agent-custom
 > ```
 >
-> 최적화된 스타터 템플릿도 함께 확인해보세요: [fullstack-starter](https://github.com/first-fluke/fullstack-starter)
+> 최적화된 스타터 템플릿도 함께 확인해보세요: [fullstack-starter](https://github.com/JK-AJAE/fullstack-starter)
 
-<a href="https://github.com/sponsors/first-fluke">
+<a href="https://github.com/sponsors/JK-AJAE">
   <img src="https://img.shields.io/badge/Sponsor-♥-ea4aaa?style=for-the-badge" alt="Sponsor" />
 </a>
 <a href="https://buymeacoffee.com/firstfluke">
@@ -310,7 +310,7 @@ flowchart TD
 
 <!-- Contributor tier ($10/mo) names here -->
 
-[스폰서 되기 →](https://github.com/sponsors/first-fluke)
+[스폰서 되기 →](https://github.com/sponsors/JK-AJAE)
 
 전체 후원자 목록은 [SPONSORS.md](../SPONSORS.md)를 참고하세요.
 
@@ -318,7 +318,7 @@ flowchart TD
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=first-fluke/oh-my-agent&type=date&legend=bottom-right)](https://www.star-history.com/#first-fluke/oh-my-agent&type=date&legend=bottom-right)
+[![Star History Chart](https://api.star-history.com/svg?repos=JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)](https://www.star-history.com/#JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)
 
 
 ## 참고문헌

@@ -375,7 +375,7 @@ describe("installVendorAdaptations", () => {
 
 describe("skills.ts - repository metadata", () => {
   it("should use the correct GitHub repository", () => {
-    expect(REPO).toBe("first-fluke/oh-my-agent");
+    expect(REPO).toBe("JK-AJAE/oh-my-agent-custom");
   });
 });
 

@@ -665,7 +665,7 @@ GitHub에서 oh-my-agent에 별을 달아줍니다.
 oma star
 ```
 
-옵션 없음. `gh` CLI가 설치되어 있고 인증되어 있어야 합니다. `first-fluke/oh-my-agent` 리포지토리에 별을 달아줍니다.
+옵션 없음. `gh` CLI가 설치되어 있고 인증되어 있어야 합니다. `JK-AJAE/oh-my-agent-custom` 리포지토리에 별을 달아줍니다.
 
 **예시:**
 ```bash

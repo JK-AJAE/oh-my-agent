@@ -77,8 +77,8 @@ Python (FastAPI/SQLAlchemy), Node.js (NestJS/Hono + Prisma/Drizzle), Rust (Axum/
 ### Шаг 1: Скачивание и распаковка
 
 ```bash
-VERSION=$(curl -s https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/prompt-manifest.json | jq -r '.version')
-curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
+VERSION=$(curl -s https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/prompt-manifest.json | jq -r '.version')
+curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
 sha256sum -c agent-skills.tar.gz.sha256
 tar -xzf agent-skills.tar.gz
 ```

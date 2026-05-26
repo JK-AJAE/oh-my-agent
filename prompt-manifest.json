@@ -2,7 +2,7 @@
   "name": "oh-my-agent",
   "version": "8.3.0",
   "releaseDate": "2026-05-20T08:34:56.919Z",
-  "repository": "https://github.com/first-fluke/oh-my-agent",
+  "repository": "https://github.com/JK-AJAE/oh-my-agent-custom",
   "files": [
     {
       "path": ".agents/agents/architecture-reviewer.md",

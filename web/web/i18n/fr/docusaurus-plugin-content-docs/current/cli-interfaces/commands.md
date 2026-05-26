@@ -633,7 +633,7 @@ Ajouter une étoile à oh-my-agent sur GitHub.
 oma star
 ```
 
-Aucune option. Nécessite que le CLI `gh` soit installé et authentifié. Ajoute une étoile au dépôt `first-fluke/oh-my-agent`.
+Aucune option. Nécessite que le CLI `gh` soit installé et authentifié. Ajoute une étoile au dépôt `JK-AJAE/oh-my-agent-custom`.
 
 **Exemple :**
 ```bash

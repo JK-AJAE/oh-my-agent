@@ -9,7 +9,7 @@ Danh mục multi-agent CLI đã bão hòa. Chỉ trong quý vừa qua đã có h
 
 oh-my-agent tối ưu trục khác. Giả định khởi đầu là khi có model đủ năng lực, chi phí phân tích, thiết kế và implementation trong SDLC đang tiến về 0. Phần đắt đỏ của phát triển phần mềm xưa nay vẫn là test và maintenance — giữ hệ thống chạy, an toàn và dễ hiểu sau commit đầu tiên. oh-my-agent được thiết kế quanh trục đó.
 
-Trang này cụ thể hóa định vị đó. Để xem thảo luận dài đã sinh ra khung này, xem [issue #155](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589).
+Trang này cụ thể hóa định vị đó. Để xem thảo luận dài đã sinh ra khung này, xem [issue #155](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589).
 
 ---
 

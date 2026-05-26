@@ -1,6 +1,6 @@
 # oh-my-agent: Portable Multi-Agent Harness
 
-[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/first-fluke/oh-my-agent?style=flat&logo=github)](https://github.com/first-fluke/oh-my-agent) [![License](https://img.shields.io/github/license/first-fluke/oh-my-agent)](https://github.com/first-fluke/oh-my-agent/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/first-fluke/oh-my-agent?label=updated&logo=git)](https://github.com/first-fluke/oh-my-agent/commits/main)
+[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/JK-AJAE/oh-my-agent-custom?style=flat&logo=github)](https://github.com/JK-AJAE/oh-my-agent-custom) [![License](https://img.shields.io/github/license/JK-AJAE/oh-my-agent-custom)](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/JK-AJAE/oh-my-agent-custom?label=updated&logo=git)](https://github.com/JK-AJAE/oh-my-agent-custom/commits/main)
 
 [English](../README.md) | [한국어](./README.ko.md) | [Português](./README.pt.md) | [日本語](./README.ja.md) | [Français](./README.fr.md) | [Español](./README.es.md) | [Nederlands](./README.nl.md) | [Polski](./README.pl.md) | [Русский](./README.ru.md) | [Deutsch](./README.de.md) | [Tiếng Việt](./README.vi.md) | [ภาษาไทย](./README.th.md) 
 
@@ -14,12 +14,12 @@
 
 ```bash
 # macOS / Linux — 自动安装 bun、uv & serena
-curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell) — 自动安装 bun、uv & serena
-irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
 ```
 
 ```bash
@@ -37,10 +37,10 @@ bunx oh-my-agent@latest
 ```bash
 # 所有 skill，部署到检测到的每个 runtime
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
-apm install first-fluke/oh-my-agent
+apm install JK-AJAE/oh-my-agent-custom
 
 # 单个 skill
-apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
+apm install JK-AJAE/oh-my-agent-custom/.agents/skills/oma-frontend
 ```
 
 APM 只分发 skill。workflow、规则、`oma-config.yaml`、关键词检测 hook 和 `oma agent:spawn` CLI 还是用 `bunx oh-my-agent@latest`。一个项目挑一种分发方式就好，免得跑偏。
@@ -212,7 +212,7 @@ oma search fetch <url>      # 自动升级策略的机械搜索
 
 ## 为什么选 oh-my-agent？
 
-> [深入了解 →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
+> [深入了解 →](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589)
 
 - **可移植**：`.agents/` 跟着项目走，不被任何 IDE 绑定
 - **角色化**：像真正的工程团队一样建模，而不是一堆 prompt 的堆砌
@@ -277,7 +277,7 @@ flowchart TD
 
 - **[详细文档](./AGENTS_SPEC.md)**：完整技术规格和架构
 - **[支持的 Agent](./SUPPORTED_AGENTS.md)**：各 IDE 的 agent 支持情况
-- **[Web 文档](https://first-fluke.github.io/oh-my-agent/)**：指南、教程和 CLI 参考
+- **[Web 文档](https://JK-AJAE.github.io/oh-my-agent/)**：指南、教程和 CLI 参考
 
 ## 赞助
 
@@ -286,12 +286,12 @@ flowchart TD
 > **喜欢这个项目？** 给个 star 吧！
 >
 > ```bash
-> gh api --method PUT /user/starred/first-fluke/oh-my-agent
+> gh api --method PUT /user/starred/JK-AJAE/oh-my-agent-custom
 > ```
 >
-> 试试我们优化过的入门模板：[fullstack-starter](https://github.com/first-fluke/fullstack-starter)
+> 试试我们优化过的入门模板：[fullstack-starter](https://github.com/JK-AJAE/fullstack-starter)
 
-<a href="https://github.com/sponsors/first-fluke">
+<a href="https://github.com/sponsors/JK-AJAE">
   <img src="https://img.shields.io/badge/Sponsor-♥-ea4aaa?style=for-the-badge" alt="Sponsor" />
 </a>
 <a href="https://buymeacoffee.com/firstfluke">
@@ -310,7 +310,7 @@ flowchart TD
 
 <!-- Contributor tier ($10/mo) names here -->
 
-[成为赞助者 →](https://github.com/sponsors/first-fluke)
+[成为赞助者 →](https://github.com/sponsors/JK-AJAE)
 
 完整赞助者列表请查看 [SPONSORS.md](../SPONSORS.md)。
 
@@ -318,7 +318,7 @@ flowchart TD
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=first-fluke/oh-my-agent&type=date&legend=bottom-right)](https://www.star-history.com/#first-fluke/oh-my-agent&type=date&legend=bottom-right)
+[![Star History Chart](https://api.star-history.com/svg?repos=JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)](https://www.star-history.com/#JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)
 
 
 ## 参考文献

@@ -187,12 +187,12 @@ function renderFooter(report: DoctorReport): void {
 
   if (checkStarred()) {
     p.note(
-      `${pc.green("⭐")} Thank you for starring oh-my-agent!\n${pc.dim("https://github.com/sponsors/first-fluke")}`,
+      `${pc.green("⭐")} Thank you for starring oh-my-agent!\n${pc.dim("https://github.com/sponsors/JK-AJAE")}`,
       "Support",
     );
   } else {
     p.note(
-      `${pc.yellow("❤️")} Enjoying oh-my-agent? Give it a star or sponsor!\n${pc.dim("gh api --method PUT /user/starred/first-fluke/oh-my-agent")}\n${pc.dim("https://github.com/sponsors/first-fluke")}`,
+      `${pc.yellow("❤️")} Enjoying oh-my-agent? Give it a star or sponsor!\n${pc.dim("gh api --method PUT /user/starred/JK-AJAE/oh-my-agent-custom")}\n${pc.dim("https://github.com/sponsors/JK-AJAE")}`,
       "Support",
     );
   }

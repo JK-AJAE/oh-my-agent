@@ -633,7 +633,7 @@ Dar estrella a oh-my-agent en GitHub.
 oma star
 ```
 
-Sin opciones. Requiere que el CLI `gh` esté instalado y autenticado. Da estrella al repositorio `first-fluke/oh-my-agent`.
+Sin opciones. Requiere que el CLI `gh` esté instalado y autenticado. Da estrella al repositorio `JK-AJAE/oh-my-agent-custom`.
 
 **Ejemplo:**
 ```bash

@@ -15,7 +15,7 @@ interface CliArgs {
   dryRun: boolean;
 }
 
-const GITHUB_URL = "https://github.com/first-fluke/oh-my-agent";
+const GITHUB_URL = "https://github.com/JK-AJAE/oh-my-agent-custom";
 const DEVTO_ENDPOINT = "https://dev.to/api/articles";
 
 function parseArgs(argv: string[]): CliArgs {

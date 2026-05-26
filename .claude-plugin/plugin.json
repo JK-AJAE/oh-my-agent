@@ -5,10 +5,10 @@
   "author": {
     "name": "First Fluke",
     "email": "our.first.fluke@gmail.com",
-    "url": "https://github.com/first-fluke"
+    "url": "https://github.com/JK-AJAE"
   },
-  "homepage": "https://github.com/first-fluke/oh-my-agent",
-  "repository": "https://github.com/first-fluke/oh-my-agent",
+  "homepage": "https://github.com/JK-AJAE/oh-my-agent-custom",
+  "repository": "https://github.com/JK-AJAE/oh-my-agent-custom",
   "license": "MIT",
   "keywords": [
     "multi-agent",

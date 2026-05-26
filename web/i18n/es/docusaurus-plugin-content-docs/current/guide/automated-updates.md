@@ -7,7 +7,7 @@ description: Documentación completa del GitHub Action de oh-my-agent — config
 
 ## Descripción General
 
-El GitHub Action de oh-my-agent (`first-fluke/oma-update-action@v1`) actualiza automaticamente las habilidades de agentes de tu proyecto ejecutando `oma update` en CI. Soporta dos modos: crear un pull request para revision, o confirmar directamente en una rama.
+El GitHub Action de oh-my-agent (`JK-AJAE/oma-update-action@v1`) actualiza automaticamente las habilidades de agentes de tu proyecto ejecutando `oma update` en CI. Soporta dos modos: crear un pull request para revision, o confirmar directamente en una rama.
 
 ---
 
@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: first-fluke/oma-update-action@v1
+      - uses: JK-AJAE/oma-update-action@v1
 ```
 
 Esa es la configuracion minima. Crea un PR con configuracion por defecto cuando hay una nueva version disponible.
@@ -89,7 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: first-fluke/oma-update-action@v1
+      - uses: JK-AJAE/oma-update-action@v1
         id: update
 
       - name: Summary
@@ -130,7 +130,7 @@ jobs:
         with:
           token: ${{ secrets.OH_MY_AGENT_PAT }}
 
-      - uses: first-fluke/oma-update-action@v1
+      - uses: JK-AJAE/oma-update-action@v1
         with:
           mode: commit
           token: ${{ secrets.OH_MY_AGENT_PAT }}
@@ -168,7 +168,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: first-fluke/oma-update-action@v1
+      - uses: JK-AJAE/oma-update-action@v1
         id: update
 
       - name: Notify Slack
@@ -209,7 +209,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: first-fluke/oma-update-action@v1
+      - uses: JK-AJAE/oma-update-action@v1
         with:
           force: 'true'
           pr-title: "chore(deps): force-update oh-my-agent skills (reset configs)"

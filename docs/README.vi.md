@@ -1,6 +1,6 @@
 # oh-my-agent: Portable Multi-Agent Harness
 
-[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/first-fluke/oh-my-agent?style=flat&logo=github)](https://github.com/first-fluke/oh-my-agent) [![License](https://img.shields.io/github/license/first-fluke/oh-my-agent)](https://github.com/first-fluke/oh-my-agent/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/first-fluke/oh-my-agent?label=updated&logo=git)](https://github.com/first-fluke/oh-my-agent/commits/main)
+[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/JK-AJAE/oh-my-agent-custom?style=flat&logo=github)](https://github.com/JK-AJAE/oh-my-agent-custom) [![License](https://img.shields.io/github/license/JK-AJAE/oh-my-agent-custom)](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/JK-AJAE/oh-my-agent-custom?label=updated&logo=git)](https://github.com/JK-AJAE/oh-my-agent-custom/commits/main)
 
 [English](../README.md) | [한국어](./README.ko.md) | [中文](./README.zh.md) | [Português](./README.pt.md) | [日本語](./README.ja.md) | [Français](./README.fr.md) | [Español](./README.es.md) | [Nederlands](./README.nl.md) | [Polski](./README.pl.md) | [Русский](./README.ru.md) | [Deutsch](./README.de.md) | [ภาษาไทย](./README.th.md)
 
@@ -14,12 +14,12 @@ Hỗ trợ tất cả các AI IDE chính: Antigravity, Claude Code, Cursor, Gemi
 
 ```bash
 # macOS / Linux — tự động cài bun, uv & serena nếu chưa có
-curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell) — tự động cài bun, uv & serena nếu chưa có
-irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
 ```
 
 ```bash
@@ -37,10 +37,10 @@ bunx oh-my-agent@latest
 ```bash
 # Toàn bộ skill, triển khai vào mọi runtime được phát hiện
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
-apm install first-fluke/oh-my-agent
+apm install JK-AJAE/oh-my-agent-custom
 
 # Một skill duy nhất
-apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
+apm install JK-AJAE/oh-my-agent-custom/.agents/skills/oma-frontend
 ```
 
 APM chỉ phân phối skill. Còn workflow, rule, `oma-config.yaml`, hook phát hiện từ khóa và CLI `oma agent:spawn` thì dùng `bunx oh-my-agent@latest`. Mỗi dự án chỉ chọn một cách phân phối thôi, không thì lệch nhau.
@@ -212,7 +212,7 @@ Việc chọn model đi theo hai lớp:
 
 ## Tại sao chọn oh-my-agent?
 
-> [Đọc thêm lý do →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
+> [Đọc thêm lý do →](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589)
 
 - **Di động**: `.agents/` đi cùng dự án, không bị ràng buộc vào một IDE
 - **Dựa trên vai trò**: agent được mô hình hóa như đội kỹ thuật thực, không phải một đống prompt
@@ -277,7 +277,7 @@ flowchart TD
 
 - **[Tài liệu chi tiết](./AGENTS_SPEC.md)**: đặc tả kỹ thuật và kiến trúc đầy đủ
 - **[Agent được hỗ trợ](./SUPPORTED_AGENTS.md)**: ma trận hỗ trợ agent theo IDE
-- **[Tài liệu web](https://first-fluke.github.io/oh-my-agent/)**: hướng dẫn, tutorial và CLI reference
+- **[Tài liệu web](https://JK-AJAE.github.io/oh-my-agent/)**: hướng dẫn, tutorial và CLI reference
 
 ## Nhà tài trợ
 
@@ -286,12 +286,12 @@ Dự án này được duy trì nhờ sự hỗ trợ hào phóng của các nh�
 > **Thích dự án này?** Hãy tặng một ngôi sao!
 >
 > ```bash
-> gh api --method PUT /user/starred/first-fluke/oh-my-agent
+> gh api --method PUT /user/starred/JK-AJAE/oh-my-agent-custom
 > ```
 >
-> Thử template starter tối ưu của chúng tôi: [fullstack-starter](https://github.com/first-fluke/fullstack-starter)
+> Thử template starter tối ưu của chúng tôi: [fullstack-starter](https://github.com/JK-AJAE/fullstack-starter)
 
-<a href="https://github.com/sponsors/first-fluke">
+<a href="https://github.com/sponsors/JK-AJAE">
   <img src="https://img.shields.io/badge/Sponsor-♥-ea4aaa?style=for-the-badge" alt="Sponsor" />
 </a>
 <a href="https://buymeacoffee.com/firstfluke">
@@ -310,7 +310,7 @@ Dự án này được duy trì nhờ sự hỗ trợ hào phóng của các nh�
 
 <!-- Contributor tier ($10/mo) names here -->
 
-[Trở thành nhà tài trợ →](https://github.com/sponsors/first-fluke)
+[Trở thành nhà tài trợ →](https://github.com/sponsors/JK-AJAE)
 
 Xem danh sách đầy đủ người ủng hộ tại [SPONSORS.md](../SPONSORS.md).
 
@@ -318,7 +318,7 @@ Xem danh sách đầy đủ người ủng hộ tại [SPONSORS.md](../SPONSORS.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=first-fluke/oh-my-agent&type=date&legend=bottom-right)](https://www.star-history.com/#first-fluke/oh-my-agent&type=date&legend=bottom-right)
+[![Star History Chart](https://api.star-history.com/svg?repos=JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)](https://www.star-history.com/#JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)
 
 
 ## Tài liệu tham khảo

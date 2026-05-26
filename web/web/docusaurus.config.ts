@@ -7,11 +7,11 @@ const config: Config = {
     "Multi-agent orchestration with skill routing, parallel execution, and Serena memory-driven coordination.",
   favicon: "icons/android/android-launchericon-48-48.png",
 
-  url: "https://first-fluke.github.io",
+  url: "https://JK-AJAE.github.io",
   baseUrl: "/oh-my-agent/",
   trailingSlash: true,
 
-  organizationName: "first-fluke",
+  organizationName: "JK-AJAE",
   projectName: "oh-my-agent",
 
   onBrokenLinks: "throw",
@@ -138,7 +138,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: "./sidebars.ts",
-          editUrl: "https://github.com/first-fluke/oh-my-agent/tree/main/web/",
+          editUrl: "https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/web/",
         },
         blog: false,
         theme: {
@@ -169,12 +169,12 @@ const config: Config = {
           label: "Docs",
         },
         {
-          href: "https://github.com/sponsors/first-fluke",
+          href: "https://github.com/sponsors/JK-AJAE",
           label: "Sponsor",
           position: "right",
         },
         {
-          href: "https://github.com/first-fluke/oh-my-agent",
+          href: "https://github.com/JK-AJAE/oh-my-agent-custom",
           label: "GitHub",
           position: "right",
         },
@@ -205,11 +205,11 @@ const config: Config = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/first-fluke/oh-my-agent",
+              href: "https://github.com/JK-AJAE/oh-my-agent-custom",
             },
             {
               label: "Sponsor",
-              href: "https://github.com/sponsors/first-fluke",
+              href: "https://github.com/sponsors/JK-AJAE",
             },
           ],
         },

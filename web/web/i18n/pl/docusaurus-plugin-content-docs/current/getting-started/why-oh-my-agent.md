@@ -9,7 +9,7 @@ Kategoria multi-agent CLI jest juz nasycona. W samym ostatnim kwartale pojawilo 
 
 oh-my-agent optymalizuje inna os. Hipoteza wyjsciowa: przy wystarczajaco zdolnych modelach koszt analizy, projektowania i implementacji w SDLC zbliza sie do zera. Droga czesc tworzenia oprogramowania to zawsze byly testy i utrzymanie - utrzymanie systemu dzialajacego, bezpiecznego i zrozumialego po pierwszym commicie. Na tej osi zaprojektowano oh-my-agent.
 
-Ta strona konkretyzuje to pozycjonowanie. Dluga dyskusja, ktora doprowadzila do tego ujecia, znajduje sie w [issue #155](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589).
+Ta strona konkretyzuje to pozycjonowanie. Dluga dyskusja, ktora doprowadzila do tego ujecia, znajduje sie w [issue #155](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589).
 
 ---
 

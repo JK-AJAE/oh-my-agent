@@ -68,8 +68,8 @@ Antigravity IDEまたはGemini CLIのSerena MCPブリッジ設定を提案。
 
 ```bash
 # レジストリから最新tarballをダウンロード
-VERSION=$(curl -s https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/prompt-manifest.json | jq -r '.version')
-curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
+VERSION=$(curl -s https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/prompt-manifest.json | jq -r '.version')
+curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
 # チェックサム検証
 sha256sum -c agent-skills.tar.gz.sha256
 # 展開

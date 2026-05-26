@@ -222,7 +222,7 @@ oma viz [--json]   # Алиас
 oma star
 ```
 
-Поставить звезду `first-fluke/oh-my-agent` на GitHub. Требуется `gh` CLI.
+Поставить звезду `JK-AJAE/oh-my-agent-custom` на GitHub. Требуется `gh` CLI.
 
 ### describe
 

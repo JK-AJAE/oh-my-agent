@@ -109,7 +109,7 @@ runs:
         body: |
           Automated oh-my-agent skills update to v${{ steps.changes.outputs.version }}.
 
-          This PR was created by the [oh-my-agent update action](https://github.com/first-fluke/oh-my-agent).
+          This PR was created by the [oh-my-agent update action](https://github.com/JK-AJAE/oh-my-agent-custom).
         labels: ${{ inputs.pr-labels }}
         delete-branch: true
 

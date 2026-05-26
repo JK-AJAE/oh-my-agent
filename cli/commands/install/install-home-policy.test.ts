@@ -47,7 +47,7 @@ const githubState = vi.hoisted(() => ({
 const skillsState = vi.hoisted(() => ({
   PRESETS: { custom: [] },
   INSTALLED_SKILLS_DIR: ".agents/skills",
-  REPO: "first-fluke/oh-my-agent",
+  REPO: "JK-AJAE/oh-my-agent-custom",
   CLI_SKILLS_DIR: {
     claude: { base: "project", path: ".claude/skills" },
     copilot: { base: "project", path: ".github/skills" },

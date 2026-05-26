@@ -16,8 +16,8 @@ authors:
 version: 8.3.0 # x-release-please-version
 date-released: "2026-05-20" # x-release-please-date
 license: MIT
-repository-code: "https://github.com/first-fluke/oh-my-agent"
-url: "https://github.com/first-fluke/oh-my-agent"
+repository-code: "https://github.com/JK-AJAE/oh-my-agent-custom"
+url: "https://github.com/JK-AJAE/oh-my-agent-custom"
 keywords:
   - multi-agent
   - agent-skills
@@ -39,5 +39,5 @@ preferred-citation:
   year: 2026
   date-released: "2026-05-20" # x-release-please-date
   license: MIT
-  url: "https://github.com/first-fluke/oh-my-agent"
-  repository-code: "https://github.com/first-fluke/oh-my-agent"
+  url: "https://github.com/JK-AJAE/oh-my-agent-custom"
+  repository-code: "https://github.com/JK-AJAE/oh-my-agent-custom"
