@@ -49,7 +49,10 @@ import {
   usesGeminiCli,
 } from "../../utils/gemini-deprecation.js";
 import { t } from "../../utils/i18n.js";
-import { acquireLock } from "../../utils/install-lock.js";
+import {
+  acquireLock,
+  bindInstallLockRelease,
+} from "../../utils/install-lock.js";
 import { link } from "../link/link.js";
 import { runMigrations } from "../migrations/index.js";
 
@@ -168,7 +171,7 @@ export async function update(options: UpdateOptions = {}): Promise<void> {
     p.cancel(msg);
     process.exit(1);
   }
-  const releaseLock = lock.release;
+  const releaseLock = bindInstallLockRelease(lock.release);
 
   // In global mode, target the global SSOT and show a banner.
   if (mode === "global") {

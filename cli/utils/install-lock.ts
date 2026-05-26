@@ -168,6 +168,45 @@ export function acquireLock(installRoot: string): AcquireResult {
   return attemptAcquire();
 }
 
+const INSTALL_LOCK_SIGNALS = ["SIGINT", "SIGTERM"] as const;
+type InstallLockSignal = (typeof INSTALL_LOCK_SIGNALS)[number];
+
+const SIGNAL_EXIT_CODE: Record<InstallLockSignal, number> = {
+  SIGINT: 130,
+  SIGTERM: 143,
+};
+
+/**
+ * Wrap a lock release so it is idempotent and runs on SIGINT/SIGTERM before exit.
+ * Call the returned function from a `finally` block for normal completion paths.
+ */
+export function bindInstallLockRelease(release: () => void): () => void {
+  let released = false;
+  const handlers = new Map<InstallLockSignal, () => void>();
+
+  const releaseOnce = (): void => {
+    if (released) return;
+    released = true;
+    for (const signal of INSTALL_LOCK_SIGNALS) {
+      const handler = handlers.get(signal);
+      if (handler) process.removeListener(signal, handler);
+    }
+    handlers.clear();
+    release();
+  };
+
+  for (const signal of INSTALL_LOCK_SIGNALS) {
+    const handler = (): void => {
+      releaseOnce();
+      process.exit(SIGNAL_EXIT_CODE[signal]);
+    };
+    handlers.set(signal, handler);
+    process.once(signal, handler);
+  }
+
+  return releaseOnce;
+}
+
 /** Test-only: forcibly remove the lock file (used in fixtures). */
 export function _forceReleaseLock(installRoot: string): void {
   const path = lockPath(installRoot);

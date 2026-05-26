@@ -154,6 +154,7 @@ vi.mock("../../io/serena.js", () => ({
 }));
 vi.mock("../../utils/install-lock.js", () => ({
   acquireLock: vi.fn(() => ({ ok: true, release: () => {} })),
+  bindInstallLockRelease: vi.fn((release: () => void) => release),
 }));
 
 import {

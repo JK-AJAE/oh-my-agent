@@ -67,6 +67,7 @@ const competitorsState = vi.hoisted(() => ({
 
 const lockState = vi.hoisted(() => ({
   acquireLock: vi.fn(() => ({ ok: true, release: vi.fn() })),
+  bindInstallLockRelease: vi.fn((release: () => void) => release),
 }));
 
 const serenaState = vi.hoisted(() => ({

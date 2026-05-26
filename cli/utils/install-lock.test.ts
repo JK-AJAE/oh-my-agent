@@ -7,8 +7,13 @@ import {
 } from "node:fs";
 import { hostname, tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
-import { _forceReleaseLock, acquireLock, lockPath } from "./install-lock.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  _forceReleaseLock,
+  acquireLock,
+  bindInstallLockRelease,
+  lockPath,
+} from "./install-lock.js";
 
 describe("lockPath", () => {
   it("returns <installRoot>/.agents/_install.lock", () => {
@@ -146,5 +151,70 @@ describe("acquireLock", () => {
     tempRoots.push(root);
 
     expect(() => _forceReleaseLock(root)).not.toThrow();
+  });
+});
+
+describe("bindInstallLockRelease", () => {
+  const tempRoots: string[] = [];
+
+  afterEach(() => {
+    for (const root of tempRoots) {
+      rmSync(root, { recursive: true, force: true });
+    }
+    tempRoots.length = 0;
+  });
+
+  it("release is idempotent and removes the lock file", () => {
+    const root = mkdtempSync(join(tmpdir(), "oma-lock-"));
+    tempRoots.push(root);
+
+    const acquired = acquireLock(root);
+    expect(acquired.ok).toBe(true);
+    if (!acquired.ok) return;
+
+    const release = bindInstallLockRelease(acquired.release);
+    release();
+    expect(existsSync(lockPath(root))).toBe(false);
+    expect(() => release()).not.toThrow();
+  });
+
+  it("removes signal listeners after normal release", () => {
+    const root = mkdtempSync(join(tmpdir(), "oma-lock-"));
+    tempRoots.push(root);
+
+    const acquired = acquireLock(root);
+    expect(acquired.ok).toBe(true);
+    if (!acquired.ok) return;
+
+    const sigintBefore = process.listenerCount("SIGINT");
+    const sigtermBefore = process.listenerCount("SIGTERM");
+
+    const release = bindInstallLockRelease(acquired.release);
+    expect(process.listenerCount("SIGINT")).toBe(sigintBefore + 1);
+    expect(process.listenerCount("SIGTERM")).toBe(sigtermBefore + 1);
+
+    release();
+    expect(process.listenerCount("SIGINT")).toBe(sigintBefore);
+    expect(process.listenerCount("SIGTERM")).toBe(sigtermBefore);
+  });
+
+  it("releases the lock before exiting on SIGINT", () => {
+    const root = mkdtempSync(join(tmpdir(), "oma-lock-"));
+    tempRoots.push(root);
+
+    const acquired = acquireLock(root);
+    expect(acquired.ok).toBe(true);
+    if (!acquired.ok) return;
+
+    bindInstallLockRelease(acquired.release);
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+      throw new Error("process.exit");
+    }) as typeof process.exit);
+
+    expect(() => process.emit("SIGINT")).toThrow("process.exit");
+    expect(existsSync(lockPath(root))).toBe(false);
+    expect(exitSpy).toHaveBeenCalledWith(130);
+
+    exitSpy.mockRestore();
   });
 });

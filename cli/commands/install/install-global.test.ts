@@ -122,6 +122,7 @@ const miscState = vi.hoisted(() => ({
   ensureSerenaProject: vi.fn(() => ({ configured: false, registered: false })),
   resolveSerenaLanguages: vi.fn(() => ["typescript"]),
   acquireLock: vi.fn(() => ({ ok: true, release: vi.fn() })),
+  bindInstallLockRelease: vi.fn((release: () => void) => release),
 }));
 
 vi.mock("@clack/prompts", () => promptState);
@@ -164,6 +165,7 @@ vi.mock("../../io/serena.js", () => ({
 }));
 vi.mock("../../utils/install-lock.js", () => ({
   acquireLock: miscState.acquireLock,
+  bindInstallLockRelease: miscState.bindInstallLockRelease,
 }));
 vi.mock("../link/link.js", () => ({
   link: vi.fn(() => ({
