@@ -1,14 +1,17 @@
-import {
-  createReadStream,
-  existsSync,
-  readdirSync,
-  readFileSync,
-} from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { createInterface } from "node:readline";
 import { registerParser } from "../registry.js";
 import type { NormalizedEntry } from "../schema.js";
+import {
+  findResponse,
+  inWindow,
+  type PairMessage,
+  pathToProjectName,
+  preview,
+  readJsonlSync,
+  streamJsonl,
+} from "./shared.js";
 
 const CLAUDE_DIR = join(homedir(), ".claude");
 const HISTORY_PATH = join(CLAUDE_DIR, "history.jsonl");
@@ -31,7 +34,7 @@ function extractText(
 
 interface SessionPair {
   prefix: string; // first 80 chars of user prompt in session file
-  response: string; // first 200 chars of assistant response
+  response: string; // response preview
 }
 
 /**
@@ -59,42 +62,34 @@ function loadSessionResponses(
 
       for (const file of files) {
         const sessionId = file.replace(".jsonl", "");
-        const pairs: SessionPair[] = [];
-        try {
-          const lines = readFileSync(join(projPath, file), "utf-8")
-            .split("\n")
-            .filter(Boolean);
+        const rows = readJsonlSync<{
+          type?: string;
+          message?: {
+            content?: string | Array<{ type?: string; text?: string }>;
+          };
+        }>(join(projPath, file));
 
-          const msgs: Array<{ type: string; text: string }> = [];
-          for (const line of lines) {
-            const d = JSON.parse(line);
-            if (d.type === "user" || d.type === "assistant") {
-              const text = extractText(d.message?.content || "");
-              msgs.push({ type: d.type, text });
-            }
-          }
-
-          for (let i = 0; i < msgs.length; i++) {
-            const msg = msgs[i];
-            if (!msg) continue;
-            if (msg.type !== "user") continue;
-            let resp = "";
-            for (let j = i + 1; j < msgs.length; j++) {
-              const next = msgs[j];
-              if (!next) continue;
-              if (next.type === "assistant" && next.text) {
-                resp = next.text.slice(0, 200);
-                break;
-              }
-            }
-            pairs.push({
-              prefix: msg.text.slice(0, 80),
-              response: resp,
+        const msgs: PairMessage[] = [];
+        for (const row of rows) {
+          if (row.type === "user" || row.type === "assistant") {
+            msgs.push({
+              role: row.type,
+              text: extractText(row.message?.content || ""),
             });
           }
-        } catch {
-          // skip unreadable
         }
+
+        const pairs: SessionPair[] = [];
+        for (let i = 0; i < msgs.length; i++) {
+          const msg = msgs[i];
+          if (msg?.role !== "user") continue;
+          const resp = findResponse(msgs, i, "first");
+          pairs.push({
+            prefix: msg.text.slice(0, 80),
+            response: resp ? preview(resp) : "",
+          });
+        }
+
         if (pairs.length > 0) {
           result.set(sessionId, pairs);
         }
@@ -116,7 +111,7 @@ registerParser({
   async parse(start, end) {
     if (!existsSync(HISTORY_PATH)) return [];
 
-    // First pass: collect entries and session IDs
+    // First pass: collect entries and session IDs.
     const rawEntries: Array<{
       ts: number;
       project?: string;
@@ -125,54 +120,48 @@ registerParser({
     }> = [];
     const sessionIds = new Set<string>();
 
-    const rl = createInterface({
-      input: createReadStream(HISTORY_PATH),
-      crlfDelay: Number.POSITIVE_INFINITY,
-    });
+    for await (const row of streamJsonl<{
+      timestamp?: number;
+      display?: string;
+      project?: string;
+      sessionId?: string;
+    }>(HISTORY_PATH)) {
+      const ts = row.timestamp;
+      if (typeof ts !== "number" || !inWindow(ts, start, end)) continue;
 
-    for await (const line of rl) {
-      if (!line.trim()) continue;
-      try {
-        const row = JSON.parse(line);
-        const ts = row.timestamp;
-        if (typeof ts !== "number" || ts < start || ts >= end) continue;
+      const prompt = row.display;
+      if (!prompt) continue;
 
-        const prompt = row.display;
-        if (!prompt) continue;
+      const sessionId = row.sessionId || undefined;
+      if (sessionId) sessionIds.add(sessionId);
 
-        const sessionId = row.sessionId || undefined;
-        if (sessionId) sessionIds.add(sessionId);
-
-        rawEntries.push({
-          ts,
-          project: row.project?.split("/").pop() || undefined,
-          prompt,
-          sessionId,
-        });
-      } catch {
-        // skip malformed lines
-      }
+      rawEntries.push({
+        ts,
+        project: pathToProjectName(row.project),
+        prompt,
+        sessionId,
+      });
     }
 
-    // Second pass: load responses for matching sessions
+    // Second pass: load responses for matching sessions.
     const sessionResponses = loadSessionResponses(sessionIds);
 
-    // Track per-session index for fallback matching
+    // Track per-session index for fallback matching.
     const sessionIndexCounters = new Map<string, number>();
 
-    // Build normalized entries: prefix match first, index fallback
+    // Build normalized entries: prefix match first, index fallback.
     const entries: NormalizedEntry[] = rawEntries.map((raw) => {
       let response: string | undefined;
       if (raw.sessionId) {
         const pairs = sessionResponses.get(raw.sessionId);
         if (pairs) {
-          // Primary: match by prompt prefix
+          // Primary: match by prompt prefix.
           const key = raw.prompt.slice(0, 80);
           const prefixMatch = pairs.find((p) => p.prefix === key);
           if (prefixMatch) {
             response = prefixMatch.response || undefined;
           } else {
-            // Fallback: match by sequential index within the session
+            // Fallback: match by sequential index within the session.
             const idx = sessionIndexCounters.get(raw.sessionId) ?? 0;
             const pair = pairs[idx];
             if (pair) {

@@ -1,6 +1,6 @@
 ---
 title: Instalação
-description: "Guia completo de instalação do oh-my-agent — três métodos de instalação, todos os seis presets com suas listas de habilidades, requisitos de ferramentas CLI para os cinco fornecedores, configuração pós-instalação, campos do oma-config.yaml e verificação com oma doctor."
+description: "Guia completo de instalação do oh-my-agent — três métodos de instalação, todos os presets nativos com suas listas de habilidades, requisitos de ferramentas CLI para os fornecedores, configuração pós-instalação, campos do oma-config.yaml e verificação com oma doctor."
 ---
 
 # Instalação
@@ -13,16 +13,16 @@ description: "Guia completo de instalação do oh-my-agent — três métodos de
 
 ---
 
-## Método 1: Instalação em uma Linha (Recomendado)
+## Método 1: instalação em uma linha (recomendado)
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
 ```
 
 Ambos os scripts bootstrap se comportam da mesma forma:
@@ -37,7 +37,7 @@ Tempo típico de instalação: menos de 60 segundos.
 
 ---
 
-## Método 2: Instalação Manual via bunx
+## Método 2: instalação manual via bunx
 
 ```bash
 bunx oh-my-agent@latest
@@ -62,7 +62,7 @@ Todos os presets incluem oma-pm (planejamento), oma-qa (revisão), oma-debug (co
 
 Os recursos compartilhados (`_shared/`) são sempre instalados independentemente do preset. Isso inclui roteamento principal, carregamento de contexto, estrutura de prompts, detecção de fornecedor, protocolos de execução e protocolo de memória.
 
-### O que é Criado
+### O que é criado
 
 Após a instalação, seu projeto conterá:
 
@@ -102,7 +102,7 @@ Após a instalação, seu projeto conterá:
 
 ---
 
-## Método 3: Instalação Global
+## Método 3: instalação global
 
 Para uso em nível de CLI (dashboards, execução de agentes, diagnósticos), instale oh-my-agent globalmente:
 
@@ -146,9 +146,9 @@ oma star                # Dar estrela no repositório
 
 ---
 
-## Instalação de Ferramentas CLI de IA
+## Instalação de ferramentas CLI de IA
 
-Você precisa de pelo menos uma ferramenta CLI de IA instalada. oh-my-agent suporta cinco fornecedores, e você pode misturá-los — usando diferentes CLIs para diferentes agentes via mapeamento agente-CLI.
+Você precisa de pelo menos uma ferramenta CLI de IA instalada. oh-my-agent suporta fornecedores, e você pode misturá-los — usando diferentes CLIs para diferentes agentes via mapeamento agente-CLI.
 
 ### Gemini CLI
 
@@ -208,7 +208,7 @@ language: en
 
 # Obrigatório
 language: en
-model_preset: gemini   # built-in: antigravity, claude, codex, gemini, qwen, cursor, mixed
+model_preset: antigravity   # built-in: antigravity, claude, codex, qwen, cursor, mixed
 
 # Opcional — preferências de data/hora
 date_format: ISO
@@ -234,19 +234,19 @@ agents:
 #       backend: { model: openai/gpt-5.5, effort: high }
 ```
 
-### Referência de Campos
+### Referência de campos
 
 | Campo | Tipo | Obrigatório | Descrição |
 |-------|------|-------------|-----------|
 | `language` | string | Sim | Código do idioma de resposta. Suporta en, ko, ja, zh, es, fr, de, pt, ru, nl, pl. |
-| `model_preset` | string | Sim | Chave do preset ativo. Uma das sete chaves built-in (`antigravity`, `claude`, `codex`, `gemini`, `qwen`, `cursor`, `mixed`) ou uma chave de `custom_presets`. Veja [Per-Agent Models](../guide/per-agent-models.md). |
+| `model_preset` | string | Sim | Chave do preset ativo. Uma das chaves built-in (`antigravity`, `claude`, `codex`, `qwen`, `cursor`, `mixed`) ou uma chave de `custom_presets`. Veja [Per-Agent Models](../guide/per-agent-models.md). |
 | `date_format` | string | Não | Formato de timestamp (`ISO`, `US`, `EU`). Padrão: `ISO`. |
 | `timezone` | string | Não | Identificador de fuso horário (ex: `Asia/Seoul`). Padrão: `UTC`. |
 | `agents` | map | Não | Overrides parciais por agente (`AgentSpec` apenas como objeto). Shallow merge sobre os defaults do preset. |
 | `models` | map | Não | Slugs de modelo definidos pelo usuário, antes em `models.yaml`. |
 | `custom_presets` | map | Não | Presets definidos pelo usuário. Suporta `extends:` para herança parcial de um preset built-in. |
 
-### Resolução de Vendor
+### Resolução de vendor
 
 Ao spawnar um agente, o vendor CLI é resolvido a partir do `model_preset` ativo (e de quaisquer overrides em `agents:`). Veja [Per-Agent Models](../guide/per-agent-models.md) para detalhes completos.
 
@@ -291,7 +291,7 @@ oma update
 
 Isso atualiza o CLI global do oh-my-agent para a versão mais recente.
 
-### Atualização de Habilidades do Projeto
+### Atualização de habilidades do projeto
 
 Habilidades e workflows dentro de um projeto podem ser atualizados via GitHub Action (`action/`) para atualizações automatizadas, ou manualmente reexecutando o instalador:
 
@@ -303,7 +303,7 @@ O instalador detecta instalações existentes e oferece atualizar preservando se
 
 ---
 
-## Próximos Passos
+## Próximos passos
 
 Abra seu projeto na sua IDE de IA e comece a usar oh-my-agent. As habilidades são detectadas automaticamente. Experimente:
 

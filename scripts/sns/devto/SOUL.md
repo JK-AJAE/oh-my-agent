@@ -41,11 +41,11 @@ Avoid generic "In today's fast-paced world" intros. Avoid rhetorical questions s
 5. **Installation**: use the canonical curl one-liner. Do not substitute `brew install`, `bunx`, or any other installer in the post body.
    ```bash
    # macOS / Linux
-   curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
    ```
    ```powershell
    # Windows (PowerShell)
-   irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
+   irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
    ```
 6. **Links**: GitHub repo link last. Optionally include the previous post URL if continuing a thread.
 
@@ -78,4 +78,4 @@ Example shape:
 
 > oh-my-agent is built for teams who orchestrate more than they prompt. Next up: <one concrete thing on the roadmap>.
 >
-> https://github.com/JK-AJAE/oh-my-agent-custom
+> https://github.com/first-fluke/oh-my-agent

@@ -156,7 +156,6 @@ describe("cleanDanglingSymlinks", () => {
   });
 
   it("removes a broken symlink whose target does not exist", () => {
-    if (process.platform === "win32") return;
     const root = mkdtempSync(join(tmpdir(), "oma-symlink-"));
     tempRoots.push(root);
     const skillsDir = join(root, ".claude", "skills");
@@ -175,7 +174,6 @@ describe("cleanDanglingSymlinks", () => {
   });
 
   it("preserves a valid symlink whose target exists", () => {
-    if (process.platform === "win32") return;
     const root = mkdtempSync(join(tmpdir(), "oma-symlink-"));
     tempRoots.push(root);
     const skillsDir = join(root, ".claude", "skills");

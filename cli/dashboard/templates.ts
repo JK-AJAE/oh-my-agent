@@ -30,28 +30,6 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <div class="p-4"><ul class="text-xs" id="activityList"><li class="text-dim italic">No activity yet</li></ul></div>
     </div>
   </div>
-  <div class="bg-surface border border-bd rounded-lg overflow-hidden mt-5">
-    <div class="px-4 py-3 border-b border-bd text-[13px] font-semibold text-purple-light bg-surface-2 flex items-center justify-between">
-      <span>Self-Evolved Skills & Rules</span>
-      <span class="bg-purple text-white px-2 py-0.5 rounded-full text-[10px]" id="evolutionCount">0</span>
-    </div>
-    <div class="p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <h4 class="text-xs text-purple-light font-semibold mb-2 border-b border-bd/40 pb-1">Evolved Skills</h4>
-          <ul class="text-xs max-h-40 overflow-y-auto" id="evolvedSkillsList">
-            <li class="text-dim italic">No evolved skills yet</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="text-xs text-purple-light font-semibold mb-2 border-b border-bd/40 pb-1">Evolved Rules</h4>
-          <ul class="text-xs max-h-40 overflow-y-auto" id="evolvedRulesList">
-            <li class="text-dim italic">No evolved rules yet</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="mt-5 pt-3 border-t border-bd flex justify-between text-[11px] text-dim"><span>Serena Memory Dashboard</span><span id="footerTime">--</span></div>
   <script>
     const $=s=>document.querySelector(s);
@@ -64,40 +42,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     function createTextEl(tag,text,cls){const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;return el}
     function renderAgents(agents){const tbody=$('#agentBody');clearChildren(tbody);if(!agents||!agents.length){const tr=document.createElement('tr'),td=createTextEl('td','No agents detected yet','text-dim text-xs italic py-3');td.setAttribute('colspan','4');tr.appendChild(td);tbody.appendChild(tr);return}agents.forEach(a=>{const ns=normalizeStatus(a.status),tr=document.createElement('tr');tr.className='border-b border-bd/40 last:border-b-0';const td1=createTextEl('td',a.agent,'px-3 py-2.5');tr.appendChild(td1);const std=document.createElement('td');std.className='px-3 py-2.5';const dot=document.createElement('span');dot.className='inline-block w-2 h-2 rounded-full mr-1.5 '+(dotCls[ns]||'bg-dim')+(ns==='running'?' pulse-dot':'');std.appendChild(dot);std.appendChild(createTextEl('span',ns));tr.appendChild(std);tr.appendChild(createTextEl('td',a.turn!=null?String(a.turn):'-','px-3 py-2.5'));tr.appendChild(createTextEl('td',a.task||'','px-3 py-2.5'));tbody.appendChild(tr)})}
     function renderActivity(activity){const list=$('#activityList');clearChildren(list);if(!activity||!activity.length){list.appendChild(createTextEl('li','No activity yet','text-dim italic'));return}activity.forEach(a=>{const li=document.createElement('li');li.className='py-2 border-b border-bd/30 last:border-b-0 flex gap-2';li.appendChild(createTextEl('span','['+a.agent+']','text-purple-light font-semibold whitespace-nowrap'));li.appendChild(createTextEl('span',a.message,'text-dim'));list.appendChild(li)})}
-    function renderEvolution(evolution){
-      const skillsList=$('#evolvedSkillsList');
-      const rulesList=$('#evolvedRulesList');
-      clearChildren(skillsList);
-      clearChildren(rulesList);
-      const skills=(evolution&&evolution.skills)||[];
-      const rules=(evolution&&evolution.rules)||[];
-      $('#evolutionCount').textContent=String(skills.length+rules.length);
-      if(!skills.length){
-        skillsList.appendChild(createTextEl('li','No evolved skills yet','text-dim italic'));
-      }else{
-        skills.forEach(s=>{
-          const li=document.createElement('li');li.className='py-1 border-b border-bd/10 last:border-b-0 flex flex-col';
-          const hd=document.createElement('div');hd.className='flex justify-between items-center';
-          hd.appendChild(createTextEl('span',s.name,'text-purple font-semibold'));
-          hd.appendChild(createTextEl('span',new Date(s.timestamp).toLocaleTimeString(),'text-dim text-[10px]'));
-          li.appendChild(hd);li.appendChild(createTextEl('span',s.description,'text-dim text-[10px]'));
-          skillsList.appendChild(li)
-        })
-      }
-      if(!rules.length){
-        rulesList.appendChild(createTextEl('li','No evolved rules yet','text-dim italic'));
-      }else{
-        rules.forEach(r=>{
-          const li=document.createElement('li');li.className='py-1 border-b border-bd/10 last:border-b-0 flex flex-col';
-          const hd=document.createElement('div');hd.className='flex justify-between items-center';
-          hd.appendChild(createTextEl('span',r.name,'text-cyan font-semibold'));
-          hd.appendChild(createTextEl('span',new Date(r.timestamp).toLocaleTimeString(),'text-dim text-[10px]'));
-          li.appendChild(hd);li.appendChild(createTextEl('span',r.description,'text-dim text-[10px]'));
-          rulesList.appendChild(li)
-        })
-      }
-    }
-    function renderState(state){$('#sessionId').textContent=state.session?.id||'N/A';const st=(state.session?.status||'UNKNOWN').toUpperCase(),ns=normalizeStatus(st),sel=$('#sessionStatus');sel.textContent=st;sel.className='px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wide border '+(statusCls[ns]||statusCls.pending);if(state.updatedAt){const ts=new Date(state.updatedAt).toLocaleString();$('#updatedAt').textContent='Updated: '+ts;$('#footerTime').textContent=ts}renderAgents(state.agents);renderActivity(state.activity);renderEvolution(state.evolution)}
+    function renderState(state){$('#sessionId').textContent=state.session?.id||'N/A';const st=(state.session?.status||'UNKNOWN').toUpperCase(),ns=normalizeStatus(st),sel=$('#sessionStatus');sel.textContent=st;sel.className='px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wide border '+(statusCls[ns]||statusCls.pending);if(state.updatedAt){const ts=new Date(state.updatedAt).toLocaleString();$('#updatedAt').textContent='Updated: '+ts;$('#footerTime').textContent=ts}renderAgents(state.agents);renderActivity(state.activity)}
     let ws,rd=1000;function connect(){const b=$('#connBadge');b.textContent='Connecting...';b.className='ml-auto px-3 py-1 rounded-xl text-[11px] font-semibold border border-warn/30 bg-warn/15 text-warn';const p=location.protocol==='https:'?'wss:':'ws:';ws=new WebSocket(p+'//'+location.host+'/?token='+encodeURIComponent(AUTH_TOKEN));ws.onopen=()=>{b.textContent='Connected';b.className='ml-auto px-3 py-1 rounded-xl text-[11px] font-semibold border border-ok/30 bg-ok/15 text-ok';rd=1000};ws.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.data)renderState(m.data)}catch{}};ws.onclose=()=>{b.textContent='Disconnected';b.className='ml-auto px-3 py-1 rounded-xl text-[11px] font-semibold border border-err/30 bg-err/15 text-err';setTimeout(()=>{rd=Math.min(rd*1.5,10000);connect()},rd)};ws.onerror=()=>ws.close()}
     fetch('/api/state',{headers:AUTH_HEADERS}).then(r=>{if(!r.ok)throw new Error('unauthorized');return r.json()}).then(renderState).catch(()=>{});connect();
   </script>

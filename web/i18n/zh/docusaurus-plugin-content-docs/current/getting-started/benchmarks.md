@@ -49,9 +49,9 @@ description: 五个 Claude Code 框架基于完全相同的提示构建同一款
 
 | vanilla | oma | omc | ecc | superpowers |
 |---|---|---|---|---|
-| ![vanilla](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/superpowers/01-landing.png) |
+| ![vanilla](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/superpowers/01-landing.png) |
 
-完整的逐屏对比（世界构建器、AI 面板、画廊、保存→重载状态）请见 [GitHub 基准报告](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks)。
+完整的逐屏对比（世界构建器、AI 面板、画廊、保存→重载状态）请见 [GitHub 基准报告](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks)。
 
 ---
 
@@ -65,7 +65,7 @@ description: 五个 Claude Code 框架基于完全相同的提示构建同一款
 | **工程** | 20 | 代码广度、TS strict、最大文件大小 + 文件夹深度、deferred-stub 标记、不存在硬编码密钥 | 静态分析（jq + grep + find） |
 | **效率** | 10 | 完成所需轮次、墙钟时长、文件均摊成本 | `claude -p` 结果 JSON |
 
-规格与视觉评审通过 `judge-multi.sh` 在每个框架上运行 3 轮，逐项分数取多轮平均。实现位于 [`benchmarks/scoring/multiaxis/`](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks/scoring/multiaxis)。
+规格与视觉评审通过 `judge-multi.sh` 在每个框架上运行 3 轮，逐项分数取多轮平均。实现位于 [`benchmarks/scoring/multiaxis/`](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks/scoring/multiaxis)。
 
 ---
 
@@ -99,4 +99,4 @@ done
   $(pwd)
 ```
 
-每个框架的完整叙述、原始分数和截图都维护在 [`benchmarks/README.md`](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/benchmarks/README.md)。该文件由 `build-report.sh` 基于每次运行的 `multiaxis/*.json` 生成，因此始终与最新的评分产物保持同步。
+每个框架的完整叙述、原始分数和截图都维护在 [`benchmarks/README.md`](https://github.com/first-fluke/oh-my-agent/blob/main/benchmarks/README.md)。该文件由 `build-report.sh` 基于每次运行的 `multiaxis/*.json` 生成，因此始终与最新的评分产物保持同步。

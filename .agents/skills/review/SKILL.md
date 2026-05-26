@@ -1,18 +1,8 @@
 ---
-name: "review"
-description: |-
-  Pre-landing PR review. Analyzes diff against the base branch for SQL safety, LLM trust
-  boundary violations, conditional side effects, and other structural issues. Use when
-  asked to "review this PR", "code review", "pre-landing review", or "check my diff".
-  Proactively suggest when the user is about to merge or land code changes. (gstack)
-category: "utility"
-preamble-tier: "4"
-version: "1.0.0"
-allowed-tools: "- Bash - Read - Edit - Write - Grep - Glob - Agent - AskUserQuestion - WebSearch"
-triggers: "- review this pr - code review - check my diff - pre-landing review"
+name: review
+description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility check (WCAG 2.1 AA), and code quality review
+disable-model-invocation: true
 ---
+<!-- oma:generated -->
 
-<!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
-<!-- Regenerate: bun run gen:skill-docs -->
-
-## Preamble (run first)
+Read and follow `.agents/workflows/review.md` step by step.

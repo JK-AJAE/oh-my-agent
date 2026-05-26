@@ -52,13 +52,13 @@ function effortLevelMeetsRecommended(actual: unknown): boolean {
 export const RECOMMENDED_ATTRIBUTION = {
   commit:
     "Generated with oh-my-agent\n\nCo-Authored-By: First Fluke <our.first.fluke@gmail.com>",
-  pr: "Generated with [oh-my-agent](https://github.com/JK-AJAE/oh-my-agent-custom)",
+  pr: "Generated with [oh-my-agent](https://github.com/first-fluke/oh-my-agent)",
 } as const;
 
 /**
  * Check whether existing settings already match the recommended values.
  */
-export function needsSettingsUpdate(
+export function needsClaudeSettingsUpdate(
   // biome-ignore lint/suspicious/noExplicitAny: settings.json schema is dynamic
   claudeSettings: any,
   options: ClaudeSettingsOptions = {},
@@ -103,7 +103,7 @@ export function needsSettingsUpdate(
 /**
  * Merge recommended settings into existing settings object (mutates).
  */
-export function applyRecommendedSettings(
+export function applyClaudeSettings(
   // biome-ignore lint/suspicious/noExplicitAny: settings.json schema is dynamic
   claudeSettings: any,
   options: ClaudeSettingsOptions = {},

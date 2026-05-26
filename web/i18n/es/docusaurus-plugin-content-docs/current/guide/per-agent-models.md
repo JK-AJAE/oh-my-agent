@@ -5,15 +5,15 @@ description: Configura qué modelo de IA usa cada agente mediante model_preset e
 
 # Guía: Configuración de Modelo por Agente
 
-## Visión General
+## Visión general
 
-`model_preset` es el único concepto que controla qué modelo usa cada agente. Elige uno de los siete presets integrados y cada agente (pm, backend, frontend, qa, …) queda conectado a un modelo apropiado para esa pila de proveedor. Sobrescribe agentes individuales según sea necesario. Define presets adicionales cuando tu equipo tenga una combinación no estándar.
+`model_preset` es el único concepto que controla qué modelo usa cada agente. Elige uno de los presets integrados y cada agente (pm, backend, frontend, qa, …) queda conectado a un modelo apropiado para esa pila de proveedor. Sobrescribe agentes individuales según sea necesario. Define presets adicionales cuando tu equipo tenga una combinación no estándar.
 
 Toda la configuración vive en un único archivo: `.agents/oma-config.yaml`.
 
 Esta página cubre:
 
-1. Los siete presets integrados
+1. Los presets integrados
 2. Cómo sobrescribir agentes individuales con el mapa `agents:`
 3. Cómo declarar slugs de modelo personalizados con `models:`
 4. Cómo definir presets personalizados con `custom_presets:` y `extends:`
@@ -22,14 +22,14 @@ Esta página cubre:
 
 ---
 
-## Presets Integrados
+## Presets integrados
 
-Asigna a `model_preset` una de las siete claves integradas:
+Asigna a `model_preset` una de las claves integradas:
 
 ```yaml
 # .agents/oma-config.yaml
 language: en
-model_preset: gemini
+model_preset: antigravity
 ```
 
 | Clave | Descripción | Ideal para |
@@ -46,14 +46,14 @@ Los presets integrados se distribuyen dentro del paquete del CLI y se actualizan
 
 ---
 
-## Sobrescribir Agentes Individuales
+## Sobrescribir agentes individuales
 
 Usa el mapa `agents:` para sobrescribir agentes específicos por encima del preset activo. Solo se ven afectados los agentes que listas; el resto conserva los valores por defecto del preset.
 
 ```yaml
 # .agents/oma-config.yaml
 language: en
-model_preset: gemini
+model_preset: antigravity
 
 agents:
   backend: { model: openai/gpt-5.5, effort: high }
@@ -75,7 +75,7 @@ La fusión es superficial: cada campo de tu sobrescritura reemplaza el valor del
 
 ---
 
-## Declarar Slugs de Modelo en Línea
+## Declarar slugs de modelo en línea
 
 Registra bajo `models:` los slugs de modelo que aún no están en el registro integrado. Una vez registrado, usa el slug en cualquier lugar dentro de `agents:` o `custom_presets:`.
 
@@ -94,7 +94,7 @@ models:
 
 ---
 
-## Presets Personalizados
+## Presets personalizados
 
 Define presets adicionales en `custom_presets:`. Usa `extends:` para heredar todos los valores por defecto de agente desde un preset integrado y sobrescribir solo los agentes que te interesen.
 
@@ -163,7 +163,7 @@ Tras la migración, se eliminan `.agents/config/defaults.yaml`, `.agents/config/
 
 ---
 
-## Tope de Cuota de Sesión
+## Tope de cuota de sesión
 
 `session.quota_cap` no cambia. Añádelo a `oma-config.yaml` para limitar el spawn descontrolado de subagentes:
 
@@ -182,7 +182,7 @@ Cuando se alcanza un tope, el orchestrator rechaza nuevos spawns y expone un est
 
 ---
 
-## Ejemplo Completo
+## Ejemplo completo
 
 ```yaml
 # .agents/oma-config.yaml

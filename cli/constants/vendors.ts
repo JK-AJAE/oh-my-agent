@@ -1,6 +1,6 @@
 import type { CliTool, CliVendor } from "../types/index.js";
 
-export const REPO = "JK-AJAE/oh-my-agent-custom";
+export const REPO = "first-fluke/oh-my-agent";
 export const INSTALLED_SKILLS_DIR = ".agents/skills";
 
 /**
@@ -33,15 +33,34 @@ export const ALL_CLI_VENDORS: CliVendor[] = [
   "hermes",
 ].sort() as CliVendor[];
 
-export type SkillTargetBase = "project" | "home";
-
 export interface SkillTargetSpec {
-  base: SkillTargetBase;
-  path: string;
+  /** Relative path under the install root when mode === "project". */
+  projectPath: string;
+  /** Relative path under the install root when mode === "global". */
+  homePath: string;
+  /**
+   * When true, this vendor writes outside the project directory even in
+   * project mode (HOME-base). Callers must obtain explicit user consent
+   * before proceeding. Today only `hermes` qualifies.
+   */
+  requiresHomeConsent?: boolean;
 }
 
 export const CLI_SKILLS_DIR: Record<CliTool, SkillTargetSpec> = {
-  claude: { base: "project", path: ".claude/skills" },
-  copilot: { base: "project", path: ".github/skills" },
-  hermes: { base: "home", path: ".hermes/skills/oma" },
+  antigravity: {
+    projectPath: ".gemini/antigravity-cli/skills",
+    homePath: ".gemini/antigravity-cli/skills",
+    requiresHomeConsent: true,
+  },
+  claude: { projectPath: ".claude/skills", homePath: ".claude/skills" },
+  codex: { projectPath: ".codex/skills", homePath: ".codex/skills" },
+  copilot: { projectPath: ".github/skills", homePath: ".copilot/skills" },
+  cursor: { projectPath: ".cursor/skills", homePath: ".cursor/skills" },
+  gemini: { projectPath: ".gemini/skills", homePath: ".gemini/skills" },
+  hermes: {
+    projectPath: ".hermes/skills/oma",
+    homePath: ".hermes/skills/oma",
+    requiresHomeConsent: true,
+  },
+  qwen: { projectPath: ".qwen/skills", homePath: ".qwen/skills" },
 };

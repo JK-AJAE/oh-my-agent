@@ -49,9 +49,9 @@ description: 동일한 프롬프트로 5개의 Claude Code harness가 같은 어
 
 | vanilla | oma | omc | ecc | superpowers |
 |---|---|---|---|---|
-| ![vanilla](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/superpowers/01-landing.png) |
+| ![vanilla](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/superpowers/01-landing.png) |
 
-화면별 전체 비교(world builder, AI 패널, 갤러리, save→reload 상태)는 [GitHub 벤치마크 리포트](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks)에 정리되어 있습니다.
+화면별 전체 비교(world builder, AI 패널, 갤러리, save→reload 상태)는 [GitHub 벤치마크 리포트](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks)에 정리되어 있습니다.
 
 ---
 
@@ -65,7 +65,7 @@ description: 동일한 프롬프트로 5개의 Claude Code harness가 같은 어
 | **Engineering** | 20 | 코드 범위, TS strict, 최대 파일 크기 + 폴더 깊이, deferred-stub 마커, 하드코딩된 키 없음 | 정적 분석 (jq + grep + find) |
 | **Efficiency** | 10 | 완료까지 turns, wall-clock duration, 파일당 비용 | `claude -p` 결과 JSON |
 
-Spec과 visual judge는 `judge-multi.sh`를 통해 harness당 3회 실행되며, 항목별 점수는 라운드 전체에 걸쳐 평균을 냅니다. 구현체는 [`benchmarks/scoring/multiaxis/`](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks/scoring/multiaxis)에 있습니다.
+Spec과 visual judge는 `judge-multi.sh`를 통해 harness당 3회 실행되며, 항목별 점수는 라운드 전체에 걸쳐 평균을 냅니다. 구현체는 [`benchmarks/scoring/multiaxis/`](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks/scoring/multiaxis)에 있습니다.
 
 ---
 
@@ -99,4 +99,4 @@ done
   $(pwd)
 ```
 
-harness별 전체 서술, raw 점수, 스크린샷은 [`benchmarks/README.md`](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/benchmarks/README.md)에서 관리됩니다. 이 파일은 각 실행의 `multiaxis/*.json`으로부터 `build-report.sh`가 생성하므로, 항상 최신 scoring artifact와 동기화 상태를 유지합니다.
+harness별 전체 서술, raw 점수, 스크린샷은 [`benchmarks/README.md`](https://github.com/first-fluke/oh-my-agent/blob/main/benchmarks/README.md)에서 관리됩니다. 이 파일은 각 실행의 `multiaxis/*.json`으로부터 `build-report.sh`가 생성하므로, 항상 최신 scoring artifact와 동기화 상태를 유지합니다.

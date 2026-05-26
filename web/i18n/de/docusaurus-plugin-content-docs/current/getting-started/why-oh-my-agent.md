@@ -9,7 +9,7 @@ Die Multi-Agent-CLI-Kategorie ist gesättigt. Allein im letzten Quartal sind meh
 
 oh-my-agent optimiert eine andere Achse. Die Ausgangsannahme: Mit ausreichend leistungsfähigen Modellen nähern sich die Kosten für Analyse, Design und Implementierung im SDLC der Null. Der teure Teil der Softwareentwicklung war schon immer Testen und Wartung – ein System auch nach dem ersten Commit am Laufen, sicher und verständlich zu halten. Genau um diese Achse herum ist oh-my-agent gebaut.
 
-Diese Seite konkretisiert diese Positionierung. Für die ausführliche Diskussion, die dieses Framing hervorgebracht hat, siehe [Issue #155](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589).
+Diese Seite konkretisiert diese Positionierung. Für die ausführliche Diskussion, die dieses Framing hervorgebracht hat, siehe [Issue #155](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589).
 
 ---
 

@@ -71,7 +71,7 @@ Wurde ein Preset mit Backend-Skill ausgewählt, wird nach der Sprachvariante gef
 
 ### 6. IDE-Symlinks konfigurieren
 
-Der Installer erstellt immer Claude-Code-Symlinks (`.claude/skills/`). Er generiert außerdem vendor-native Agenten-Dateien und Hooks für Antigravity, Claude, Codex, Gemini und Qwen. Existiert ein `.github/`-Verzeichnis, werden automatisch auch GitHub-Copilot-Symlinks erstellt. Andernfalls wird gefragt:
+Der Installer erstellt immer Claude-Code-Symlinks (`.claude/skills/`). Er generiert außerdem vendor-native Agenten-Dateien und Hooks für Antigravity, Claude, Codex und Qwen. Existiert ein `.github/`-Verzeichnis, werden automatisch auch GitHub-Copilot-Symlinks erstellt. Andernfalls wird gefragt:
 
 ```
 Auch Symlinks für GitHub Copilot erstellen? (.github/skills/)
@@ -139,11 +139,11 @@ Für Umgebungen, in denen die interaktive CLI nicht verfügbar ist (CI-Pipelines
 
 ```bash
 # Neuestes Tarball aus der Registry herunterladen
-VERSION=$(curl -s https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/prompt-manifest.json | jq -r '.version')
-curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
+VERSION=$(curl -s https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/prompt-manifest.json | jq -r '.version')
+curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
 
 # Prüfsumme verifizieren
-curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz.sha256" -o agent-skills.tar.gz.sha256
+curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz.sha256" -o agent-skills.tar.gz.sha256
 sha256sum -c agent-skills.tar.gz.sha256
 
 # Entpacken
@@ -228,7 +228,7 @@ Der Doctor-Befehl prüft:
 
 | Prüfung | Was verifiziert wird |
 |:------|:----------------|
-| **CLI-Installationen** | agy, gemini, claude, codex, qwen — Version und Verfügbarkeit |
+| **CLI-Installationen** | agy, claude, codex, qwen — Version und Verfügbarkeit |
 | **Authentifizierung** | API-Schlüssel oder OAuth-Status für jede CLI |
 | **MCP-Konfiguration** | Serena-MCP-Server-Setup für jede CLI-Umgebung |
 | **Skill-Status** | Welche Skills installiert sind und ob sie aktuell sind |
@@ -408,7 +408,7 @@ Für jeden ausgewählten Skill kopiert `installSkill()` das Skill-Verzeichnis na
 
 ### 8. Vendor-Anpassungen
 
-`installVendorAdaptations()` installiert IDE-spezifische Dateien für alle unterstützten Anbieter (Antigravity, Claude, Codex, Gemini, Qwen):
+`installVendorAdaptations()` installiert IDE-spezifische Dateien für alle unterstützten Anbieter (Antigravity, Claude, Codex, Qwen):
 
 - Agenten-Definitionen (`.claude/agents/*.md`)
 - Hook-Konfigurationen (`.claude/hooks/`)

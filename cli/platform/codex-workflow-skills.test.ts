@@ -35,7 +35,7 @@ describe("installCodexWorkflowSkills", () => {
     return dir;
   }
 
-  it("generates SKILL.md wrappers for each top-level workflow", () => {
+  it("generates SKILL.md wrappers under .agents/skills/ for each top-level workflow", () => {
     const sourceDir = mkTemp("oma-codex-src-");
     const targetDir = mkTemp("oma-codex-dst-");
     setupSource(sourceDir, {
@@ -45,8 +45,8 @@ describe("installCodexWorkflowSkills", () => {
 
     installCodexWorkflowSkills(sourceDir, targetDir);
 
-    const ralphFile = join(targetDir, ".codex", "skills", "ralph", "SKILL.md");
-    const debugFile = join(targetDir, ".codex", "skills", "debug", "SKILL.md");
+    const ralphFile = join(targetDir, ".agents", "skills", "ralph", "SKILL.md");
+    const debugFile = join(targetDir, ".agents", "skills", "debug", "SKILL.md");
     expect(existsSync(ralphFile)).toBe(true);
     expect(existsSync(debugFile)).toBe(true);
 
@@ -69,7 +69,7 @@ describe("installCodexWorkflowSkills", () => {
     installCodexWorkflowSkills(sourceDir, targetDir);
 
     const body = readFileSync(
-      join(targetDir, ".codex", "skills", "bare", "SKILL.md"),
+      join(targetDir, ".agents", "skills", "bare", "SKILL.md"),
       "utf-8",
     );
     expect(body).toContain("description: Workflow: bare");
@@ -91,10 +91,10 @@ describe("installCodexWorkflowSkills", () => {
 
     installCodexWorkflowSkills(sourceDir, targetDir);
 
-    expect(existsSync(join(targetDir, ".codex", "skills", "resources"))).toBe(
+    expect(existsSync(join(targetDir, ".agents", "skills", "resources"))).toBe(
       false,
     );
-    expect(existsSync(join(targetDir, ".codex", "skills", "judge"))).toBe(
+    expect(existsSync(join(targetDir, ".agents", "skills", "judge"))).toBe(
       false,
     );
   });
@@ -104,18 +104,18 @@ describe("installCodexWorkflowSkills", () => {
     const targetDir = mkTemp("oma-codex-dst-");
     setupSource(sourceDir, { debug: "---\ndescription: Bug\n---\n" });
 
-    const staleDir = join(targetDir, ".codex", "skills", "ralph");
+    const staleDir = join(targetDir, ".agents", "skills", "ralph");
     mkdirSync(staleDir, { recursive: true });
     writeFileSync(
       join(staleDir, "SKILL.md"),
-      "---\nname: ralph\ndescription: old\n---\n<!-- oma:generated -->\n\nRead and follow `.agents/workflows/ralph.md` step by step.\n",
+      "---\nname: ralph\ndescription: old\ndisable-model-invocation: true\n---\n<!-- oma:generated -->\n\nRead and follow `.agents/workflows/ralph.md` step by step.\n",
     );
 
     installCodexWorkflowSkills(sourceDir, targetDir);
 
     expect(existsSync(staleDir)).toBe(false);
     expect(
-      existsSync(join(targetDir, ".codex", "skills", "debug", "SKILL.md")),
+      existsSync(join(targetDir, ".agents", "skills", "debug", "SKILL.md")),
     ).toBe(true);
   });
 
@@ -124,7 +124,7 @@ describe("installCodexWorkflowSkills", () => {
     const targetDir = mkTemp("oma-codex-dst-");
     setupSource(sourceDir, { debug: "---\ndescription: Bug\n---\n" });
 
-    const userDir = join(targetDir, ".codex", "skills", "my-custom");
+    const userDir = join(targetDir, ".agents", "skills", "my-custom");
     mkdirSync(userDir, { recursive: true });
     const userSkill =
       "---\nname: my-custom\ndescription: User skill\n---\nHi\n";
@@ -142,12 +142,12 @@ describe("installCodexWorkflowSkills", () => {
 
     installCodexWorkflowSkills(sourceDir, targetDir);
     const first = readFileSync(
-      join(targetDir, ".codex", "skills", "ralph", "SKILL.md"),
+      join(targetDir, ".agents", "skills", "ralph", "SKILL.md"),
       "utf-8",
     );
     installCodexWorkflowSkills(sourceDir, targetDir);
     const second = readFileSync(
-      join(targetDir, ".codex", "skills", "ralph", "SKILL.md"),
+      join(targetDir, ".agents", "skills", "ralph", "SKILL.md"),
       "utf-8",
     );
     expect(second).toBe(first);
@@ -159,6 +159,6 @@ describe("installCodexWorkflowSkills", () => {
 
     installCodexWorkflowSkills(sourceDir, targetDir);
 
-    expect(existsSync(join(targetDir, ".codex", "skills"))).toBe(false);
+    expect(existsSync(join(targetDir, ".agents", "skills"))).toBe(false);
   });
 });

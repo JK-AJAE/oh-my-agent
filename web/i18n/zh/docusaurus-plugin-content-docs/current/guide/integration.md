@@ -71,7 +71,7 @@ oma
 
 ### 6. 配置 IDE 符号链接
 
-安装器始终创建 Claude Code 符号链接（`.claude/skills/`）。它还会为 Antigravity、Claude、Codex、Gemini 和 Qwen 生成供应商原生的智能体文件和钩子。如果存在 `.github/` 目录，还会自动创建 GitHub Copilot 符号链接。否则，会询问：
+安装器始终创建 Claude Code 符号链接（`.claude/skills/`）。它还会为 Antigravity、Claude、Codex 和 Qwen 生成供应商原生的智能体文件和钩子。如果存在 `.github/` 目录，还会自动创建 GitHub Copilot 符号链接。否则，会询问：
 
 ```
 Also create symlinks for GitHub Copilot? (.github/skills/)
@@ -139,11 +139,11 @@ Configure Serena MCP with bridge? (Required for full functionality)
 
 ```bash
 # 从注册表下载最新 tarball
-VERSION=$(curl -s https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/prompt-manifest.json | jq -r '.version')
-curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
+VERSION=$(curl -s https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/prompt-manifest.json | jq -r '.version')
+curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
 
 # 验证校验和
-curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz.sha256" -o agent-skills.tar.gz.sha256
+curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz.sha256" -o agent-skills.tar.gz.sha256
 sha256sum -c agent-skills.tar.gz.sha256
 
 # 解压
@@ -228,7 +228,7 @@ doctor 命令检查：
 
 | 检查项 | 验证内容 |
 |:-------|:---------|
-| **CLI 安装** | agy、gemini、claude、codex、qwen：版本和可用性 |
+| **CLI 安装** | agy、claude、codex、qwen：版本和可用性 |
 | **认证** | 每个 CLI 的 API 密钥或 OAuth 状态 |
 | **MCP 配置** | 每个 CLI 环境的 Serena MCP 服务器设置 |
 | **技能状态** | 已安装哪些技能以及是否为最新版本 |
@@ -408,7 +408,7 @@ oma dashboard:web
 
 ### 8. 供应商适配
 
-`installVendorAdaptations()` 为所有支持的供应商（Antigravity、Claude、Codex、Gemini、Qwen）安装 IDE 特定文件：
+`installVendorAdaptations()` 为所有支持的供应商（Antigravity、Claude、Codex、Qwen）安装 IDE 特定文件：
 
 - 智能体定义（`.claude/agents/*.md`）
 - 钩子配置（`.claude/hooks/`）

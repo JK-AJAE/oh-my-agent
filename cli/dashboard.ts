@@ -100,10 +100,6 @@ export function startDashboard(
     if (requestUrl.pathname === "/api/state") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(buildFullState(memoriesDir)));
-    } else if (requestUrl.pathname === "/api/evolution") {
-      const state = buildFullState(memoriesDir);
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(state.evolution || { skills: [], rules: [] }));
     } else if (requestUrl.pathname === "/api/recap") {
       try {
         const window = requestUrl.searchParams.get("window") || "7d";

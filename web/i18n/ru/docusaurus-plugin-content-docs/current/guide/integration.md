@@ -58,7 +58,7 @@ Python (FastAPI/SQLAlchemy), Node.js (NestJS/Hono + Prisma/Drizzle), Rust (Axum/
 
 ### 6. Настройка символических ссылок IDE
 
-Установщик всегда создаёт символические ссылки Claude Code (`.claude/skills/`). Также генерирует нативные файлы агентов и хуки для Antigravity, Claude, Codex, Gemini и Qwen. Если существует директория `.github/`, автоматически создаются символические ссылки для GitHub Copilot. Иначе — по запросу.
+Установщик всегда создаёт символические ссылки Claude Code (`.claude/skills/`). Также генерирует нативные файлы агентов и хуки для Antigravity, Claude, Codex и Qwen. Если существует директория `.github/`, автоматически создаются символические ссылки для GitHub Copilot. Иначе — по запросу.
 
 ### 7. Git rerere
 
@@ -77,8 +77,8 @@ Python (FastAPI/SQLAlchemy), Node.js (NestJS/Hono + Prisma/Drizzle), Rust (Axum/
 ### Шаг 1: Скачивание и распаковка
 
 ```bash
-VERSION=$(curl -s https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/prompt-manifest.json | jq -r '.version')
-curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
+VERSION=$(curl -s https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/prompt-manifest.json | jq -r '.version')
+curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
 sha256sum -c agent-skills.tar.gz.sha256
 tar -xzf agent-skills.tar.gz
 ```
@@ -187,6 +187,6 @@ oma dashboard:web    # Веб на http://localhost:9847
 5. **Установка рабочих процессов** — все 14 определений
 6. **Установка конфигов** — `oma-config.yaml`, `mcp.json` (без перезаписи существующих)
 7. **Установка навыков** — выбранные навыки + языковые варианты
-8. **Вендорные адаптации** — файлы для Claude, Codex, Gemini, Qwen
+8. **Вендорные адаптации** — файлы для Claude, Codex, Qwen
 9. **Символические ссылки CLI** — `.claude/skills/`, `.claude/agents/`
 10. **Git rerere + MCP** — опциональная настройка

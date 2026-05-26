@@ -50,7 +50,7 @@ The default command (no subcommand) launches the interactive installer.
 
 The installer presents these presets:
 
-| Preset | Skills Included |
+| Préréglage | Compétences incluses |
 |:-------|:---------------|
 | **All** | Every available skill |
 | **Fullstack** | Frontend + Backend + PM + QA |
@@ -71,7 +71,7 @@ If you selected a preset that includes the backend skill, you are asked to choos
 
 ### 6. Configure IDE Symlinks
 
-The installer always creates Claude Code symlinks (`.claude/skills/`). It also generates vendor-native agent files and hooks for Antigravity, Claude, Codex, Gemini, and Qwen, and if a `.github/` directory exists, it creates GitHub Copilot symlinks automatically. Otherwise, it asks:
+The installer always creates Claude Code symlinks (`.claude/skills/`). It also generates vendor-native agent files and hooks for Antigravity, Claude, Codex, and Qwen, and if a `.github/` directory exists, it creates GitHub Copilot symlinks automatically. Otherwise, it asks:
 
 ```
 Also create symlinks for GitHub Copilot? (.github/skills/)
@@ -139,11 +139,11 @@ For environments where the interactive CLI is not available (CI pipelines, restr
 
 ```bash
 # Download the latest tarball from the registry
-VERSION=$(curl -s https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/prompt-manifest.json | jq -r '.version')
-curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
+VERSION=$(curl -s https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/prompt-manifest.json | jq -r '.version')
+curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz" -o agent-skills.tar.gz
 
 # Verify checksum
-curl -L "https://github.com/JK-AJAE/oh-my-agent-custom/releases/download/cli-v${VERSION}/agent-skills.tar.gz.sha256" -o agent-skills.tar.gz.sha256
+curl -L "https://github.com/first-fluke/oh-my-agent/releases/download/cli-v${VERSION}/agent-skills.tar.gz.sha256" -o agent-skills.tar.gz.sha256
 sha256sum -c agent-skills.tar.gz.sha256
 
 # Extract
@@ -226,9 +226,9 @@ oma doctor --json
 
 The doctor command checks:
 
-| Check | What It Verifies |
+| Vérification | Ce qu'elle vérifie |
 |:------|:----------------|
-| **CLI installations** | agy, gemini, claude, codex, qwen — version and availability |
+| **CLI installations** | agy, claude, codex, qwen — version and availability |
 | **Authentication** | API key or OAuth status for each CLI |
 | **MCP configuration** | Serena MCP server setup for each CLI environment |
 | **Skill status** | Which skills are installed and whether they are current |
@@ -408,7 +408,7 @@ For each selected skill, `installSkill()` copies the skill directory to `.agents
 
 ### 8. Vendor Adaptations
 
-`installVendorAdaptations()` installs IDE-specific files for all supported vendors (Antigravity, Claude, Codex, Gemini, Qwen):
+`installVendorAdaptations()` installs IDE-specific files for all supported vendors (Antigravity, Claude, Codex, Qwen):
 
 - Agent definitions (`.claude/agents/*.md`)
 - Hook configurations (`.claude/hooks/`)

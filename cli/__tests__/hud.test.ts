@@ -1,31 +1,25 @@
 import { execSync } from "node:child_process";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
-
-// Mock readFileSync for fd 0 to prevent blocking on stdin when hud.ts runs main() on import
-vi.mock("node:fs", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("node:fs")>();
-  return {
-    ...actual,
-    readFileSync: (fd: any, options?: any) => {
-      if (fd === 0) {
-        return "{}";
-      }
-      return actual.readFileSync(fd, options);
-    },
-  };
-});
-
-import { buildClaudeStatusline, buildGeminiBar } from "../../.agents/hooks/core/hud.ts";
+import { describe, expect, it } from "vitest";
+import { buildGeminiBar } from "../../.agents/hooks/core/hud.ts";
 
 const HUD_PATH = join(__dirname, "../../.agents/hooks/core/hud.ts");
+const HUD_PROJECT_DIR = join(tmpdir(), "oma-hud-test-empty-project");
 
 // Strip ANSI escape codes for readable assertions
 // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape stripping requires matching \x1b
 const stripAnsi = (s: string) => s.replace(/\x1b\[[0-9;]*m/g, "");
 
 function hud(input: Record<string, unknown>): string {
-  return buildClaudeStatusline(input);
+  return execSync(`bun "${HUD_PATH}"`, {
+    input: JSON.stringify(input),
+    encoding: "utf-8",
+    env: {
+      ...process.env,
+      CLAUDE_PROJECT_DIR: HUD_PROJECT_DIR,
+    },
+  });
 }
 
 describe("hud.ts", () => {
@@ -100,12 +94,16 @@ describe("hud.ts", () => {
       const result = stripAnsi(
         hud({
           context_window: {
+            used_percentage: 42,
             total_input_tokens: 1234,
             total_output_tokens: 5678,
           },
+          agent_state: "running",
         }),
       );
       expect(result).toContain("tok:1.2k↑5.7k↓");
+      expect(result.endsWith("tok:1.2k↑5.7k↓")).toBe(true);
+      expect(result.indexOf("running")).toBeLessThan(result.indexOf("tok:"));
     });
 
     it("formats tokens over 10k without decimal", () => {
@@ -369,7 +367,6 @@ describe("hud.ts (gemini bar)", () => {
   });
 
   it("does not write the gemini bar to stdout (would corrupt agent context)", () => {
-    if (process.platform === "win32") return;
     const stdout = execSync(`bun "${HUD_PATH}"`, {
       input: JSON.stringify({
         hook_event_name: "AfterTool",

@@ -1,7 +1,3 @@
----
-description: Independent verifier protocol for Ralph — evidence-based criterion verification, regression detection, BLOCKED marking, and heavy verification caching rules
----
-
 # JUDGE Protocol: Independent Verifier
 
 This protocol governs how the JUDGE phase operates in the ralph workflow.

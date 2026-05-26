@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Complete installation guide for oh-my-agent, covering three install methods, all six presets with their skill lists, CLI tool requirements for all five vendors, post-install configuration, oma-config.yaml fields, and verification with oma doctor.
+description: Complete installation guide for oh-my-agent, covering three install methods, all built-in presets with their skill lists, CLI tool requirements per vendor, post-install configuration, oma-config.yaml fields, and verification with oma doctor.
 ---
 
 # Installation
@@ -14,16 +14,16 @@ description: Complete installation guide for oh-my-agent, covering three install
 
 ---
 
-## Method 1: One-Liner Install (Recommended)
+## Method 1: one-liner install (recommended)
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
 ```
 
 Both bootstrap scripts behave the same way:
@@ -38,7 +38,7 @@ Typical install time: under 60 seconds.
 
 ---
 
-## Method 2: Manual Install via bunx
+## Method 2: manual install via bunx
 
 ```bash
 bunx oh-my-agent@latest
@@ -63,7 +63,7 @@ Every preset includes oma-pm (planning), oma-qa (review), oma-debug (bug fixing)
 
 The shared resources (`_shared/`) are always installed regardless of preset. This includes core routing, context loading, prompt structure, vendor detection, execution protocols, and memory protocol.
 
-### What Gets Created
+### What gets created
 
 After installation, your project will contain:
 
@@ -103,7 +103,7 @@ After installation, your project will contain:
 
 ---
 
-## Method 3: Global Install
+## Method 3: global install
 
 For CLI-level usage (dashboards, agent spawning, diagnostics), install oh-my-agent globally:
 
@@ -142,7 +142,7 @@ oma visualize # Dependency visualization (alias: `oma viz`)
 oma describe # Introspect CLI commands as JSON
 oma bridge # MCP stdio ↔ Streamable HTTP bridge
 oma memory:init # Initialize Serena memory schema
-oma auth:status # Check CLI auth status (gh/gemini/claude/codex/cursor/qwen)
+oma auth:status # Check CLI auth status (gh/claude/codex/cursor/qwen)
 oma search # Mechanical search primitives (alias: `oma s`)
 oma image # Multi-vendor AI image generation (alias: `oma img`)
 oma export # Export skills for external IDEs (e.g. cursor)
@@ -153,9 +153,9 @@ oma star # Star the repository
 
 ---
 
-## AI CLI Tool Installation
+## AI CLI tool installation
 
-You need at least one AI CLI tool installed. oh-my-agent supports five vendors, and you can mix them by using different CLIs for different agents via the agent-CLI mapping.
+You need at least one AI CLI tool installed. oh-my-agent supports multiple vendors, and you can mix them by using different CLIs for different agents via the agent-CLI mapping.
 
 ### Gemini CLI
 
@@ -212,7 +212,7 @@ The `oma install` command creates `.agents/oma-config.yaml`. This is the central
 ```yaml
 # Required
 language: en
-model_preset: gemini   # built-in: antigravity, claude, codex, gemini, qwen, cursor, mixed
+model_preset: antigravity   # built-in: antigravity, claude, codex, qwen, cursor, mixed
 
 # Optional — date/time preferences
 date_format: ISO
@@ -238,19 +238,19 @@ agents:
 #       backend: { model: openai/gpt-5.5, effort: high }
 ```
 
-### Field Reference
+### Field reference
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `language` | string | Yes | Response language code. Supports en, ko, ja, zh, es, fr, de, pt, ru, nl, pl. |
-| `model_preset` | string | Yes | Active preset key. One of the seven built-in keys (`antigravity`, `claude`, `codex`, `gemini`, `qwen`, `cursor`, `mixed`) or a `custom_presets` key. See [Per-Agent Models](../guide/per-agent-models.md). |
+| `model_preset` | string | Yes | Active preset key. One of the built-in keys (`antigravity`, `claude`, `codex`, `qwen`, `cursor`, `mixed`) or a `custom_presets` key. See [Per-Agent Models](../guide/per-agent-models.md). |
 | `date_format` | string | No | Timestamp format (`ISO`, `US`, `EU`). Default: `ISO`. |
 | `timezone` | string | No | Timezone identifier (e.g., `Asia/Seoul`). Default: `UTC`. |
 | `agents` | map | No | Partial per-agent overrides (object-only `AgentSpec`). Shallow-merged over preset defaults. |
 | `models` | map | No | User-defined model slugs, formerly in `models.yaml`. |
 | `custom_presets` | map | No | User-defined presets. Supports `extends:` for partial inheritance from a built-in preset. |
 
-### Vendor Resolution
+### Vendor resolution
 
 When spawning an agent, the CLI vendor is resolved from the active `model_preset` (and any `agents:` overrides). See [Per-Agent Models](../guide/per-agent-models.md) for full details.
 
@@ -287,7 +287,7 @@ See [Per-Agent Models](../guide/per-agent-models.md) for the full matrix and mig
 
 ## Updating
 
-### CLI Update
+### CLI update
 
 ```bash
 oma update
@@ -295,7 +295,7 @@ oma update
 
 This updates the global oh-my-agent CLI to the latest version.
 
-### Project Skills Update
+### Project skills update
 
 Skills and workflows within a project can be updated via the GitHub Action (`action/`) for automated updates, or manually by re-running the installer:
 
@@ -307,7 +307,7 @@ The installer detects existing installations and offers to update while preservi
 
 ---
 
-## What is Next
+## What is next
 
 Open your project in your AI IDE and start using oh-my-agent. Skills are auto-detected. Try:
 

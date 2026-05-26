@@ -1,14 +1,14 @@
 {
   "name": "oma",
-  "version": "8.3.0",
-  "description": "Portable multi-agent harness for .agents-based skills and workflows across Claude Code, Codex, Gemini, and more",
+  "version": "8.10.0",
+  "description": "Portable, vendor-agnostic agent harness for project-specific skills, workflows, and agent teams aligned with your codebase, conventions, and engineering standards.",
   "author": {
     "name": "First Fluke",
     "email": "our.first.fluke@gmail.com",
-    "url": "https://github.com/JK-AJAE"
+    "url": "https://github.com/first-fluke"
   },
-  "homepage": "https://github.com/JK-AJAE/oh-my-agent-custom",
-  "repository": "https://github.com/JK-AJAE/oh-my-agent-custom",
+  "homepage": "https://github.com/first-fluke/oh-my-agent",
+  "repository": "https://github.com/first-fluke/oh-my-agent",
   "license": "MIT",
   "keywords": [
     "multi-agent",

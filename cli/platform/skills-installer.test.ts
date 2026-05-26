@@ -3,6 +3,7 @@ import { join, relative, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createCliSymlinks,
+  createVendorSymlinks,
   installClaudeSkills,
   installConfigs,
   installSkill,
@@ -375,7 +376,7 @@ describe("installVendorAdaptations", () => {
 
 describe("skills.ts - repository metadata", () => {
   it("should use the correct GitHub repository", () => {
-    expect(REPO).toBe("JK-AJAE/oh-my-agent-custom");
+    expect(REPO).toBe("first-fluke/oh-my-agent");
   });
 });
 
@@ -628,6 +629,63 @@ describe("createCliSymlinks", () => {
     expect(result.skipped).toContain(
       ".hermes/skills/oma/oma-frontend (real dir exists)",
     );
+  });
+});
+
+describe("createVendorSymlinks", () => {
+  const mockTargetDir = "/tmp/test-project";
+  const ssotSkillsDir = resolve(mockTargetDir, ".agents/skills");
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (fs.lstatSync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => {
+        throw new Error("ENOENT");
+      },
+    );
+    (fs.realpathSync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      (p: string) => p,
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("createVendorSymlinks creates qwen symlinks", () => {
+    (fs.existsSync as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      true,
+    );
+
+    const result = createVendorSymlinks(mockTargetDir, ["qwen"], ["oma-test"]);
+
+    expect(fs.symlinkSync).toHaveBeenCalledWith(
+      relative(
+        join(mockTargetDir, ".qwen/skills"),
+        join(ssotSkillsDir, "oma-test"),
+      ),
+      join(mockTargetDir, ".qwen/skills/oma-test"),
+      "dir",
+    );
+    expect(result.created).toContain(".qwen/skills/oma-test");
+  });
+
+  it("createCliSymlinks alias still works", () => {
+    (fs.existsSync as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+      true,
+    );
+
+    const result = createCliSymlinks(mockTargetDir, ["qwen"], ["oma-test"]);
+
+    expect(fs.symlinkSync).toHaveBeenCalledWith(
+      relative(
+        join(mockTargetDir, ".qwen/skills"),
+        join(ssotSkillsDir, "oma-test"),
+      ),
+      join(mockTargetDir, ".qwen/skills/oma-test"),
+      "dir",
+    );
+    expect(result.created).toContain(".qwen/skills/oma-test");
   });
 });
 

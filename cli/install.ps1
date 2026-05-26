@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 # oh-my-agent installer (Windows)
-# Usage: irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
@@ -41,7 +41,7 @@ if ($PSVersionTable.PSVersion.Major -ge 6) {
 }
 
 if (-not $isWin) {
-  Write-Fail "This script is for Windows only. On macOS/Linux use:`n  curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash"
+  Write-Fail "This script is for Windows only. On macOS/Linux use:`n  curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash"
 }
 
 $arch = $env:PROCESSOR_ARCHITECTURE

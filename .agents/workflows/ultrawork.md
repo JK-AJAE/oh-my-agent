@@ -20,51 +20,7 @@ description: Ultrawork - high-quality 5-phase development workflow with 11 revie
 ## Vendor Detection
 
 Before starting, determine your runtime environment by following `.agents/skills/_shared/core/vendor-detection.md`.
-The detected runtime vendor and each agent's target vendor determine how agents are spawned.
-
----
-
-## Agent Dispatch Pattern
-
-All phases use the same dispatch logic. Resolve the target vendor for each agent from `.agents/oma-config.yaml`:
-
-| Runtime + Target | Method |
-|------------------|--------|
-| Claude Code, target=Claude | `Agent(subagent_type="{role}", prompt="{task}. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules.", run_in_background=true)` — multiple calls in same message = parallel |
-| Codex CLI, target=Codex | Native `.codex/agents/{agent}.toml`; fall back to `oma agent:spawn` if unverified |
-| Gemini CLI, target=Gemini | Native Gemini subagents; fall back to `oma agent:spawn` |
-| Cross-vendor or unavailable | `oma agent:spawn {role} "{task}. IMPORTANT: Follow context-loading.md rules." session-id [-w ./path] &` |
-
-## Agent Monitoring Pattern
-
-After spawning any agent, **wait for completion before proceeding**:
-
-1. Use memory read tool to poll `progress-{agent}[-{sessionId}].md`
-2. Use MCP code analysis tools to verify alignment
-3. Check for `result-{agent}[-{sessionId}].md` to confirm completion
-4. Use memory edit tool to record results in `session-ultrawork.md`
-
-**Continue polling until all agents report completion or failure.**
-
-## Review Loop Termination
-
-When any gate fails, check these conditions before re-spawning (OR, whichever fires first):
-
-1. Total failure count has reached the configured maximum iterations (default: 5 cycles across VERIFY + REFINE). Stop.
-2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)`, save results, and stop.
-
-If neither condition is met, continue.
-
-## Quality Score Pattern (Conditional)
-
-At measurement checkpoints (Steps 5.2, 8.1, 13.1, 17.1), if automated tools are available:
-
-1. Run tests/lint/type-check to measure score
-2. Calculate delta from previous checkpoint
-3. Record in Experiment Ledger via memory tools
-4. **Discard rule** (REFINE only): if delta < -5, revert changes
-
-If no measurement tools exist, gates fall back to binary checklist. Quality Score is loaded **conditionally** per `context-loading.md`, not at Phase 0.
+The detected runtime vendor and each agent's target vendor determine how agents are spawned in Phase 2 (IMPL), Phase 3 (VERIFY), Phase 4 (REFINE), and Phase 5 (SHIP).
 
 ---
 
@@ -73,9 +29,19 @@ If no measurement tools exist, gates fall back to binary checklist. Quality Scor
 1. Read `.agents/skills/oma-coordination/SKILL.md` and confirm Core Rules.
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
 3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
-4. Read `.agents/workflows/ultrawork/resources/multi-review-protocol.md` (11 review guides)
-5. Read `.agents/workflows/ultrawork/resources/phase-gates.md` (gate definitions)
-6. Record session start using memory write tool:
+4. Read `.agents/skills/_shared/runtime/event-spec.md` for L1 event protocol.
+5. Define the `oma_emit` helper for required L1 decisions:
+   ```bash
+   oma_emit() {
+     kind="$1"
+     payload="$2"
+     oma emit "$kind" "$payload"
+   }
+   ```
+6. Read `.agents/workflows/ultrawork/resources/multi-review-protocol.md` (11 review guides)
+7. Read `.agents/skills/_shared/core/quality-principles.md` (4 principles)
+8. Read `.agents/workflows/ultrawork/resources/phase-gates.md` (gate definitions)
+9. Record session start using memory write tool:
    - Create `session-ultrawork.md` in the memory base path
    - Include: session start time, user request summary, workflow version (ultrawork)
 
@@ -83,20 +49,53 @@ If no measurement tools exist, gates fall back to binary checklist. Quality Scor
 
 ## Phase 1: PLAN (Steps 1-4)
 
-### Step 1-4: Create Plan & Reviews
+### Step 1: Create Plan & Review
 // turbo
 Activate PM Agent to execute Steps 1-4:
 
-1. Analyze requirements, define API contracts, create prioritized task breakdown.
-2. **Step 2** Plan Review (Completeness): Ensure requirements fully mapped.
-3. **Step 3** Meta Review: Self-verify if review was sufficient.
-4. **Step 4** Over-Engineering Review (Simplicity): Check for unnecessary complexity.
-5. Save plan to `.agents/results/plan-{sessionId}.json`.
-6. Create `task-board.md` in memory path. Record plan completion.
+1. Analyze requirements.
+2. Define API contracts.
+3. Create a prioritized task breakdown.
+4. Execute Plan Review - Completeness (Step 2).
+5. Execute Meta Review (Step 3).
+6. Execute Over-Engineering Review (Step 4).
+7. Save plan to `.agents/results/plan-{sessionId}.json`.
+8. Create `task-board.md` in memory path for dashboard compatibility.
+9. Use memory write tool to record plan completion.
+
+### Step 2: Plan Review (Completeness)
+- **Executed by PM Agent**: Ensure requirements are fully mapped.
+
+### Step 3: Review Verification (Meta Review)
+- **Executed by PM Agent**: Self-verify if the review was sufficient.
+
+### Step 4: Over-Engineering Review (Simplicity)
+- **Executed by PM Agent**: Check for unnecessary complexity (MVP focus).
 
 ### PLAN_GATE
-See `phase-gates.md` § PLAN_GATE. Requires user confirmation.
-**On pass**: Record phase completion. **On fail**: Return to Step 1.
+- [ ] Plan documented
+- [ ] Assumptions listed
+- [ ] Alternatives considered
+- [ ] Over-engineering review done
+- [ ] **User confirmation**
+
+**On gate pass**:
+1. Use memory edit tool to record phase completion in `session-ultrawork.md`.
+2. Emit the required L1 decision:
+   ```bash
+   oma_emit "decision.made" '{"subject":"ultrawork.plan-approved","decision":"Proceed with the approved PLAN output.","rationale":"PLAN_GATE passed and the user confirmed scope."}'
+   ```
+3. Verify the required decision before Phase 2:
+   ```bash
+   oma state:verify-decisions --workflow ultrawork --checkpoint plan-approved
+   ```
+4. Emit and verify the implementation scope lock before spawning implementation agents:
+   ```bash
+   oma_emit "decision.made" '{"subject":"ultrawork.impl-plan-locked","decision":"Use the approved task decomposition for IMPL.","rationale":"PLAN output is locked before implementation agents are spawned."}'
+   oma state:verify-decisions --workflow ultrawork --checkpoint impl-plan-locked
+   ```
+
+**Gate failure → Return to Step 1**
 
 ---
 
@@ -104,105 +103,300 @@ See `phase-gates.md` § PLAN_GATE. Requires user confirmation.
 
 ### Step 5: Implementation
 // turbo
-Spawn Implementation Agents (Backend/Frontend/Mobile) in parallel using the **Agent Dispatch Pattern** above.
+Spawn Implementation Agents (Backend/Frontend/Mobile) in parallel.
 
-- **Role**: `backend-engineer`, `frontend-engineer` (or as needed)
-- **Task**: "Implement {domain} tasks per plan."
+#### Per-Agent Dispatch
+Resolve the target vendor for each agent from `.agents/oma-config.yaml`.
+Use native subagents only when `target_vendor === current_runtime_vendor` and that runtime supports the vendor's role-subagent path.
+Otherwise use `oma agent:spawn` for that agent.
 
-### Step 5.1: Monitor & Wait
-Follow the **Agent Monitoring Pattern** above.
+#### If Claude Code and target vendor is Claude
+Use the Agent tool to spawn subagents:
+- `Agent(subagent_type="backend-engineer", prompt="Implement backend tasks per plan. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules.", run_in_background=true)`
+- `Agent(subagent_type="frontend-engineer", prompt="Implement frontend tasks per plan. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules.", run_in_background=true)`
+- Multiple Agent tool calls in the same message = true parallel execution
 
-### Step 5.2: Measure Baseline Quality Score
-Follow the **Quality Score Pattern** above. Record as IMPL baseline.
+#### If Codex CLI and target vendor is Codex
+Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when available.
+Pass each agent its task description, API contracts, and relevant context.
+If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn`.
+
+#### If Gemini CLI and target vendor is Gemini
+Use native Gemini subagents when available, otherwise fall back to `oma agent:spawn`.
+
+#### If target vendor differs from current runtime, or native dispatch is unavailable
+```bash
+oma agent:spawn backend "Implement backend tasks per plan. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules." session-id -w ./backend &
+oma agent:spawn frontend "Implement frontend tasks per plan. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules." session-id -w ./frontend &
+wait
+```
+
+---
+
+### Step 5.1: Monitor & Wait for Completion
+
+**Wait for all implementation agents to complete before proceeding.**
+
+1. Use memory read tool to poll `progress-{agent}[-{sessionId}].md` files
+2. Use MCP code analysis tools to verify implementation alignment
+3. Check for `result-{agent}[-{sessionId}].md` files to confirm completion
+4. Use memory edit tool to record monitoring results in `session-ultrawork.md`
+
+**Continue polling until all agents report completion or failure.**
+
+### Step 5.2: Measure Baseline Quality Score (Conditional)
+
+If automated measurement is available (tests, lint exist):
+
+1. Load `quality-score.md` (conditional, per `context-loading.md`)
+2. Run tests, lint, type-check via Bash to measure baseline
+3. Create Experiment Ledger via memory tools: `[WRITE]("experiment-ledger.md", initial ledger with baseline row)`
+4. Record composite score as the IMPL baseline
+
+If no measurement tools: skip; gates fall back to binary checklist.
 
 ### IMPL_GATE
-See `phase-gates.md` § IMPL_GATE.
-**On pass**: Record phase completion. **On fail**: Re-spawn failed agents, repeat until pass.
+- [ ] Build succeeds
+- [ ] Tests pass
+- [ ] Only planned files modified
+- [ ] (If measured) Baseline Quality Score recorded in Experiment Ledger
+
+**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
+
+**Gate failure → Return to Step 5, re-spawn failed agents, and repeat monitoring until GATE passes.**
 
 ---
 
 ## Phase 3: VERIFY (Steps 6-8)
 
-### Steps 6-8: QA Verification
+### Step 6-8: QA Verification
 // turbo
-Spawn QA Agent using the **Agent Dispatch Pattern**.
+Spawn QA Agent to execute Steps 6-8.
 
-- **Role**: `qa-reviewer`
-- **Task**: "Step 6: Alignment Review. Step 7: Security/Bug Review (npm audit, OWASP). Step 8: Improvement/Regression Review."
+#### If Claude Code
+Use the Agent tool to spawn subagent:
+- `Agent(subagent_type="qa-reviewer", prompt="Execute Phase 3 Verification. Step 6: Alignment Review. Step 7: Security/Bug Review (npm audit, OWASP). Step 8: Improvement/Regression Review. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules.", run_in_background=true)`
 
-Monitor with the **Agent Monitoring Pattern**.
+#### If Codex CLI
+Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when available for QA verification.
+If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn`.
 
-- **Step 6**: Compare implementation vs plan.
-- **Step 7**: Check for vulnerabilities (OWASP Top 10).
-- **Step 8**: Run regression tests.
-- **Step 8.1**: Measure Post-VERIFY Quality Score (conditional).
+#### If Gemini CLI or Antigravity or CLI Fallback
+```bash
+oma agent:spawn qa-agent "Execute Phase 3 Verification. Step 6: Alignment Review. Step 7: Security/Bug Review (npm audit, OWASP). Step 8: Improvement/Regression Review. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules." session-id
+```
+
+---
+
+### Monitor QA Agent Progress
+
+**Wait for QA Agent to complete verification before proceeding.**
+
+1. Use memory read tool to poll `progress-qa-agent[-{sessionId}].md`
+2. Check for `result-qa-agent[-{sessionId}].md` to confirm completion
+3. Use memory edit tool to record QA results in `session-ultrawork.md`
+
+**Continue polling until QA Agent reports completion.**
+
+### Step 6: Alignment Review
+- **Executed by QA Agent**: Compare implementation vs plan.
+
+### Step 7: Security/Bug Review (Safety)
+- **Executed by QA Agent**: Check for vulnerabilities (Safety).
+
+### Step 8: Improvement Review (Regression Prevention)
+- **Executed by QA Agent**: Run regression tests.
+
+### Step 8.1: Measure Post-VERIFY Quality Score (Conditional)
+
+If baseline was measured at Step 5.2:
+1. Measure Quality Score incorporating QA findings
+2. Calculate delta from IMPL baseline
+3. Record as experiment in Experiment Ledger via memory tools
 
 ### VERIFY_GATE
-See `phase-gates.md` § VERIFY_GATE.
-**On pass**: Record phase completion.
+- [ ] Implementation = Requirements
+- [ ] CRITICAL count: 0
+- [ ] HIGH count: 0
+- [ ] No regressions
+- [ ] (If measured) Quality Score >= 75 (Grade B)
 
-**On fail**: Check **Review Loop Termination** conditions. If continuing:
+**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
 
-**Root-cause-first fix mandate:** fix prompts MUST require root-cause remediation. Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding bugs, silencing tests) unless explicitly justified.
+**Gate failure (1st time)** → Before re-spawning for the next VERIFY cycle, check the session cost cap:
 
-**2nd failure on same issue (termination not triggered)** → Activate **Exploration Loop**:
-1. Load `exploration-loop.md` (conditional)
-2. Generate 2-3 alternative hypotheses
-3. Experiment each (git stash per attempt), measure Quality Score
-4. Select highest-scoring approach, record in Experiment Ledger
+> **Review Loop termination conditions** (OR, whichever fires first wins):
+> 1. Gate failure count has reached the configured maximum iterations (default: 5 total VERIFY + REFINE cycles). Do not start another cycle.
+> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save all current step results before stopping, then report to the user that the loop was terminated early due to quota.
+>
+> If neither condition is met, return to Step 5 and continue.
+
+**Root-cause-first fix mandate:** when re-spawning implementation agents to address QA findings, the fix prompt MUST require root-cause remediation. Forbid tactical patches (try/catch swallowing the error, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent explicitly justifies why a structural fix is out of scope (upstream library bug, deprecated path, hotfix window).
+
+**Gate failure (2nd time on same issue, and termination conditions not yet met)** → Activate **Exploration Loop**:
+1. Load `exploration-loop.md` (conditional, per `context-loading.md`)
+2. Generate 2-3 alternative hypotheses using Exploration Decision template (`reasoning-templates.md` #6)
+3. Experiment each approach sequentially (git stash per attempt)
+4. Measure Quality Score for each
+5. Select the highest-scoring approach
+6. Record all experiments in Experiment Ledger
+7. Resume VERIFY with winning approach
 
 ---
 
 ## Phase 4: REFINE (Steps 9-13)
 
-### Steps 9-13: Deep Refinement
+### Step 9-13: Deep Refinement
 // turbo
-Spawn Debug Agent using the **Agent Dispatch Pattern**.
+Spawn Debug Agent (or Senior Dev Agent) to execute Steps 9-13.
 
-- **Role**: `debug-investigator`
-- **Task**: "Step 9: Split large files. Step 10: Integration check. Step 11: Side Effect analysis. Step 12: Consistency review. Step 13: Cleanup dead code."
+#### If Claude Code
+Use the Agent tool to spawn subagent:
+- `Agent(subagent_type="debug-investigator", prompt="Execute Phase 4 Refine. Step 9: Split large files. Step 10: Integration check. Step 11: Side Effect analysis (find_referencing_symbols). Step 12: Consistency review. Step 13: Cleanup dead code. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules.", run_in_background=true)`
 
-Monitor with the **Agent Monitoring Pattern**.
+#### If Codex CLI
+Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when available for refinement tasks.
+If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn`.
 
-- **Step 9**: Files > 500 lines, Functions > 50 lines.
-- **Step 10**: Check for duplicate logic (Reusability).
-- **Step 11**: Analyze impact scope (Cascade Impact).
-- **Step 12**: Review naming and style (Consistency).
-- **Step 13**: Remove newly created dead code.
-- **Step 13.1**: Measure Post-REFINE Quality Score (conditional). Apply Discard rule if delta < -5.
+#### If Gemini CLI or Antigravity or CLI Fallback
+```bash
+oma agent:spawn debug-agent "Execute Phase 4 Refine. Step 9: Split large files. Step 10: Integration check. Step 11: Side Effect analysis (find_referencing_symbols). Step 12: Consistency review. Step 13: Cleanup dead code. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules." session-id
+```
+
+---
+
+### Monitor Debug Agent Progress
+
+**Wait for Debug Agent to complete refinement before proceeding.**
+
+1. Use memory read tool to poll `progress-debug-agent[-{sessionId}].md`
+2. Check for `result-debug-agent[-{sessionId}].md` to confirm completion
+3. Use memory edit tool to record refinement results in `session-ultrawork.md`
+
+**Continue polling until Debug Agent reports completion.**
+
+### Step 9: Split Large Files/Functions
+- **Executed by Debug Agent**: Files > 500 lines, Functions > 50 lines.
+
+### Step 10: Integration/Reuse Review (Reusability)
+- **Executed by Debug Agent**: Check for duplicate logic.
+
+### Step 11: Side Effect Review (Cascade Impact)
+- **Executed by Debug Agent**: Analyze impact scope.
+
+### Step 12: Full Change Review (Consistency)
+- **Executed by Debug Agent**: Review naming and style.
+
+### Step 13: Clean Up Unused Code
+- **Executed by Debug Agent**: Remove newly created dead code.
+
+### Step 13.1: Measure Post-REFINE Quality Score (Conditional)
+
+If baseline was measured at Step 5.2:
+1. Measure Quality Score after refinement
+2. Calculate delta from Post-VERIFY score
+3. **If delta < -5**: Apply Discard rule. Revert refinement changes, record in Experiment Ledger.
+4. Record kept experiments in Experiment Ledger
 
 ### REFINE_GATE
-See `phase-gates.md` § REFINE_GATE.
-**On pass**: Record phase completion. **On fail**: Check **Review Loop Termination**, then re-spawn.
-**Skip conditions**: Simple tasks < 50 lines.
+- [ ] No large files/functions
+- [ ] Integration opportunities captured
+- [ ] Side effects verified
+- [ ] Code cleaned
+- [ ] (If measured) Quality Score >= Post-VERIFY score (no regression from refinement)
+
+**On gate pass**:
+1. Use memory edit tool to record phase completion in `session-ultrawork.md`.
+2. Emit and verify the REFINE outcome decision:
+   ```bash
+   oma_emit "decision.made" '{"subject":"ultrawork.refine-outcome","decision":"Keep the REFINE changes or explicitly skip refinement.","rationale":"REFINE_GATE passed or the documented skip condition applies."}'
+   oma state:verify-decisions --workflow ultrawork --checkpoint refine-outcome
+   ```
+
+**Gate failure → Before re-spawning the Debug Agent, apply the same termination check:**
+
+> **Review Loop termination conditions** (OR, whichever fires first wins):
+> 1. Total REFINE failure count has reached the configured maximum iterations (default: 5 cycles across all phases). Do not start another cycle.
+> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop. Save current step results before stopping, then report early termination due to quota.
+>
+> If neither condition is met, re-spawn the Debug Agent with specific issues and repeat until GATE passes.
+
+**Skip conditions**: Simple tasks < 50 lines
 
 ---
 
 ## Phase 5: SHIP (Steps 14-17)
 
-### Steps 14-17: Final QA & Deployment Readiness
+### Step 14-17: Final QA & Deployment Readiness
 // turbo
-Spawn QA Agent using the **Agent Dispatch Pattern**.
+Spawn QA Agent to execute Steps 14-17.
 
-- **Role**: `qa-reviewer`
-- **Task**: "Step 14: Quality Review (lint/coverage). Step 15: UX Flow Verification. Step 16: Related Issues Review. Step 17: Deployment Readiness."
+#### If Claude Code
+Use the Agent tool to spawn subagent:
+- `Agent(subagent_type="qa-reviewer", prompt="Execute Phase 5 Ship. Step 14: Quality Review (lint/coverage). Step 15: UX Flow Verification. Step 16: Related Issues Review. Step 17: Deployment Readiness. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules.", run_in_background=true)`
 
-Monitor with the **Agent Monitoring Pattern**.
+#### If Codex CLI
+Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when available for final QA and deployment readiness tasks.
+If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn`.
 
-- **Step 14**: Lint, Types, Coverage.
-- **Step 15**: User journey check.
-- **Step 16**: Final impact check.
-- **Step 17**: Secrets, Migrations, checklist.
-- **Step 17.1**: Final Quality Score & Session Summary (conditional).
+#### If Gemini CLI or Antigravity or CLI Fallback
+```bash
+oma agent:spawn qa-agent "Execute Phase 5 Ship. Step 14: Quality Review (lint/coverage). Step 15: UX Flow Verification. Step 16: Related Issues Review. Step 17: Deployment Readiness. IMPORTANT: Follow .agents/skills/_shared/core/context-loading.md rules." session-id
+```
 
-**Always at session end** (regardless of Quality Score):
-- Record Evaluator Accuracy events (false_positive, missed_stub, good_catch)
-- Append EA events to `session-metrics.md`
-- If rolling 3-session EA >= 30: Flag → "QA tuning suggested. Run `oma retro` to review."
+---
+
+### Monitor Final QA Progress
+
+**Wait for QA Agent to complete final review before proceeding.**
+
+1. Use memory read tool to poll `progress-qa-agent[-{sessionId}].md`
+2. Check for `result-qa-agent[-{sessionId}].md` to confirm completion
+3. Use memory edit tool to record final QA results in `session-ultrawork.md`
+
+**Continue polling until QA Agent reports completion.**
+
+### Step 14: Code Quality Review
+- **Executed by QA Agent**: Lint, Types, Coverage.
+
+### Step 15: UX Flow Verification
+- **Executed by QA Agent**: User journey check.
+
+### Step 16: Related Issues Review (Cascade Impact 2nd)
+- **Executed by QA Agent**: Final impact check.
+
+### Step 17: Deployment Readiness Review (Final)
+- **Executed by QA Agent**: Secrets, Migrations, checklist.
+
+### Step 17.1: Final Quality Score & Session Summary (Conditional)
+
+If Quality Score was measured during this session:
+1. Measure final Quality Score
+2. Generate Experiment Ledger summary (total experiments, keep rate, net delta)
+3. Auto-generate lessons from discarded experiments (delta <= -5) into `lessons-learned.md`
+4. Append Quality Score Progression and Experiment Summary to session metrics
+
+**Always** (regardless of Quality Score availability):
+5. Record Evaluator Accuracy events for this session:
+   - Review all QA findings: any disputed by impl agents? → `false_positive`
+   - Review runtime verification results: any stubs caught that static review missed? → `missed_stub`
+   - Review impl agent self-check results: any bugs caught by QA that self-check missed? → `good_catch`
+6. Append EA events to `session-metrics.md`
+7. If rolling 3-session EA >= 30: Flag in final report
+   → "QA tuning suggested. Run `oma retro` to review."
 
 ### SHIP_GATE
-See `phase-gates.md` § SHIP_GATE. Requires user final approval.
-**On pass**: Record final results. **On fail**: Address issues, re-run affected steps.
+- [ ] Quality checks pass
+- [ ] UX verified
+- [ ] Related issues resolved
+- [ ] Deployment checklist complete
+- [ ] (If measured) Final Quality Score >= 75 (Grade B) with non-negative delta from baseline
+- [ ] (If measured) Experiment Ledger summary recorded
+- [ ] **User final approval**
+
+**On gate pass**: Use memory write tool to record final results in `session-ultrawork.md`
+
+**Gate failure → Address issues, re-run affected steps, and repeat until GATE passes.**
 
 ---
 
@@ -210,10 +404,13 @@ See `phase-gates.md` § SHIP_GATE. Requires user final approval.
 
 If `oma-config.yaml` has `docs.auto_verify: true`:
 
-1. Run `oma docs verify --json` from repo root.
-2. If `broken.length === 0`: print summary and continue.
-3. If `broken.length > 0`: print 1-3 line drift summary with hint `Run /oma-docs verify for the full report.`
-4. If `oma-docs` unavailable: skip silently.
+1. Run `oma docs verify --json` from the repo root.
+2. Capture the JSON output.
+3. If `broken.length === 0`: print `docs verified clean (N docs)` summary to stdout and continue with workflow completion.
+4. If `broken.length > 0`: print a 1-3 line summary identifying which docs have drift, and a hint `Run /oma-docs verify for the full report.` Continue with workflow completion (warn-only, never block).
+5. If `oma-docs` is not available (CLI command missing): skip silently.
+
+This hook is opt-in; the default `auto_verify: false` skips this step entirely.
 
 ---
 
@@ -233,12 +430,14 @@ If `oma-config.yaml` has `docs.auto_verify: true`:
 
 ## Autoresearch-Inspired Enhancements
 
+This workflow conditionally incorporates patterns from autoresearch:
+
 | Pattern | When Active | Reference |
 |---------|-------------|-----------|
-| **Continuous metrics** | When measurement tools available | `quality-score.md` |
+| **Continuous metrics** | When measurement tools available | `quality-score.md` (loaded at VERIFY/SHIP) |
 | **Keep/Discard** | When quality score is measured | `quality-score.md` delta rules |
-| **Experiment logging** | When baseline is established | `experiment-ledger.md` |
-| **Hypothesis exploration** | On repeated gate failures | `exploration-loop.md` |
-| **Auto-learning** | At session end, if experiments exist | `lessons-learned.md` |
+| **Experiment logging** | When baseline is established | `experiment-ledger.md` (via memory protocol) |
+| **Hypothesis exploration** | On repeated gate failures | `exploration-loop.md` (loaded on trigger) |
+| **Auto-learning** | At session end, if experiments exist | `lessons-learned.md` auto-generation |
 
 All protocols are loaded **conditionally** per `context-loading.md`, not at Phase 0.

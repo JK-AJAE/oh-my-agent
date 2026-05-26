@@ -7,13 +7,13 @@ description: Configure which AI model each agent uses via model_preset in oma-co
 
 ## Overview
 
-`model_preset` is the single concept that controls which model every agent uses. Pick one of the seven built-in presets and every agent (pm, backend, frontend, qa, …) is wired to an appropriate model for that vendor stack. Override individual agents as needed. Define additional presets when your team has a non-standard mix.
+`model_preset` is the single concept that controls which model every agent uses. Pick one of the built-in presets and every agent (pm, backend, frontend, qa, …) is wired to an appropriate model for that vendor stack. Override individual agents as needed. Define additional presets when your team has a non-standard mix.
 
 All configuration lives in one file: `.agents/oma-config.yaml`.
 
 This page covers:
 
-1. The seven built-in presets
+1. The built-in presets
 2. Overriding individual agents with the `agents:` map
 3. Inlining custom model slugs with `models:`
 4. Defining custom presets with `custom_presets:` and `extends:`
@@ -22,14 +22,14 @@ This page covers:
 
 ---
 
-## Built-In Presets
+## Built-in presets
 
-Set `model_preset` to one of the seven built-in keys:
+Set `model_preset` to one of the built-in keys:
 
 ```yaml
 # .agents/oma-config.yaml
 language: en
-model_preset: gemini
+model_preset: antigravity
 ```
 
 | Key | Description | Best for |
@@ -46,14 +46,14 @@ Built-in presets ship inside the CLI package and update automatically when you u
 
 ---
 
-## Overriding Individual Agents
+## Overriding individual agents
 
 Use the `agents:` map to override specific agents on top of the active preset. Only agents you list are affected; the rest stay on the preset defaults.
 
 ```yaml
 # .agents/oma-config.yaml
 language: en
-model_preset: gemini
+model_preset: antigravity
 
 agents:
   backend: { model: openai/gpt-5.5, effort: high }
@@ -75,7 +75,7 @@ The merge is shallow: each field in your override replaces the preset value for 
 
 ---
 
-## Inlining Model Slugs
+## Inlining model slugs
 
 Register model slugs that are not yet in the built-in registry under `models:`. Once registered, use the slug anywhere in `agents:` or `custom_presets:`.
 
@@ -94,7 +94,7 @@ models:
 
 ---
 
-## Custom Presets
+## Custom presets
 
 Define additional presets in `custom_presets:`. Use `extends:` to inherit all agent defaults from a built-in preset and override only the agents you care about.
 
@@ -145,7 +145,7 @@ Each row shows the resolved model slug and which source applied it (`(preset)` o
 
 ---
 
-## Migration from Legacy `agent_cli_mapping`
+## Migration from legacy `agent_cli_mapping`
 
 Migration 008 runs automatically on `oma install` and `oma update`. It converts legacy projects in place:
 
@@ -163,7 +163,7 @@ After migration, `.agents/config/defaults.yaml`, `.agents/config/models.yaml`, a
 
 ---
 
-## Session Quota Cap
+## Session quota cap
 
 `session.quota_cap` is unchanged. Add it to `oma-config.yaml` to bound runaway subagent spawning:
 
@@ -182,7 +182,7 @@ When a cap is reached, the orchestrator refuses further spawns and surfaces a `Q
 
 ---
 
-## Full Example
+## Full example
 
 ```yaml
 # .agents/oma-config.yaml

@@ -153,6 +153,64 @@ async function promptRepair(report: DoctorReport): Promise<void> {
   }
 }
 
+function renderDualInstall(report: DoctorReport): void {
+  const { project, global, warnings } = report.dualInstall;
+
+  function formatLine(label: string, probe: typeof project): string {
+    if (!probe.installed) return `${pc.dim("—")} ${label}: not installed`;
+    const mode = probe.mode ?? pc.dim("legacy");
+    const version = probe.version ?? "unknown";
+    return `${pc.green("✅")} ${label}: ${version} (${mode})`;
+  }
+
+  const projectLine = formatLine("Project", project);
+  const globalLine = formatLine("Global ", global);
+
+  const lines: string[] = [projectLine, globalLine];
+
+  if (warnings.length > 0) {
+    lines.push("");
+    lines.push(pc.bold("Warnings:"));
+    for (const w of warnings) {
+      lines.push(`  ${pc.yellow("⚠️")}  ${w}`);
+    }
+  }
+
+  p.note(lines.join("\n"), "Install Presence");
+}
+
+function renderSkillBoundaries(report: DoctorReport): void {
+  const audit = report.skillAudit;
+  if (audit.skillCount < 2) return;
+  if (audit.findings.length === 0) {
+    const worst = audit.worstPair;
+    const worstLine = worst
+      ? `\n${pc.dim(`closest pair: ${worst.a} ↔ ${worst.b} (${(worst.similarity * 100).toFixed(1)}%)`)}`
+      : "";
+    p.note(
+      `${pc.green("✅")} No skill description collisions${worstLine}`,
+      "Skill Boundaries",
+    );
+    return;
+  }
+  const lines = audit.findings.map((f) => {
+    const tag = f.severity === "fail" ? pc.red("FAIL") : pc.yellow("WARN");
+    const pct = `${(f.pair.similarity * 100).toFixed(1)}%`;
+    return `${tag} ${f.pair.a} ↔ ${f.pair.b}  ${pc.dim(pct)}`;
+  });
+  p.note(
+    [
+      ...lines,
+      "",
+      pc.dim(
+        "Rewrite frontmatter `description:` to differentiate triggers, domains, or boundaries.",
+      ),
+      pc.dim("Run: oma skills audit --json"),
+    ].join("\n"),
+    "Skill Boundaries",
+  );
+}
+
 function renderFooter(report: DoctorReport): void {
   if (report.hasSerena) {
     p.note(
@@ -187,12 +245,12 @@ function renderFooter(report: DoctorReport): void {
 
   if (checkStarred()) {
     p.note(
-      `${pc.green("⭐")} Thank you for starring oh-my-agent!\n${pc.dim("https://github.com/sponsors/JK-AJAE")}`,
+      `${pc.green("⭐")} Thank you for starring oh-my-agent!\n${pc.dim("https://github.com/sponsors/first-fluke")}`,
       "Support",
     );
   } else {
     p.note(
-      `${pc.yellow("❤️")} Enjoying oh-my-agent? Give it a star or sponsor!\n${pc.dim("gh api --method PUT /user/starred/JK-AJAE/oh-my-agent-custom")}\n${pc.dim("https://github.com/sponsors/JK-AJAE")}`,
+      `${pc.yellow("❤️")} Enjoying oh-my-agent? Give it a star or sponsor!\n${pc.dim("gh api --method PUT /user/starred/first-fluke/oh-my-agent")}\n${pc.dim("https://github.com/sponsors/first-fluke")}`,
       "Support",
     );
   }
@@ -371,9 +429,11 @@ export async function renderDoctorReport(report: DoctorReport): Promise<void> {
   p.intro(pc.bgMagenta(pc.white(" 🩺 oh-my-agent doctor ")));
 
   try {
+    renderDualInstall(report);
     renderCliTable(report);
     renderMcpTable(report);
     renderSkillsTable(report);
+    renderSkillBoundaries(report);
     await promptRepair(report);
     renderFooter(report);
   } catch (error) {

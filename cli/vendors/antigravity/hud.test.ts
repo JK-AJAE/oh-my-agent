@@ -8,6 +8,24 @@ const FAKE_HOME = "/tmp/fake-home";
 const AGY_DIR = join(FAKE_HOME, ".gemini/antigravity-cli");
 const SETTINGS = join(AGY_DIR, "settings.json");
 const HOOKS_DIR = join(AGY_DIR, "hooks");
+const VARIANT = "/repo/.agents/hooks/variants/antigravity.json";
+
+const variantJson = JSON.stringify({
+  events: {
+    PreInvocation: [
+      { hook: "keyword-detector.ts", timeout: 5 },
+      { hook: "state-boundary.ts", timeout: 5 },
+      { hook: "skill-injector.ts", timeout: 3 },
+    ],
+    PreToolUse: {
+      hook: "test-filter.ts",
+      matcher: "Bash",
+      timeout: 5,
+    },
+    Stop: { hook: "persistent-mode.ts", timeout: 5 },
+  },
+  statusLine: { hook: "hud.ts" },
+});
 
 vi.mock("node:os", async () => {
   const actual = await vi.importActual<typeof import("node:os")>("node:os");
@@ -61,39 +79,60 @@ describe("installAntigravityHud", () => {
         const norm = p.replace(/\\/g, "/");
         if (norm.endsWith(".gemini/antigravity-cli")) return true;
         if (norm.includes(".agents/hooks/core")) return true;
+        if (norm.includes(".agents/hooks/variants/antigravity.json"))
+          return true;
         return false; // settings.json missing -> start fresh
       },
     );
-    (fs.readFileSync as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
-      "{}",
+    (fs.readFileSync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      (p: string) => {
+        const norm = p.replace(/\\/g, "/");
+        if (norm.includes(".agents/hooks/variants/antigravity.json"))
+          return variantJson;
+        return "{}";
+      },
     );
 
     const result = installAntigravityHud("/repo");
 
     expect(result.installed).toBe(true);
-    const cpCall = (fs.cpSync as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(cpCall?.[0].replace(/\\/g, "/")).toBe("/repo/.agents/hooks/core");
-    expect(cpCall?.[1].replace(/\\/g, "/")).toBe(HOOKS_DIR.replace(/\\/g, "/"));
-    expect(cpCall?.[2]).toEqual({ recursive: true, force: true, dereference: true });
+    expect(fs.cpSync).toHaveBeenCalledWith(
+      "/repo/.agents/hooks/core",
+      HOOKS_DIR,
+      { recursive: true, force: true, dereference: true },
+    );
 
     const writeCall = (
       fs.writeFileSync as unknown as ReturnType<typeof vi.fn>
     ).mock.calls.find(
-      (call: string[]) => typeof call[0] === "string" && call[0].replace(/\\/g, "/") === SETTINGS.replace(/\\/g, "/"),
+      (call: string[]) => typeof call[0] === "string" && call[0] === SETTINGS,
     );
     expect(writeCall).toBeTruthy();
 
     const settings = JSON.parse(writeCall?.[1] as string);
     expect(settings.statusLine.type).toBe("command");
-    expect(settings.statusLine.command.replace(/\\/g, "/")).toBe(
-      `bun "${HOOKS_DIR.replace(/\\/g, "/")}/hud.ts"`,
+    expect(settings.statusLine.command).toBe(
+      `bun "${join(HOOKS_DIR, "hud.ts")}"`,
+    );
+    expect(settings.hooks.PreInvocation).toHaveLength(3);
+    expect(settings.hooks.PreInvocation[0]).toMatchObject({
+      name: "keyword-detector",
+      type: "command",
+      command: `bun "${join(HOOKS_DIR, "keyword-detector.ts")}"`,
+      timeout: 5,
+    });
+    expect(settings.hooks.PreInvocation[1].command).toBe(
+      `bun "${join(HOOKS_DIR, "state-boundary.ts")}"`,
+    );
+    expect(settings.hooks.PreInvocation[2].command).toBe(
+      `bun "${join(HOOKS_DIR, "skill-injector.ts")}"`,
     );
     expect(settings.hooks.PreToolUse[0].matcher).toBe("Bash");
-    expect(settings.hooks.PreToolUse[0].hooks[0].command.replace(/\\/g, "/")).toBe(
-      `bun "${HOOKS_DIR.replace(/\\/g, "/")}/test-filter.ts"`,
+    expect(settings.hooks.PreToolUse[0].hooks[0].command).toBe(
+      `bun "${join(HOOKS_DIR, "test-filter.ts")}"`,
     );
-    expect(settings.hooks.Stop[0].hooks[0].command.replace(/\\/g, "/")).toBe(
-      `bun "${HOOKS_DIR.replace(/\\/g, "/")}/persistent-mode.ts"`,
+    expect(settings.hooks.Stop[0].command).toBe(
+      `bun "${join(HOOKS_DIR, "persistent-mode.ts")}"`,
     );
   });
 
@@ -102,18 +141,23 @@ describe("installAntigravityHud", () => {
       (p: string) => {
         const norm = p.replace(/\\/g, "/");
         if (norm.endsWith(".gemini/antigravity-cli")) return true;
-        if (norm === SETTINGS.replace(/\\/g, "/")) return true;
+        if (norm === SETTINGS) return true;
         if (norm.includes(".agents/hooks/core")) return true;
+        if (norm.includes(".agents/hooks/variants/antigravity.json"))
+          return true;
         return false;
       },
     );
-    (fs.readFileSync as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
-      JSON.stringify({
-        colorScheme: "tokyo night",
-        enableTelemetry: false,
-        toolPermission: "always-proceed",
-        trustedWorkspaces: ["/repo"],
-      }),
+    (fs.readFileSync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      (p: string) =>
+        p === VARIANT
+          ? variantJson
+          : JSON.stringify({
+              colorScheme: "tokyo night",
+              enableTelemetry: false,
+              toolPermission: "always-proceed",
+              trustedWorkspaces: ["/repo"],
+            }),
     );
 
     installAntigravityHud("/repo");
@@ -121,7 +165,7 @@ describe("installAntigravityHud", () => {
     const writeCall = (
       fs.writeFileSync as unknown as ReturnType<typeof vi.fn>
     ).mock.calls.find(
-      (call: string[]) => typeof call[0] === "string" && call[0].replace(/\\/g, "/") === SETTINGS.replace(/\\/g, "/"),
+      (call: string[]) => typeof call[0] === "string" && call[0] === SETTINGS,
     );
     const settings = JSON.parse(writeCall?.[1] as string);
 
@@ -139,35 +183,27 @@ describe("installAntigravityHud", () => {
       (p: string) => {
         const norm = p.replace(/\\/g, "/");
         if (norm.endsWith(".gemini/antigravity-cli")) return true;
-        if (norm === SETTINGS.replace(/\\/g, "/")) return true;
+        if (norm === SETTINGS) return true;
         if (norm.includes(".agents/hooks/core")) return true;
+        if (norm.includes(".agents/hooks/variants/antigravity.json"))
+          return true;
         return false;
       },
     );
 
     let snapshot = "{}";
     (fs.readFileSync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (p: string) => {
-        const norm = p.replace(/\\/g, "/");
-        if (norm === SETTINGS.replace(/\\/g, "/")) return snapshot;
-        return "{}";
-      },
+      (p: string) => (p === SETTINGS ? snapshot : variantJson),
     );
-    (fs.writeFileSync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (p: string, data: string) => {
-        const norm = p.replace(/\\/g, "/");
-        if (norm === SETTINGS.replace(/\\/g, "/")) snapshot = data;
-      },
-    );
+    (
+      fs.writeFileSync as unknown as ReturnType<typeof vi.fn>
+    ).mockImplementation((p: string, content: string) => {
+      if (p === SETTINGS) snapshot = content;
+    });
 
-    // Run 1
     installAntigravityHud("/repo");
-    const run1Settings = JSON.parse(snapshot);
-
-    // Run 2
+    const firstSnapshot = snapshot;
     installAntigravityHud("/repo");
-    const run2Settings = JSON.parse(snapshot);
-
-    expect(run1Settings).toEqual(run2Settings);
+    expect(snapshot).toBe(firstSnapshot);
   });
 });

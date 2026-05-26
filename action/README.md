@@ -1,8 +1,8 @@
 # oh-my-agent update action
 
-Automatically update [oh-my-agent](https://github.com/JK-AJAE/oh-my-agent-custom) skills in your repository via a scheduled GitHub Action.
+Automatically update [oh-my-agent](https://github.com/first-fluke/oh-my-agent) skills in your repository via a scheduled GitHub Action.
 
-> **Marketplace**: This action is also available on the [GitHub Marketplace](https://github.com/marketplace/actions/oh-my-agent-update) via [`JK-AJAE/oma-update-action`](https://github.com/JK-AJAE/oma-update-action).
+> **Marketplace**: This action is also available on the [GitHub Marketplace](https://github.com/marketplace/actions/oh-my-agent-update) via [`first-fluke/oma-update-action`](https://github.com/first-fluke/oma-update-action).
 
 ## Usage
 
@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
 ```
 
 ## Inputs
@@ -55,7 +55,7 @@ jobs:
 ### Direct commit mode
 
 ```yaml
-- uses: JK-AJAE/oma-update-action@v1
+- uses: first-fluke/oma-update-action@v1
   with:
     mode: commit
     commit-message: "chore: sync oh-my-agent skills"
@@ -64,7 +64,7 @@ jobs:
 ### With a Personal Access Token (for fork repos)
 
 ```yaml
-- uses: JK-AJAE/oma-update-action@v1
+- uses: first-fluke/oma-update-action@v1
   with:
     token: ${{ secrets.PAT_TOKEN }}
 ```
@@ -79,7 +79,7 @@ jobs:
       updated: ${{ steps.oma.outputs.updated }}
     steps:
       - uses: actions/checkout@v4
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
         id: oma
 
   notify:

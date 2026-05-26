@@ -41,7 +41,7 @@ function Hero() {
           <div className={styles.buttons}>
             <Link
               className="button button--primary button--lg"
-              href="https://github.com/JK-AJAE/oh-my-agent-custom"
+              href="https://github.com/first-fluke/oh-my-agent"
               target="_blank"
               rel="noreferrer"
             >

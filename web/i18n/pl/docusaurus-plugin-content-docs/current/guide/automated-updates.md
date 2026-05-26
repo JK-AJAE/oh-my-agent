@@ -7,7 +7,7 @@ description: Kompletna dokumentacja GitHub Action oh-my-agent — konfiguracja, 
 
 ## Przegląd
 
-GitHub Action oh-my-agent (`JK-AJAE/oma-update-action@v1`) automatycznie aktualizuje umiejętności agentów w projekcie uruchamiając `oma update` w CI. Obsługuje dwa tryby: tworzenie pull request do przeglądu lub bezpośredni commit na gałąź.
+GitHub Action oh-my-agent (`first-fluke/oma-update-action@v1`) automatycznie aktualizuje umiejętności agentów w projekcie uruchamiając `oma update` w CI. Obsługuje dwa tryby: tworzenie pull request do przeglądu lub bezpośredni commit na gałąź.
 
 ---
 
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
 ```
 
 ---

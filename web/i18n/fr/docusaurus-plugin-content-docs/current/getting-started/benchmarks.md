@@ -49,9 +49,9 @@ Cinq harnais Claude Code ont construit le même MVP de plateforme créative d'ap
 
 | vanilla | oma | omc | ecc | superpowers |
 |---|---|---|---|---|
-| ![vanilla](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/benchmarks/screenshots/superpowers/01-landing.png) |
+| ![vanilla](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/vanilla/01-landing.png) | ![oma](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/oma/01-landing.png) | ![omc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/omc/01-landing.png) | ![ecc](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/ecc/01-landing.png) | ![superpowers](https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/benchmarks/screenshots/superpowers/01-landing.png) |
 
-Les comparaisons complètes écran par écran (world builder, panneau IA, galerie, état save→reload) sont disponibles dans le [rapport de benchmark GitHub](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks).
+Les comparaisons complètes écran par écran (world builder, panneau IA, galerie, état save→reload) sont disponibles dans le [rapport de benchmark GitHub](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks).
 
 ---
 
@@ -65,7 +65,7 @@ Les comparaisons complètes écran par écran (world builder, panneau IA, galeri
 | **Ingénierie** | 20 | étendue du code, TS strict, taille max de fichier + profondeur de dossier, marqueurs de stub différé, pas de clés en dur | analyse statique (jq + grep + find) |
 | **Efficacité** | 10 | tours nécessaires, durée d'horloge, coût par fichier | JSON résultat de `claude -p` |
 
-Les juges spec et visuel s'exécutent 3 fois par harnais via `judge-multi.sh` et les scores par item sont moyennés sur l'ensemble des tours. L'implémentation se trouve à [`benchmarks/scoring/multiaxis/`](https://github.com/JK-AJAE/oh-my-agent-custom/tree/main/benchmarks/scoring/multiaxis).
+Les juges spec et visuel s'exécutent 3 fois par harnais via `judge-multi.sh` et les scores par item sont moyennés sur l'ensemble des tours. L'implémentation se trouve à [`benchmarks/scoring/multiaxis/`](https://github.com/first-fluke/oh-my-agent/tree/main/benchmarks/scoring/multiaxis).
 
 ---
 
@@ -81,10 +81,10 @@ Les juges spec et visuel s'exécutent 3 fois par harnais via `judge-multi.sh` et
 ## Reproduire
 
 ```bash
-# Run all 5 harnesses (sequential, ~45 min, ~$15-20 in API spend)
+# Exécute les 5 harnais (séquentiel, ~45 min, ~15-20 $ de dépense API)
 ./benchmarks/run.sh
 
-# Multiaxis scoring per harness (5-axis, 100pt) — single judge round
+# Scoring multiaxes par harnais (5 axes, 100 pts), un seul tour de juge
 for h in vanilla oma omc ecc superpowers; do
   ./benchmarks/scoring/multiaxis/score.sh \
     /tmp/oma-benchmark-<timestamp>/projects/$h \
@@ -93,10 +93,10 @@ for h in vanilla oma omc ecc superpowers; do
     /tmp/oma-benchmark-<timestamp>/multiaxis/$h
 done
 
-# Generate the report
+# Génère le rapport
 ./benchmarks/scoring/multiaxis/build-report.sh \
   /tmp/oma-benchmark-<timestamp> \
   $(pwd)
 ```
 
-Le récit complet par harnais, les scores bruts et les captures d'écran sont maintenus dans [`benchmarks/README.md`](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/benchmarks/README.md) -- ce fichier est généré par `build-report.sh` à partir des `multiaxis/*.json` de chaque exécution, il reste donc toujours synchronisé avec les derniers artefacts de scoring.
+Le récit complet par harnais, les scores bruts et les captures d'écran sont maintenus dans [`benchmarks/README.md`](https://github.com/first-fluke/oh-my-agent/blob/main/benchmarks/README.md) -- ce fichier est généré par `build-report.sh` à partir des `multiaxis/*.json` de chaque exécution, il reste donc toujours synchronisé avec les derniers artefacts de scoring.

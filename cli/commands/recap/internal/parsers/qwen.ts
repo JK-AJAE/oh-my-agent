@@ -1,9 +1,16 @@
-import { createReadStream, existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { createInterface } from "node:readline";
 import { registerParser } from "../registry.js";
 import type { NormalizedEntry } from "../schema.js";
+import {
+  findResponse,
+  inWindow,
+  type PairMessage,
+  pathToProjectName,
+  preview,
+  streamJsonl,
+} from "./shared.js";
 
 const QWEN_BASE = join(homedir(), ".qwen", "projects");
 
@@ -27,6 +34,22 @@ function findChatFiles(): string[] {
   return files;
 }
 
+interface QwenRow {
+  type?: string;
+  timestamp?: string;
+  message?: { parts?: Array<{ text?: string }> };
+  cwd?: string;
+  sessionId?: string;
+  gitBranch?: string;
+}
+
+function rowText(row: QwenRow): string {
+  return (row.message?.parts || [])
+    .map((p) => p.text || "")
+    .filter(Boolean)
+    .join(" ");
+}
+
 registerParser({
   name: "qwen",
 
@@ -41,74 +64,38 @@ registerParser({
     const entries: NormalizedEntry[] = [];
 
     for (const file of files) {
-      // Collect all messages first for user→assistant pairing
-      const allMsgs: Array<{ type: string; row: Record<string, unknown> }> = [];
-      const rl = createInterface({
-        input: createReadStream(file),
-        crlfDelay: Number.POSITIVE_INFINITY,
-      });
-
-      for await (const line of rl) {
-        if (!line.trim()) continue;
-        try {
-          const row = JSON.parse(line);
-          if (row.type === "user" || row.type === "assistant") {
-            allMsgs.push({ type: row.type, row });
-          }
-        } catch {
-          // skip
-        }
+      // Collect user/assistant messages first for user→assistant pairing.
+      const msgs: QwenRow[] = [];
+      for await (const row of streamJsonl<QwenRow>(file)) {
+        if (row.type === "user" || row.type === "assistant") msgs.push(row);
       }
 
-      for (let i = 0; i < allMsgs.length; i++) {
-        const entry = allMsgs[i];
-        if (!entry) continue;
-        const { type, row } = entry;
-        if (type !== "user") continue;
+      const pairs: PairMessage[] = msgs.map((row) => ({
+        role: row.type === "user" ? "user" : "assistant",
+        text: rowText(row),
+      }));
 
-        const ts = (row as { timestamp?: string }).timestamp
-          ? new Date((row as { timestamp: string }).timestamp).getTime()
-          : 0;
-        if (Number.isNaN(ts) || ts < start || ts >= end) continue;
+      for (let i = 0; i < msgs.length; i++) {
+        const row = msgs[i];
+        if (!row || row.type !== "user") continue;
 
-        const parts =
-          (row as { message?: { parts?: Array<{ text?: string }> } }).message
-            ?.parts || [];
-        const text = parts
-          .map((p) => p.text || "")
-          .filter(Boolean)
-          .join(" ");
+        const ts = row.timestamp ? new Date(row.timestamp).getTime() : 0;
+        if (!inWindow(ts, start, end)) continue;
+
+        const text = rowText(row);
         if (!text) continue;
 
-        const project =
-          (row as { cwd?: string }).cwd?.split("/").pop() || undefined;
-
-        // Grab next assistant response
-        let response: string | undefined;
-        const next = allMsgs[i + 1];
-        if (next?.type === "assistant") {
-          const rParts =
-            (
-              next.row as {
-                message?: { parts?: Array<{ text?: string }> };
-              }
-            ).message?.parts || [];
-          const rText = rParts
-            .map((p) => p.text || "")
-            .filter(Boolean)
-            .join(" ");
-          if (rText) response = rText.slice(0, 200);
-        }
+        const response = findResponse(pairs, i, "immediate");
 
         entries.push({
           tool: "qwen",
           timestamp: ts,
-          project,
+          project: pathToProjectName(row.cwd),
           prompt: text,
-          response,
-          sessionId: (row as { sessionId?: string }).sessionId || undefined,
+          response: response ? preview(response) : undefined,
+          sessionId: row.sessionId || undefined,
           metadata: {
-            gitBranch: (row as { gitBranch?: string }).gitBranch || undefined,
+            gitBranch: row.gitBranch || undefined,
           },
         });
       }

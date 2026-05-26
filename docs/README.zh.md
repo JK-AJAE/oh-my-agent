@@ -1,6 +1,6 @@
 # oh-my-agent: Portable Multi-Agent Harness
 
-[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/JK-AJAE/oh-my-agent-custom?style=flat&logo=github)](https://github.com/JK-AJAE/oh-my-agent-custom) [![License](https://img.shields.io/github/license/JK-AJAE/oh-my-agent-custom)](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/JK-AJAE/oh-my-agent-custom?label=updated&logo=git)](https://github.com/JK-AJAE/oh-my-agent-custom/commits/main)
+[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/first-fluke/oh-my-agent?style=flat&logo=github)](https://github.com/first-fluke/oh-my-agent) [![License](https://img.shields.io/github/license/first-fluke/oh-my-agent)](https://github.com/first-fluke/oh-my-agent/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/first-fluke/oh-my-agent?label=updated&logo=git)](https://github.com/first-fluke/oh-my-agent/commits/main)
 
 [English](../README.md) | [한국어](./README.ko.md) | [Português](./README.pt.md) | [日本語](./README.ja.md) | [Français](./README.fr.md) | [Español](./README.es.md) | [Nederlands](./README.nl.md) | [Polski](./README.pl.md) | [Русский](./README.ru.md) | [Deutsch](./README.de.md) | [Tiếng Việt](./README.vi.md) | [ภาษาไทย](./README.th.md) 
 
@@ -14,12 +14,12 @@
 
 ```bash
 # macOS / Linux — 自动安装 bun、uv & serena
-curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell) — 自动安装 bun、uv & serena
-irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
 ```
 
 ```bash
@@ -37,10 +37,10 @@ bunx oh-my-agent@latest
 ```bash
 # 所有 skill，部署到检测到的每个 runtime
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
-apm install JK-AJAE/oh-my-agent-custom
+apm install first-fluke/oh-my-agent
 
 # 单个 skill
-apm install JK-AJAE/oh-my-agent-custom/.agents/skills/oma-frontend
+apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 ```
 
 APM 只分发 skill。workflow、规则、`oma-config.yaml`、关键词检测 hook 和 `oma agent:spawn` CLI 还是用 `bunx oh-my-agent@latest`。一个项目挑一种分发方式就好，免得跑偏。
@@ -123,34 +123,34 @@ APM 只分发 skill。workflow、规则、`oma-config.yaml`、关键词检测 ho
 
 | Agent | 职责 |
 |-------|------|
-| **oma-academic-writer** | 出版级学术英语文章的撰写、修订与基于评分量表的审计 |
-| **oma-architecture** | 架构权衡、边界划分，以及 ADR/ATAM/CBAM 视角下的分析 |
-| **oma-backend** | 用 Python、Node.js 或 Rust 开发 API |
-| **oma-brainstorm** | 动手之前先探索想法 |
-| **oma-db** | Schema 设计、迁移、索引、vector DB |
-| **oma-debug** | 根因分析、修复、回归测试 |
-| **oma-deepsec** | 智能体驱动的漏洞扫描器、PR 门禁、自定义 matcher |
-| **oma-design** | 设计系统、token、无障碍、响应式 |
-| **oma-dev-workflow** | CI/CD、发布、monorepo 自动化 |
-| **oma-docs** | 引用完整性检测、变更影响文档识别 |
-| **oma-frontend** | React/Next.js、TypeScript、Tailwind CSS v4、shadcn/ui |
-| **oma-hwp** | HWP/HWPX/HWPML 转 Markdown |
-| **oma-image** | 多供应商 AI 图像生成 |
-| **oma-market** | 基于社区信号的市场调研，覆盖 pain/trend/竞品/discovery 意图，自动套用 SWOT/5F/PESTEL |
-| **oma-mobile** | Flutter 跨平台应用 |
-| **oma-observability** | 涵盖 APM/RUM、指标/日志/追踪/Profile、SLO、事故取证、传输层调优的可观测性路由器 |
-| **oma-orchestrator** | 通过 CLI 并行执行 agent |
-| **oma-pdf** | PDF 转 Markdown |
-| **oma-pm** | 任务规划、需求拆解、API 契约定义 |
-| **oma-qa** | OWASP 安全、性能、无障碍审查 |
-| **oma-recap** | 会话历史分析与主题化工作摘要 |
-| **oma-scholar** | 涵盖文献检索与同行评审的学术研究伴侣 |
-| **oma-scm** | 软件配置管理（SCM），涵盖分支、合并、worktree、基线、Conventional Commits |
-| **oma-search** | 基于意图的搜索路由器，附带信任评分，覆盖文档、网页、代码、本地 |
+| **oma-academic-writer** | 将学术文章写到发表级别，涵盖起草、修订与审稿 |
+| **oma-architecture** | 权衡架构方案、划定模块边界，提供 ADR/ATAM/CBAM 分析 |
+| **oma-backend** | 用 Python、Node.js 或 Rust 构建并加固你的 API |
+| **oma-brainstorm** | 在动手之前，先和你一起把想法探索清楚 |
+| **oma-db** | 设计 schema、迁移、索引与 vector store |
+| **oma-debug** | 找到根因、修复 bug，并补上回归测试 |
+| **oma-deepsec** | 扫描代码中的安全漏洞，拦截高风险 pull request |
+| **oma-design** | 构建含 token、无障碍支持与响应式布局的设计系统 |
+| **oma-dev-workflow** | 自动化 CI/CD、发布流程与 monorepo 任务 |
+| **oma-docs** | 检查文档中的失效引用，并标出被代码变更波及的内容 |
+| **oma-frontend** | 用 React/Next.js、TypeScript、Tailwind CSS v4 与 shadcn/ui 构建 UI |
+| **oma-hwp** | 将 HWP、HWPX 和 HWPML 文件转换为 Markdown |
+| **oma-image** | 同时调用多家 AI 供应商生成图像 |
+| **oma-market** | 从社区信号中挖掘市场洞察，并套用 SWOT、Porter's 5F 和 PESTEL 框架呈现结论 |
+| **oma-mobile** | 用 Flutter 构建跨平台移动应用 |
+| **oma-observability** | 统一路由可观测性工作，覆盖指标、日志、追踪、SLO 与事故取证 |
+| **oma-orchestrator** | 通过 CLI 并行调度多个 agent |
+| **oma-pdf** | 将 PDF 文件转换为 Markdown |
+| **oma-pm** | 规划任务、拆解需求、定义 API 契约 |
+| **oma-qa** | 审查代码的 OWASP 安全性、性能与无障碍合规 |
+| **oma-recap** | 将会话历史整理成有主题分类的工作摘要 |
+| **oma-scholar** | 检索学术文献，协助开展同行评审 |
+| **oma-scm** | 管理分支、合并、worktree 与 Conventional Commits |
+| **oma-search** | 将每条查询路由至最优来源，并标注结果的可信度评分 |
 | **oma-skill-creator** | 以 SSL-lite 格式编写和审计 OMA skill |
-| **oma-tf-infra** | 多云 Terraform IaC（Infrastructure as Code，基础设施即代码） |
-| **oma-translator** | 自然的多语言翻译 |
-| **oma-voice** | 基于 Voicebox MCP 的本地优先 TTS/STT，覆盖语音生成、配音与转写 |
+| **oma-tf-infra** | 使用 Terraform 完成多云基础设施的自动化编排 |
+| **oma-translator** | 将内容翻译成目标语言，读来如同母语写就 |
+| **oma-voice** | 在本地完成语音合成与转写，无需任何云服务 |
 
 ## 工作原理
 
@@ -208,11 +208,11 @@ oma search fetch <url>      # 自动升级策略的机械搜索
 - 同厂商原生调度使用生成在 `.claude/agents/`、`.codex/agents/`、`.gemini/agents/` 里的厂商 agent 定义。
 - 跨厂商或 CLI 回退调度使用 `.agents/skills/oma-orchestrator/config/cli-config.yaml` 里的厂商默认值。
 
-**按 agent 配置模型**：可在 `.agents/oma-config.yaml` 里为每个 agent 单独指定模型和 `effort`。内置六个 runtime profiles：`claude`、`codex`、`gemini`、`qwen`、`cursor`、`mixed`。用 `oma doctor --profile` 查看解析后的 auth 矩阵。完整指南：[web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md)。
+**按 agent 配置模型**：可在 `.agents/oma-config.yaml` 里为每个 agent 单独指定模型和 `effort`。内置 runtime profiles：`antigravity`、`claude`、`codex`、`qwen`、`cursor`、`mixed`。用 `oma doctor --profile` 查看解析后的 auth 矩阵。完整指南：[web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md)。
 
 ## 为什么选 oh-my-agent？
 
-> [深入了解 →](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589)
+> [深入了解 →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
 
 - **可移植**：`.agents/` 跟着项目走，不被任何 IDE 绑定
 - **角色化**：像真正的工程团队一样建模，而不是一堆 prompt 的堆砌
@@ -277,7 +277,7 @@ flowchart TD
 
 - **[详细文档](./AGENTS_SPEC.md)**：完整技术规格和架构
 - **[支持的 Agent](./SUPPORTED_AGENTS.md)**：各 IDE 的 agent 支持情况
-- **[Web 文档](https://JK-AJAE.github.io/oh-my-agent/)**：指南、教程和 CLI 参考
+- **[Web 文档](https://first-fluke.github.io/oh-my-agent/)**：指南、教程和 CLI 参考
 
 ## 赞助
 
@@ -286,12 +286,12 @@ flowchart TD
 > **喜欢这个项目？** 给个 star 吧！
 >
 > ```bash
-> gh api --method PUT /user/starred/JK-AJAE/oh-my-agent-custom
+> gh api --method PUT /user/starred/first-fluke/oh-my-agent
 > ```
 >
-> 试试我们优化过的入门模板：[fullstack-starter](https://github.com/JK-AJAE/fullstack-starter)
+> 试试我们优化过的入门模板：[fullstack-starter](https://github.com/first-fluke/fullstack-starter)
 
-<a href="https://github.com/sponsors/JK-AJAE">
+<a href="https://github.com/sponsors/first-fluke">
   <img src="https://img.shields.io/badge/Sponsor-♥-ea4aaa?style=for-the-badge" alt="Sponsor" />
 </a>
 <a href="https://buymeacoffee.com/firstfluke">
@@ -310,7 +310,7 @@ flowchart TD
 
 <!-- Contributor tier ($10/mo) names here -->
 
-[成为赞助者 →](https://github.com/sponsors/JK-AJAE)
+[成为赞助者 →](https://github.com/sponsors/first-fluke)
 
 完整赞助者列表请查看 [SPONSORS.md](../SPONSORS.md)。
 
@@ -318,12 +318,13 @@ flowchart TD
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)](https://www.star-history.com/#JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)
+[![Star History Chart](https://api.star-history.com/svg?repos=first-fluke/oh-my-agent&type=date&legend=bottom-right)](https://www.star-history.com/#first-fluke/oh-my-agent&type=date&legend=bottom-right)
 
 
 ## 参考文献
 
 - Liang, Q., Wang, H., Liang, Z., & Liu, Y. (2026). *From skill text to skill structure: The scheduling-structural-logical representation for agent skills* (Version 2) [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2604.24026
+- Chen, C., Yu, Q., Gu, Y., Huang, Z., Li, H., Liu, H., Liu, S., Liu, J., Peng, D., Wang, J., Yan, Z., Meng, F., Qin, E., Che, C., & Hu, M. (2026). *The scaling laws of skills in LLM agent systems* (Version 1) [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2605.16508
 
 
 ## 许可证

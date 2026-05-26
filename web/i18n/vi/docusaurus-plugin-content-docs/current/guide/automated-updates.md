@@ -7,7 +7,7 @@ description: Tài liệu đầy đủ về GitHub Action cho oh-my-agent — thi
 
 ## Tổng quan
 
-GitHub Action oh-my-agent (`JK-AJAE/oma-update-action@v1`) tự động cập nhật skill agent của dự án bằng cách chạy `oma update` trong CI. Nó hỗ trợ hai chế độ: tạo pull request để xem xét, hoặc commit trực tiếp vào nhánh.
+GitHub Action oh-my-agent (`first-fluke/oma-update-action@v1`) tự động cập nhật skill agent của dự án bằng cách chạy `oma update` trong CI. Nó hỗ trợ hai chế độ: tạo pull request để xem xét, hoặc commit trực tiếp vào nhánh.
 
 ---
 
@@ -33,14 +33,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
 ```
 
 Đây là cấu hình tối thiểu. Nó tạo PR với cài đặt mặc định khi có phiên bản mới.
 
 ---
 
-## Tất cả input Action
+## Tất cả input action
 
 | Input | Kiểu | Bắt buộc | Mặc định | Mô tả |
 |:------|:-----|:---------|:--------|:-----------|
@@ -54,7 +54,7 @@ jobs:
 
 ---
 
-## Tất cả output Action
+## Tất cả output action
 
 | Output | Kiểu | Mô tả | Có sẵn |
 |:-------|:-----|:-----------|:----------|

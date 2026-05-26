@@ -7,7 +7,7 @@ description: Documentation complète du GitHub Action oh-my-agent — configurat
 
 ## Vue d'ensemble
 
-Le GitHub Action oh-my-agent (`JK-AJAE/oma-update-action@v1`) met automatiquement à jour les compétences d'agents de votre projet en exécutant `oma update` en CI. Il supporte deux modes : créer une pull request pour revue, ou commiter directement sur une branche.
+Le GitHub Action oh-my-agent (`first-fluke/oma-update-action@v1`) met automatiquement à jour les compétences d'agents de votre projet en exécutant `oma update` en CI. Il supporte deux modes : créer une pull request pour revue, ou commiter directement sur une branche.
 
 ---
 
@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
 ```
 
 That is the minimal configuration. It creates a PR with default settings when a new version is available.
@@ -42,7 +42,7 @@ That is the minimal configuration. It creates a PR with default settings when a 
 
 ## Toutes les Entrées de l'Action
 
-| Input | Type | Required | Default | Description |
+| Entrée | Type | Requis | Par défaut | Description |
 |:------|:-----|:---------|:--------|:-----------|
 | `mode` | string | No | `"pr"` | How to apply changes. `"pr"` creates a pull request. `"commit"` pushes directly to the base branch. |
 | `base-branch` | string | No | `"main"` | Base branch for the PR (in `pr` mode) or the target branch for direct commits (in `commit` mode). |
@@ -56,7 +56,7 @@ That is the minimal configuration. It creates a PR with default settings when a 
 
 ## Toutes les Sorties de l'Action
 
-| Output | Type | Description | Available |
+| Sortie | Type | Description | Disponibilité |
 |:-------|:-----|:-----------|:----------|
 | `updated` | string | `"true"` if changes were detected after running `oma update`. `"false"` if already up to date. | Always |
 | `version` | string | The oh-my-agent version after the update. Read from `.agents/skills/_version.json`. | When `updated` is `"true"` |
@@ -89,7 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
         id: update
 
       - name: Summary
@@ -130,7 +130,7 @@ jobs:
         with:
           token: ${{ secrets.OH_MY_AGENT_PAT }}
 
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
         with:
           mode: commit
           token: ${{ secrets.OH_MY_AGENT_PAT }}
@@ -168,7 +168,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
         id: update
 
       - name: Notify Slack
@@ -209,7 +209,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
         with:
           force: 'true'
           pr-title: "chore(deps): force-update oh-my-agent skills (reset configs)"

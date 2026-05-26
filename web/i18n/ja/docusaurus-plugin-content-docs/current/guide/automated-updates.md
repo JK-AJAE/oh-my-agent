@@ -7,7 +7,7 @@ description: oh-my-agent GitHub Actionの完全ドキュメント。セットア
 
 ## 概要
 
-oh-my-agent GitHub Action（`JK-AJAE/oma-update-action@v1`）は、CIで`oma update`を実行してプロジェクトのエージェントスキルを自動更新します。PRを作成してレビューするモードと、ブランチに直接コミットするモードをサポート。
+oh-my-agent GitHub Action（`first-fluke/oma-update-action@v1`）は、CIで`oma update`を実行してプロジェクトのエージェントスキルを自動更新します。PRを作成してレビューするモードと、ブランチに直接コミットするモードをサポート。
 
 ---
 
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: JK-AJAE/oma-update-action@v1
+      - uses: first-fluke/oma-update-action@v1
 ```
 
 ---
@@ -65,7 +65,7 @@ jobs:
 ### 例1：デフォルトPRモード
 
 ```yaml
-- uses: JK-AJAE/oma-update-action@v1
+- uses: first-fluke/oma-update-action@v1
   id: update
 - name: Summary
   if: steps.update.outputs.updated == 'true'
@@ -78,7 +78,7 @@ jobs:
 - uses: actions/checkout@v4
   with:
     token: ${{ secrets.OH_MY_AGENT_PAT }}
-- uses: JK-AJAE/oma-update-action@v1
+- uses: first-fluke/oma-update-action@v1
   with:
     mode: commit
     token: ${{ secrets.OH_MY_AGENT_PAT }}
@@ -88,7 +88,7 @@ jobs:
 ### 例3：Slack通知付き
 
 ```yaml
-- uses: JK-AJAE/oma-update-action@v1
+- uses: first-fluke/oma-update-action@v1
   id: update
 - name: Notify Slack
   if: steps.update.outputs.updated == 'true'
@@ -103,7 +103,7 @@ jobs:
 ### 例4：強制更新
 
 ```yaml
-- uses: JK-AJAE/oma-update-action@v1
+- uses: first-fluke/oma-update-action@v1
   with:
     force: 'true'
     pr-title: "chore(deps): force-update oh-my-agent skills (reset configs)"

@@ -55,7 +55,7 @@ export function readRules(baseDir: string): ParsedRule[] {
  * Generate .cursor/rules/*.mdc from SSOT.
  * Cursor uses: description, globs, alwaysApply frontmatter.
  */
-export function generateCursorRules(targetDir: string): string[] {
+export function applyCursorRules(targetDir: string): string[] {
   const rules = readRules(targetDir);
   if (rules.length === 0) return [];
 
@@ -153,7 +153,6 @@ const OMA_END = "<!-- OMA:END -->";
 const VENDOR_FILES: Record<string, string> = {
   claude: "CLAUDE.md",
   gemini: "GEMINI.md",
-  antigravity: "GEMINI.md",
   codex: "AGENTS.md",
   cursor: "AGENTS.md",
   qwen: "AGENTS.md",
@@ -164,8 +163,6 @@ const VENDOR_SPAWN: Record<string, string> = {
   claude:
     "Same-vendor native dispatch via Claude Code Agent tool with `.claude/agents/{name}.md`; cross-vendor fallback via `oma agent:spawn`",
   gemini:
-    "Same-vendor native dispatch via `.gemini/agents/{name}.md`; cross-vendor or unsupported cases fall back to `oma agent:spawn {agent} {prompt} {sessionId}`",
-  antigravity:
     "Same-vendor native dispatch via `.gemini/agents/{name}.md`; cross-vendor or unsupported cases fall back to `oma agent:spawn {agent} {prompt} {sessionId}`",
   cursor: "`@agent-name` (defined in `.cursor/agents/`)",
   codex:
@@ -178,8 +175,6 @@ const VENDOR_HOOKS: Record<string, string> = {
   claude:
     "Hooks: `UserPromptSubmit` (keyword detection), `PreToolUse`, `Stop` (persistent mode)",
   gemini:
-    "Hooks: `BeforeAgent` (keyword detection), `BeforeTool`, `AfterAgent` (persistent mode)",
-  antigravity:
     "Hooks: `BeforeAgent` (keyword detection), `BeforeTool`, `AfterAgent` (persistent mode)",
   codex:
     "Hooks: `UserPromptSubmit` (keyword detection), `PreToolUse`, `Stop` (persistent mode)",

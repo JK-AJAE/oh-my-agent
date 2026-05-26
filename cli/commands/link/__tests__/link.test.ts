@@ -3,20 +3,25 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../../../utils/safe-write.js", () => ({
+  safeWriteJson: vi.fn(),
+}));
+
 let configuredVendorsForTest: string[] = [];
 let agyInstalledResult: { installed: boolean; reason?: string } = {
   installed: true,
 };
 
 vi.mock("../../../platform/rules.js", () => ({
-  generateCursorRules: vi.fn(() => []),
+  applyCursorRules: vi.fn(() => []),
   mergeRulesIndexForVendor: vi.fn(() => true),
 }));
 
 vi.mock("../../../platform/skills-installer.js", () => ({
+  createVendorSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
   createCliSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
   detectExistingCliSymlinkDirs: vi.fn(() => []),
-  ensureCursorMcpConfig: vi.fn(),
+  applyCursorMcpConfig: vi.fn(),
   getInstalledSkillNames: vi.fn(() => []),
   installCodexWorkflowSkills: vi.fn(),
   installCopilotWorkflowPrompts: vi.fn(),
@@ -38,35 +43,38 @@ vi.mock("../../../vendors/antigravity/hud.js", () => ({
 }));
 
 vi.mock("../../../vendors/claude/mcp.js", () => ({
-  applyRecommendedClaudeMcp: vi.fn((mcp: unknown) => mcp),
+  applyClaudeMcp: vi.fn((mcp: unknown) => mcp),
   needsClaudeMcpUpdate: vi.fn(() => false),
 }));
 
 vi.mock("../../../vendors/claude/settings.js", () => ({
-  applyRecommendedSettings: vi.fn(),
-  needsSettingsUpdate: vi.fn(() => false),
+  applyClaudeSettings: vi.fn(),
+  needsClaudeSettingsUpdate: vi.fn(() => false),
 }));
 
 vi.mock("../../../vendors/codex/settings.js", () => ({
-  applyRecommendedCodexSettings: vi.fn((s: unknown) => s),
+  applyCodexSettings: vi.fn((s: unknown) => s),
   needsCodexSettingsUpdate: vi.fn(() => false),
   parseCodexConfig: vi.fn(() => ({})),
   serializeCodexConfig: vi.fn(() => ""),
 }));
 
 vi.mock("../../../vendors/gemini/settings.js", () => ({
-  applyRecommendedGeminiSettings: vi.fn(),
+  applyGeminiSettings: vi.fn(),
   needsGeminiSettingsUpdate: vi.fn(() => false),
 }));
 
 vi.mock("../../../vendors/qwen/settings.js", () => ({
-  applyRecommendedQwenSettings: vi.fn((s: unknown) => s),
+  applyQwenSettings: vi.fn((s: unknown) => s),
   needsQwenSettingsUpdate: vi.fn(() => false),
 }));
 
 import * as skills from "../../../platform/skills-installer.js";
+import * as safeWrite from "../../../utils/safe-write.js";
 import * as antigravity from "../../../vendors/antigravity/hud.js";
+import * as claudeMcp from "../../../vendors/claude/mcp.js";
 import * as gemini from "../../../vendors/gemini/settings.js";
+import * as qwen from "../../../vendors/qwen/settings.js";
 import { link } from "../link.js";
 
 describe("link kernel", () => {
@@ -184,6 +192,11 @@ describe("link kernel", () => {
       expect(antigravity.installAntigravityHud).toHaveBeenCalledWith(
         expect.stringContaining(projectDir),
       );
+      expect(skills.installVendorAdaptations).toHaveBeenCalledWith(
+        expect.stringContaining(projectDir),
+        expect.stringContaining(projectDir),
+        ["claude"],
+      );
       expect(result.agyInstalled).toBe(true);
     });
 
@@ -262,16 +275,16 @@ describe("link kernel", () => {
   });
 
   describe("refreshSymlinks toggle", () => {
-    it("does not call createCliSymlinks when refreshSymlinks is false", () => {
+    it("does not call createVendorSymlinks when refreshSymlinks is false", () => {
       const projectDir = makeProject(["claude"]);
       process.chdir(projectDir);
 
       link({ quiet: true, refreshSymlinks: false });
 
-      expect(skills.createCliSymlinks).not.toHaveBeenCalled();
+      expect(skills.createVendorSymlinks).not.toHaveBeenCalled();
     });
 
-    it("calls createCliSymlinks by default when symlink dirs and skills exist", () => {
+    it("calls createVendorSymlinks by default when symlink dirs and skills exist", () => {
       (
         skills.detectExistingCliSymlinkDirs as unknown as ReturnType<
           typeof vi.fn
@@ -285,7 +298,7 @@ describe("link kernel", () => {
 
       link({ quiet: true });
 
-      expect(skills.createCliSymlinks).toHaveBeenCalled();
+      expect(skills.createVendorSymlinks).toHaveBeenCalled();
     });
   });
 
@@ -300,6 +313,80 @@ describe("link kernel", () => {
       // and link dedupes by target file (CLAUDE.md / AGENTS.md / GEMINI.md).
       expect(result.mergedDocs).toContain("CLAUDE.md");
       expect(result.mergedDocs).toContain("AGENTS.md");
+    });
+  });
+
+  describe("safeWriteJson routing", () => {
+    it("calls safeWriteJson for Claude .mcp.json (NOT .claude.json) when update is needed", () => {
+      (
+        claudeMcp.needsClaudeMcpUpdate as ReturnType<typeof vi.fn>
+      ).mockReturnValueOnce(true);
+
+      const projectDir = makeProject(["claude"]);
+      process.chdir(projectDir);
+
+      link({ quiet: true });
+
+      const calls = (
+        safeWrite.safeWriteJson as ReturnType<typeof vi.fn>
+      ).mock.calls.map((args: unknown[]) => args[0] as string);
+      const mcpCall = calls.find((p: string) => p.endsWith(".mcp.json"));
+      expect(mcpCall).toBeDefined();
+      const forbidden = calls.find((p: string) => p.endsWith(".claude.json"));
+      expect(forbidden).toBeUndefined();
+    });
+
+    it("calls safeWriteJson for Gemini settings.json when update is needed", () => {
+      (
+        gemini.needsGeminiSettingsUpdate as ReturnType<typeof vi.fn>
+      ).mockReturnValueOnce(true);
+
+      const projectDir = makeProject(["gemini"]);
+      process.chdir(projectDir);
+
+      link({ quiet: true });
+
+      const calls = (
+        safeWrite.safeWriteJson as ReturnType<typeof vi.fn>
+      ).mock.calls.map((args: unknown[]) => args[0] as string);
+      expect(
+        calls.some(
+          (p: string) => p.includes(".gemini") && p.endsWith("settings.json"),
+        ),
+      ).toBe(true);
+    });
+
+    it("calls safeWriteJson for Qwen settings.json when update is needed", () => {
+      (
+        qwen.needsQwenSettingsUpdate as ReturnType<typeof vi.fn>
+      ).mockReturnValueOnce(true);
+
+      const projectDir = makeProject(["qwen"]);
+      process.chdir(projectDir);
+
+      link({ quiet: true });
+
+      const calls = (
+        safeWrite.safeWriteJson as ReturnType<typeof vi.fn>
+      ).mock.calls.map((args: unknown[]) => args[0] as string);
+      expect(
+        calls.some(
+          (p: string) => p.includes(".qwen") && p.endsWith("settings.json"),
+        ),
+      ).toBe(true);
+    });
+
+    it("never calls safeWriteJson with .claude.json for any vendor", () => {
+      const projectDir = makeProject(["claude", "gemini", "qwen", "codex"]);
+      process.chdir(projectDir);
+
+      link({ quiet: true });
+
+      const calls = (
+        safeWrite.safeWriteJson as ReturnType<typeof vi.fn>
+      ).mock.calls.map((args: unknown[]) => args[0] as string);
+      const forbidden = calls.find((p: string) => p.endsWith(".claude.json"));
+      expect(forbidden).toBeUndefined();
     });
   });
 });

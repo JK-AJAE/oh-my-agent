@@ -5,36 +5,12 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve, dirname } from "node:path";
-import { execSync } from "node:child_process";
+import { join } from "node:path";
 import {
   parseFrontmatter,
   serializeFrontmatter,
 } from "../utils/frontmatter.js";
 import type { Difficulty } from "./context-loader.js";
-import { SKILLS } from "../constants/skill-data.js";
-import {
-  generateCursorRules,
-  generateClaudeRules,
-  mergeRulesIndexForVendor,
-} from "./rules.js";
-import { webScraper, skillWriter } from "./tools/selfEvolution.js";
-
-
-// =============================================================================
-// Spec path resolution (V6 자율 진화 플랜)
-// Priority 1: HARNESS_SPEC_PATH env var
-// Priority 2: E:/harness-library/my_old_harness_spec.md (절대 경로)
-// Priority 3: repoRoot-relative (레거시 fallback)
-// =============================================================================
-export function resolveSpecPath(repoRoot: string): string {
-  if (process.env.HARNESS_SPEC_PATH) {
-    return resolve(process.env.HARNESS_SPEC_PATH);
-  }
-  const absoluteDefault = resolve("E:/harness-library/my_old_harness_spec.md");
-  if (existsSync(absoluteDefault)) return absoluteDefault;
-  return join(repoRoot, "my_old_harness_spec.md");
-}
 
 // =============================================================================
 // Agent Tool Mapping (Abstract -> Vendor-specific)
@@ -50,8 +26,6 @@ export const TOOL_MAPPING: Record<string, Record<string, string>> = {
     glob: "glob",
     ask: "ask_user",
     memory: "save_memory",
-    webscraper: "webScraper",
-    skillwriter: "skillWriter",
   },
   claude: {
     read: "Read",
@@ -60,8 +34,6 @@ export const TOOL_MAPPING: Record<string, Record<string, string>> = {
     bash: "Bash",
     grep: "Grep",
     glob: "Glob",
-    webscraper: "webScraper",
-    skillwriter: "skillWriter",
   },
   cursor: {
     read: "read_file",
@@ -70,8 +42,6 @@ export const TOOL_MAPPING: Record<string, Record<string, string>> = {
     bash: "run_shell_command",
     grep: "grep_search",
     glob: "glob",
-    webscraper: "webScraper",
-    skillwriter: "skillWriter",
   },
 };
 
@@ -188,164 +158,12 @@ function readAbstractAgentDefinitions(
     });
 }
 
-export class MissingAssetError extends Error {
-  public query: string;
-  constructor(query: string) {
-    super(`Missing Asset: No matching skills or harnesses found in the registry for query "${query}".`);
-    this.query = query;
-    this.name = "MissingAssetError";
-  }
-}
-
-export function matchSkillsForIntent(intent: string): string[] {
-  const query = intent.toLowerCase().trim();
-  if (!query) return [];
-
-  const matched = new Set<string>();
-  const tokens = query.split(/\s+/).filter((t) => t.length > 1);
-  if (tokens.length === 0) return [];
-
-  const categories = Object.values(SKILLS);
-  for (const categoryList of categories) {
-    if (!Array.isArray(categoryList)) continue;
-    for (const skill of categoryList) {
-      if (!skill || typeof skill !== "object") continue;
-      const name = String((skill as any).name || "").toLowerCase();
-      const desc = String((skill as any).desc || "").toLowerCase();
-
-      if (name.includes(query) || query.includes(name)) {
-        matched.add(String((skill as any).name));
-      } else {
-        const matchesToken = tokens.some((t) => name.includes(t) || desc.includes(t));
-        if (matchesToken) {
-          matched.add(String((skill as any).name));
-        }
-      }
-    }
-  }
-
-  const result = Array.from(matched);
-  if (result.length === 0) {
-    throw new MissingAssetError(intent);
-  }
-  return result;
-}
-
-export function selfMutateSkill(query: string, targetDir: string = process.cwd()): string {
-  console.log(`[self-mutation] Missing Asset detected for "${query}". Initializing self-mutation loop...`);
-
-  const skillId = `dynamic-${query.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 50)}`;
-  const description = `Dynamic self-evolved skill for handling: ${query}. Generated via OMA Self-Mutation loop.`;
-  const timestamp = new Date().toISOString();
-
-  const skillBody = `---
-name: ${skillId}
-description: "${description}"
-category: utility
-created: "${timestamp}"
----
-
-# 🤖 Dynamic Self-Evolved Skill: ${query}
-
-## Context & Trend Overview
-Automatically generated to fulfill intent: "${query}".
-Analyzed current repository architecture and matched against latest development trends.
-
-## Instructions
-1. Automatically follow guidelines for ${query}.
-2. Follow standard OMA protocols for self-correction.
-3. Validate output syntax and logic consistency.
-`;
-
-  const skillsDir = join(targetDir, ".agents", "skills", skillId);
-  mkdirSync(skillsDir, { recursive: true });
-  writeFileSync(join(skillsDir, "SKILL.md"), skillBody, "utf-8");
-
-  // Re-run generate-skill-data.mjs to update the database index
-  try {
-    const candidates = [
-      join(targetDir, "cli", "scripts", "generate-skill-data.mjs"),
-      join(targetDir, "scripts", "generate-skill-data.mjs"),
-      join(dirname(targetDir), "cli", "scripts", "generate-skill-data.mjs"),
-    ];
-    const scriptPath = candidates.find((p) => existsSync(p));
-    if (scriptPath) {
-      execSync(`node "${scriptPath}"`, { stdio: "inherit" });
-    } else {
-      console.warn(`[self-mutation] generate-skill-data.mjs not found in any candidate path.`);
-    }
-  } catch (err) {
-    console.error(`[self-mutation] Failed to run generate-skill-data:`, err);
-  }
-
-  // Create corresponding dynamic rule in .agents/rules/
-  const ruleId = `dynamic-rule-${query.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 50)}`;
-  const ruleBody = `---
-description: "Dynamic self-evolved rule for handling: ${query}"
-globs: "*"
-alwaysApply: true
----
-
-# Dynamic Rule: ${query}
-- Enforce strict adherence to ${query} guidelines.
-`;
-
-  const rulesDir = join(targetDir, ".agents", "rules");
-  mkdirSync(rulesDir, { recursive: true });
-  writeFileSync(join(rulesDir, `${ruleId}.md`), ruleBody, "utf-8");
-
-  // Re-merge rules for all vendors
-  try {
-    generateCursorRules(targetDir);
-    generateClaudeRules(targetDir);
-    for (const v of ["gemini", "claude", "codex", "cursor", "qwen", "antigravity"]) {
-      mergeRulesIndexForVendor(targetDir, v);
-    }
-  } catch (err) {
-    console.error(`[self-mutation] Failed to regenerate rules:`, err);
-  }
-
-  // Update evolution-registry.json
-  const registryPath = join(targetDir, ".agents", "evolution-registry.json");
-  let registry: { skills: any[]; rules: any[] } = { skills: [], rules: [] };
-  try {
-    if (existsSync(registryPath)) {
-      registry = JSON.parse(readFileSync(registryPath, "utf-8"));
-    }
-  } catch {}
-
-  if (!registry.skills) registry.skills = [];
-  if (!registry.rules) registry.rules = [];
-
-  if (!registry.skills.some((s: any) => s.name === skillId)) {
-    registry.skills.push({
-      name: skillId,
-      description,
-      timestamp,
-    });
-  }
-
-  if (!registry.rules.some((r: any) => r.name === ruleId)) {
-    registry.rules.push({
-      name: ruleId,
-      description: `Dynamic self-evolved rule for handling: ${query}`,
-      timestamp,
-    });
-  }
-
-  writeFileSync(registryPath, JSON.stringify(registry, null, 2), "utf-8");
-
-  console.log(`[self-mutation] Successfully generated and registered dynamic skill: ${skillId}`);
-  return skillId;
-}
-
 function buildMarkdownAgentFile(
   definition: AbstractAgentDefinition,
   variant: AgentVariant,
   config: AgentConfig,
   vendor: string,
   difficulty?: Difficulty,
-  userIntent?: string,
 ): { fileName: string; content: string } {
   const { agentKey, entry, frontmatter, body } = definition;
   const mapping = TOOL_MAPPING[vendor] || {};
@@ -385,35 +203,15 @@ function buildMarkdownAgentFile(
     fm[getTimeoutField(vendor)] = config.timeoutMins;
   }
   if (config.mcpServers) fm.mcpServers = config.mcpServers;
-
-  let dynamicSkills: string[] = [];
-  if (userIntent) {
-    try {
-      dynamicSkills = matchSkillsForIntent(userIntent);
-    } catch (err) {
-      if (err instanceof MissingAssetError) {
-        const mutatedSkill = selfMutateSkill(userIntent);
-        dynamicSkills = [mutatedSkill];
-      } else {
-        throw err;
-      }
-    }
-  }
-
-  const existingSkills = Array.isArray(frontmatter.skills)
-    ? frontmatter.skills.map((s) => String(s))
-    : [];
-  const mergedSkills = Array.from(new Set([...existingSkills, ...dynamicSkills]));
-
-  if (mergedSkills.length > 0 && supportsSkillsFrontmatter(vendor)) {
-    fm.skills = mergedSkills;
+  if (frontmatter.skills && supportsSkillsFrontmatter(vendor)) {
+    fm.skills = frontmatter.skills;
   }
   if (config.extra) {
     Object.assign(fm, config.extra);
   }
 
   const geminiSkillReferences =
-    vendor === "gemini" ? buildGeminiSkillReferences(mergedSkills) : "";
+    vendor === "gemini" ? buildGeminiSkillReferences(frontmatter.skills) : "";
   // T16: strip CHARTER_CHECK block for Simple tasks to save ~200 tokens per spawn.
   // Default (difficulty undefined or Medium/Complex) preserves the block.
   const effectiveBody =
@@ -431,7 +229,6 @@ function buildCodexAgentFile(
   definition: AbstractAgentDefinition,
   variant: AgentVariant,
   config: AgentConfig,
-  userIntent?: string,
 ): { fileName: string; content: string } {
   const { agentKey, entry, frontmatter, body } = definition;
   const name = (frontmatter.name as string) || agentKey;
@@ -447,25 +244,9 @@ function buildCodexAgentFile(
       ? config.extra.sandbox_mode
       : "workspace-write";
   const finalBody = formatAgentBody(body, variant.protocolPath);
-
-  let dynamicSkills: string[] = [];
-  if (userIntent) {
-    try {
-      dynamicSkills = matchSkillsForIntent(userIntent);
-    } catch (err) {
-      if (err instanceof MissingAssetError) {
-        const mutatedSkill = selfMutateSkill(userIntent);
-        dynamicSkills = [mutatedSkill];
-      } else {
-        throw err;
-      }
-    }
-  }
-
-  const existingSkills = Array.isArray(frontmatter.skills)
+  const skills = Array.isArray(frontmatter.skills)
     ? frontmatter.skills.map((skill) => String(skill)).filter(Boolean)
     : [];
-  const skills = Array.from(new Set([...existingSkills, ...dynamicSkills]));
 
   const lines = [
     `# Generated by oh-my-agent CLI. Source: .agents/agents/${entry}`,
@@ -552,7 +333,7 @@ const ALLOWED_FIELDS: Record<string, readonly string[]> = {
     "timeout_mins",
     "kind",
   ],
-  antigravity: ["name", "description", "model", "tools", "maxTurns", "skills"],
+  antigravity: ["name", "description", "model"],
   qwen: ["name", "description", "model", "thinking"],
 };
 
@@ -603,7 +384,6 @@ export function installVendorAgents(
   sourceDir: string,
   targetDir: string,
   vendor: string,
-  userIntent?: string,
 ): void {
   const agentsSrcDir = join(sourceDir, ".agents", "agents");
   const variantPath = join(agentsSrcDir, "variants", `${vendor}.json`);
@@ -620,20 +400,9 @@ export function installVendorAgents(
     const config = variant.agents[definition.agentKey] || {};
     const output =
       vendor === "codex"
-        ? buildCodexAgentFile(definition, variant, config, userIntent)
-        : buildMarkdownAgentFile(definition, variant, config, vendor, undefined, userIntent);
+        ? buildCodexAgentFile(definition, variant, config)
+        : buildMarkdownAgentFile(definition, variant, config, vendor);
 
     writeFileSync(join(destDir, output.fileName), output.content);
   }
 }
-
-// =============================================================================
-// Self-Evolution Tool Binding
-// =============================================================================
-export function getEvolutionTools(repoRoot: string) {
-  return {
-    webScraper,
-    skillWriter: (payload: any) => skillWriter(payload, repoRoot),
-  };
-}
-

@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join, relative, resolve, sep } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import {
   ALL_CLI_VENDORS,
   CLI_SKILLS_DIR,
@@ -16,6 +16,8 @@ import type {
 import { clearNonDirectory } from "../utils/fs-utils.js";
 import { applyRecommendedCursorSettings } from "../vendors/cursor/settings.js";
 import { createLink } from "./fs-link.js";
+import { getInstallMode } from "./install-context.js";
+import { installUnifiedWorkflowSkills } from "./workflow-skills.js";
 
 export * from "../constants/index.js";
 export type { CliTool, CliVendor, SkillInfo } from "../types/index.js";
@@ -26,8 +28,8 @@ export * from "./hooks-composer.js";
 export * from "./vendor-adapter.js";
 
 /** Read selected vendors from oma-config.yaml. Falls back to all vendors. */
-export function readVendorsFromConfig(targetDir: string): CliVendor[] {
-  const configPath = join(targetDir, ".agents", "oma-config.yaml");
+export function readVendorsFromConfig(installRoot: string): CliVendor[] {
+  const configPath = join(installRoot, ".agents", "oma-config.yaml");
   if (!fs.existsSync(configPath)) return [...ALL_CLI_VENDORS];
 
   const content = fs.readFileSync(configPath, "utf-8");
@@ -42,10 +44,10 @@ export function readVendorsFromConfig(targetDir: string): CliVendor[] {
 
 /** Write selected vendors to oma-config.yaml. */
 export function writeVendorsToConfig(
-  targetDir: string,
+  installRoot: string,
   vendors: CliVendor[],
 ): void {
-  const configPath = join(targetDir, ".agents", "oma-config.yaml");
+  const configPath = join(installRoot, ".agents", "oma-config.yaml");
   if (!fs.existsSync(configPath)) return;
 
   let content = fs.readFileSync(configPath, "utf-8");
@@ -66,13 +68,13 @@ export function writeVendorsToConfig(
 export function installSkill(
   sourceDir: string,
   skillName: string,
-  targetDir: string,
+  installRoot: string,
   variant?: string,
 ): boolean {
   const src = join(sourceDir, ".agents", "skills", skillName);
   if (!fs.existsSync(src)) return false;
 
-  const dest = join(targetDir, INSTALLED_SKILLS_DIR, skillName);
+  const dest = join(installRoot, INSTALLED_SKILLS_DIR, skillName);
   clearNonDirectory(dest);
   fs.mkdirSync(dest, { recursive: true });
   fs.cpSync(src, dest, { recursive: true, force: true });
@@ -100,21 +102,21 @@ export function installSkill(
   return true;
 }
 
-export function installShared(sourceDir: string, targetDir: string): void {
+export function installShared(sourceDir: string, installRoot: string): void {
   const src = join(sourceDir, ".agents", "skills", "_shared");
   if (!fs.existsSync(src)) return;
 
-  const dest = join(targetDir, INSTALLED_SKILLS_DIR, "_shared");
+  const dest = join(installRoot, INSTALLED_SKILLS_DIR, "_shared");
   clearNonDirectory(dest);
   fs.mkdirSync(dest, { recursive: true });
   fs.cpSync(src, dest, { recursive: true, force: true });
 }
 
-export function installWorkflows(sourceDir: string, targetDir: string): void {
+export function installWorkflows(sourceDir: string, installRoot: string): void {
   const src = join(sourceDir, ".agents", "workflows");
   if (!fs.existsSync(src)) return;
 
-  const dest = join(targetDir, ".agents", "workflows");
+  const dest = join(installRoot, ".agents", "workflows");
   clearNonDirectory(dest);
   fs.mkdirSync(dest, { recursive: true });
   fs.cpSync(src, dest, { recursive: true, force: true });
@@ -144,57 +146,24 @@ function listWorkflowNames(workflowsDir: string): string[] {
 }
 
 /**
- * Mirror `.agents/workflows/*.md` into `.codex/skills/<name>/SKILL.md` wrappers so
- * Codex CLI can invoke workflows via `$<name>`. Prunes stale oma-generated
- * wrappers whose workflow no longer exists in SSOT; never touches
- * user-authored skills (those lack the oma:generated marker).
+ * Mirror `.agents/workflows/*.md` into canonical `.agents/skills/<name>/SKILL.md`
+ * wrappers (via the unified installer). The Codex-specific `.codex/skills/<n>`
+ * symlink is created by the symlink layer (`createVendorSymlinks`).
  */
 export function installCodexWorkflowSkills(
   sourceDir: string,
-  targetDir: string,
+  installRoot: string,
 ): void {
-  const workflowsDir = join(sourceDir, ".agents", "workflows");
-  const skillsRoot = join(targetDir, ".codex", "skills");
-  const names = listWorkflowNames(workflowsDir);
-
-  if (fs.existsSync(skillsRoot)) {
-    for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const skillDir = join(skillsRoot, entry.name);
-      const skillFile = join(skillDir, "SKILL.md");
-      if (!fs.existsSync(skillFile)) continue;
-      let existing: string;
-      try {
-        existing = fs.readFileSync(skillFile, "utf-8");
-      } catch {
-        continue;
-      }
-      if (!existing.includes(CODEX_WRAPPER_MARKER)) continue;
-      if (!names.includes(entry.name)) {
-        fs.rmSync(skillDir, { recursive: true, force: true });
-      }
-    }
-  }
-
-  if (names.length === 0) return;
-
-  fs.mkdirSync(skillsRoot, { recursive: true });
-  for (const name of names) {
-    const description =
-      extractWorkflowDescription(join(workflowsDir, `${name}.md`)) ??
-      `Workflow: ${name}`;
-    const skillDir = join(skillsRoot, name);
-    const skillFile = join(skillDir, "SKILL.md");
-    clearNonDirectory(skillDir);
-    fs.mkdirSync(skillDir, { recursive: true });
-    const body = `---\nname: ${name}\ndescription: ${description}\n---\n${CODEX_WRAPPER_MARKER}\n\nRead and follow \`.agents/workflows/${name}.md\` step by step.\n`;
-    fs.writeFileSync(skillFile, body);
-  }
+  installUnifiedWorkflowSkills(sourceDir, installRoot);
 }
 
 /**
- * Mirror `.agents/workflows/*.md` into `.github/prompts/<name>.prompt.md`
+ * Mirror `.agents/workflows/*.md` into canonical `.agents/skills/<name>/SKILL.md`
+ * (via the unified installer) and also into `.github/prompts/<name>.prompt.md`
  * wrappers so GitHub Copilot Chat can invoke workflows via slash commands.
+ * The `.prompt.md` format uses a markdown-link body that cannot be replicated
+ * by symlinks, so the Copilot-specific write is kept here.
+ *
  * Prunes stale oma-generated prompts whose workflow no longer exists in SSOT;
  * never touches user-authored prompts (those lack the oma:generated marker).
  *
@@ -204,10 +173,12 @@ export function installCodexWorkflowSkills(
  */
 export function installCopilotWorkflowPrompts(
   sourceDir: string,
-  targetDir: string,
+  installRoot: string,
 ): void {
+  installUnifiedWorkflowSkills(sourceDir, installRoot);
+
   const workflowsDir = join(sourceDir, ".agents", "workflows");
-  const promptsRoot = join(targetDir, ".github", "prompts");
+  const promptsRoot = join(installRoot, ".github", "prompts");
   const names = listWorkflowNames(workflowsDir);
 
   if (fs.existsSync(promptsRoot)) {
@@ -241,11 +212,11 @@ export function installCopilotWorkflowPrompts(
   }
 }
 
-export function installRules(sourceDir: string, targetDir: string): void {
+export function installRules(sourceDir: string, installRoot: string): void {
   const src = join(sourceDir, ".agents", "rules");
   if (!fs.existsSync(src)) return;
 
-  const dest = join(targetDir, ".agents", "rules");
+  const dest = join(installRoot, ".agents", "rules");
   clearNonDirectory(dest);
   fs.mkdirSync(dest, { recursive: true });
   fs.cpSync(src, dest, { recursive: true, force: true });
@@ -253,12 +224,12 @@ export function installRules(sourceDir: string, targetDir: string): void {
 
 export function installConfigs(
   sourceDir: string,
-  targetDir: string,
+  installRoot: string,
   force = false,
 ): void {
   const configSrc = join(sourceDir, ".agents", "config");
   if (fs.existsSync(configSrc)) {
-    const configDest = join(targetDir, ".agents", "config");
+    const configDest = join(installRoot, ".agents", "config");
     fs.mkdirSync(configDest, { recursive: true });
 
     if (force) {
@@ -282,7 +253,7 @@ export function installConfigs(
 
   const mcpSrc = join(sourceDir, ".agents", "mcp.json");
   if (fs.existsSync(mcpSrc)) {
-    const agentDir = join(targetDir, ".agents");
+    const agentDir = join(installRoot, ".agents");
     fs.mkdirSync(agentDir, { recursive: true });
     const mcpDest = join(agentDir, "mcp.json");
     if (force || !fs.existsSync(mcpDest)) {
@@ -295,7 +266,7 @@ export function installConfigs(
   // preserved unless `force` is true.
   const omaConfigSrc = join(sourceDir, ".agents", "oma-config.yaml");
   if (fs.existsSync(omaConfigSrc)) {
-    const agentDir = join(targetDir, ".agents");
+    const agentDir = join(installRoot, ".agents");
     fs.mkdirSync(agentDir, { recursive: true });
     const omaConfigDest = join(agentDir, "oma-config.yaml");
     if (force || !fs.existsSync(omaConfigDest)) {
@@ -305,7 +276,7 @@ export function installConfigs(
 }
 
 export function installGlobalWorkflows(sourceDir: string): void {
-  const homeDir = process.env.HOME || process.env.USERPROFILE || "";
+  const homeDir = homedir();
   const dest = join(homeDir, ".gemini", "antigravity", "global_workflows");
   const src = join(sourceDir, ".agents", "workflows");
   if (!fs.existsSync(src)) return;
@@ -332,11 +303,11 @@ export function getAllSkills(): SkillInfo[] {
  *
  * Skips if `.agents/mcp.json` is missing.
  */
-export function ensureCursorMcpConfig(targetDir: string): void {
-  const agentsMcp = join(targetDir, ".agents", "mcp.json");
+export function applyCursorMcpConfig(installRoot: string): void {
+  const agentsMcp = join(installRoot, ".agents", "mcp.json");
   if (!fs.existsSync(agentsMcp)) return;
 
-  const cursorDir = join(targetDir, ".cursor");
+  const cursorDir = join(installRoot, ".cursor");
   const cursorMcp = join(cursorDir, "mcp.json");
 
   let baseConfig: Record<string, unknown> = {};
@@ -371,11 +342,11 @@ export function ensureCursorMcpConfig(targetDir: string): void {
 }
 
 /**
- * @deprecated Replaced by `ensureCursorMcpConfig`. Kept as a thin alias for
+ * @deprecated Replaced by `applyCursorMcpConfig`. Kept as a thin alias for
  * any external consumers; will be removed in a future major.
  */
-export function ensureCursorMcpSymlink(targetDir: string): void {
-  ensureCursorMcpConfig(targetDir);
+export function applyCursorMcpSymlink(installRoot: string): void {
+  applyCursorMcpConfig(installRoot);
 }
 
 /**
@@ -383,12 +354,12 @@ export function ensureCursorMcpSymlink(targetDir: string): void {
  */
 export function installClaudeSkills(
   sourceDir: string,
-  targetDir: string,
+  installRoot: string,
 ): void {
   const srcSkills = join(sourceDir, ".claude", "skills");
   const srcAgents = join(sourceDir, ".claude", "agents");
-  const destSkills = join(targetDir, ".claude", "skills");
-  const destAgents = join(targetDir, ".claude", "agents");
+  const destSkills = join(installRoot, ".claude", "skills");
+  const destAgents = join(installRoot, ".claude", "agents");
 
   if (fs.existsSync(srcSkills)) {
     clearNonDirectory(destSkills);
@@ -428,14 +399,50 @@ export function isHookVendor(v: CliVendor): v is VendorType {
 /**
  * Resolve the absolute directory where vendor skill symlinks should live.
  *
- * Project-base vendors live under `targetDir`; home-base vendors live under
- * the user's HOME directory. This is the only path that produces HOME paths
- * and is the trust boundary for HOME writes.
+ * Mode-aware: when the active install context is "global", uses `spec.homePath`
+ * under `installRoot` (= homedir() for global mode). Otherwise uses
+ * `spec.projectPath`. Vendors with `requiresHomeConsent` always resolve under
+ * the user's HOME regardless of mode (matches hermes legacy semantics).
+ *
+ * This is the canonical mode-aware resolver. `resolveCliSkillsDir` is a
+ * compat shim retained for callers that pass `targetDir` explicitly.
  */
-function resolveCliSkillsDir(targetDir: string, cli: CliTool): string {
+export function vendorSkillsDir(cli: CliTool, installRoot: string): string {
   const spec = CLI_SKILLS_DIR[cli];
-  const root = spec.base === "home" ? homedir() : targetDir;
-  return join(root, spec.path);
+
+  if (spec.requiresHomeConsent === true) {
+    return join(homedir(), spec.homePath);
+  }
+
+  let mode: "project" | "global" = "project";
+  try {
+    mode = getInstallMode();
+  } catch {
+    // Context not set yet (early bootstrap or unit tests that don't init).
+    mode = "project";
+  }
+
+  if (mode === "global") {
+    return join(installRoot, spec.homePath);
+  }
+
+  return join(installRoot, spec.projectPath);
+}
+
+/**
+ * Resolve the absolute directory where vendor skill symlinks should live.
+ *
+ * Project-base vendors live under `targetDir`; vendors that require home
+ * consent (e.g. hermes) live under the user's HOME directory. This is the
+ * only path that produces HOME paths and is the trust boundary for HOME
+ * writes.
+ *
+ * @deprecated Use `vendorSkillsDir(cli, installRoot)` directly. This shim is
+ * retained for callers that pass `installRoot` explicitly and will be removed
+ * once all call sites are migrated.
+ */
+function resolveCliSkillsDir(installRoot: string, cli: CliTool): string {
+  return vendorSkillsDir(cli, installRoot);
 }
 
 /**
@@ -444,38 +451,40 @@ function resolveCliSkillsDir(targetDir: string, cli: CliTool): string {
  * user consent before proceeding when this returns true.
  */
 export function vendorRequiresHomeConsent(cli: CliTool): boolean {
-  return CLI_SKILLS_DIR[cli].base === "home";
+  return Boolean(CLI_SKILLS_DIR[cli].requiresHomeConsent);
 }
 
 /**
  * User-facing display path for a vendor's skill directory.
- * Home-base vendors get a `~/...` prefix; project-base vendors return
- * the project-relative path verbatim.
+ * Vendors that require home consent get a `~/...` prefix; project-base
+ * vendors return the project-relative path verbatim.
  */
 export function getVendorDisplayPath(cli: CliTool): string {
   const spec = CLI_SKILLS_DIR[cli];
-  return spec.base === "home" ? `~/${spec.path}` : spec.path;
+  return spec.requiresHomeConsent ? `~/${spec.homePath}` : spec.projectPath;
 }
 
-export function createCliSymlinks(
-  targetDir: string,
+export function createVendorSymlinks(
+  installRoot: string,
   cliTools: CliTool[],
   skillNames: string[],
 ): { created: string[]; skipped: string[] } {
   const created: string[] = [];
   const skipped: string[] = [];
-  const ssotSkillsDir = resolve(targetDir, INSTALLED_SKILLS_DIR);
+  const ssotSkillsDir = resolve(installRoot, INSTALLED_SKILLS_DIR);
 
-  let realSsotBase: string;
   try {
-    realSsotBase = fs.realpathSync(ssotSkillsDir);
+    fs.realpathSync(ssotSkillsDir);
   } catch {
     return { created, skipped };
   }
 
   for (const cli of cliTools) {
-    const skillsDir = CLI_SKILLS_DIR[cli].path;
-    const linkRootDir = resolveCliSkillsDir(targetDir, cli);
+    const spec = CLI_SKILLS_DIR[cli];
+    const skillsDir = spec.requiresHomeConsent
+      ? spec.homePath
+      : spec.projectPath;
+    const linkRootDir = resolveCliSkillsDir(installRoot, cli);
 
     if (!fs.existsSync(linkRootDir)) {
       fs.mkdirSync(linkRootDir, { recursive: true });
@@ -487,24 +496,6 @@ export function createCliSymlinks(
 
       if (!fs.existsSync(source)) {
         skipped.push(`${skillsDir}/${skillName} (source missing)`);
-        continue;
-      }
-
-      // Defense-in-depth: reject sources whose realpath escapes the SSOT
-      // base. Prevents path traversal via malicious symlinks in
-      // `.agents/skills/`.
-      let realSource: string;
-      try {
-        realSource = fs.realpathSync(source);
-      } catch {
-        skipped.push(`${skillsDir}/${skillName} (source unreadable)`);
-        continue;
-      }
-      if (
-        realSource !== realSsotBase &&
-        !realSource.startsWith(realSsotBase + sep)
-      ) {
-        skipped.push(`${skillsDir}/${skillName} (source escapes SSOT base)`);
         continue;
       }
 
@@ -526,7 +517,18 @@ export function createCliSymlinks(
       }
 
       const relativePath = relative(linkRootDir, source);
-      createLink(relativePath, link, "dir");
+      try {
+        createLink(relativePath, link, "dir", ssotSkillsDir);
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message.startsWith("createLink: target")
+        ) {
+          skipped.push(`${skillsDir}/${skillName} (source escapes SSOT base)`);
+          continue;
+        }
+        throw err;
+      }
       created.push(`${skillsDir}/${skillName}`);
     }
   }
@@ -534,8 +536,13 @@ export function createCliSymlinks(
   return { created, skipped };
 }
 
-export function getInstalledSkillNames(targetDir: string): string[] {
-  const skillsDir = join(targetDir, INSTALLED_SKILLS_DIR);
+/**
+ * @deprecated Use createVendorSymlinks. Removed in a future release.
+ */
+export const createCliSymlinks = createVendorSymlinks;
+
+export function getInstalledSkillNames(installRoot: string): string[] {
+  const skillsDir = join(installRoot, INSTALLED_SKILLS_DIR);
   if (!fs.existsSync(skillsDir)) return [];
 
   return fs
@@ -544,10 +551,10 @@ export function getInstalledSkillNames(targetDir: string): string[] {
     .map((d) => d.name);
 }
 
-export function detectExistingCliSymlinkDirs(targetDir: string): CliTool[] {
+export function detectExistingCliSymlinkDirs(installRoot: string): CliTool[] {
   const tools: CliTool[] = [];
   for (const cli of Object.keys(CLI_SKILLS_DIR) as CliTool[]) {
-    if (fs.existsSync(resolveCliSkillsDir(targetDir, cli))) {
+    if (fs.existsSync(resolveCliSkillsDir(installRoot, cli))) {
       tools.push(cli);
     }
   }

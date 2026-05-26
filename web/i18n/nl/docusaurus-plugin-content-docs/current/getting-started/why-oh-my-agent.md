@@ -9,7 +9,7 @@ De multi-agent CLI categorie is verzadigd. Alleen al in het afgelopen kwartaal z
 
 oh-my-agent optimaliseert een andere as. De uitgangshypothese is dat met voldoende capabele modellen de kosten van analyse, ontwerp en implementatie in de SDLC naar nul tenderen. Het dure deel van software-ontwikkeling was altijd al testen en onderhoud: een systeem werkend, veilig en begrijpelijk houden na de eerste commit. Op die as is oh-my-agent ontworpen.
 
-Deze pagina maakt die positionering concreet. Voor de uitgebreide discussie die dit kader heeft voortgebracht, zie [issue #155](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589).
+Deze pagina maakt die positionering concreet. Voor de uitgebreide discussie die dit kader heeft voortgebracht, zie [issue #155](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589).
 
 ---
 

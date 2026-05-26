@@ -17,7 +17,6 @@ import type {
   DispatchPlan,
   Invocation,
 } from "./runtime-dispatch/types.js";
-import { installVendorAgents } from "../platform/agent-composer.js";
 
 export { ConfigError } from "./runtime-dispatch/config-error.js";
 export { detectRuntimeVendor } from "./runtime-dispatch/detect.js";
@@ -102,12 +101,6 @@ export function planDispatch(
   promptContent: string,
   env: NodeJS.ProcessEnv = process.env,
 ): DispatchPlan {
-  try {
-    installVendorAgents(process.cwd(), process.cwd(), targetVendor, promptContent);
-  } catch (err) {
-    console.error(`[runtime-dispatch] Dynamic agent composition failed:`, err);
-  }
-
   const runtimeVendor = detectRuntimeVendor(env);
 
   // Resolve per-agent plan from oma-config.yaml + defaults.yaml.

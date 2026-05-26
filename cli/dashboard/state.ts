@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 
 export type DashboardSession = {
@@ -25,10 +25,6 @@ export type DashboardState = {
   activity: DashboardActivity[];
   memoriesDir: string;
   updatedAt: string;
-  evolution?: {
-    skills: { name: string; description: string; timestamp: string }[];
-    rules: { name: string; description: string; timestamp: string }[];
-  };
 };
 
 const EMPTY_SESSION: DashboardSession = { id: "N/A", status: "UNKNOWN" };
@@ -307,20 +303,11 @@ export function buildFullState(memoriesDir: string): DashboardState {
     });
   }
 
-  let evolution = { skills: [], rules: [] };
-  const registryPath = join(process.cwd(), ".agents", "evolution-registry.json");
-  if (existsSync(registryPath)) {
-    try {
-      evolution = JSON.parse(readFileSync(registryPath, "utf-8"));
-    } catch { }
-  }
-
   return {
     session,
     agents,
     activity: getLatestActivity(memoriesDir),
     memoriesDir,
     updatedAt: new Date().toISOString(),
-    evolution,
   };
 }

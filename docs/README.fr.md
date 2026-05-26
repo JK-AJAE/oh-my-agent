@@ -1,6 +1,6 @@
 # oh-my-agent: Portable Multi-Agent Harness
 
-[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/JK-AJAE/oh-my-agent-custom?style=flat&logo=github)](https://github.com/JK-AJAE/oh-my-agent-custom) [![License](https://img.shields.io/github/license/JK-AJAE/oh-my-agent-custom)](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/JK-AJAE/oh-my-agent-custom?label=updated&logo=git)](https://github.com/JK-AJAE/oh-my-agent-custom/commits/main)
+[![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/first-fluke/oh-my-agent?style=flat&logo=github)](https://github.com/first-fluke/oh-my-agent) [![License](https://img.shields.io/github/license/first-fluke/oh-my-agent)](https://github.com/first-fluke/oh-my-agent/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/first-fluke/oh-my-agent?label=updated&logo=git)](https://github.com/first-fluke/oh-my-agent/commits/main)
 
 [English](../README.md) | [한국어](./README.ko.md) | [中文](./README.zh.md) | [Português](./README.pt.md) | [日本語](./README.ja.md) | [Español](./README.es.md) | [Nederlands](./README.nl.md) | [Polski](./README.pl.md) | [Русский](./README.ru.md) | [Deutsch](./README.de.md) | [Tiếng Việt](./README.vi.md) | [ภาษาไทย](./README.th.md)
 
@@ -14,12 +14,12 @@ Compatible avec tous les principaux IDEs IA : Antigravity, Claude Code, Cursor, 
 
 ```bash
 # macOS / Linux — installe bun, uv & serena automatiquement si absents
-curl -fsSL https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell) — installe bun, uv & serena automatiquement si absents
-irm https://raw.githubusercontent.com/JK-AJAE/oh-my-agent-custom/main/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/first-fluke/oh-my-agent/main/cli/install.ps1 | iex
 ```
 
 ```bash
@@ -37,10 +37,10 @@ bunx oh-my-agent@latest
 ```bash
 # Tous les skills, déployés sur chaque runtime détectée
 # (.claude, .cursor, .codex, .opencode, .github, .agents)
-apm install JK-AJAE/oh-my-agent-custom
+apm install first-fluke/oh-my-agent
 
 # Un seul skill
-apm install JK-AJAE/oh-my-agent-custom/.agents/skills/oma-frontend
+apm install first-fluke/oh-my-agent/.agents/skills/oma-frontend
 ```
 
 APM ne livre que les skills. Pour les workflows, les règles, `oma-config.yaml`, les hooks de détection de mots-clés et la CLI `oma agent:spawn`, utilise `bunx oh-my-agent@latest`. Une seule méthode de distribution par projet, sinon ça finit par diverger.
@@ -123,34 +123,34 @@ Choisis un preset et c'est parti :
 
 | Agent | Ce Qu'il Fait |
 |-------|-------------|
-| **oma-academic-writer** | Rédaction, révision et audits par rubrique de prose académique de qualité publication |
-| **oma-architecture** | Arbitrages d'architecture, frontières, analyse au regard d'ADR/ATAM/CBAM |
-| **oma-backend** | APIs en Python, Node.js ou Rust |
-| **oma-brainstorm** | Explore les idées avant que tu te lances dans le code |
-| **oma-db** | Conception de schémas, migrations, indexation, vector DB |
-| **oma-debug** | Analyse de cause racine, corrections, tests de régression |
-| **oma-deepsec** | Scanner de vulnérabilités par agent, gate PR, matchers personnalisés |
-| **oma-design** | Systèmes de design, tokens, accessibilité, responsive |
-| **oma-dev-workflow** | CI/CD, releases, automatisation monorepo |
-| **oma-docs** | Vérifications d'intégrité des refs, détection de docs affectés par un diff |
-| **oma-frontend** | React/Next.js, TypeScript, Tailwind CSS v4, shadcn/ui |
-| **oma-hwp** | Conversion HWP/HWPX/HWPML vers Markdown |
-| **oma-image** | Génération d'images IA multi-fournisseur |
-| **oma-market** | Étude de marché par signaux communautaires pour pain/trend/concurrent/discovery avec SWOT/5F/PESTEL |
-| **oma-mobile** | Apps multiplateformes avec Flutter |
-| **oma-observability** | Routeur d'observabilité pour APM/RUM, métriques/logs/traces/profils, SLO, forensique d'incidents et tuning du transport |
-| **oma-orchestrator** | Exécution parallèle d'agents via CLI |
-| **oma-pdf** | Conversion PDF vers Markdown |
-| **oma-pm** | Planifie les tâches, découpe les specs, définit les contrats d'API |
-| **oma-qa** | Sécurité OWASP, performance, revue d'accessibilité |
-| **oma-recap** | Analyse de l'historique des conversations et resumes thematiques du travail |
-| **oma-scholar** | Compagnon de recherche académique pour la recherche bibliographique et l'évaluation par les pairs |
-| **oma-scm** | Gestion de configuration logicielle avec branches, fusions, worktrees, références de base, Conventional Commits |
-| **oma-search** | Routeur de recherche basé sur l'intention avec score de confiance pour docs, web, code et local |
-| **oma-skill-creator** | Rédige et audite les skills OMA au format SSL-lite |
-| **oma-tf-infra** | IaC multi-cloud avec Terraform (Infrastructure as Code) |
-| **oma-translator** | Traduction multilingue naturelle |
-| **oma-voice** | TTS/STT local-first via Voicebox MCP pour génération vocale, voix off et transcription |
+| **oma-academic-writer** | Rédige, révise et audite ta prose académique jusqu'à la qualité publication |
+| **oma-architecture** | Évalue les arbitrages d'architecture et trace les frontières de modules avec une analyse ADR/ATAM/CBAM |
+| **oma-backend** | Construit et sécurise tes APIs en Python, Node.js ou Rust |
+| **oma-brainstorm** | Explore les idées avec toi avant de te lancer dans le code |
+| **oma-db** | Conçoit tes schémas, migrations, index et vector stores |
+| **oma-debug** | Identifie la cause racine, corrige le bug et écrit un test de régression |
+| **oma-deepsec** | Scanne ton code pour détecter les failles de sécurité et bloque les pull requests à risque |
+| **oma-design** | Construit des systèmes de design avec tokens, accessibilité et layouts responsive |
+| **oma-dev-workflow** | Automatise ton CI/CD, tes releases et tes tâches monorepo |
+| **oma-docs** | Vérifie les références cassées dans ta doc et signale les pages touchées par un changement de code |
+| **oma-frontend** | Construit ton UI avec React/Next.js, TypeScript, Tailwind CSS v4 et shadcn/ui |
+| **oma-hwp** | Convertit les fichiers HWP, HWPX et HWPML en Markdown |
+| **oma-image** | Génère des images via plusieurs fournisseurs d'IA en parallèle |
+| **oma-market** | Analyse ton marché à partir de signaux communautaires et le structure avec SWOT, Porter's 5F et PESTEL |
+| **oma-mobile** | Construit des apps multiplateformes avec Flutter |
+| **oma-observability** | Route les tâches d'observabilité entre métriques, logs, traces, SLOs et forensique d'incidents |
+| **oma-orchestrator** | Lance plusieurs agents en parallèle depuis la CLI |
+| **oma-pdf** | Convertit les fichiers PDF en Markdown |
+| **oma-pm** | Planifie les tâches, découpe les exigences et définit les contrats d'API |
+| **oma-qa** | Passe ton code en revue pour détecter les failles OWASP, les problèmes de performance et d'accessibilité |
+| **oma-recap** | Résume ton historique de conversations en synthèses de travail organisées par thème |
+| **oma-scholar** | Explore la littérature académique et t'aide à mener une évaluation par les pairs |
+| **oma-scm** | Gère tes branches, fusions, worktrees et Conventional Commits |
+| **oma-search** | Route chaque requête vers la meilleure source et évalue le niveau de confiance du résultat |
+| **oma-skill-creator** | Rédige et audite les nouveaux skills OMA au format SSL-lite |
+| **oma-tf-infra** | Provisionne une infrastructure multi-cloud avec Terraform |
+| **oma-translator** | Traduit entre les langues comme si un natif avait écrit le texte |
+| **oma-voice** | Génère des voix off et transcrit de l'audio en local, sans cloud |
 
 ## Comment Ça Marche
 
@@ -208,11 +208,11 @@ La sélection de modèle suit deux couches :
 - Le dispatch natif du même fournisseur utilise la définition d'agent générée dans `.claude/agents/`, `.codex/agents/` ou `.gemini/agents/`.
 - Le dispatch inter-fournisseur ou le fallback CLI utilise les valeurs par défaut du fournisseur dans `.agents/skills/oma-orchestrator/config/cli-config.yaml`.
 
-**modèles par agent** : chaque agent peut cibler son propre modèle et son `effort` via `.agents/oma-config.yaml`. Six runtime profiles prêts à l'emploi : `claude`, `codex`, `gemini`, `qwen`, `cursor`, `mixed`. Vérifiez la matrice d'auth résolue avec `oma doctor --profile`. Guide complet : [web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md).
+**modèles par agent** : chaque agent peut cibler son propre modèle et son `effort` via `.agents/oma-config.yaml`. Runtime profiles prêts à l'emploi : `antigravity`, `claude`, `codex`, `qwen`, `cursor`, `mixed`. Vérifiez la matrice d'auth résolue avec `oma doctor --profile`. Guide complet : [web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md).
 
 ## Pourquoi oh-my-agent ?
 
-> [En savoir plus →](https://github.com/JK-AJAE/oh-my-agent-custom/issues/155#issuecomment-4142133589)
+> [En savoir plus →](https://github.com/first-fluke/oh-my-agent/issues/155#issuecomment-4142133589)
 
 - **Portable** : `.agents/` voyage avec ton projet, pas enfermé dans un IDE
 - **Basé sur les rôles** : des agents modélisés comme une vraie équipe d'ingé, pas un tas de prompts
@@ -277,7 +277,7 @@ flowchart TD
 
 - **[Documentation Détaillée](./AGENTS_SPEC.md)** : spec technique complète et architecture
 - **[Agents Supportés](./SUPPORTED_AGENTS.md)** : matrice de support des agents par IDE
-- **[Docs Web](https://JK-AJAE.github.io/oh-my-agent/)** : guides, tutoriels et référence CLI
+- **[Docs Web](https://first-fluke.github.io/oh-my-agent/)** : guides, tutoriels et référence CLI
 
 ## Sponsors
 
@@ -286,12 +286,12 @@ Ce projet est maintenu grâce à nos généreux sponsors.
 > **Tu aimes ce projet ?** Mets-lui une étoile !
 >
 > ```bash
-> gh api --method PUT /user/starred/JK-AJAE/oh-my-agent-custom
+> gh api --method PUT /user/starred/first-fluke/oh-my-agent
 > ```
 >
-> Essaie notre template starter optimisé : [fullstack-starter](https://github.com/JK-AJAE/fullstack-starter)
+> Essaie notre template starter optimisé : [fullstack-starter](https://github.com/first-fluke/fullstack-starter)
 
-<a href="https://github.com/sponsors/JK-AJAE">
+<a href="https://github.com/sponsors/first-fluke">
   <img src="https://img.shields.io/badge/Sponsor-♥-ea4aaa?style=for-the-badge" alt="Sponsor" />
 </a>
 <a href="https://buymeacoffee.com/firstfluke">
@@ -310,7 +310,7 @@ Ce projet est maintenu grâce à nos généreux sponsors.
 
 <!-- Contributor tier ($10/mo) names here -->
 
-[Devenir sponsor →](https://github.com/sponsors/JK-AJAE)
+[Devenir sponsor →](https://github.com/sponsors/first-fluke)
 
 Voir [SPONSORS.md](../SPONSORS.md) pour la liste complète des supporters.
 
@@ -318,12 +318,13 @@ Voir [SPONSORS.md](../SPONSORS.md) pour la liste complète des supporters.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)](https://www.star-history.com/#JK-AJAE/oh-my-agent-custom&type=date&legend=bottom-right)
+[![Star History Chart](https://api.star-history.com/svg?repos=first-fluke/oh-my-agent&type=date&legend=bottom-right)](https://www.star-history.com/#first-fluke/oh-my-agent&type=date&legend=bottom-right)
 
 
 ## Références
 
 - Liang, Q., Wang, H., Liang, Z., & Liu, Y. (2026). *From skill text to skill structure: The scheduling-structural-logical representation for agent skills* (Version 2) [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2604.24026
+- Chen, C., Yu, Q., Gu, Y., Huang, Z., Li, H., Liu, H., Liu, S., Liu, J., Peng, D., Wang, J., Yan, Z., Meng, F., Qin, E., Che, C., & Hu, M. (2026). *The scaling laws of skills in LLM agent systems* (Version 1) [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2605.16508
 
 
 ## Licence
