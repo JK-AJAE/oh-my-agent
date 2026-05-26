@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![npm downloads](https://img.shields.io/npm/dm/oh-my-agent?color=cb3837&logo=npm)](https://www.npmjs.com/package/oh-my-agent) [![GitHub stars](https://img.shields.io/github/stars/first-fluke/oh-my-agent?style=flat&logo=github)](https://github.com/first-fluke/oh-my-agent) [![License](https://img.shields.io/github/license/first-fluke/oh-my-agent)](https://github.com/first-fluke/oh-my-agent/blob/main/LICENSE) [![Last Updated](https://img.shields.io/github/last-commit/first-fluke/oh-my-agent?label=updated&logo=git)](https://github.com/first-fluke/oh-my-agent/commits/main)
 
-[한국어](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.ko.md) | [中文](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.zh.md) | [Português](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.pt.md) | [日本語](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.ja.md) | [Français](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.fr.md) | [Español](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.es.md) | [Nederlands](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.nl.md) | [Polski](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.pl.md) | [Русский](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.ru.md) | [Deutsch](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.de.md) | [Tiếng Việt](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.vi.md) | [ภาษาไทย](https://github.com/first-fluke/oh-my-agent/blob/main/docs/README.th.md)
+[한국어](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.ko.md) | [中文](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.zh.md) | [Português](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.pt.md) | [日本語](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.ja.md) | [Français](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.fr.md) | [Español](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.es.md) | [Nederlands](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.nl.md) | [Polski](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.pl.md) | [Русский](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.ru.md) | [Deutsch](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.de.md) | [Tiếng Việt](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.vi.md) | [ภาษาไทย](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/README.th.md)
 
 Ever wished your AI assistant had coworkers? That's what oh-my-agent does.
 
@@ -228,7 +228,7 @@ agents:
 ```
 
 - `oma doctor --profile` — prints the per-role resolved model matrix
-- Full guide: [`web/docs/guide/per-agent-models.md`](https://github.com/first-fluke/oh-my-agent/blob/main/web/docs/guide/per-agent-models.md)
+- Full guide: [`web/docs/guide/per-agent-models.md`](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/web/docs/guide/per-agent-models.md)
 
 ## Why oh-my-agent?
 
@@ -295,8 +295,8 @@ flowchart TD
 
 ## Learn More
 
-- **[Detailed Documentation](https://github.com/first-fluke/oh-my-agent/blob/main/docs/AGENTS_SPEC.md)** — Full technical spec and architecture
-- **[Supported Agents](https://github.com/first-fluke/oh-my-agent/blob/main/docs/SUPPORTED_AGENTS.md)** — Agent support matrix across IDEs
+- **[Detailed Documentation](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/AGENTS_SPEC.md)** — Full technical spec and architecture
+- **[Supported Agents](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/docs/SUPPORTED_AGENTS.md)** — Agent support matrix across IDEs
 - **[Web Docs](https://first-fluke.github.io/oh-my-agent/)** — Guides, tutorials, and CLI reference
 
 ## Sponsors
@@ -332,7 +332,7 @@ This project is maintained thanks to our generous sponsors.
 
 [Become a sponsor →](https://github.com/sponsors/first-fluke)
 
-See [SPONSORS.md](https://github.com/first-fluke/oh-my-agent/blob/main/SPONSORS.md) for a full list of supporters.
+See [SPONSORS.md](https://github.com/JK-AJAE/oh-my-agent-custom/blob/main/SPONSORS.md) for a full list of supporters.
 
 
 
