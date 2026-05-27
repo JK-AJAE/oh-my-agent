@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "8.11.0",
-  "releaseDate": "2026-05-27T10:15:27.883Z",
+  "releaseDate": "2026-05-27T11:56:02.325Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -80,6 +80,11 @@
       "size": 700
     },
     {
+      "path": ".agents/agents/variants/grok.json",
+      "sha256": "e868c77406ba8fb984a2e16e0d9bf294ade9120b071aa2eb727515ebc5927a44",
+      "size": 782
+    },
+    {
       "path": ".agents/config/defaults.yaml",
       "sha256": "5651f86c002c36604aa45d199d996007ceac1ae5e7de478865f302bd47f502d9",
       "size": 7044
@@ -91,8 +96,8 @@
     },
     {
       "path": ".agents/hooks/core/constants.ts",
-      "sha256": "f84a333ccff3046284f46ec7b376cd79c5576f79e44183cf07cc63ea66f22e11",
-      "size": 1185
+      "sha256": "872cddf33a62e50287b52140fb29b52e9b0109cc825ca176d294d345b45aa9f7",
+      "size": 1195
     },
     {
       "path": ".agents/hooks/core/filter-test-output.sh",
@@ -106,8 +111,8 @@
     },
     {
       "path": ".agents/hooks/core/hook-output.ts",
-      "sha256": "7c8d4abb63f3b4fc8d246953fce7e7a8b251a9c2fd107ed48e4de296406457b8",
-      "size": 2476
+      "sha256": "946f66bb0f1adf42885fb1c50c4893cfed04e4c09458d8221e1104560b113161",
+      "size": 3190
     },
     {
       "path": ".agents/hooks/core/hud.ts",
@@ -116,23 +121,23 @@
     },
     {
       "path": ".agents/hooks/core/keyword-detector.ts",
-      "sha256": "3b6a50318972f59267c0c148834df07dc6f3e4e70017ebe20671b99747a0461c",
-      "size": 26926
+      "sha256": "8baf766942520d74f9ade00f640b23fd4baae3ca231a73f7eb769abcb33c2aac",
+      "size": 27529
     },
     {
       "path": ".agents/hooks/core/persistent-mode.ts",
-      "sha256": "d185183aa2c221841819edf2f7738fc070f7124cfe0f6f764cd0725e98800513",
-      "size": 7351
+      "sha256": "02e1fe6fe0d7968d1513808e303cf5a55be6f34e30c640039d37e6e37e10fc07",
+      "size": 7697
     },
     {
       "path": ".agents/hooks/core/skill-injector.ts",
-      "sha256": "a0ba214dc05edb0a4e47514308cc425012953fe129fa61e2ea1c2c4467aed8cc",
-      "size": 16786
+      "sha256": "026b974af283b9661ee4002cd4cb2561fcbd0fb40df33474b8c4bdab4870c8ac",
+      "size": 17199
     },
     {
       "path": ".agents/hooks/core/state-boundary.ts",
-      "sha256": "bdc01b6156c110b01b9796d76454dcfbb431c981f394c3c33a713b80691952e8",
-      "size": 4182
+      "sha256": "84a3d1ac2707b23ff5132800da371cc86b4f939d4e29cb060cabf9a7f3e3ca01",
+      "size": 4595
     },
     {
       "path": ".agents/hooks/core/state-emit.ts",
@@ -146,8 +151,8 @@
     },
     {
       "path": ".agents/hooks/core/test-filter.ts",
-      "sha256": "32383f054f98fc3c4e707ba0587649e73400955f3e2bc901daa6dcc7b826eac8",
-      "size": 4762
+      "sha256": "70dcc6e861621da74af1eab7a3e9e49d6dc5ce1c64b015c75cf6b4000f2c8882",
+      "size": 5027
     },
     {
       "path": ".agents/hooks/core/triggers.json",
@@ -161,8 +166,8 @@
     },
     {
       "path": ".agents/hooks/core/vendor-renderer.ts",
-      "sha256": "7e3beb1f24278f2523c81a74f7ee730b35ed6c89e6f05888784f62c97bcad8cf",
-      "size": 1417
+      "sha256": "299f7b6433ef073bae522d138a3108bafb01cbf459e31a975d770e36547c6b00",
+      "size": 1434
     },
     {
       "path": ".agents/hooks/variants/antigravity.json",
@@ -190,9 +195,14 @@
       "size": 1085
     },
     {
+      "path": ".agents/hooks/variants/grok.json",
+      "sha256": "5970dc503db7d6764d13e3b9342fcd932acd7604d2ef289ee9400fb1ad7032f9",
+      "size": 672
+    },
+    {
       "path": ".agents/hooks/variants/hook-variant.schema.json",
-      "sha256": "a02f0a8c2cba8217e1fa14b8c0a26cdcb68aee0f244cbbc80dfcae30396b1bfb",
-      "size": 4007
+      "sha256": "03afdaf9a24d3ace9a9d47a4e7a543ccaba12035c236ad0035143a4727ff3a6a",
+      "size": 4079
     },
     {
       "path": ".agents/hooks/variants/qwen.json",
@@ -388,6 +398,11 @@
       "path": ".agents/skills/_shared/runtime/execution-protocols/gemini.md",
       "sha256": "c3ac82f2fcdba7dc1a48dc212f6d2de8a0943a0285ab992e2d6f8d5526a7b961",
       "size": 1692
+    },
+    {
+      "path": ".agents/skills/_shared/runtime/execution-protocols/grok.md",
+      "sha256": "4571d2c717d6db5b91c62dd809d5bda55f58121975cfa9290257f980d9a10926",
+      "size": 1354
     },
     {
       "path": ".agents/skills/_shared/runtime/execution-protocols/qwen.md",
@@ -1846,6 +1861,6 @@
   "metadata": {
     "skillCount": 48,
     "workflowCount": 21,
-    "totalFiles": 367
+    "totalFiles": 370
   }
 }
