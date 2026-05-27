@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "8.10.2",
-  "releaseDate": "2026-05-26T15:19:52.636Z",
+  "releaseDate": "2026-05-27T10:07:59.187Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -131,8 +131,8 @@
     },
     {
       "path": ".agents/hooks/core/state-boundary.ts",
-      "sha256": "114e9359613847bc0846ca6ab0f167be5f396d4eb2530fc096c1b8ee129e56ba",
-      "size": 4216
+      "sha256": "bdc01b6156c110b01b9796d76454dcfbb431c981f394c3c33a713b80691952e8",
+      "size": 4182
     },
     {
       "path": ".agents/hooks/core/state-emit.ts",
@@ -158,6 +158,11 @@
       "path": ".agents/hooks/core/types.ts",
       "sha256": "7d2be6b7471d7cf9d85528f85fb6755103eebeed0b54e897e62d1eb4a2e4148d",
       "size": 828
+    },
+    {
+      "path": ".agents/hooks/core/vendor-renderer.ts",
+      "sha256": "7e3beb1f24278f2523c81a74f7ee730b35ed6c89e6f05888784f62c97bcad8cf",
+      "size": 1417
     },
     {
       "path": ".agents/hooks/variants/antigravity.json",
@@ -1536,8 +1541,8 @@
     },
     {
       "path": ".agents/skills/oma-slide/SKILL.md",
-      "sha256": "7491127e4cdb6b3c62ffa8c231bd62fa0861852bc73f86c8d2d9a1a54dda9a24",
-      "size": 13111
+      "sha256": "64d67f2d3498a386e4d00787945164affa1fc2fad1d92259f55ec34982fe4da2",
+      "size": 15458
     },
     {
       "path": ".agents/skills/oma-slide/resources/animation-patterns.md",
@@ -1555,6 +1560,11 @@
       "size": 8039
     },
     {
+      "path": ".agents/skills/oma-slide/resources/canva-integration.md",
+      "sha256": "e0a86e4a9d0d1d135b1bc40117ac586c6206198a1f8fcb0dd32506fd1803130a",
+      "size": 11364
+    },
+    {
       "path": ".agents/skills/oma-slide/resources/design-doctrine.md",
       "sha256": "c6fee4b66b2b2dbbeb92d458e291dfd4242d352ef6b3862990c52647ca0e27a9",
       "size": 11391
@@ -1566,8 +1576,8 @@
     },
     {
       "path": ".agents/skills/oma-slide/resources/generation-protocol.md",
-      "sha256": "155eee6ad8222c148727a89310c15f25561aedcdd407188d23ff0a673242e690",
-      "size": 13913
+      "sha256": "2dea90c9db071fcd2d46808c5c9169a50ff53082ab020b7116704fb3cb794c1d",
+      "size": 16294
     },
     {
       "path": ".agents/skills/oma-slide/resources/selection-index.json",
@@ -1836,6 +1846,6 @@
   "metadata": {
     "skillCount": 48,
     "workflowCount": 21,
-    "totalFiles": 365
+    "totalFiles": 367
   }
 }
