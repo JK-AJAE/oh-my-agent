@@ -15,17 +15,28 @@ Call direction is one-way: **skill calls CLI. CLI never calls skill.**
 
 **Goal:** identify which generation mode applies before doing anything else.
 
-1. Inspect user input for one of three signals:
+1. Inspect user input for one of four signals:
    - `new` — a topic, title, or free-text brief (no existing deck supplied).
    - `import-pptx` — user provides a `.pptx` file path.
+   - `import-canva` — user provides a Canva design ID or URL.
    - `enhance` — user points to an existing workdir with `slide-NN.html` files.
 
 2. For `import-pptx`: run `oma slide import-pptx <file> --dir <slug>` and skip to Phase 3
    (use the extracted fragments as the generation base; apply the chosen style on top).
 
-3. For `enhance`: skip to Phase 2 (style may already be set in `meta.json`).
+3. For `import-canva`: probe Canva MCP with `list_designs`.
+   - If Canva MCP is not configured: offer auto-provisioning (see `resources/canva-integration.md`
+     §Auto-Provisioning). Add the `canva` entry to project MCP config files and optionally
+     the agy CLI global config (`~/.gemini/antigravity-cli/mcp_config.json`) with user approval.
+     Notify that a session restart may be needed, then retry the probe.
+   - If configured and authed: `export_design` (PPTX), then `oma slide import-pptx` on the
+     downloaded file. Skip to Phase 3.
+   - If configured but unauthed: notify user about OAuth; skip to local import path.
+   See `resources/canva-integration.md` for full pipeline details.
 
-4. For `new`: continue to Phase 1.
+4. For `enhance`: skip to Phase 2 (style may already be set in `meta.json`).
+
+5. For `new`: continue to Phase 1.
 
 ---
 
@@ -293,8 +304,38 @@ After bundle/export, report:
 - Working directory path
 - List of `slide-NN.html` files created
 - Path to `out/deck.html` (and any exports)
+- Canva design URL (if Canva export was performed)
 - Validate status (pass / surfaced diff)
 - Any deferred items (`TODO(oma-deferred)`) such as unresolved image generation
+
+### 6d. Canva Export (on user request, requires Canva MCP)
+
+If the user requests Canva export ("export to Canva", "캔바로 내보내기", etc.):
+
+1. **Probe**: Call `list_designs` via Canva MCP to verify authentication.
+   - If Canva MCP is not configured: offer auto-provisioning
+     (see `resources/canva-integration.md` §Auto-Provisioning). Write the `canva` entry
+     to project MCP config files with user approval, then retry.
+   - On auth failure: notify user ("Canva MCP is not authenticated.
+     Run local exports instead.") and skip.
+
+2. **Render PNGs**: Run `oma slide png --dir <slug> --out-dir <slug>/out/png/ --resolution 2x`
+   to get high-resolution per-slide images.
+
+3. **Upload assets**: For each PNG, call `upload_asset` via Canva MCP.
+   Record returned `asset_id` for each slide.
+
+4. **Create presentation**: Call `create_design` with type "Presentation"
+   and the uploaded assets as pages.
+
+5. **Report**: Include the Canva design URL in the delivery summary (6c).
+
+> **Note**: Canva export produces a raster-backed presentation (images per slide).
+> Text is NOT editable in Canva. For editable text, export PPTX first
+> and use Canva's native PPTX import instead.
+
+See `resources/canva-integration.md` for detailed step-by-step pipeline,
+error handling, and security considerations.
 
 ---
 
@@ -320,12 +361,12 @@ Exit codes: `0 ok · 4 invalid-input · 6 timeout · 1 error`.
 
 ## Mode Summary Table
 
-| Phase | Mode: new | Mode: import-pptx | Mode: enhance |
-|---|---|---|---|
-| 0 Detect | detect + scaffold | run `import-pptx` | detect existing workdir |
-| 1 Discover | AskUserQuestion + asset eval | (skipped) | (skipped) |
-| 2 Style | 3 previews → user picks | user picks style | may reuse existing style |
-| 3 Generate | write all slides | overlay style on extracted fragments | rewrite targeted slides |
-| 4 Validate | full validate loop | full validate loop | targeted validate loop |
-| 5 Review | viewer + optional edit | viewer + optional edit | viewer + optional edit |
-| 6 Deliver | bundle + optional exports | bundle + optional exports | bundle + optional exports |
+| Phase | Mode: new | Mode: import-pptx | Mode: import-canva | Mode: enhance |
+|---|---|---|---|---|
+| 0 Detect | detect + scaffold | run `import-pptx` | probe Canva MCP + `export_design` → `import-pptx` | detect existing workdir |
+| 1 Discover | AskUserQuestion + asset eval | (skipped) | (skipped) | (skipped) |
+| 2 Style | 3 previews → user picks | user picks style | user picks style | may reuse existing style |
+| 3 Generate | write all slides | overlay style on extracted fragments | overlay style on extracted fragments | rewrite targeted slides |
+| 4 Validate | full validate loop | full validate loop | full validate loop | targeted validate loop |
+| 5 Review | viewer + optional edit | viewer + optional edit | viewer + optional edit | viewer + optional edit |
+| 6 Deliver | bundle + optional exports | bundle + optional exports | bundle + optional exports + optional Canva push-back | bundle + optional exports |

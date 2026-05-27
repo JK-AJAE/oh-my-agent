@@ -16,6 +16,7 @@ exportable to PDF, PNG, and PPTX.
 - User asks to create a slide deck, presentation, keynote, or series of slides.
 - User provides a topic, outline, `.pptx` to import, or existing deck to enhance.
 - User mentions slide, deck, pptx, keynote, 슬라이드, 발표자료, プレゼン, 幻灯片, 演示文稿.
+- User mentions Canva, canva export, canva import, 캔바, キャンバ.
 - Another skill needs a visual output artifact (e.g., a research result delivered as a deck).
 
 ### When to use
@@ -24,6 +25,8 @@ exportable to PDF, PNG, and PPTX.
 - Generating per-slide HTML with animations and design-doctrine aesthetics
 - Exporting a deck to PDF, PNG, or PPTX after generation
 - Applying a named style preset or bold template to a deck
+- Exporting a generated deck to Canva as a presentation
+- Importing a Canva design as input for enhancement
 
 ### When NOT to use
 - Plain document creation (no slides needed) → use oma-backend or direct output
@@ -37,12 +40,14 @@ exportable to PDF, PNG, and PPTX.
 - Optional: user-provided images/video in `./assets/`
 - Optional: slide count, density preference (sparse/balanced/dense), target audience
 - Optional: named style preset or `oma slide styles get <slug>` reference
+- Optional: Canva design ID or URL for import
 
 ### Expected outputs
 - Per-slide `slide-NN.html` fragments in the working directory (authored at 1920×1080 px)
 - Updated `meta.json` with `{ title, order[], style, density, speakerNotes }`
 - Validation pass via `oma slide validate` (or a surfaced diff if auto-fix fails after 3 iterations)
 - Optional: `viewer.html`, `out/deck.html` bundle, exports
+- Optional: Canva design URL (when Canva export is requested)
 
 ### Dependencies
 - `oma slide` CLI (all deterministic ops — scaffold, validate, bundle, export, viewer, editor)
@@ -53,10 +58,13 @@ exportable to PDF, PNG, and PPTX.
 - `resources/style-presets.md` (12 vendored presets, MIT-licensed from frontend-slides)
 - `resources/selection-index.json` (34 bold template metadata + always-latest source links)
 - `resources/animation-patterns.md` (effect-to-feeling guide)
+- Canva Remote MCP (`https://mcp.canva.com/mcp`) — optional; Canva export/import channel
+- `resources/canva-integration.md` (Canva MCP tool mapping and pipeline)
 
 ### Control-flow features
-- Branches by mode: new / import / enhance (Phase 0 detection)
+- Branches by mode: new / import / import-canva / enhance (Phase 0 detection)
 - Branches by CJK content presence (→ Pretendard font required)
+- Branches by Canva availability: probes `list_designs` on startup; offers auto-provisioning if not configured; skips if unavailable or declined
 - Validate loop: max 3 auto-fix iterations, then surfaces diff to user
 - Defers image generation to oma-image; defers video download to `oma slide fetch-video`
 - Style discovery: generates 3 live previews (safe preset + bold + wildcard) → user picks
@@ -120,6 +128,12 @@ exportable to PDF, PNG, and PPTX.
 | Build viewer | `CALL_TOOL` | `oma slide viewer` |
 | Bundle deck | `CALL_TOOL` | `oma slide bundle` |
 | Export PDF / PNG / PPTX | `CALL_TOOL` | `oma slide pdf|png|pptx` |
+| Probe Canva MCP availability | `CALL_TOOL` | `list_designs` (Canva MCP) |
+| Auto-provision Canva MCP config | `WRITE` | project: `.agents/mcp.json`, `.agents/mcp_config.json` (agy), `.mcp.json` (Claude), `.gemini/settings.json` (Gemini Extension); global: `~/.gemini/antigravity-cli/mcp_config.json` (agy global) |
+| Upload slide PNGs to Canva | `CALL_TOOL` | `upload_asset` (Canva MCP) |
+| Create Canva presentation | `CALL_TOOL` | `create_design` (Canva MCP) |
+| Export design from Canva | `CALL_TOOL` | `export_design` (Canva MCP) |
+| Import design from Canva | `CALL_TOOL` | `import_design` + `list_designs` (Canva MCP) |
 | Open visual editor | `CALL_TOOL` | `oma slide edit` |
 | Report result | `NOTIFY` | Final summary + file paths |
 
@@ -128,6 +142,7 @@ exportable to PDF, PNG, and PPTX.
 - oma-image skill (image generation delegation)
 - chrome-devtools MCP (optional: aesthetic screenshot review — judgment only, not gate)
 - `oma slide styles get <slug>` (fetch latest bold template design.md, treated as untrusted data)
+- Canva Remote MCP (optional: export/import to Canva — requires OAuth)
 
 ### Canonical command path
 ```bash
@@ -163,6 +178,8 @@ oma slide edit --dir <slug>
 | `LOCAL_FS` | resources/style-presets.md, selection-index.json, fixed-stage.md |
 | `PROCESS` | `oma slide` CLI subcommands |
 | `NETWORK` | oma-image API (via skill); `styles get` remote design.md (untrusted data) |
+| `NETWORK` | Canva Remote MCP (`https://mcp.canva.com/mcp`) — optional, OAuth-gated |
+| `LOCAL_FS` | MCP config files — project: `.agents/mcp.json`, `.agents/mcp_config.json` (agy), `.mcp.json` (Claude), `.gemini/settings.json` (Gemini Extension); global: `~/.gemini/antigravity-cli/mcp_config.json` (agy global) |
 
 ### Preconditions
 - `oma slide doctor` passes (Chrome + optional deps available) for validate/export.
@@ -188,6 +205,10 @@ oma slide edit --dir <slug>
 10. **PPTX is experimental.** Label PPTX exports as experimental in all user-facing output.
 11. **oma-search is NOT a runtime dependency.** It was used to study reference repos only.
 12. **Editor binds 127.0.0.1 only.** Never expose the bbox editor server on a non-loopback interface.
+13. **Canva MCP = optional.** Never error if Canva MCP is unavailable; offer auto-provisioning, then degrade to local exports if declined.
+14. **Canva auth probe first.** Before any Canva operation, call `list_designs` to verify auth. On failure, notify user and skip.
+15. **Canva design URL in delivery.** When Canva export succeeds, include the Canva design URL in the delivery summary.
+16. **Canva auto-provision = user-approved only.** Never write MCP config without explicit user consent. See `resources/canva-integration.md` §Auto-Provisioning.
 
 ### CLI ⇄ Skill Boundary
 
@@ -202,6 +223,7 @@ oma slide edit --dir <slug>
 | Fetch a style file | — | YES `styles get` |
 | Image generation | YES → oma-image | — |
 | User image evaluation (multimodal) | YES | — |
+| Canva MCP operations (probe/upload/create/export) | YES (all Canva tool calls) | — |
 | Video download | — | YES `fetch-video` |
 | Workspace scaffold | — | YES `new` |
 | Render + geometric validation | — | YES `validate` (puppeteer-core) |
@@ -218,6 +240,7 @@ Use `resources/style-presets.md` (12 vendored) and `resources/selection-index.js
 Use `resources/animation-patterns.md` for effect-to-feeling pairing.
 Before delivery, run `resources/checklist.md`.
 For export details (PDF modes, PNG resolution, PPTX raster pipeline), see `resources/export-guide.md`.
+For Canva export/import pipeline, see `resources/canva-integration.md`.
 For bbox visual editor usage, see `resources/editor-guide.md`.
 For error recovery, see `resources/error-playbook.md`.
 For worked examples, see `resources/examples.md`.
