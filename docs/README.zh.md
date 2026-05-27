@@ -84,10 +84,15 @@ APM 只分发 skill。workflow、规则、`oma-config.yaml`、关键词检测 ho
 <strong>Cursor</strong><br/>
 <sub>原生 + 适配器</sub>
 </td>
-<td align="center" width="20%">
+<td align="center" width="16%">
 <a href="https://github.com/QwenLM/qwen-code"><img src="https://github.com/QwenLM.png?size=120" alt="Qwen Code" width="48" height="48" /></a><br/>
 <strong>Qwen Code</strong><br/>
 <sub>原生派发</sub>
+</td>
+<td align="center" width="16%">
+<a href="https://grok.x.ai"><img src="./assets/agents/grok.png" alt="Grok" width="48" height="48" /></a><br/>
+<strong>Grok</strong><br/>
+<sub>native hooks + agents</sub>
 </td>
 </tr>
 <tr>
@@ -208,7 +213,7 @@ oma search fetch <url>      # 自动升级策略的机械搜索
 - 同厂商原生调度使用生成在 `.claude/agents/`、`.codex/agents/`、`.gemini/agents/` 里的厂商 agent 定义。
 - 跨厂商或 CLI 回退调度使用 `.agents/skills/oma-orchestrator/config/cli-config.yaml` 里的厂商默认值。
 
-**按 agent 配置模型**：可在 `.agents/oma-config.yaml` 里为每个 agent 单独指定模型和 `effort`。内置 runtime profiles：`antigravity`、`claude`、`codex`、`qwen`、`cursor`、`mixed`。用 `oma doctor --profile` 查看解析后的 auth 矩阵。完整指南：[web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md)。
+**按 agent 配置模型**：可在 `.agents/oma-config.yaml` 里为每个 agent 单独指定模型和 `effort`。内置 runtime profiles：`antigravity`、`claude`、`codex`、`cursor`、`grok`、`mixed`、`qwen`。用 `oma doctor --profile` 查看解析后的 auth 矩阵。完整指南：[web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md)。
 
 ## 为什么选 oh-my-agent？
 

@@ -84,10 +84,15 @@ Chọn một preset và bạn đã sẵn sàng:
 <strong>Cursor</strong><br/>
 <sub>nguyên bản + adapter</sub>
 </td>
-<td align="center" width="20%">
+<td align="center" width="16%">
 <a href="https://github.com/QwenLM/qwen-code"><img src="https://github.com/QwenLM.png?size=120" alt="Qwen Code" width="48" height="48" /></a><br/>
 <strong>Qwen Code</strong><br/>
 <sub>dispatch nguyên bản</sub>
+</td>
+<td align="center" width="16%">
+<a href="https://grok.x.ai"><img src="./assets/agents/grok.png" alt="Grok" width="48" height="48" /></a><br/>
+<strong>Grok</strong><br/>
+<sub>native hooks + agents</sub>
 </td>
 </tr>
 <tr>
@@ -208,7 +213,7 @@ Việc chọn model đi theo hai lớp:
 - Dispatch bản địa cùng nhà cung cấp dùng định nghĩa agent được sinh ra trong `.claude/agents/`, `.codex/agents/` hoặc `.gemini/agents/`.
 - Dispatch chéo nhà cung cấp hoặc fallback CLI dùng giá trị mặc định của nhà cung cấp trong `.agents/skills/oma-orchestrator/config/cli-config.yaml`.
 
-**model theo từng agent**: mỗi agent có thể trỏ tới model và `effort` riêng thông qua `.agents/oma-config.yaml`. Có sẵn các runtime profiles: `antigravity`, `claude`, `codex`, `qwen`, `cursor`, `mixed`. Kiểm tra ma trận auth đã resolve bằng `oma doctor --profile`. Hướng dẫn đầy đủ: [web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md).
+**model theo từng agent**: mỗi agent có thể trỏ tới model và `effort` riêng thông qua `.agents/oma-config.yaml`. Có sẵn các runtime profiles: `antigravity`, `claude`, `codex`, `cursor`, `grok`, `mixed`, `qwen`. Kiểm tra ma trận auth đã resolve bằng `oma doctor --profile`. Hướng dẫn đầy đủ: [web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md).
 
 ## Tại sao chọn oh-my-agent?
 

@@ -84,10 +84,15 @@ O `oh-my-agent` mantém `.agents/` como única fonte de verdade (SSOT) e o proje
 <strong>Cursor</strong><br/>
 <sub>nativo + adaptador</sub>
 </td>
-<td align="center" width="20%">
+<td align="center" width="16%">
 <a href="https://github.com/QwenLM/qwen-code"><img src="https://github.com/QwenLM.png?size=120" alt="Qwen Code" width="48" height="48" /></a><br/>
 <strong>Qwen Code</strong><br/>
 <sub>dispatch nativo</sub>
+</td>
+<td align="center" width="16%">
+<a href="https://grok.x.ai"><img src="./assets/agents/grok.png" alt="Grok" width="48" height="48" /></a><br/>
+<strong>Grok</strong><br/>
+<sub>native hooks + agents</sub>
 </td>
 </tr>
 <tr>
@@ -208,7 +213,7 @@ A seleção de modelo segue duas camadas:
 - Dispatch nativo de mesmo vendor usa a definição de agente gerada em `.claude/agents/`, `.codex/agents/` ou `.gemini/agents/`.
 - Dispatch cross-vendor ou fallback via CLI usa os padrões de vendor em `.agents/skills/oma-orchestrator/config/cli-config.yaml`.
 
-**modelos por agente**: cada agente pode apontar para seu próprio modelo e `effort` a partir de `.agents/oma-config.yaml`. Os runtime profiles disponíveis: `antigravity`, `claude`, `codex`, `qwen`, `cursor`, `mixed`. Confira a matriz de auth resolvida com `oma doctor --profile`. Guia completo: [web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md).
+**modelos por agente**: cada agente pode apontar para seu próprio modelo e `effort` a partir de `.agents/oma-config.yaml`. Os runtime profiles disponíveis: `antigravity`, `claude`, `codex`, `cursor`, `grok`, `mixed`, `qwen`. Confira a matriz de auth resolvida com `oma doctor --profile`. Guia completo: [web/docs/guide/per-agent-models.md](../web/docs/guide/per-agent-models.md).
 
 ## Por Que oh-my-agent?
 

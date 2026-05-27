@@ -1,5 +1,48 @@
 # Changelog
 
+## [8.12.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.11.0...cli-v8.12.0) (2026-05-27)
+
+
+### Features
+
+* add first-class Grok support ([cb57928](https://github.com/first-fluke/oh-my-agent/commit/cb5792813c34c799455fa37bb0e97088cd8ee889))
+
+
+### Bug Fixes
+
+* **grok:** add grok to RuntimeVendor and harden parser/renderer for tsc ([ec2cfd3](https://github.com/first-fluke/oh-my-agent/commit/ec2cfd308c3d5f26dc16569e21df6ebee640c581))
+
+
+### Documentation
+
+* add grok to model_preset lists in alphabetical order ([7ef90af](https://github.com/first-fluke/oh-my-agent/commit/7ef90afd553f107e939a4d515eda2850e9319e8d))
+
+## [8.11.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.10.2...cli-v8.11.0) (2026-05-27)
+
+
+### Features
+
+* **oma-slide:** add Canva MCP integration and auto-provisioning ([fc2c599](https://github.com/first-fluke/oh-my-agent/commit/fc2c5993207ee513aa12a81ffcffaf3b0a473c13))
+* **slide:** add print support and improve local CSS scoping ([613da42](https://github.com/first-fluke/oh-my-agent/commit/613da4270903723abbe1087877f5eb298c541688))
+
+
+### Refactoring
+
+* **hooks:** extract state snapshot rendering to vendor-renderer ([570b2d2](https://github.com/first-fluke/oh-my-agent/commit/570b2d2142d97c8d6ca5fcfa7d128186b98d94b8))
+
+
+### Documentation
+
+* **core:** update auto-generated agent tables ([bba294f](https://github.com/first-fluke/oh-my-agent/commit/bba294faa8ea88fb2dfa22d376d5166865f521c2))
+* **oma-slide:** default decks to session result paths ([bdec8c4](https://github.com/first-fluke/oh-my-agent/commit/bdec8c4a58beb000aee8fec1bf79037e2fd9b8f4))
+
+## [8.10.2](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.10.1...cli-v8.10.2) (2026-05-26)
+
+
+### Bug Fixes
+
+* **slide:** repair corrupt editor /screenshot dataUrl ([a66f920](https://github.com/first-fluke/oh-my-agent/commit/a66f920d21cd85e7adf79e2aaf4fb32432433503))
+
 ## [8.10.1](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.10.0...cli-v8.10.1) (2026-05-26)
 
 

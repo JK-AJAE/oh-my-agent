@@ -93,6 +93,36 @@ const migrationsState = vi.hoisted(() => ({
 const skillsState = vi.hoisted(() => ({
   REPO: "first-fluke/oh-my-agent",
   INSTALLED_SKILLS_DIR: ".agents/skills",
+  ALL_CLI_VENDORS: [
+    "antigravity",
+    "claude",
+    "codex",
+    "copilot",
+    "cursor",
+    "gemini",
+    "grok",
+    "hermes",
+    "qwen",
+  ],
+  CLI_SKILLS_DIR: {
+    antigravity: {
+      projectPath: ".gemini/antigravity-cli/skills",
+      homePath: ".gemini/antigravity-cli/skills",
+      requiresHomeConsent: true,
+    },
+    claude: { projectPath: ".claude/skills", homePath: ".claude/skills" },
+    codex: { projectPath: ".codex/skills", homePath: ".codex/skills" },
+    copilot: { projectPath: ".github/skills", homePath: ".copilot/skills" },
+    cursor: { projectPath: ".cursor/skills", homePath: ".cursor/skills" },
+    gemini: { projectPath: ".gemini/skills", homePath: ".gemini/skills" },
+    grok: { projectPath: ".grok/skills", homePath: ".grok/skills" },
+    hermes: {
+      projectPath: ".hermes/skills/oma",
+      homePath: ".hermes/skills/oma",
+      requiresHomeConsent: true,
+    },
+    qwen: { projectPath: ".qwen/skills", homePath: ".qwen/skills" },
+  },
 }));
 
 // ---------------------------------------------------------------------------
