@@ -43,7 +43,8 @@ exportable to PDF, PNG, and PPTX.
 - Optional: Canva design ID or URL for import
 
 ### Expected outputs
-- Per-slide `slide-NN.html` fragments in the working directory (authored at 1920×1080 px)
+- Per-slide `slide-NN.html` fragments under `.agents/results/slides/<session-id>/`
+  (authored at 1920×1080 px)
 - Updated `meta.json` with `{ title, order[], style, density, speakerNotes }`
 - Validation pass via `oma slide validate` (or a surfaced diff if auto-fix fails after 3 iterations)
 - Optional: `viewer.html`, `out/deck.html` bundle, exports
@@ -77,7 +78,8 @@ exportable to PDF, PNG, and PPTX.
 3. Load `resources/generation-protocol.md` and the relevant style reference before writing any HTML.
 
 ### Scenes
-1. **DETECT** (Phase 0): Identify mode (new / import / enhance). Scaffold workdir via `oma slide new`.
+1. **DETECT** (Phase 0): Identify mode (new / import / enhance). Resolve the session output
+   directory as `.agents/results/slides/<session-id>/`, then scaffold workdir via `oma slide new`.
 2. **DISCOVER** (Phase 1): Clarify purpose, length, content, density. Evaluate user-provided assets
    (multimodal-Read each image; `oma slide fetch-video` for video → `./assets/`). Co-design outline
    around text AND curated assets.
@@ -146,35 +148,37 @@ exportable to PDF, PNG, and PPTX.
 
 ### Canonical command path
 ```bash
+DECK_DIR=".agents/results/slides/<session-id>"
+
 # Scaffold
-oma slide new --dir <slug>
+oma slide new --dir "$DECK_DIR"
 
 # Validate (after writing slides)
-oma slide validate --dir <slug> --format json
+oma slide validate --dir "$DECK_DIR" --format json
 
 # Build viewer
-oma slide viewer --dir <slug>
+oma slide viewer --dir "$DECK_DIR"
 
 # Bundle to single-file
-oma slide bundle --dir <slug> --out <slug>/out/deck.html
+oma slide bundle --dir "$DECK_DIR"
 
 # Exports (optional)
-oma slide pdf  --dir <slug> --out <slug>/out/deck.pdf
-oma slide png  --dir <slug> --out-dir <slug>/out/png/
-oma slide pptx --dir <slug> --out <slug>/out/deck.pptx   # experimental
+oma slide pdf  --dir "$DECK_DIR"
+oma slide png  --dir "$DECK_DIR"
+oma slide pptx --dir "$DECK_DIR"   # experimental
 
 # Style browsing
 oma slide styles list
 oma slide styles get <slug>
 
 # Visual editor
-oma slide edit --dir <slug>
+oma slide edit --dir "$DECK_DIR"
 ```
 
 ### Resource scope
 | Scope | Resource target |
 |-------|-----------------|
-| `CODEBASE` | Working directory: slide-NN.html, meta.json, assets/ |
+| `CODEBASE` | `.agents/results/slides/<session-id>/`: slide-NN.html, meta.json, assets/ |
 | `LOCAL_FS` | resources/style-presets.md, selection-index.json, fixed-stage.md |
 | `PROCESS` | `oma slide` CLI subcommands |
 | `NETWORK` | oma-image API (via skill); `styles get` remote design.md (untrusted data) |
@@ -187,7 +191,7 @@ oma slide edit --dir <slug>
 - For image generation: oma-image skill is reachable (or placeholder path accepted).
 
 ### Effects and side effects
-- Writes `slide-NN.html` and `meta.json` into the workdir.
+- Writes `slide-NN.html` and `meta.json` into `.agents/results/slides/<session-id>/`.
 - Writes generated images to `./assets/` via oma-image.
 - Calls `oma slide` CLI which reads those files for validation/bundling/export.
 - Fetches remote `design.md` files (cached; treated as untrusted style data).
