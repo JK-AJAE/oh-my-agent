@@ -1,5 +1,36 @@
 # Changelog
 
+## [8.18.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.17.1...cli-v8.18.0) (2026-05-29)
+
+
+### Features
+
+* **doctor:** report AgentMemory diagnostics ([0ee3054](https://github.com/first-fluke/oh-my-agent/commit/0ee3054dfe431dd07f9c40e45a2b12e8d357717d))
+
+
+### Bug Fixes
+
+* **doctor:** use visual-width-aware padding for table alignment ([d12bc8c](https://github.com/first-fluke/oh-my-agent/commit/d12bc8c8adf3a8cc05dc5f0e8dbe4ac601afa64a))
+
+## [8.17.1](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.17.0...cli-v8.17.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* **agent:** route subagent result artifacts to .serena/memories with parseable status ([326a228](https://github.com/first-fluke/oh-my-agent/commit/326a228d0ece3e5c1e552c37c73051863b306fcf))
+
+## [8.17.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.16.0...cli-v8.17.0) (2026-05-29)
+
+
+### Features
+
+* **memory:** import vendor history into AgentMemory ([e75aaaf](https://github.com/first-fluke/oh-my-agent/commit/e75aaafdd2bc4932d00d75eea8b2aefb35140f47))
+
+
+### Documentation
+
+* add oma-slide skill entry to README agent tables ([80d7e38](https://github.com/first-fluke/oh-my-agent/commit/80d7e38fb02d27f3844bbe1ed370fcc804e4512b))
+
 ## [8.16.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v8.15.0...cli-v8.16.0) (2026-05-28)
 
 

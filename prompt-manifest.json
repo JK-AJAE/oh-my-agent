@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
-  "version": "8.16.0",
-  "releaseDate": "2026-05-28T07:09:46.912Z",
+  "version": "8.18.0",
+  "releaseDate": "2026-05-29T12:20:24.900Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -385,29 +385,34 @@
       "size": 4891
     },
     {
+      "path": ".agents/skills/_shared/runtime/execution-protocols/antigravity.md",
+      "sha256": "98fe46049859b1813145b8e196b11a51efe0fed7f2d8f679e91b45471d9950ee",
+      "size": 2638
+    },
+    {
       "path": ".agents/skills/_shared/runtime/execution-protocols/claude.md",
-      "sha256": "df6c50993b99c15f8e3b6d4f097898ade83ea608b57339e751c0a8cbff5fe99b",
-      "size": 1611
+      "sha256": "47414379d5daeba7ea0738bc7f5582e8d05b42c53c5183465cfd6811d4d0ed3b",
+      "size": 2684
     },
     {
       "path": ".agents/skills/_shared/runtime/execution-protocols/codex.md",
-      "sha256": "2a00605658392c32f2e665b2796dbcdb818f2322f9c55aee69709bf188a16a9f",
-      "size": 1479
+      "sha256": "ff45f86e1c8b1dd91af18bdb5cedc0e139e613804df6139b635179f2e6acd2c8",
+      "size": 2472
     },
     {
       "path": ".agents/skills/_shared/runtime/execution-protocols/gemini.md",
-      "sha256": "c3ac82f2fcdba7dc1a48dc212f6d2de8a0943a0285ab992e2d6f8d5526a7b961",
-      "size": 1692
+      "sha256": "ef7478e55f48d9973d3a6869db189b2059f9bd061f2ea47b7fb8f72a12a9f4bc",
+      "size": 2230
     },
     {
       "path": ".agents/skills/_shared/runtime/execution-protocols/grok.md",
-      "sha256": "4571d2c717d6db5b91c62dd809d5bda55f58121975cfa9290257f980d9a10926",
-      "size": 1354
+      "sha256": "fb7da4447bae1ed8e995291a1bbd73da0b0ec459f68756f43ce3a5c504d973da",
+      "size": 2771
     },
     {
       "path": ".agents/skills/_shared/runtime/execution-protocols/qwen.md",
-      "sha256": "3d32a30de9542225bb9c6d815a86cb52ab1b04a528bcf16fe50a67438b36254f",
-      "size": 1608
+      "sha256": "4ea60912b4ea69264eea0bb95ff6c620839783429e5a440362c57c14401646cf",
+      "size": 2146
     },
     {
       "path": ".agents/skills/_shared/runtime/memory-protocol.md",
@@ -416,7 +421,7 @@
     },
     {
       "path": ".agents/skills/_version.json",
-      "sha256": "58194df3c2b2af247bb3374c85ad89e3ea91a0ee1609d32360d31615e652b670",
+      "sha256": "f2b5578ea339af2094bb0fd76773ad4372fc1dc724b7b8fa7bfe9c9140e4c5df",
       "size": 25
     },
     {
@@ -1861,6 +1866,6 @@
   "metadata": {
     "skillCount": 48,
     "workflowCount": 21,
-    "totalFiles": 370
+    "totalFiles": 371
   }
 }
