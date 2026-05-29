@@ -346,9 +346,10 @@ describe("AgentMemory doctor checks", () => {
   });
 
   it("reports missing AgentMemory binary when a service file is installed", async () => {
-    vi.mocked(existsSync).mockImplementation((p) =>
-      String(p).endsWith("dev.oma.agentmemory.plist") ||
-      String(p).endsWith("oma-agentmemory.service"),
+    vi.mocked(existsSync).mockImplementation(
+      (p) =>
+        String(p).endsWith("dev.oma.agentmemory.plist") ||
+        String(p).endsWith("oma-agentmemory.service"),
     );
 
     const reportPromise = collectDoctorReport();
