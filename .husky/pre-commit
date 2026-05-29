@@ -1,1 +1,9 @@
+branch="$(git branch --show-current)"
+
+if [ "$branch" = "main" ] && [ "${OMA_ALLOW_MAIN_COMMIT:-}" != "1" ]; then
+  echo "main is reserved for upstream sync. Commit custom work on custom."
+  echo "Set OMA_ALLOW_MAIN_COMMIT=1 only for intentional sync metadata commits."
+  exit 1
+fi
+
 bunx biome check --write --staged --no-errors-on-unmatched

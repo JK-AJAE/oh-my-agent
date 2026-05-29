@@ -1,3 +1,10 @@
+remote_name="$1"
+
+if [ "$remote_name" = "upstream" ]; then
+  echo "Push to upstream is disabled for this overlay checkout."
+  exit 1
+fi
+
 bun run typecheck
 # Mirror GitHub Actions, which sets CI=true automatically. Catches tests
 # that behave differently under non-interactive yes-mode (install.ts).
