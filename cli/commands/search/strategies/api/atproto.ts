@@ -6,11 +6,14 @@ import type {
 import { apiFetch, invalidInputResult } from "./helpers.js";
 
 /**
- * Bluesky — `public.api.bsky.app`. Profile/feed endpoints are public;
- * the search endpoint returns 403 and is intentionally not wired up.
+ * Bluesky — profile/feed endpoints are public on `public.api.bsky.app`.
+ * Keyword search (`app.bsky.feed.searchPosts`) returns 403 on that host but
+ * is served unauthenticated by `api.bsky.app`, so `keywordSearch` targets the
+ * latter while resource fetches stay on the former.
  */
 const BSKY_HOSTS = new Set(["bsky.app", "www.bsky.app", "staging.bsky.app"]);
 const BSKY_API = "https://public.api.bsky.app/xrpc";
+const BSKY_SEARCH_API = "https://api.bsky.app/xrpc";
 
 export const bluesky: PlatformHandler = {
   id: "bluesky",
@@ -45,6 +48,18 @@ export const bluesky: PlatformHandler = {
     return apiFetch({
       platform: "bluesky",
       url,
+      fetchUrl: endpoint,
+      ctx,
+      expectJson: true,
+    });
+  },
+  async keywordSearch(query: string, ctx: FetchContext): Promise<FetchResult> {
+    const endpoint = `${BSKY_SEARCH_API}/app.bsky.feed.searchPosts?q=${encodeURIComponent(
+      query,
+    )}&limit=25`;
+    return apiFetch({
+      platform: "bluesky",
+      url: new URL(endpoint),
       fetchUrl: endpoint,
       ctx,
       expectJson: true,
