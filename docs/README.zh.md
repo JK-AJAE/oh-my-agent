@@ -92,12 +92,6 @@ APM 只分发 skill。workflow、规则、`oma-config.yaml`、关键词检测 ho
 <strong>Qwen Code</strong><br/>
 <sub>原生派发</sub>
 </td>
-
-<td align="center">
-<a href="https://kiro.dev"><img src="./assets/agents/kiro.png" alt="Kiro CLI" width="48" height="48" /></a><br/>
-<strong>Kiro CLI</strong><br/>
-<sub>原生钩子 + 代理</sub>
-</td>
 </tr>
 <tr>
 <td align="center">
@@ -120,13 +114,16 @@ APM 只分发 skill。workflow、规则、`oma-config.yaml`、关键词检测 ho
 <strong>GitHub Copilot</strong><br/>
 <sub>符号链接技能</sub>
 </td>
-
 <td align="center">
 <a href="https://grok.x.ai"><img src="./assets/agents/grok.png" alt="Grok" width="48" height="48" /></a><br/>
 <strong>Grok</strong><br/>
 <sub>原生钩子</sub>
 </td>
-<td align="center"></td>
+<td align="center">
+<a href="https://kiro.dev"><img src="./assets/agents/kiro.png" alt="Kiro CLI" width="48" height="48" /></a><br/>
+<strong>Kiro CLI</strong><br/>
+<sub>原生钩子 + 代理</sub>
+</td>
 </tr>
 </table>
 

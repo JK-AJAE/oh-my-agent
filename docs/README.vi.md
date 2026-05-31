@@ -92,12 +92,6 @@ Chọn một preset và bạn đã sẵn sàng:
 <strong>Qwen Code</strong><br/>
 <sub>dispatch nguyên bản</sub>
 </td>
-
-<td align="center">
-<a href="https://kiro.dev"><img src="./assets/agents/kiro.png" alt="Kiro CLI" width="48" height="48" /></a><br/>
-<strong>Kiro CLI</strong><br/>
-<sub>native hooks + agents</sub>
-</td>
 </tr>
 <tr>
 <td align="center">
@@ -120,13 +114,16 @@ Chọn một preset và bạn đã sẵn sàng:
 <strong>GitHub Copilot</strong><br/>
 <sub>skills qua symlink</sub>
 </td>
-
 <td align="center">
 <a href="https://grok.x.ai"><img src="./assets/agents/grok.png" alt="Grok" width="48" height="48" /></a><br/>
 <strong>Grok</strong><br/>
 <sub>native hooks</sub>
 </td>
-<td align="center"></td>
+<td align="center">
+<a href="https://kiro.dev"><img src="./assets/agents/kiro.png" alt="Kiro CLI" width="48" height="48" /></a><br/>
+<strong>Kiro CLI</strong><br/>
+<sub>native hooks + agents</sub>
+</td>
 </tr>
 </table>
 

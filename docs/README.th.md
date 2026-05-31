@@ -92,12 +92,6 @@ APM แจกแค่ skill เท่านั้น ส่วน workflow, rul
 <strong>Qwen Code</strong><br/>
 <sub>dispatch เนทีฟ</sub>
 </td>
-
-<td align="center">
-<a href="https://kiro.dev"><img src="./assets/agents/kiro.png" alt="Kiro CLI" width="48" height="48" /></a><br/>
-<strong>Kiro CLI</strong><br/>
-<sub>native hooks + agents</sub>
-</td>
 </tr>
 <tr>
 <td align="center">
@@ -120,13 +114,16 @@ APM แจกแค่ skill เท่านั้น ส่วน workflow, rul
 <strong>GitHub Copilot</strong><br/>
 <sub>skills ผ่าน symlink</sub>
 </td>
-
 <td align="center">
 <a href="https://grok.x.ai"><img src="./assets/agents/grok.png" alt="Grok" width="48" height="48" /></a><br/>
 <strong>Grok</strong><br/>
 <sub>native hooks</sub>
 </td>
-<td align="center"></td>
+<td align="center">
+<a href="https://kiro.dev"><img src="./assets/agents/kiro.png" alt="Kiro CLI" width="48" height="48" /></a><br/>
+<strong>Kiro CLI</strong><br/>
+<sub>native hooks + agents</sub>
+</td>
 </tr>
 </table>
 
