@@ -16,6 +16,7 @@ import {
   installSkill,
 } from "../../platform/skills-installer.js";
 import { retryObservePath } from "../../state/events.js";
+import { evaluateSelfHealingGate } from "../../state/self-healing.js";
 import type { CLICheck, SkillCheck } from "../../types/index.js";
 import type {
   MemoryDaemonResult,
@@ -35,8 +36,18 @@ import {
   controlAgentMemoryDaemon,
   getAgentMemoryServicePresence,
 } from "../memory/memory.js";
-import { auditSkills, type SkillAuditReport } from "../skills/audit.js";
-import { checkDualInstall, type DualInstallReport } from "./dual-install.js";
+import { auditSkills } from "../skills/audit.js";
+import { checkDualInstall } from "./dual-install.js";
+import type {
+  AgentMemoryBinaryCheck,
+  AgentMemoryDaemonCheck,
+  AgentMemoryDoctorCheck,
+  AgentMemoryRetryQueueCheck,
+  DoctorOptions,
+  DoctorReport,
+  McpCheck,
+  VendorDocCheck,
+} from "./types.js";
 
 const OMA_DOCTOR_PROBE_TIMEOUT_MS = Number(
   process.env.OMA_DOCTOR_PROBE_TIMEOUT_MS ?? 5000,
@@ -67,44 +78,6 @@ export const AUTH_CHECKERS: Record<string, () => boolean> = {
   kiro: isKiroAuthenticated,
 };
 
-export interface McpCheck extends CLICheck {
-  mcp: { configured: boolean; path?: string };
-}
-
-export interface VendorDocCheck {
-  fileName: string;
-  required: boolean;
-  hasOmaBlock: boolean;
-}
-
-export interface AgentMemoryRetryQueueCheck {
-  path: string;
-  total: number;
-  invalid: number;
-}
-
-export interface AgentMemoryDaemonCheck {
-  pidPath: string;
-  ownedPid?: number;
-  ownedProcessRunning: boolean;
-  endpoint: string | null;
-}
-
-export interface AgentMemoryBinaryCheck {
-  command: string;
-  available: boolean;
-  path?: string;
-}
-
-export interface AgentMemoryDoctorCheck {
-  status: MemoryProviderStatus;
-  binary: AgentMemoryBinaryCheck;
-  retryQueue: AgentMemoryRetryQueueCheck;
-  service: MemoryServicePresence;
-  daemon: AgentMemoryDaemonCheck;
-  issues: string[];
-}
-
 /** Vendor context files checked when their CLI is installed. */
 const VENDOR_DOC_SPECS: Array<{
   fileName: string;
@@ -116,22 +89,6 @@ const VENDOR_DOC_SPECS: Array<{
 ];
 
 const OMA_START_MARKER = "<!-- OMA:START";
-
-export interface DoctorReport {
-  cwd: string;
-  clis: CLICheck[];
-  mcpChecks: McpCheck[];
-  skillChecks: SkillCheck[];
-  missingCLIs: CLICheck[];
-  missingSkills: SkillCheck[];
-  vendorDocs: VendorDocCheck[];
-  hasSerena: boolean;
-  serenaFileCount: number;
-  agentMemory: AgentMemoryDoctorCheck;
-  totalIssues: number;
-  skillAudit: SkillAuditReport;
-  dualInstall: DualInstallReport;
-}
 
 function isValidRetryLine(line: string): boolean {
   try {
@@ -386,7 +343,9 @@ function collectVendorDocChecks(
   }));
 }
 
-export async function collectDoctorReport(): Promise<DoctorReport> {
+export async function collectDoctorReport(
+  options: DoctorOptions = {},
+): Promise<DoctorReport> {
   const cwd = process.cwd();
   const dualInstall = await checkDualInstall(cwd);
 
@@ -425,16 +384,24 @@ export async function collectDoctorReport(): Promise<DoctorReport> {
 
   const skillAudit = auditSkills(cwd);
   const agentMemory = await collectAgentMemoryCheck(cwd);
+  const selfHealing = options.healCheckAgent
+    ? evaluateSelfHealingGate({
+        workspace: cwd,
+        agentType: options.healCheckAgent,
+      })
+    : undefined;
 
   const vendorDocIssues = vendorDocs.filter(
     (d) => d.required && !d.hasOmaBlock,
   ).length;
+  const selfHealingIssues = selfHealing && !selfHealing.ok ? 1 : 0;
 
   const totalIssues =
     missingCLIs.length +
     missingSkills.length +
     vendorDocIssues +
-    agentMemory.issues.length;
+    agentMemory.issues.length +
+    selfHealingIssues;
 
   return {
     cwd,
@@ -450,6 +417,7 @@ export async function collectDoctorReport(): Promise<DoctorReport> {
     totalIssues,
     skillAudit,
     dualInstall,
+    selfHealing,
   };
 }
 
@@ -486,6 +454,7 @@ export function serializeReportAsJson(report: DoctorReport): string {
       daemon: report.agentMemory.daemon,
       issues: report.agentMemory.issues,
     },
+    selfHealing: report.selfHealing ?? null,
     vendorDocs: report.vendorDocs.map((d) => ({
       file: d.fileName,
       required: d.required,

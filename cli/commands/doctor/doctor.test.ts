@@ -45,6 +45,7 @@ const spawnState = vi.hoisted(() => {
 
   return {
     createMockProc,
+    execFileSyncFn: vi.fn(),
     lastProcs,
     spawnFn: vi.fn(() => {
       const proc = createMockProc();
@@ -55,6 +56,7 @@ const spawnState = vi.hoisted(() => {
 });
 
 vi.mock("node:child_process", () => ({
+  execFileSync: spawnState.execFileSyncFn,
   spawn: spawnState.spawnFn,
 }));
 
@@ -118,6 +120,7 @@ describe("checkCLI via collectDoctorReport", () => {
     vi.useFakeTimers();
     spawnState.lastProcs.length = 0;
     vi.clearAllMocks();
+    spawnState.execFileSyncFn.mockReturnValue("");
   });
 
   afterEach(() => {
@@ -225,6 +228,7 @@ describe("vendor doc OMA block checks", () => {
     vi.useFakeTimers();
     spawnState.lastProcs.length = 0;
     vi.clearAllMocks();
+    spawnState.execFileSyncFn.mockReturnValue("");
     vi.mocked(existsSync).mockReturnValue(false);
     vi.mocked(readFileSync).mockReturnValue("");
   });
@@ -297,6 +301,7 @@ describe("AgentMemory doctor checks", () => {
     vi.useFakeTimers();
     spawnState.lastProcs.length = 0;
     vi.clearAllMocks();
+    spawnState.execFileSyncFn.mockReturnValue("");
     vi.mocked(existsSync).mockReturnValue(false);
     vi.mocked(readFileSync).mockReturnValue("");
   });
@@ -369,6 +374,50 @@ describe("AgentMemory doctor checks", () => {
     });
     expect(report.agentMemory.issues).toContain(
       "AgentMemory binary not found: agentmemory",
+    );
+  });
+});
+
+describe("self-healing doctor check", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    spawnState.lastProcs.length = 0;
+    vi.clearAllMocks();
+    vi.mocked(existsSync).mockReturnValue(false);
+    vi.mocked(readFileSync).mockReturnValue("");
+    spawnState.execFileSyncFn.mockImplementation((_command, args) => {
+      const gitArgs = args as string[];
+      if (gitArgs.includes("--is-inside-work-tree")) return "true\n";
+      if (gitArgs.includes("HEAD")) return "abc123\n";
+      if (gitArgs.includes("status")) return "";
+      return "";
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("adds an optional self-healing gate result and counts a blocked gate as one issue", async () => {
+    const reportPromise = collectDoctorReport({ healCheckAgent: "debug" });
+    await vi.advanceTimersByTimeAsync(0);
+    await settleInstalledClis([]);
+
+    const report = await reportPromise;
+
+    expect(report.selfHealing).toMatchObject({
+      ok: false,
+      reasons: ["no-git-tracked-changes", "missing-skill-output-metadata"],
+      skill: {
+        agentType: "debug",
+        hasStructuredOutputs: false,
+      },
+    });
+    expect(report.totalIssues).toBe(
+      report.missingCLIs.length +
+        report.missingSkills.length +
+        report.agentMemory.issues.length +
+        1,
     );
   });
 });

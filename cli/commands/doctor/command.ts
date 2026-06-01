@@ -11,6 +11,7 @@ import { renderDoctorReport, renderProfileReport } from "./ui.js";
 export async function doctor(
   jsonMode = false,
   profileMode = false,
+  healCheckAgent?: string,
 ): Promise<void> {
   if (profileMode) {
     const report = await collectProfileReport(process.cwd());
@@ -18,7 +19,7 @@ export async function doctor(
     return;
   }
 
-  const report = await collectDoctorReport();
+  const report = await collectDoctorReport({ healCheckAgent });
   if (jsonMode) {
     console.log(serializeReportAsJson(report));
     process.exit(report.totalIssues === 0 ? 0 : 1);
@@ -31,7 +32,11 @@ export function registerDoctor(program: Command): void {
     program
       .command("doctor")
       .description("Check CLI installations, MCP configs, and skill status")
-      .option("--profile", "Show profile health matrix (auth status per role)"),
+      .option("--profile", "Show profile health matrix (auth status per role)")
+      .option(
+        "--heal-check <agentType>",
+        "Include self-healing gate check for an agent",
+      ),
     "Output as JSON for CI/CD",
   ).action(
     runAction(
@@ -39,7 +44,11 @@ export function registerDoctor(program: Command): void {
         const profileMode = Boolean(
           (options as Record<string, unknown>).profile,
         );
-        await doctor(resolveJsonMode(options), profileMode);
+        await doctor(
+          resolveJsonMode(options),
+          profileMode,
+          (options as Record<string, unknown>).healCheck as string | undefined,
+        );
       },
       { supportsJsonOutput: true },
     ),

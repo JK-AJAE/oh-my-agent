@@ -42,13 +42,11 @@ function visualPadEnd(s: string, targetWidth: number): string {
 
 import { checkStarred } from "../../io/github.js";
 import { getAllSkills } from "../../platform/skills-installer.js";
+import { renderSelfHealingGateResult } from "../../state/self-healing.js";
 import { printMigrationGuide } from "../../vendors/qwen/auth.js";
-import {
-  AUTH_CHECKERS,
-  type DoctorReport,
-  installSkillsFromRemote,
-} from "./doctor.js";
+import { AUTH_CHECKERS, installSkillsFromRemote } from "./doctor.js";
 import type { ProfileReport } from "./profile.js";
+import type { DoctorReport } from "./types.js";
 
 function renderCliTable(report: DoctorReport): void {
   const rows = report.clis.map((cli) => {
@@ -311,6 +309,11 @@ function renderAgentMemory(report: DoctorReport): void {
   p.note(lines.join("\n"), "AgentMemory");
 }
 
+function renderSelfHealing(report: DoctorReport): void {
+  if (!report.selfHealing) return;
+  p.note(renderSelfHealingGateResult(report.selfHealing), "Self-Healing Gate");
+}
+
 function renderFooter(report: DoctorReport): void {
   if (report.hasSerena) {
     p.note(
@@ -534,6 +537,7 @@ export async function renderDoctorReport(report: DoctorReport): Promise<void> {
     renderSkillsTable(report);
     renderSkillBoundaries(report);
     renderAgentMemory(report);
+    renderSelfHealing(report);
     await promptRepair(report);
     renderFooter(report);
   } catch (error) {
