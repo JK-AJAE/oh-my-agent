@@ -1,6 +1,8 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import * as readline from "node:readline/promises";
 import YAML from "yaml";
 
 export type IntelSourceKind =
@@ -24,6 +26,19 @@ export type IntelSignal = {
   trust: "low" | "medium" | "high";
 };
 
+export type ReviewLens =
+  | "evidence"
+  | "fit"
+  | "differentiation"
+  | "scope"
+  | "risk";
+
+export type ReviewFinding = {
+  lens: ReviewLens;
+  verdict: "pass" | "flag" | "fail";
+  note: string;
+};
+
 export type CandidateGap = {
   id: string;
   title: string;
@@ -35,6 +50,7 @@ export type CandidateGap = {
   maintenanceRisk: "low" | "medium" | "high";
   decision: "accept" | "defer" | "reject";
   rationale: string;
+  review?: ReviewFinding[];
 };
 
 export type IntelConfig = {
@@ -52,7 +68,7 @@ export type IntelConfig = {
     formats: Array<"md" | "json">;
   };
   remote: {
-    githubIssue: { enabled: boolean; requireConfirm: boolean };
+    githubIssue: { enabled: boolean; requireConfirm: boolean; repo?: string };
   };
 };
 
@@ -67,6 +83,9 @@ export type IntelRunOptions = {
   outputDir?: string;
   dryRun?: boolean;
   fixture?: string;
+  createIssue?: boolean;
+  baseRepo?: string;
+  assumeYes?: boolean;
   now?: Date;
 };
 
@@ -76,13 +95,24 @@ type CoverageNote = {
   detail: string;
 };
 
+export type IssueResult = {
+  status: "created" | "dry-run" | "skipped" | "duplicate" | "refused";
+  detail: string;
+  title: string;
+  fingerprint: string;
+  url?: string;
+  body?: string;
+};
+
 export type IntelRunResult = {
   config: IntelConfig;
   signals: IntelSignal[];
   candidates: CandidateGap[];
   coverage: CoverageNote[];
-  markdown: string;
-  outputPaths: { markdown?: string; json?: string };
+  prd: string;
+  gapReport: string;
+  outputPaths: { prd?: string; gapReport?: string; json?: string };
+  issue?: IssueResult;
 };
 
 type RawConfig = {
@@ -99,6 +129,22 @@ type RawConfig = {
 
 const DEFAULT_OUTPUT_DIR = "docs/intel";
 const DEFAULT_FORMATS: Array<"md" | "json"> = ["md", "json"];
+const FINGERPRINT_MARKER = "oma-intel-fingerprint";
+// Flag genuinely unsafe intent (action verb + sensitive target), not mere
+// mentions of "API key" or "credentials" that appear in normal docs/release
+// notes. Keeping this tight avoids false-positive rejections (quality: no
+// false positives).
+const UNSAFE_EVIDENCE = new RegExp(
+  [
+    // verb + sensitive noun within a short window
+    "(?:scrap(?:e|ing)|exfiltrat\\w*|steal(?:ing)?|harvest(?:ing)?|capture|dump|leak|sniff)\\s+(?:\\w+\\s+){0,3}(?:credential|password|secret|token|api[ _-]?key|cookie|session)",
+    // noun + theft/harvest phrasing
+    "(?:credential|token|password|secret)\\s+(?:theft|harvest\\w*|exfiltrat\\w*)",
+    // auth/permission bypass
+    "bypass(?:ing)?\\s+(?:auth\\w*|login|permission|sandbox|2fa|mfa)",
+  ].join("|"),
+  "i",
+);
 
 const CAPABILITY_KEYWORDS: Array<[string, RegExp]> = [
   ["scaffolding", /scaffold|template|starter|bootstrap|setup|install/i],
@@ -267,6 +313,7 @@ function parseRawConfig(raw: RawConfig | undefined, cwd: string): IntelConfig {
       githubIssue: {
         enabled: asBoolean(githubIssue.enabled) ?? false,
         requireConfirm: asBoolean(githubIssue.require_confirm) ?? true,
+        repo: asString(githubIssue.repo),
       },
     },
   };
@@ -286,6 +333,9 @@ export function resolveIntelConfig(options: IntelRunOptions): IntelConfig {
   if (reposOverride.length > 0)
     config.sources.github = { repos: reposOverride };
   if (options.outputDir?.trim()) config.output.dir = options.outputDir.trim();
+  if (options.baseRepo?.trim()) {
+    config.remote.githubIssue.repo = normalizeRepo(options.baseRepo);
+  }
 
   const optionLastCommits = parseLastCommits(options.lastCommits);
   if (options.since && optionLastCommits) {
@@ -351,10 +401,171 @@ function commitLimit(config: IntelConfig): number {
   return Math.min(Math.max(config.window.lastCommits ?? 30, 1), 100);
 }
 
-function githubSinceParam(config: IntelConfig, now: Date): string | undefined {
+function githubSinceDate(config: IntelConfig, now: Date): Date | undefined {
   if (!config.window.since) return undefined;
-  const parsed = parseDurationToSinceDate(config.window.since, now);
-  return parsed?.toISOString();
+  return parseDurationToSinceDate(config.window.since, now) ?? undefined;
+}
+
+function isAfterSince(observedAt: string | undefined, since?: Date): boolean {
+  if (!since) return true;
+  if (!observedAt) return true;
+  const observed = new Date(observedAt);
+  return (
+    Number.isNaN(observed.getTime()) || observed.getTime() >= since.getTime()
+  );
+}
+
+async function collectRepoMeta(
+  repo: string,
+  retrievedAt: string,
+): Promise<IntelSignal> {
+  const repoMeta = (await fetchJson(
+    `https://api.github.com/repos/${repo}`,
+  )) as Record<string, unknown>;
+  const description = asString(repoMeta.description) ?? "";
+  return signalFromText({
+    repo,
+    source: "local",
+    observedAt: asString(repoMeta.updated_at) ?? retrievedAt,
+    retrievedAt,
+    title: `${repo} repository surface`,
+    summary: description || "Repository metadata observed.",
+    url: asString(repoMeta.html_url),
+    trust: "medium",
+  });
+}
+
+async function collectRepoCommits(
+  repo: string,
+  config: IntelConfig,
+  now: Date,
+  retrievedAt: string,
+): Promise<IntelSignal[]> {
+  const params = new URLSearchParams({
+    per_page: String(commitLimit(config)),
+  });
+  const since = githubSinceDate(config, now);
+  if (since) params.set("since", since.toISOString());
+  const commits = (await fetchJson(
+    `https://api.github.com/repos/${repo}/commits?${params}`,
+  )) as Array<Record<string, unknown>>;
+  return commits.slice(0, commitLimit(config)).map((commit) => {
+    const sha = asString(commit.sha);
+    const commitObj = isRecord(commit.commit) ? commit.commit : {};
+    const message = asString(commitObj.message) ?? "";
+    const author = isRecord(commitObj.author) ? commitObj.author : {};
+    const firstLine = message.split("\n")[0]?.trim() || "Commit";
+    return signalFromText({
+      repo,
+      source: "commit",
+      observedAt: asString(author.date) ?? retrievedAt,
+      retrievedAt,
+      title: firstLine,
+      summary: message,
+      url: asString(commit.html_url),
+      ref: sha?.slice(0, 12),
+      trust: "high",
+    });
+  });
+}
+
+async function collectRepoReadme(
+  repo: string,
+  retrievedAt: string,
+): Promise<IntelSignal> {
+  const readme = (await fetchJson(
+    `https://api.github.com/repos/${repo}/readme`,
+  )) as Record<string, unknown>;
+  const encoded = asString(readme.content) ?? "";
+  const decoded = encoded
+    ? Buffer.from(encoded, "base64").toString("utf-8").slice(0, 4000)
+    : "";
+  return signalFromText({
+    repo,
+    source: "readme",
+    observedAt: retrievedAt,
+    retrievedAt,
+    title: `${repo} README surface`,
+    summary: decoded || "README present but empty.",
+    url: asString(readme.html_url),
+    trust: "medium",
+  });
+}
+
+async function collectRepoReleases(
+  repo: string,
+  since: Date | undefined,
+  retrievedAt: string,
+): Promise<IntelSignal[]> {
+  const releases = (await fetchJson(
+    `https://api.github.com/repos/${repo}/releases?per_page=10`,
+  )) as Array<Record<string, unknown>>;
+  return releases
+    .filter((release) => isAfterSince(asString(release.published_at), since))
+    .slice(0, 10)
+    .map((release) => {
+      const name =
+        asString(release.name) ?? asString(release.tag_name) ?? "Release";
+      const body = asString(release.body) ?? "";
+      return signalFromText({
+        repo,
+        source: "release",
+        observedAt: asString(release.published_at) ?? retrievedAt,
+        retrievedAt,
+        title: `Release ${name}`,
+        summary: body || name,
+        url: asString(release.html_url),
+        ref: asString(release.tag_name),
+        trust: "medium",
+      });
+    });
+}
+
+async function collectRepoIssues(
+  repo: string,
+  since: Date | undefined,
+  retrievedAt: string,
+): Promise<IntelSignal[]> {
+  const params = new URLSearchParams({
+    state: "all",
+    sort: "updated",
+    per_page: "15",
+  });
+  if (since) params.set("since", since.toISOString());
+  const issues = (await fetchJson(
+    `https://api.github.com/repos/${repo}/issues?${params}`,
+  )) as Array<Record<string, unknown>>;
+  return issues
+    .filter((issue) => !isRecord(issue.pull_request))
+    .slice(0, 10)
+    .map((issue) => {
+      const title = asString(issue.title) ?? "Issue";
+      const body = asString(issue.body) ?? "";
+      const number =
+        typeof issue.number === "number" ? issue.number : undefined;
+      const labels = Array.isArray(issue.labels)
+        ? issue.labels
+            .map((label) =>
+              isRecord(label) ? asString(label.name) : undefined,
+            )
+            .filter((name): name is string => !!name)
+        : [];
+      const labelSuffix = labels.length > 0 ? ` [${labels.join(", ")}]` : "";
+      return signalFromText({
+        repo,
+        source: "issue",
+        observedAt:
+          asString(issue.updated_at) ??
+          asString(issue.created_at) ??
+          retrievedAt,
+        retrievedAt,
+        title: `${title}${labelSuffix}`,
+        summary: body || title,
+        url: asString(issue.html_url),
+        ref: number ? `#${number}` : undefined,
+        trust: "medium",
+      });
+    });
 }
 
 async function collectGitHubSignals(
@@ -365,66 +576,48 @@ async function collectGitHubSignals(
   const signals: IntelSignal[] = [];
   const coverage: CoverageNote[] = [];
   const retrievedAt = now.toISOString();
+  const since = githubSinceDate(config, now);
 
   for (const repo of repos) {
+    const collected: string[] = [];
+    const degraded: string[] = [];
     try {
-      const repoMeta = (await fetchJson(
-        `https://api.github.com/repos/${repo}`,
-      )) as Record<string, unknown>;
-      const description = asString(repoMeta.description) ?? "";
-      signals.push(
-        signalFromText({
-          repo,
-          source: "local",
-          observedAt: asString(repoMeta.updated_at) ?? retrievedAt,
-          retrievedAt,
-          title: `${repo} repository surface`,
-          summary: description || "Repository metadata observed.",
-          url: asString(repoMeta.html_url),
-          trust: "medium",
-        }),
-      );
-
-      const params = new URLSearchParams({
-        per_page: String(commitLimit(config)),
-      });
-      const since = githubSinceParam(config, now);
-      if (since) params.set("since", since);
-      const commits = (await fetchJson(
-        `https://api.github.com/repos/${repo}/commits?${params}`,
-      )) as Array<Record<string, unknown>>;
-      for (const commit of commits.slice(0, commitLimit(config))) {
-        const sha = asString(commit.sha);
-        const commitObj = isRecord(commit.commit) ? commit.commit : {};
-        const message = asString(commitObj.message) ?? "";
-        const author = isRecord(commitObj.author) ? commitObj.author : {};
-        const firstLine = message.split("\n")[0]?.trim() || "Commit";
-        signals.push(
-          signalFromText({
-            repo,
-            source: "commit",
-            observedAt: asString(author.date) ?? retrievedAt,
-            retrievedAt,
-            title: firstLine,
-            summary: message,
-            url: asString(commit.html_url),
-            ref: sha?.slice(0, 12),
-            trust: "high",
-          }),
-        );
-      }
-      coverage.push({
-        source: `github:${repo}`,
-        status: "ok",
-        detail: `Collected repository metadata and ${Math.min(commits.length, commitLimit(config))} commits.`,
-      });
+      signals.push(await collectRepoMeta(repo, retrievedAt));
+      const commits = await collectRepoCommits(repo, config, now, retrievedAt);
+      signals.push(...commits);
+      collected.push(`metadata`, `${commits.length} commits`);
     } catch (error) {
       coverage.push({
         source: `github:${repo}`,
         status: "failed",
         detail: error instanceof Error ? error.message : String(error),
       });
+      continue;
     }
+
+    for (const [label, collector] of [
+      ["readme", () => collectRepoReadme(repo, retrievedAt).then((s) => [s])],
+      ["releases", () => collectRepoReleases(repo, since, retrievedAt)],
+      ["issues", () => collectRepoIssues(repo, since, retrievedAt)],
+    ] as Array<[string, () => Promise<IntelSignal[]>]>) {
+      try {
+        const collectedSignals = await collector();
+        signals.push(...collectedSignals);
+        collected.push(`${collectedSignals.length} ${label}`);
+      } catch (error) {
+        degraded.push(
+          `${label} (${error instanceof Error ? error.message : String(error)})`,
+        );
+      }
+    }
+
+    coverage.push({
+      source: `github:${repo}`,
+      status: degraded.length > 0 ? "partial" : "ok",
+      detail:
+        `Collected ${collected.join(", ")}.` +
+        (degraded.length > 0 ? ` Skipped ${degraded.join("; ")}.` : ""),
+    });
   }
 
   return { signals, coverage };
@@ -593,19 +786,134 @@ export function scoreCandidates(signals: IntelSignal[]): CandidateGap[] {
     .sort((a, b) => b.valueScore - a.valueScore);
 }
 
-function renderMarkdown(result: Omit<IntelRunResult, "markdown">): string {
-  const accepted = result.candidates.filter(
-    (candidate) => candidate.decision === "accept",
-  );
-  const deferred = result.candidates.filter(
-    (candidate) => candidate.decision !== "accept",
-  );
+/**
+ * Apply blind/adversarial review lenses over scored candidates. External
+ * evidence is treated as untrusted data, not instructions. A failing lens can
+ * downgrade an accepted candidate; flags are recorded but do not block on their
+ * own. The transform is deterministic so fixture replay stays stable.
+ */
+export function reviewCandidates(
+  candidates: CandidateGap[],
+  config: IntelConfig,
+): CandidateGap[] {
+  return candidates.map((candidate) => {
+    const repos = new Set(candidate.evidence.map((signal) => signal.repo));
+    const hasStrongCode = candidate.evidence.some(
+      (signal) => signal.source === "commit" && signal.trust === "high",
+    );
+    const unsafe = candidate.evidence.some((signal) =>
+      UNSAFE_EVIDENCE.test(`${signal.title}\n${signal.summary}`),
+    );
+
+    const review: ReviewFinding[] = [];
+
+    // Evidence gate: two independent signals, or one strong code signal.
+    const evidencePass =
+      (candidate.evidence.length >= 2 && repos.size >= 2) || hasStrongCode;
+    review.push({
+      lens: "evidence",
+      verdict: evidencePass ? "pass" : "fail",
+      note: evidencePass
+        ? `${candidate.evidence.length} signals across ${repos.size} repo(s).`
+        : "Fewer than two independent signals and no strong code signal.",
+    });
+
+    // Fit gate: capability must map to the OMA taxonomy.
+    const fitPass = candidate.capability !== "general";
+    review.push({
+      lens: "fit",
+      verdict: fitPass ? "pass" : "flag",
+      note: fitPass
+        ? `Maps to OMA capability "${candidate.capability}" for ${config.target}.`
+        : "Untagged capability; cannot confirm architectural fit.",
+    });
+
+    // Differentiation gate: avoid shallow copycat work.
+    const diffPass = candidate.differentiationScore >= 4;
+    review.push({
+      lens: "differentiation",
+      verdict: diffPass ? "pass" : "flag",
+      note: diffPass
+        ? `Differentiation score ${candidate.differentiationScore}/10.`
+        : "Low differentiation; risk of shallow clone.",
+    });
+
+    // Scope gate: bounded v1 maintainability.
+    const scopePass = candidate.maintenanceRisk !== "high";
+    review.push({
+      lens: "scope",
+      verdict: scopePass ? "pass" : "flag",
+      note: scopePass
+        ? `Maintenance risk ${candidate.maintenanceRisk}.`
+        : "High maintenance risk; scope may exceed a bounded v1.",
+    });
+
+    // Risk gate: no unsafe scraping or credential capture in evidence.
+    review.push({
+      lens: "risk",
+      verdict: unsafe ? "fail" : "pass",
+      note: unsafe
+        ? "Evidence references unsafe scraping/credential patterns."
+        : "No unsafe scraping or credential patterns detected.",
+    });
+
+    const hasFail = review.some((finding) => finding.verdict === "fail");
+    const blockingFlag = review.some(
+      (finding) =>
+        finding.verdict === "flag" &&
+        (finding.lens === "differentiation" || finding.lens === "fit"),
+    );
+
+    let decision = candidate.decision;
+    let rationale = candidate.rationale;
+    if (hasFail) {
+      decision = "reject";
+      rationale =
+        "Adversarial review rejected this candidate: " +
+        review
+          .filter((finding) => finding.verdict === "fail")
+          .map((finding) => finding.note)
+          .join(" ");
+    } else if (candidate.decision === "accept" && blockingFlag) {
+      decision = "defer";
+      rationale =
+        "Adversarial review downgraded to watch item: " +
+        review
+          .filter((finding) => finding.verdict === "flag")
+          .map((finding) => finding.note)
+          .join(" ");
+    }
+
+    return { ...candidate, decision, rationale, review };
+  });
+}
+
+function windowLabel(config: IntelConfig): string {
+  return config.window.lastCommits
+    ? `${config.window.lastCommits} commits`
+    : (config.window.since ?? "n/a");
+}
+
+function evidenceLine(signal: IntelSignal): string {
+  const ref = signal.ref ? ` ${signal.ref}` : "";
+  const url = signal.url ? ` ${signal.url}` : "";
+  return `- [${signal.source}] ${signal.repo}${ref}: ${signal.title}${url} (observed ${signal.observedAt})`;
+}
+
+type RenderInput = Omit<
+  IntelRunResult,
+  "prd" | "gapReport" | "outputPaths" | "issue"
+>;
+
+function renderGapReport(result: RenderInput): string {
+  const accepted = result.candidates.filter((c) => c.decision === "accept");
+  const deferred = result.candidates.filter((c) => c.decision !== "accept");
   const lines = [
-    "# Intelligence Suggestions",
+    "# Intelligence Gap Report",
     "",
     `Target: ${result.config.target}`,
     result.config.topic ? `Topic: ${result.config.topic}` : undefined,
-    `Window: ${result.config.window.lastCommits ? `${result.config.window.lastCommits} commits` : result.config.window.since}`,
+    `Window: ${windowLabel(result.config)}`,
     "",
     "## Top Items",
     "",
@@ -627,7 +935,7 @@ function renderMarkdown(result: Omit<IntelRunResult, "markdown">): string {
           )
       : ["- None"]),
     "",
-    "## Evidence",
+    "## Adversarial Review",
     "",
     ...result.candidates.flatMap((candidate) => [
       `### ${candidate.id}: ${candidate.title}`,
@@ -635,13 +943,76 @@ function renderMarkdown(result: Omit<IntelRunResult, "markdown">): string {
       `Decision: ${candidate.decision}`,
       `Rationale: ${candidate.rationale}`,
       "",
-      ...candidate.evidence.map((signal) => {
-        const ref = signal.ref ? ` ${signal.ref}` : "";
-        const url = signal.url ? ` ${signal.url}` : "";
-        return `- [${signal.source}] ${signal.repo}${ref}: ${signal.title}${url}`;
-      }),
+      ...(candidate.review ?? []).map(
+        (finding) => `- ${finding.lens}: ${finding.verdict} - ${finding.note}`,
+      ),
+      "",
+      "Evidence (untrusted external text, quoted only):",
+      ...candidate.evidence.map(evidenceLine),
       "",
     ]),
+    "## Coverage",
+    "",
+    ...result.coverage.map(
+      (note) => `- ${note.source}: ${note.status} - ${note.detail}`,
+    ),
+    "",
+  ].filter((line): line is string => line !== undefined);
+  return lines.join("\n");
+}
+
+function acceptanceCriteria(candidate: CandidateGap): string[] {
+  return [
+    `- Improvement in ${candidate.capability} is backed by at least ${candidate.evidence.length} cited signal(s).`,
+    "- Ships as a bounded v1 (no dashboard or daemon dependency).",
+    "- Preserves OMA cross-runtime SSOT and skills/workflows architecture.",
+    "- Includes tests and a named owner before merge.",
+  ];
+}
+
+function renderPrd(result: RenderInput): string {
+  const accepted = result.candidates.filter((c) => c.decision === "accept");
+  const rejected = result.candidates.filter((c) => c.decision !== "accept");
+  const lines = [
+    "# Product Requirements (Draft)",
+    "",
+    `Target: ${result.config.target}`,
+    result.config.topic ? `Topic: ${result.config.topic}` : undefined,
+    `Window: ${windowLabel(result.config)}`,
+    "",
+    "## Summary",
+    "",
+    accepted.length > 0
+      ? `Evidence supports ${accepted.length} candidate improvement(s). The highest-value next action is "${accepted[0]?.title}".`
+      : "No candidate passed the adversarial gates this run. Treat all items as watch-only and gather more evidence.",
+    "",
+    "## Proposed Features (Accepted)",
+    "",
+    ...(accepted.length > 0
+      ? accepted.flatMap((candidate) => [
+          `### ${candidate.id}: ${candidate.title}`,
+          "",
+          `Capability: ${candidate.capability} | value ${candidate.valueScore}/100 | maintenance risk ${candidate.maintenanceRisk}`,
+          "",
+          "Acceptance criteria:",
+          ...acceptanceCriteria(candidate),
+          "",
+          "Provenance:",
+          ...candidate.evidence.map(evidenceLine),
+          "",
+        ])
+      : ["None this run.", ""]),
+    "## Rejected / Deferred",
+    "",
+    ...(rejected.length > 0
+      ? rejected
+          .slice(0, 10)
+          .map(
+            (candidate) =>
+              `- ${candidate.id} ${candidate.title} - ${candidate.decision}: ${candidate.rationale}`,
+          )
+      : ["- None"]),
+    "",
     "## Coverage",
     "",
     ...result.coverage.map(
@@ -651,8 +1022,8 @@ function renderMarkdown(result: Omit<IntelRunResult, "markdown">): string {
     "## Remote Actions",
     "",
     result.config.remote.githubIssue.enabled
-      ? "GitHub issue creation is configured but still requires explicit confirmation."
-      : "No remote actions were performed. GitHub issue creation is disabled.",
+      ? "GitHub issue creation is enabled; run with --create-issue to file the top accepted candidates."
+      : "GitHub issue creation is disabled. Enable remote.github_issue in config to allow --create-issue.",
     "",
   ].filter((line): line is string => line !== undefined);
   return lines.join("\n");
@@ -660,6 +1031,266 @@ function renderMarkdown(result: Omit<IntelRunResult, "markdown">): string {
 
 function reportDate(now: Date): string {
   return now.toISOString().slice(0, 10);
+}
+
+function issueFingerprint(
+  config: IntelConfig,
+  accepted: CandidateGap[],
+): string {
+  const seed = [
+    config.target,
+    ...accepted.map((candidate) => candidate.capability).sort(),
+  ].join("|");
+  return createHash("sha256").update(seed).digest("hex").slice(0, 16);
+}
+
+function buildIssuePlan(result: RenderInput): {
+  title: string;
+  body: string;
+  fingerprint: string;
+} {
+  const accepted = result.candidates.filter((c) => c.decision === "accept");
+  const rejected = result.candidates.filter((c) => c.decision !== "accept");
+  const fingerprint = issueFingerprint(result.config, accepted);
+  const lead =
+    accepted[0]?.capability ?? rejected[0]?.capability ?? "intelligence";
+  const title = `intel: ${lead} opportunities for ${result.config.target}`;
+  const body = [
+    `<!-- ${FINGERPRINT_MARKER}: ${fingerprint} -->`,
+    "",
+    "## Summary",
+    "",
+    accepted.length > 0
+      ? `Adversarial review accepted ${accepted.length} candidate(s) from the latest intelligence run on \`${result.config.target}\`.`
+      : "No candidate passed the adversarial gates; filing as a watch list.",
+    "",
+    "## Accepted candidates",
+    "",
+    ...(accepted.length > 0
+      ? accepted.map(
+          (candidate) =>
+            `- ${candidate.title} (value ${candidate.valueScore}/100, ${candidate.capability})`,
+        )
+      : ["- None"]),
+    "",
+    "## Rejected / deferred",
+    "",
+    ...(rejected.length > 0
+      ? rejected
+          .slice(0, 10)
+          .map((candidate) => `- ${candidate.title} - ${candidate.decision}`)
+      : ["- None"]),
+    "",
+    "## Provenance",
+    "",
+    ...result.candidates
+      .flatMap((candidate) => candidate.evidence)
+      .slice(0, 15)
+      .map(evidenceLine),
+    "",
+    "_Generated by `oma intel`. External evidence is quoted as untrusted data._",
+  ].join("\n");
+  return { title, body, fingerprint };
+}
+
+function gh(args: string[], input?: string): string {
+  return execFileSync("gh", args, {
+    encoding: "utf-8",
+    input,
+    stdio: ["pipe", "pipe", "pipe"],
+  }).trim();
+}
+
+function ghAvailable(): boolean {
+  try {
+    gh(["--version"]);
+    gh(["auth", "status"]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function findDuplicateIssue(
+  repo: string,
+  fingerprint: string,
+): { number: number; url: string } | undefined {
+  try {
+    const raw = gh([
+      "issue",
+      "list",
+      "--repo",
+      repo,
+      "--state",
+      "all",
+      "--search",
+      fingerprint,
+      "--json",
+      "number,url,body",
+      "--limit",
+      "30",
+    ]);
+    const parsed = JSON.parse(raw || "[]") as Array<Record<string, unknown>>;
+    const match = parsed.find(
+      (issue) =>
+        typeof issue.body === "string" && issue.body.includes(fingerprint),
+    );
+    if (match && typeof match.number === "number") {
+      return { number: match.number, url: String(match.url ?? "") };
+    }
+  } catch {
+    // Search failures degrade to "no known duplicate" rather than blocking.
+  }
+  return undefined;
+}
+
+async function confirmInteractive(question: string): Promise<boolean> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  try {
+    const answer = (await rl.question(`${question} [y/N] `))
+      .trim()
+      .toLowerCase();
+    return answer === "y" || answer === "yes";
+  } finally {
+    rl.close();
+  }
+}
+
+async function createGitHubIssue(
+  result: RenderInput,
+  options: IntelRunOptions,
+): Promise<IssueResult> {
+  const { title, body, fingerprint } = buildIssuePlan(result);
+  const dryRun = !!options.dryRun;
+  const remote = result.config.remote.githubIssue;
+  const repo = remote.repo ?? options.baseRepo?.trim() ?? result.config.target;
+
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) {
+    return {
+      status: "refused",
+      detail: `Cannot file an issue: target "${repo}" is not an owner/name GitHub repo. Pass --base-repo.`,
+      title,
+      fingerprint,
+      body,
+    };
+  }
+
+  if (dryRun) {
+    return {
+      status: "dry-run",
+      detail: remote.enabled
+        ? `Would create an issue in ${repo}. Body printed below.`
+        : `Preview only: issue creation is disabled in config. Body printed below.`,
+      title,
+      fingerprint,
+      body,
+    };
+  }
+
+  if (!remote.enabled) {
+    return {
+      status: "refused",
+      detail:
+        "Issue creation is disabled. Set remote.github_issue.enabled: true in config.",
+      title,
+      fingerprint,
+      body,
+    };
+  }
+
+  if (!ghAvailable()) {
+    return {
+      status: "refused",
+      detail:
+        "GitHub CLI (gh) is not installed or not authenticated. Run `gh auth login`.",
+      title,
+      fingerprint,
+      body,
+    };
+  }
+
+  const duplicate = findDuplicateIssue(repo, fingerprint);
+  const interactive = !!process.stdin.isTTY;
+
+  if (duplicate) {
+    if (!interactive && !options.assumeYes) {
+      return {
+        status: "duplicate",
+        detail: `Matching issue #${duplicate.number} already exists (${duplicate.url}). Re-run with --yes to file anyway.`,
+        title,
+        fingerprint,
+        url: duplicate.url,
+        body,
+      };
+    }
+    if (
+      interactive &&
+      !(await confirmInteractive(
+        `A matching issue (#${duplicate.number}) already exists. Create another?`,
+      ))
+    ) {
+      return {
+        status: "skipped",
+        detail: `Skipped: duplicate of #${duplicate.number} (${duplicate.url}).`,
+        title,
+        fingerprint,
+        url: duplicate.url,
+        body,
+      };
+    }
+  }
+
+  if (remote.requireConfirm) {
+    if (!interactive && !options.assumeYes) {
+      return {
+        status: "refused",
+        detail:
+          "Issue creation requires confirmation. In non-interactive mode pass --yes to approve.",
+        title,
+        fingerprint,
+        body,
+      };
+    }
+    if (
+      interactive &&
+      !options.assumeYes &&
+      !(await confirmInteractive(`Create issue "${title}" in ${repo}?`))
+    ) {
+      return {
+        status: "skipped",
+        detail: "Issue creation declined.",
+        title,
+        fingerprint,
+        body,
+      };
+    }
+  }
+
+  try {
+    const url = gh(
+      ["issue", "create", "--repo", repo, "--title", title, "--body-file", "-"],
+      body,
+    );
+    return {
+      status: "created",
+      detail: `Created issue in ${repo}.`,
+      title,
+      fingerprint,
+      url: url || undefined,
+      body,
+    };
+  } catch (error) {
+    return {
+      status: "refused",
+      detail: `gh issue create failed: ${error instanceof Error ? error.message : String(error)}`,
+      title,
+      fingerprint,
+      body,
+    };
+  }
 }
 
 export async function runIntelSuggest(
@@ -677,25 +1308,33 @@ export async function runIntelSuggest(
 
   const signals = [...local.signals, ...market.signals, ...github.signals];
   const coverage = [...local.coverage, ...market.coverage, ...github.coverage];
-  const candidates = scoreCandidates(signals);
-  const resultBase = {
-    config,
-    signals,
-    candidates,
-    coverage,
+  const candidates = reviewCandidates(scoreCandidates(signals), config);
+  const renderInput: RenderInput = { config, signals, candidates, coverage };
+  const prd = renderPrd(renderInput);
+  const gapReport = renderGapReport(renderInput);
+
+  const result: IntelRunResult = {
+    ...renderInput,
+    prd,
+    gapReport,
     outputPaths: {},
   };
-  const markdown = renderMarkdown(resultBase);
-  const result: IntelRunResult = { ...resultBase, markdown };
+
+  if (options.createIssue) {
+    result.issue = await createGitHubIssue(renderInput, options);
+  }
 
   if (!options.dryRun) {
     const outDir = path.resolve(cwd, config.output.dir);
     fs.mkdirSync(outDir, { recursive: true });
     const stem = `${reportDate(now)}-intel`;
     if (config.output.formats.includes("md")) {
-      const mdPath = path.join(outDir, `${stem}.md`);
-      fs.writeFileSync(mdPath, markdown, "utf-8");
-      result.outputPaths.markdown = mdPath;
+      const prdPath = path.join(outDir, `${reportDate(now)}-prd.md`);
+      const gapPath = path.join(outDir, `${reportDate(now)}-gap-report.md`);
+      fs.writeFileSync(prdPath, prd, "utf-8");
+      fs.writeFileSync(gapPath, gapReport, "utf-8");
+      result.outputPaths.prd = prdPath;
+      result.outputPaths.gapReport = gapPath;
     }
     if (config.output.formats.includes("json")) {
       const jsonPath = path.join(outDir, `${stem}.json`);
@@ -707,6 +1346,7 @@ export async function runIntelSuggest(
             signals,
             candidates,
             coverage,
+            issue: result.issue,
             outputPaths: result.outputPaths,
           },
           null,

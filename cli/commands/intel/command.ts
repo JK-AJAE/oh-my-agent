@@ -16,17 +16,31 @@ type SuggestOptions = {
   outputDir?: string;
   dryRun?: boolean;
   fixture?: string;
+  createIssue?: boolean;
+  baseRepo?: string;
+  yes?: boolean;
   json?: boolean;
   output?: string;
 };
 
 function printText(result: Awaited<ReturnType<typeof runIntelSuggest>>): void {
-  console.log(result.markdown);
+  console.log(result.gapReport);
   const paths = Object.values(result.outputPaths).filter(Boolean);
   if (paths.length > 0) {
     console.log("\nWritten:");
     for (const filePath of paths) {
       console.log(`- ${filePath}`);
+    }
+  }
+  if (result.issue) {
+    console.log(`\nIssue: ${result.issue.status} - ${result.issue.detail}`);
+    if (result.issue.url) {
+      console.log(`- ${result.issue.url}`);
+    }
+    if (result.issue.status === "dry-run" && result.issue.body) {
+      console.log("\n--- issue preview ---");
+      console.log(`# ${result.issue.title}\n`);
+      console.log(result.issue.body);
     }
   }
 }
@@ -44,6 +58,9 @@ async function runSuggest(options: SuggestOptions): Promise<void> {
     outputDir: options.outputDir,
     dryRun: options.dryRun,
     fixture: options.fixture,
+    createIssue: options.createIssue,
+    baseRepo: options.baseRepo,
+    assumeYes: options.yes,
   });
 
   if (resolveJsonMode(options)) {
@@ -53,6 +70,7 @@ async function runSuggest(options: SuggestOptions): Promise<void> {
           config: result.config,
           candidates: result.candidates,
           coverage: result.coverage,
+          issue: result.issue,
           outputPaths: result.outputPaths,
         },
         null,
@@ -81,6 +99,18 @@ function addSuggestOptions(command: Command): Command {
       .option(
         "--fixture <path>",
         "Load source signals from a local JSON fixture",
+      )
+      .option(
+        "--create-issue",
+        "File a GitHub issue with the accepted candidates (requires config + confirmation)",
+      )
+      .option(
+        "--base-repo <owner/name>",
+        "GitHub repo to file the issue in (defaults to target)",
+      )
+      .option(
+        "--yes",
+        "Approve issue creation non-interactively (use with --create-issue)",
       ),
   );
 }
