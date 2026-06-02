@@ -226,8 +226,8 @@
     },
     {
       "path": ".agents/mcp_config.json",
-      "sha256": "d4df0412defe2677dc466a630c93eedd2c417f6b87006b2d300744b097160f6f",
-      "size": 575
+      "sha256": "81e8363cbb78a666513724cc06d869de10be8fa35fae27f50142f067678bb5fa",
+      "size": 624
     },
     {
       "path": ".agents/oma-config.yaml",
