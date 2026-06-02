@@ -93,6 +93,11 @@ describe("agentmemory-service", () => {
       expect(result.content).toContain("<key>III_REST_PORT</key>");
       expect(result.content).toContain("3456");
       expect(result.content).toContain("dev.oma.agentmemory");
+      // Pins the cwd-relative ./data store to the config home (D: data home).
+      expect(result.content).toContain("<key>WorkingDirectory</key>");
+      expect(result.content).toMatch(
+        /WorkingDirectory<\/key>\s*<string>.*\.agentmemory<\/string>/,
+      );
       expect(result.commands).toEqual(
         expect.arrayContaining([
           expect.stringContaining("launchctl bootstrap"),

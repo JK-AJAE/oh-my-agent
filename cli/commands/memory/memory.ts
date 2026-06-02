@@ -615,19 +615,28 @@ export async function controlAgentMemoryDaemon(args: {
     let attemptedFallbackStop = false;
     let fallbackStopCode: number | null | undefined;
 
-    if (!args.dryRun && ownedPid && isProcessRunning(ownedPid)) {
-      process.kill(ownedPid, "SIGTERM");
-      stoppedPid = ownedPid;
-    }
-
-    if (!args.dryRun && !stoppedPid) {
+    if (!args.dryRun) {
+      // `agentmemory stop` shuts down the iii engine, which owns the REST port
+      // and the on-disk store and runs in its OWN process group — signalling
+      // only the recorded wrapper pid would orphan it (accumulating stale
+      // engines that keep the port and write to ./data). Always invoke it, then
+      // also reap the wrapper launcher we recorded.
       attemptedFallbackStop = true;
       const result = spawnSync(bin, ["stop"], {
         env,
-        timeout: 5000,
+        timeout: 10000,
         encoding: "utf-8",
       });
       fallbackStopCode = result.status;
+
+      if (ownedPid && isProcessRunning(ownedPid)) {
+        try {
+          process.kill(ownedPid, "SIGTERM");
+        } catch {
+          // wrapper already exited
+        }
+        stoppedPid = ownedPid;
+      }
     }
 
     if (args.action === "stop") {
@@ -665,6 +674,10 @@ export async function controlAgentMemoryDaemon(args: {
 
     const child = spawn(bin, [], {
       detached: true,
+      // AgentMemory's iii-engine writes its store to a cwd-relative `./data/`.
+      // Pin the daemon's cwd to the config home so it lands in
+      // ~/.agentmemory/data instead of polluting the project it was started in.
+      cwd: agentMemoryConfigDir(homeDir),
       env: { ...env, III_REST_PORT: String(port) },
       stdio: "ignore",
     });

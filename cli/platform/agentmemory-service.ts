@@ -102,7 +102,13 @@ export function getAgentMemoryServicePresence(
   };
 }
 
+function agentMemoryDataHome(homeDir: string): string {
+  return join(homeDir, ".agentmemory");
+}
+
 function renderLaunchdService(args: { homeDir: string; port: number }): string {
+  // AgentMemory's iii-engine writes its store to a cwd-relative `./data/`, so
+  // pin WorkingDirectory to the config home (launchd otherwise defaults to `/`).
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -114,6 +120,8 @@ function renderLaunchdService(args: { homeDir: string; port: number }): string {
     <string>/usr/bin/env</string>
     <string>agentmemory</string>
   </array>
+  <key>WorkingDirectory</key>
+  <string>${agentMemoryDataHome(args.homeDir)}</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key>
@@ -135,12 +143,14 @@ function renderLaunchdService(args: { homeDir: string; port: number }): string {
 }
 
 function renderSystemdService(args: { homeDir: string; port: number }): string {
+  // WorkingDirectory pins AgentMemory's cwd-relative `./data/` store.
   return `[Unit]
 Description=OMA AgentMemory daemon
 After=network.target
 
 [Service]
 Type=simple
+WorkingDirectory=${agentMemoryDataHome(args.homeDir)}
 Environment=PATH=${servicePathEnvironment(args.homeDir)}
 Environment=III_REST_PORT=${args.port}
 ExecStart=/usr/bin/env agentmemory
