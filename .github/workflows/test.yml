@@ -44,6 +44,15 @@ jobs:
       - name: Build
         run: bun run --cwd cli build
 
+      # The full vitest suite hangs on Windows (see Test step above), but the
+      # AgentMemory service generator has a win32-only branch (Task Scheduler
+      # XML + schtasks) that otherwise never executes on real Windows. This file
+      # is pure (injected command runners, no spawn/stdin), so run it alone here.
+      - name: Test win32 service generator
+        if: matrix.os == 'windows-latest'
+        timeout-minutes: 5
+        run: bun run --cwd cli test agentmemory-service.test
+
       - name: Smoke test install.sh (skip bunx)
         if: matrix.os != 'windows-latest'
         shell: bash
