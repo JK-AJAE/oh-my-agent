@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "8.28.0",
-  "releaseDate": "2026-06-02T07:08:38.446Z",
+  "releaseDate": "2026-06-02T12:05:41.948Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -125,6 +125,11 @@
       "size": 11959
     },
     {
+      "path": ".agents/hooks/core/inject-log.ts",
+      "sha256": "cfb81db08ae56b12395aea6f935896fe0af085a2f9b62f0bf1d0a64cc64d6a46",
+      "size": 4804
+    },
+    {
       "path": ".agents/hooks/core/keyword-detector.ts",
       "sha256": "8baf766942520d74f9ade00f640b23fd4baae3ca231a73f7eb769abcb33c2aac",
       "size": 27529
@@ -141,8 +146,8 @@
     },
     {
       "path": ".agents/hooks/core/state-boundary.ts",
-      "sha256": "84a3d1ac2707b23ff5132800da371cc86b4f939d4e29cb060cabf9a7f3e3ca01",
-      "size": 4595
+      "sha256": "2546e12668097d2c94aed38798b46da4027d6e45edb529f544c25d3d5dc46087",
+      "size": 5098
     },
     {
       "path": ".agents/hooks/core/state-emit.ts",
@@ -1881,6 +1886,6 @@
   "metadata": {
     "skillCount": 48,
     "workflowCount": 21,
-    "totalFiles": 374
+    "totalFiles": 375
   }
 }
