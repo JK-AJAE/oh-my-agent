@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "8.31.0",
-  "releaseDate": "2026-06-03T23:07:19.814Z",
+  "releaseDate": "2026-06-03T23:38:47.212Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -106,8 +106,8 @@
     },
     {
       "path": ".agents/hooks/core/constants.ts",
-      "sha256": "4787ff4af3dbfcde8f04f2507e49c6e167dc733b8e4831c12a1b321cae44838e",
-      "size": 1205
+      "sha256": "b57e5722505d424713cd60c73a2b7e94ce6d4967bf96e6001b37fdfb2b88aa25",
+      "size": 1877
     },
     {
       "path": ".agents/hooks/core/filter-test-output.sh",
@@ -121,8 +121,8 @@
     },
     {
       "path": ".agents/hooks/core/hook-output.ts",
-      "sha256": "b1b75832476e70e0683f185181e17a54ac85fb7adc4c09f79764de58191a7a1a",
-      "size": 4177
+      "sha256": "a546646005651f2bd376be48c62c7db45121271c27dd0d0b81d700410fb85c63",
+      "size": 4965
     },
     {
       "path": ".agents/hooks/core/hud.ts",
@@ -146,8 +146,8 @@
     },
     {
       "path": ".agents/hooks/core/skill-injector.ts",
-      "sha256": "94c6c021fd5c936f7eade7d1b03b3ce0dbf50121a6e7d4e2e11977cdccc2c884",
-      "size": 18240
+      "sha256": "46e4b82eef19fc3f4b66563e9e5ce1184ba92220aee13ca64e8a345ade81166d",
+      "size": 18450
     },
     {
       "path": ".agents/hooks/core/state-boundary.ts",
@@ -166,8 +166,8 @@
     },
     {
       "path": ".agents/hooks/core/test-filter.ts",
-      "sha256": "79d250e98dbdb314dad086b3e822c6ed9803c4e25d66bbad492273fabe2f8d6a",
-      "size": 5370
+      "sha256": "32fccd65a9ca359bacbbeffeff5b3fad16212d30f302f01d2360501bf726fef4",
+      "size": 5737
     },
     {
       "path": ".agents/hooks/core/triggers.json",
@@ -181,8 +181,8 @@
     },
     {
       "path": ".agents/hooks/core/vendor-renderer.ts",
-      "sha256": "df4f18fe576085cfb3150a649a47bf65979c7fd7b2ac4069ff55e9d6bc5c754a",
-      "size": 1451
+      "sha256": "ee74ce6ba5c2a3654c24b766c2c8730e2916bf6b5bc15b229caf9946cee1aad8",
+      "size": 1466
     },
     {
       "path": ".agents/hooks/variants/antigravity.json",
@@ -223,6 +223,16 @@
       "path": ".agents/hooks/variants/kiro.json",
       "sha256": "15de7c15a8484e06bcd7376713e729063238b69287d40b3690441d022ffe7438",
       "size": 641
+    },
+    {
+      "path": ".agents/hooks/variants/pi/README.md",
+      "sha256": "367c40ae6a9a178d96bfc5bf38950f17bc4587728cb308d5b9c048b0cd06ac54",
+      "size": 2768
+    },
+    {
+      "path": ".agents/hooks/variants/pi/index.ts",
+      "sha256": "06f273d76e2a051943a4558a45d178b4f08fbb4d6c8ff986af08a9110d2b1cfc",
+      "size": 4840
     },
     {
       "path": ".agents/hooks/variants/qwen.json",
@@ -1891,6 +1901,6 @@
   "metadata": {
     "skillCount": 48,
     "workflowCount": 21,
-    "totalFiles": 376
+    "totalFiles": 378
   }
 }
