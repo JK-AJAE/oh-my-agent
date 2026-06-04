@@ -1,7 +1,29 @@
+export const RECOMMENDED_CHROME_DEVTOOLS_MCP = {
+  command: "npx",
+  args: [
+    "-y",
+    "chrome-devtools-mcp@latest",
+    "--no-usage-statistics",
+    "--isolated",
+  ] as string[],
+} as const;
+
 export type SerenaMcpServerLike = {
   command?: unknown;
   args?: unknown;
 };
+
+export function isLegacyUvxSerena(
+  server: SerenaMcpServerLike | undefined,
+): boolean {
+  if (!server || server.command !== "uvx") return false;
+  if (!Array.isArray(server.args)) return false;
+  return server.args.some(
+    (arg) =>
+      typeof arg === "string" &&
+      arg.includes("git+https://github.com/oraios/serena"),
+  );
+}
 
 const DISABLE_DASHBOARD_OPEN_ARGS = ["--open-web-dashboard", "false"] as const;
 

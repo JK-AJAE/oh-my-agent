@@ -51,9 +51,26 @@ describe("codex settings", () => {
   it("accepts existing serena stdio config with recommended features enabled", () => {
     const settings = {
       mcp_servers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
-          command: "uvx",
-          args: ["--from", "git+https://github.com/oraios/serena", "serena"],
+          command: "serena",
+          args: [
+            "start-mcp-server",
+            "--context",
+            "codex",
+            "--project",
+            ".",
+            "--open-web-dashboard",
+            "false",
+          ],
         },
       },
       features: { ...RECOMMENDED_CODEX_FEATURES },
@@ -82,6 +99,15 @@ describe("codex settings", () => {
   it("accepts settings without analytics/feedback when telemetry is opted in", () => {
     const settings = {
       mcp_servers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: { command: "uvx", args: ["serena"] },
       },
       features: { ...RECOMMENDED_CODEX_FEATURES },

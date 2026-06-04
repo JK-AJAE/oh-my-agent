@@ -1,5 +1,7 @@
 import {
   hasSerenaDashboardOpenDisabled,
+  isLegacyUvxSerena,
+  RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serenaStartMcpArgs,
 } from "../serena.js";
 
@@ -16,6 +18,7 @@ import {
  */
 
 export const RECOMMENDED_CURSOR_MCP = {
+  "chrome-devtools": RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serena: {
     command: "serena",
     args: serenaStartMcpArgs("ide"),
@@ -51,16 +54,6 @@ function hasCursorMcpTransport(
   return typeof server.command === "string" || typeof server.url === "string";
 }
 
-function isLegacyUvxSerena(server: CursorMcpServer | undefined): boolean {
-  if (!server || server.command !== "uvx") return false;
-  if (!Array.isArray(server.args)) return false;
-  return server.args.some(
-    (arg) =>
-      typeof arg === "string" &&
-      arg.includes("git+https://github.com/oraios/serena"),
-  );
-}
-
 function isWrongContextSerena(server: CursorMcpServer | undefined): boolean {
   if (!server || server.command !== "serena") return false;
   if (!Array.isArray(server.args)) return false;
@@ -74,6 +67,8 @@ export function needsCursorSettingsUpdate(rawSettings: unknown): boolean {
   if (!isRecord(rawSettings)) return true;
   const mcp = rawSettings.mcpServers;
   if (!isRecord(mcp)) return true;
+  const chromeDevtools = mcp["chrome-devtools"] as CursorMcpServer | undefined;
+  if (!hasCursorMcpTransport(chromeDevtools)) return true;
   const serena = mcp.serena as CursorMcpServer | undefined;
   if (!hasCursorMcpTransport(serena)) return true;
   if (isLegacyUvxSerena(serena)) return true;
@@ -97,6 +92,9 @@ export function applyRecommendedCursorSettings(
 
   base.mcpServers = {
     ...currentMcp,
+    "chrome-devtools":
+      currentMcp["chrome-devtools"] ??
+      RECOMMENDED_CURSOR_MCP["chrome-devtools"],
     serena: { ...RECOMMENDED_CURSOR_MCP.serena },
   };
 

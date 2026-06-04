@@ -16,9 +16,26 @@ describe("qwen settings", () => {
     const settings = {
       privacy: { usageStatisticsEnabled: false },
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
-          command: "uvx",
-          args: ["--from", "git+https://github.com/oraios/serena", "serena"],
+          command: "serena",
+          args: [
+            "start-mcp-server",
+            "--context",
+            "ide",
+            "--project",
+            ".",
+            "--open-web-dashboard",
+            "false",
+          ],
         },
       },
     };
@@ -29,6 +46,15 @@ describe("qwen settings", () => {
     const settings = {
       privacy: { usageStatisticsEnabled: false },
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: { url: "http://localhost:12341/mcp" },
       },
     };
@@ -47,6 +73,15 @@ describe("qwen settings", () => {
   it("accepts missing privacy.usageStatisticsEnabled when telemetry is opted in", () => {
     const settings = {
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: { command: "uvx", args: ["serena"] },
       },
     };
@@ -126,6 +161,15 @@ describe("T2.9 rename regression — applyQwenSettings", () => {
 
     const expected = {
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
           command: "serena",
           args: [
@@ -151,6 +195,15 @@ describe("T2.9 rename regression — applyQwenSettings", () => {
     const upToDate = {
       privacy: { usageStatisticsEnabled: false },
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
           command: "serena",
           args: [

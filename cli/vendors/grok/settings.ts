@@ -4,6 +4,8 @@ import { dirname, join } from "node:path";
 import { parse as parseToml, stringify as stringifyToml } from "smol-toml";
 import {
   hasSerenaDashboardOpenDisabled,
+  isLegacyUvxSerena,
+  RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serenaStartMcpArgs,
   withSerenaDashboardOpenDisabled,
 } from "../serena.js";
@@ -18,6 +20,7 @@ export interface GrokConfigOptions {
 
 /** Recommended MCP servers for Grok (especially Serena). */
 export const RECOMMENDED_GROK_MCP = {
+  "chrome-devtools": RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serena: {
     command: "serena",
     args: serenaStartMcpArgs("ide"),
@@ -148,20 +151,27 @@ export function applyGrokProjectMcp(cwd: string): void {
     typeof currentSerena.command === "string" ||
     typeof currentSerena.url === "string";
 
+  const nextMcp: TomlValue = { ...currentMcp };
+
+  // Inject chrome-devtools if missing
+  if (
+    !isRecord(currentMcp["chrome-devtools"]) ||
+    (typeof (currentMcp["chrome-devtools"] as TomlValue).command !== "string" &&
+      typeof (currentMcp["chrome-devtools"] as TomlValue).url !== "string")
+  ) {
+    nextMcp["chrome-devtools"] = { ...RECOMMENDED_GROK_MCP["chrome-devtools"] };
+  }
+
   if (!hasTransport) {
-    parsed.mcp_servers = {
-      ...currentMcp,
-      serena: {
-        ...currentSerena,
-        ...withSerenaDashboardOpenDisabled(RECOMMENDED_GROK_MCP.serena),
-      },
+    nextMcp.serena = {
+      ...currentSerena,
+      ...withSerenaDashboardOpenDisabled(RECOMMENDED_GROK_MCP.serena),
     };
   } else if (!hasSerenaDashboardOpenDisabled(currentSerena)) {
-    parsed.mcp_servers = {
-      ...currentMcp,
-      serena: withSerenaDashboardOpenDisabled(currentSerena),
-    };
+    nextMcp.serena = withSerenaDashboardOpenDisabled(currentSerena);
   }
+
+  parsed.mcp_servers = nextMcp;
 
   const newContent = `${stringifyToml(parsed)}\n`;
 
@@ -185,10 +195,16 @@ export function needsGrokProjectMcpUpdate(cwd: string): boolean {
     const parsed = parseToml(content) as TomlValue;
     const mcp = isRecord(parsed.mcp_servers) ? parsed.mcp_servers : {};
     const serena = isRecord(mcp.serena) ? mcp.serena : {};
+    const chromeDevtools = isRecord(mcp["chrome-devtools"])
+      ? mcp["chrome-devtools"]
+      : {};
 
     return !(
       (typeof serena.command === "string" || typeof serena.url === "string") &&
-      hasSerenaDashboardOpenDisabled(serena)
+      !isLegacyUvxSerena(serena) &&
+      hasSerenaDashboardOpenDisabled(serena) &&
+      (typeof chromeDevtools.command === "string" ||
+        typeof chromeDevtools.url === "string")
     );
   } catch {
     return true;

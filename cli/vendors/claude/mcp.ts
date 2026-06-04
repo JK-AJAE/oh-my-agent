@@ -1,5 +1,6 @@
 import {
   hasSerenaDashboardOpenDisabled,
+  isLegacyUvxSerena,
   serenaStartMcpArgs,
 } from "../serena.js";
 
@@ -50,16 +51,6 @@ function hasClaudeMcpTransport(
 ): server is ClaudeMcpServer {
   if (!server) return false;
   return typeof server.command === "string" || typeof server.url === "string";
-}
-
-function isLegacyUvxSerena(server: ClaudeMcpServer | undefined): boolean {
-  if (!server || server.command !== "uvx") return false;
-  if (!Array.isArray(server.args)) return false;
-  return server.args.some(
-    (arg) =>
-      typeof arg === "string" &&
-      arg.includes("git+https://github.com/oraios/serena"),
-  );
 }
 
 function hasStaleContext(server: ClaudeMcpServer | undefined): boolean {

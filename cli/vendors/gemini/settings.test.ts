@@ -28,9 +28,26 @@ describe("gemini settings", () => {
       experimental: { enableAgents: true },
       privacy: { usageStatisticsEnabled: false },
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
-          command: "uvx",
-          args: ["--from", "git+https://github.com/oraios/serena", "serena"],
+          command: "serena",
+          args: [
+            "start-mcp-server",
+            "--context",
+            "ide",
+            "--project",
+            ".",
+            "--open-web-dashboard",
+            "false",
+          ],
         },
       },
     };
@@ -57,6 +74,15 @@ describe("gemini settings", () => {
       general: { enableNotifications: true },
       experimental: { enableAgents: true },
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
           command: "uvx",
           args: ["serena"],
@@ -185,6 +211,15 @@ describe("T2.9 rename regression — applyGeminiSettings", () => {
       general: { enableNotifications: true },
       experimental: { enableAgents: true },
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
           command: "serena",
           args: [
@@ -212,6 +247,15 @@ describe("T2.9 rename regression — applyGeminiSettings", () => {
       experimental: { enableAgents: true },
       privacy: { usageStatisticsEnabled: false },
       mcpServers: {
+        "chrome-devtools": {
+          command: "npx",
+          args: [
+            "-y",
+            "chrome-devtools-mcp@latest",
+            "--no-usage-statistics",
+            "--isolated",
+          ],
+        },
         serena: {
           command: "serena",
           args: [

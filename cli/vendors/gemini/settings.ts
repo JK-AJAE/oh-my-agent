@@ -1,5 +1,7 @@
 import {
   hasSerenaDashboardOpenDisabled,
+  isLegacyUvxSerena,
+  RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serenaStartMcpArgs,
   withSerenaDashboardOpenDisabled,
 } from "../serena.js";
@@ -18,6 +20,7 @@ export const RECOMMENDED_GEMINI_EXPERIMENTAL = {
 } as const;
 
 export const RECOMMENDED_GEMINI_MCP = {
+  "chrome-devtools": RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serena: {
     command: "serena",
     args: serenaStartMcpArgs("ide"),
@@ -198,7 +201,11 @@ export function needsGeminiSettingsUpdate(
 
   const serenaServer = geminiSettings.mcpServers?.serena;
   if (!hasGeminiMcpTransport(serenaServer)) return true;
+  if (isLegacyUvxSerena(serenaServer)) return true;
   if (!hasSerenaDashboardOpenDisabled(serenaServer)) return true;
+
+  const chromeDevtools = geminiSettings.mcpServers?.["chrome-devtools"];
+  if (!hasGeminiMcpTransport(chromeDevtools)) return true;
 
   const privacy = isRecord(geminiSettings.privacy)
     ? geminiSettings.privacy
@@ -239,6 +246,9 @@ export function applyGeminiSettings(
 
   geminiSettings.mcpServers = {
     ...(geminiSettings.mcpServers || {}),
+    "chrome-devtools":
+      geminiSettings.mcpServers?.["chrome-devtools"] ??
+      RECOMMENDED_GEMINI_MCP["chrome-devtools"],
     serena: nextSerena,
   };
 

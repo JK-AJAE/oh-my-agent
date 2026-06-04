@@ -1,5 +1,7 @@
 import {
   hasSerenaDashboardOpenDisabled,
+  isLegacyUvxSerena,
+  RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serenaStartMcpArgs,
   withSerenaDashboardOpenDisabled,
 } from "../serena.js";
@@ -24,6 +26,7 @@ export interface QwenSettingsOptions {
 }
 
 export const RECOMMENDED_QWEN_MCP = {
+  "chrome-devtools": RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serena: {
     command: "serena",
     args: serenaStartMcpArgs("ide"),
@@ -132,7 +135,11 @@ export function needsQwenSettingsUpdate(
 
   const serenaServer = sanitized.mcpServers?.serena;
   if (!hasQwenMcpTransport(serenaServer)) return true;
+  if (isLegacyUvxSerena(serenaServer)) return true;
   if (!hasSerenaDashboardOpenDisabled(serenaServer)) return true;
+
+  const chromeDevtools = sanitized.mcpServers?.["chrome-devtools"];
+  if (!hasQwenMcpTransport(chromeDevtools)) return true;
 
   const privacy = isRecord(sanitized.privacy) ? sanitized.privacy : undefined;
   if (options.telemetry === true) {
@@ -161,6 +168,9 @@ export function applyQwenSettings(
 
   qwenSettings.mcpServers = {
     ...(qwenSettings.mcpServers || {}),
+    "chrome-devtools":
+      qwenSettings.mcpServers?.["chrome-devtools"] ??
+      RECOMMENDED_QWEN_MCP["chrome-devtools"],
     serena: nextSerena,
   };
 

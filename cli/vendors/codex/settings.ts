@@ -10,11 +10,14 @@ import { parse as parseToml, stringify as stringifyToml } from "smol-toml";
 import type { EffortLevel } from "../../platform/model-registry.js";
 import {
   hasSerenaDashboardOpenDisabled,
+  isLegacyUvxSerena,
+  RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serenaStartMcpArgs,
   withSerenaDashboardOpenDisabled,
 } from "../serena.js";
 
 export const RECOMMENDED_CODEX_MCP = {
+  "chrome-devtools": RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serena: {
     command: "serena",
     args: serenaStartMcpArgs("codex"),
@@ -107,7 +110,12 @@ export function needsCodexSettingsUpdate(
   const mcp = typed.mcp_servers;
   const serena = isRecord(mcp) ? (mcp.serena as CodexMcpServer) : undefined;
   if (!hasCodexMcpTransport(serena)) return true;
+  if (isLegacyUvxSerena(serena)) return true;
   if (!hasSerenaDashboardOpenDisabled(serena)) return true;
+  const chromeDevtools = isRecord(mcp)
+    ? (mcp["chrome-devtools"] as CodexMcpServer)
+    : undefined;
+  if (!hasCodexMcpTransport(chromeDevtools)) return true;
 
   const features = isRecord(typed.features) ? typed.features : undefined;
   for (const [key, value] of Object.entries(RECOMMENDED_CODEX_FEATURES)) {
@@ -164,6 +172,9 @@ export function applyCodexSettings(
 
   base.mcp_servers = {
     ...currentMcp,
+    "chrome-devtools":
+      (currentMcp["chrome-devtools"] as CodexMcpServer | undefined) ??
+      RECOMMENDED_CODEX_MCP["chrome-devtools"],
     serena: nextSerena,
   };
 

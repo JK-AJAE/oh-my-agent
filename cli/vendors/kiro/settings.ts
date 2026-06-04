@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import {
   hasSerenaDashboardOpenDisabled,
+  RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serenaStartMcpArgs,
   withSerenaDashboardOpenDisabled,
 } from "../serena.js";
@@ -17,6 +18,7 @@ export const KIRO_GLOBAL_SETTINGS_PATH = join(
 );
 
 export const RECOMMENDED_KIRO_MCP = {
+  "chrome-devtools": RECOMMENDED_CHROME_DEVTOOLS_MCP,
   serena: {
     command: "serena",
     args: serenaStartMcpArgs("ide"),
@@ -75,7 +77,18 @@ export function needsKiroMcpUpdate(cwd: string): boolean {
   const path = join(cwd, KIRO_PROJECT_SETTINGS_PATH);
   const settings = readJson(path);
   const mcp = isRecord(settings.mcpServers) ? settings.mcpServers : {};
+  const chromeDevtools = isRecord(mcp["chrome-devtools"])
+    ? mcp["chrome-devtools"]
+    : {};
   const serena = isRecord(mcp.serena) ? mcp.serena : {};
+  if (
+    !(
+      typeof chromeDevtools.command === "string" ||
+      typeof chromeDevtools.url === "string"
+    )
+  ) {
+    return true;
+  }
   return !(
     (typeof serena.command === "string" || typeof serena.url === "string") &&
     hasSerenaDashboardOpenDisabled(serena)
@@ -97,6 +110,9 @@ export function applyKiroProjectMcp(cwd: string): void {
     ...settings,
     mcpServers: {
       ...currentMcp,
+      "chrome-devtools":
+        currentMcp["chrome-devtools"] ??
+        RECOMMENDED_KIRO_MCP["chrome-devtools"],
       serena: withSerenaDashboardOpenDisabled({
         ...currentSerena,
         ...RECOMMENDED_KIRO_MCP.serena,
