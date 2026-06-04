@@ -210,7 +210,7 @@ type CommandCheck = {
   skip_if_missing?: string;
 };
 
-type BackendStackManifest = {
+type StackManifest = {
   language: string;
   framework?: string;
   orm?: string;
@@ -227,14 +227,15 @@ type BackendStackManifest = {
   };
 };
 
-function loadBackendStackManifest(
+function loadStackManifest(
   workspace: string,
-): BackendStackManifest | null {
+  skill: string,
+): StackManifest | null {
   const path = join(
     workspace,
     ".agents",
     "skills",
-    "oma-backend",
+    skill,
     "stack",
     "stack.yaml",
   );
@@ -246,7 +247,7 @@ function loadBackendStackManifest(
       typeof parsed === "object" &&
       typeof (parsed as { language?: unknown }).language === "string"
     ) {
-      return parsed as BackendStackManifest;
+      return parsed as StackManifest;
     }
     return null;
   } catch {
@@ -266,7 +267,7 @@ function hasBinary(bin: string, workspace: string): boolean {
 }
 
 function checkBackendSyntax(
-  manifest: BackendStackManifest,
+  manifest: StackManifest,
   workspace: string,
 ): VerifyCheck {
   const name = `${titleCase(manifest.language)} Syntax`;
@@ -286,7 +287,7 @@ function checkBackendSyntax(
 }
 
 function checkBackendTests(
-  manifest: BackendStackManifest,
+  manifest: StackManifest,
   workspace: string,
 ): VerifyCheck {
   const name = `${titleCase(manifest.language)} Tests`;
@@ -313,7 +314,7 @@ function checkBackendTests(
 }
 
 function checkBackendRawSql(
-  manifest: BackendStackManifest,
+  manifest: StackManifest,
   workspace: string,
 ): VerifyCheck {
   const name = "SQL Injection";
@@ -497,7 +498,7 @@ function runAgentChecks(
   const checks: VerifyCheck[] = [];
   switch (agentType) {
     case "backend": {
-      const manifest = loadBackendStackManifest(workspace);
+      const manifest = loadStackManifest(workspace, "oma-backend");
       if (!manifest) {
         checks.push(
           createCheck(
@@ -519,10 +520,17 @@ function runAgentChecks(
       checks.push(checkAnyTypes(workspace));
       checks.push(checkFrontendTests(workspace));
       break;
-    case "mobile":
-      checks.push(checkFlutterAnalysis(workspace));
-      checks.push(checkFlutterTests(workspace));
+    case "mobile": {
+      const manifest = loadStackManifest(workspace, "oma-mobile");
+      if (manifest) {
+        checks.push(checkBackendSyntax(manifest, workspace));
+        checks.push(checkBackendTests(manifest, workspace));
+      } else {
+        checks.push(checkFlutterAnalysis(workspace));
+        checks.push(checkFlutterTests(workspace));
+      }
       break;
+    }
     case "qa":
       checks.push(
         createCheck("QA Report", "pass", "Verified by self-check.md"),
