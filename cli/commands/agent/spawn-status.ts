@@ -4,6 +4,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import color from "picocolors";
 import { lookupFinding, recordFinding } from "../../io/findings-cache.js";
+import {
+  targetVendorNeedsPty,
+  wrapInvocationWithPty,
+} from "../../io/runtime-dispatch/pty-wrap.js";
 import { planDispatch } from "../../io/runtime-dispatch.js";
 import {
   checkCap,
@@ -224,12 +228,33 @@ export async function spawnAgent(
     promptFlag,
     promptContent,
   );
-  const { command, args, env } = dispatch.invocation;
   console.log(
     color.dim(
       `  Dispatch: ${dispatch.mode} (${dispatch.runtimeVendor} -> ${dispatch.targetVendor}, ${dispatch.reason})`,
     ),
   );
+
+  // Workaround for agy's non-TTY stdout drop (antigravity-cli#76): run the
+  // subagent under a pseudo-terminal so its headless output is captured.
+  let invocation = dispatch.invocation;
+  if (targetVendorNeedsPty(dispatch.targetVendor)) {
+    const pty = wrapInvocationWithPty(dispatch.invocation);
+    invocation = pty.invocation;
+    if (pty.wrapped) {
+      console.log(
+        color.dim(
+          `  PTY: ${dispatch.targetVendor} run under script(1) (non-TTY stdout workaround)`,
+        ),
+      );
+    } else {
+      console.warn(
+        color.yellow(
+          `[${agentId}] ${dispatch.targetVendor} headless output may be empty: ${pty.unsupportedReason}`,
+        ),
+      );
+    }
+  }
+  const { command, args, env } = invocation;
 
   const child = spawnProcess(command, args, {
     cwd: resolvedWorkspace,

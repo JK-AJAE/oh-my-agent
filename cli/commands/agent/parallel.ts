@@ -6,6 +6,10 @@ import {
   AGENTS_RESULTS_DIR,
   agentsPathFromRoot,
 } from "../../constants/paths.js";
+import {
+  targetVendorNeedsPty,
+  wrapInvocationWithPty,
+} from "../../io/runtime-dispatch/pty-wrap.js";
 import { planDispatch } from "../../io/runtime-dispatch.js";
 import { detectWorkspace } from "../../io/workspaces.js";
 import {
@@ -120,10 +124,27 @@ export async function parallelRun(
       promptFlag,
       promptContent,
     );
-    const { command, args, env } = dispatch.invocation;
     console.log(
       `    Dispatch: ${dispatch.mode} (${dispatch.runtimeVendor} -> ${dispatch.targetVendor})`,
     );
+
+    // Workaround for agy's non-TTY stdout drop (antigravity-cli#76): run the
+    // subagent under a pseudo-terminal so its headless output is captured.
+    let invocation = dispatch.invocation;
+    if (targetVendorNeedsPty(dispatch.targetVendor)) {
+      const pty = wrapInvocationWithPty(dispatch.invocation);
+      invocation = pty.invocation;
+      if (pty.wrapped) {
+        console.log(`    PTY: ${dispatch.targetVendor} run under script(1)`);
+      } else {
+        console.warn(
+          color.yellow(
+            `[${idx}] ${dispatch.targetVendor} headless output may be empty: ${pty.unsupportedReason}`,
+          ),
+        );
+      }
+    }
+    const { command, args, env } = invocation;
 
     const logStream = fs.openSync(logFile, "w");
     const child = spawnProcess(command, args, {
