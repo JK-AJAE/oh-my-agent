@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "8.39.0",
-  "releaseDate": "2026-06-04T13:17:52.947Z",
+  "releaseDate": "2026-06-04T14:59:44.946Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -93,6 +93,41 @@
       "path": ".agents/config/defaults.yaml",
       "sha256": "5651f86c002c36604aa45d199d996007ceac1ae5e7de478865f302bd47f502d9",
       "size": 7044
+    },
+    {
+      "path": ".agents/eval/oma-scholar/_rollouts/69cf97a7b7bfbc2f.json",
+      "sha256": "2fab74f54ee032559f9792590707e8e7cbca0a596496104e60a79c7af55a89e9",
+      "size": 13204
+    },
+    {
+      "path": ".agents/eval/oma-scholar/anti-fabrication-doi.yaml",
+      "sha256": "0b3e842ac9385b833f6a7c9d7cbbfff2aed9231dfea42ef5c7ce8ef07e712692",
+      "size": 369
+    },
+    {
+      "path": ".agents/eval/oma-scholar/claims-only-partial-fetch.yaml",
+      "sha256": "7f84c7be1fd3e46e8cddc0ac977bfd94c86ae904f7f026ee4db153c56025cc93",
+      "size": 573
+    },
+    {
+      "path": ".agents/eval/oma-scholar/lint-before-share.yaml",
+      "sha256": "c7afd92382dfb374e91736d94ca4cab7f390e93b0803b7bdbc7423ff26308843",
+      "size": 387
+    },
+    {
+      "path": ".agents/eval/oma-scholar/openalex-fallback-old-paper.yaml",
+      "sha256": "bb3b8fbc46f11de953869ecf8a1eb82e1ab11d84a05425df7f41eb2d2965a33b",
+      "size": 424
+    },
+    {
+      "path": ".agents/eval/oma-scholar/provenance-single-actor.yaml",
+      "sha256": "f70e8b2c2aa45b4b3f623824f64242c0ec2a2b28d2fddf8f3b61bc4693841232",
+      "size": 417
+    },
+    {
+      "path": ".agents/eval/oma-scholar/spec-version-profile.yaml",
+      "sha256": "93affb9115bb0415d5ca73f2734226fa915f0756cacef72bf5451f187ba8cf73",
+      "size": 337
     },
     {
       "path": ".agents/hooks/core/agentmemory-client.ts",
@@ -1996,6 +2031,6 @@
   "metadata": {
     "skillCount": 31,
     "workflowCount": 22,
-    "totalFiles": 397
+    "totalFiles": 404
   }
 }
