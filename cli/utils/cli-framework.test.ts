@@ -84,3 +84,70 @@ describe("runAction — optsWithGlobals regression (global --yes shadowing subco
     expect(opts.flag).toBe(true);
   });
 });
+
+/**
+ * Regression test for the bug where `runAction` overwrote `args[0]` with the
+ * merged options object. Commander invokes the action as
+ * `(...operands, options, command)`, so for a command that declares positional
+ * operands (e.g. `state:emit <kind> [payload]`) `args[0]` is the first operand,
+ * not the options. Overwriting args[0] clobbered the operand — `oma state:emit
+ * decision.made '{...}'` recorded `kind` as the options object
+ * (`{category:"main",mirror:true}`) instead of the string `"decision.made"`.
+ *
+ * Fix: replace the options slot by position (`args.length - 2`) so positional
+ * operands survive while options still get globals merged in.
+ */
+describe("runAction — positional operands survive options merge", () => {
+  async function parseOperandCommand(argv: string[]): Promise<{
+    operands: unknown[];
+    opts: Record<string, unknown>;
+  }> {
+    let operands: unknown[] = [];
+    let opts: Record<string, unknown> = {};
+
+    const program = new Command();
+    program.exitOverride();
+    program.option("-y, --yes", "Skip prompts (program-level)");
+
+    program
+      .command("emit <kind> [payload]")
+      .option("--category <category>", "category", "main")
+      .action(
+        runAction(
+          (
+            kind: string,
+            payload: string | undefined,
+            options: Record<string, unknown>,
+          ) => {
+            operands = [kind, payload];
+            opts = { ...options };
+          },
+        ),
+      );
+
+    await program.parseAsync(argv, { from: "user" });
+    return { operands, opts };
+  }
+
+  it("passes the first operand through untouched (was overwritten by options)", async () => {
+    const { operands } = await parseOperandCommand([
+      "emit",
+      "decision.made",
+      '{"a":1}',
+    ]);
+    expect(operands[0]).toBe("decision.made");
+    expect(operands[1]).toBe('{"a":1}');
+  });
+
+  it("still merges global options into the handler's options arg", async () => {
+    const { operands, opts } = await parseOperandCommand([
+      "--yes",
+      "emit",
+      "session.ended",
+    ]);
+    expect(operands[0]).toBe("session.ended");
+    expect(operands[1]).toBeUndefined();
+    expect(opts.yes).toBe(true);
+    expect(opts.category).toBe("main");
+  });
+});

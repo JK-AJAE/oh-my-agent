@@ -352,13 +352,19 @@ export function runAction<T extends unknown[]>(
     const command = getActionCommand(args);
 
     // Commander stores global/parent options (e.g. the root-program's `-y/--yes`)
-    // in the ancestor command's _optionValues, not the subcommand's. This means
-    // args[0] (which commander sets to `command.opts()`) is missing any option
-    // that was parsed into a parent. Replace args[0] with `optsWithGlobals()` so
-    // every handler receives the full merged option set regardless of where in the
-    // command tree the flag was registered.
-    if (command && args.length > 0) {
-      (args as unknown[])[0] = command.optsWithGlobals();
+    // in the ancestor command's _optionValues, not the subcommand's, so the
+    // options object handed to the handler is missing any option parsed into a
+    // parent. Replace it with `optsWithGlobals()` so every handler receives the
+    // full merged option set regardless of where in the command tree the flag
+    // was registered.
+    //
+    // Commander invokes the action as (...operands, options, command), so the
+    // options object is the SECOND-TO-LAST argument — not args[0]. For commands
+    // that declare positional operands (e.g. `state:emit <kind> [payload]`),
+    // args[0] is the first operand; overwriting it corrupted the operand (kind
+    // became the options object). Target the options slot by position instead.
+    if (command && args.length >= 2) {
+      (args as unknown[])[args.length - 2] = command.optsWithGlobals();
     }
 
     const options = getActionOptions(args);
