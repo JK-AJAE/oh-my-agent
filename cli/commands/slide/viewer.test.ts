@@ -1,10 +1,27 @@
-import { describe, expect, it } from "vitest";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   escapeInlineScript,
   extractLinkStylesheets,
   extractSlides,
   extractStyles,
+  runSlideViewer,
 } from "./viewer.js";
+
+const ASSETS_DIR = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "..",
+  ".agents",
+  "skills",
+  "oma-slide",
+  "resources",
+  "assets",
+);
 
 describe("escapeInlineScript", () => {
   it("breaks a literal </script> so it cannot close the inline tag", () => {
@@ -84,5 +101,66 @@ describe("extractLinkStylesheets", () => {
   it("ignores non-stylesheet links", () => {
     const html = `<link rel="icon" href="/favicon.ico">`;
     expect(extractLinkStylesheets(html)).toEqual([]);
+  });
+});
+
+describe("runSlideViewer — print pagination reset placement", () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = join(tmpdir(), `oma-viewer-test-${Date.now()}-${process.pid}`);
+    mkdirSync(dir, { recursive: true });
+    // Copy the real shared assets so the cascade we assert on is the shipped one.
+    writeFileSync(
+      join(dir, "viewport-base.css"),
+      readFileSync(join(ASSETS_DIR, "viewport-base.css"), "utf8"),
+    );
+    writeFileSync(
+      join(dir, "deck-stage.js"),
+      readFileSync(join(ASSETS_DIR, "deck-stage.js"), "utf8"),
+    );
+    writeFileSync(
+      join(dir, "meta.json"),
+      JSON.stringify({ title: "t", order: ["slide-01.html", "slide-02.html"] }),
+    );
+    // Each slide carries the protocol-mandated `.slide { position: absolute }`,
+    // which the viewer scopes to `#slide-NN` (id specificity 1,0,0).
+    for (const id of ["slide-01", "slide-02"]) {
+      writeFileSync(
+        join(dir, `${id}.html`),
+        `<section class="slide" id="${id}"><style>.slide{position:absolute;outline:2px solid ${id}}</style><h1>${id}</h1></section>`,
+      );
+    }
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+    vi.restoreAllMocks();
+  });
+
+  it("emits an id-scoped print reset AFTER the scoped author styles, with no !important", async () => {
+    const code = await runSlideViewer({ dir });
+    expect(code).toBe(0);
+
+    const html = readFileSync(join(dir, "viewer.html"), "utf8");
+
+    // The reset targets every slide id at #id specificity.
+    expect(html).toContain("@media print");
+    expect(html).toContain("#slide-01");
+    expect(html).toContain("#slide-02");
+
+    // The scoped author rule (outline:...slide-01) must come BEFORE the reset's
+    // `position: relative` — equal #id specificity means source order decides,
+    // so the reset can override author `position: absolute` without !important.
+    const authorIdx = html.indexOf("solid slide-01");
+    const resetIdx = html.lastIndexOf("position: relative");
+    expect(authorIdx).toBeGreaterThan(-1);
+    expect(resetIdx).toBeGreaterThan(authorIdx);
+
+    // The whole pagination path is now !important-free except the a11y reset.
+    expect(html).not.toContain("position: relative !important");
+    expect(html).not.toContain("transform: none !important");
   });
 });

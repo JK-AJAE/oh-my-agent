@@ -164,6 +164,48 @@ export function scopeSlideCss(css: string, slideId: string): string {
 }
 
 /**
+ * Build the `@media print` pagination reset for the MERGED viewer/bundle.
+ *
+ * Why this exists (and why it carries NO `!important`):
+ *   In a merged deck each slide's author CSS is scoped to its `#slide-NN` id
+ *   (see scopeSlideCss → an id selector, specificity 1,0,0). The author rule
+ *   `#slide-NN { position: absolute }` therefore outranks the generic
+ *   `@media print { .slide { … } }` (0,1,0) shipped in viewport-base.css, so in
+ *   print every slide stays absolutely positioned, stacks at 0,0, page flow
+ *   collapses and the PDF crops.
+ *
+ *   Rather than win that fight with `!important`, we emit a reset at MATCHING id
+ *   specificity (`#slide-NN`) that the caller places AFTER the author styles.
+ *   Equal specificity + later source order ⇒ this reset wins cleanly. The
+ *   declarations mirror the generic `.slide` print rule (which still supplies
+ *   page-break/pointer-events for unscoped/standalone cases).
+ *
+ * Returns "" when there are no ids — nothing to scope, emit nothing.
+ */
+export function buildPrintPaginationReset(slideIds: string[]): string {
+  const ids = slideIds.filter((id) => Boolean(id));
+  if (ids.length === 0) return "";
+  const selector = ids.map((id) => `#${id}`).join(",\n      ");
+  return `<style>
+  /*
+   * Print pagination reset — built by buildPrintPaginationReset() (scope-css.ts).
+   * Emitted AFTER the per-slide author styles so it overrides their id-scoped
+   * "position: absolute" by source order at equal (#id) specificity, with no
+   * forced override. Without this the merged PDF would crop to one stacked page.
+   */
+  @media print {
+    ${selector} {
+      position: relative;
+      inset: auto;
+      visibility: visible;
+      opacity: 1;
+      transition: none;
+    }
+  }
+</style>`;
+}
+
+/**
  * Extract the first `id="…"` from a slide HTML fragment's <section class="slide">.
  * Returns null when no id is present (caller then leaves styles unscoped).
  */

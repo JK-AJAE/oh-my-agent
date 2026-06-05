@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { firstSlideId, scopeSlideCss, scopeStyleBlocks } from "./scope-css.js";
+import {
+  buildPrintPaginationReset,
+  firstSlideId,
+  scopeSlideCss,
+  scopeStyleBlocks,
+} from "./scope-css.js";
 
 describe("scopeSlideCss", () => {
   it("rewrites the slide-root class to the slide id", () => {
@@ -131,5 +136,30 @@ describe("scopeStyleBlocks", () => {
   it("returns the block unchanged when it is not a <style> element", () => {
     const [out] = scopeStyleBlocks(["not a style block"], "slide-01");
     expect(out).toBe("not a style block");
+  });
+});
+
+describe("buildPrintPaginationReset", () => {
+  it("scopes the print reset to every slide id (matching #id specificity)", () => {
+    const out = buildPrintPaginationReset(["slide-01", "slide-02"]);
+    expect(out).toContain("@media print");
+    expect(out).toContain("#slide-01");
+    expect(out).toContain("#slide-02");
+    expect(out).toContain("position: relative;");
+    expect(out).toContain("inset: auto;");
+  });
+
+  it("wins by source order, NOT by !important (the whole point of this reset)", () => {
+    // Regression: pagination must override id-scoped author styles via equal
+    // specificity + later source order, so the shipped CSS can drop !important.
+    const out = buildPrintPaginationReset(["slide-01"]);
+    expect(out).not.toContain("!important");
+  });
+
+  it("returns empty string when there are no ids (emit nothing)", () => {
+    expect(buildPrintPaginationReset([])).toBe("");
+    expect(
+      buildPrintPaginationReset(["", undefined as unknown as string]),
+    ).toBe("");
   });
 });

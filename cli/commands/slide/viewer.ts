@@ -31,7 +31,11 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import color from "picocolors";
-import { firstSlideId, scopeStyleBlocks } from "./scope-css.js";
+import {
+  buildPrintPaginationReset,
+  firstSlideId,
+  scopeStyleBlocks,
+} from "./scope-css.js";
 import { resolveWorkspace } from "./workspace.js";
 
 // ─── HTML extraction helpers ──────────────────────────────────────────────────
@@ -141,6 +145,7 @@ export async function runSlideViewer(opts: ViewerOptions): Promise<number> {
   const allSlides: string[] = [];
   const allStyles: string[] = [];
   const allLinkStylesheets: string[] = [];
+  const slideIds: string[] = [];
 
   for (const slideFile of meta.order) {
     const slidePath = join(dir, slideFile);
@@ -169,6 +174,7 @@ export async function runSlideViewer(opts: ViewerOptions): Promise<number> {
     // only when the section has no id to anchor on.
     const styles = extractStyles(slideHtml);
     const slideId = firstSlideId(slideHtml);
+    if (slideId) slideIds.push(slideId);
     allStyles.push(...(slideId ? scopeStyleBlocks(styles, slideId) : styles));
 
     // Extract local link stylesheets
@@ -202,6 +208,7 @@ export async function runSlideViewer(opts: ViewerOptions): Promise<number> {
     linkStylesheets: allLinkStylesheets,
     speakerNotesJson: notesJson,
     slideCount: allSlides.length,
+    printPaginationReset: buildPrintPaginationReset(slideIds),
   });
 
   // Write viewer.html
@@ -230,6 +237,7 @@ interface BuildViewerHtmlOpts {
   linkStylesheets: string[];
   speakerNotesJson: string;
   slideCount: number;
+  printPaginationReset: string;
 }
 
 function buildViewerHtml(opts: BuildViewerHtmlOpts): string {
@@ -242,6 +250,7 @@ function buildViewerHtml(opts: BuildViewerHtmlOpts): string {
     linkStylesheets,
     speakerNotesJson,
     slideCount,
+    printPaginationReset,
   } = opts;
 
   const slidesHtml = slides.join("\n    ");
@@ -276,6 +285,7 @@ ${viewportCss}
       }
     }
   </style>
+  ${printPaginationReset}
 </head>
 <body>
   <deck-stage>

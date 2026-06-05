@@ -17,7 +17,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import color from "picocolors";
-import { firstSlideId, scopeStyleBlocks } from "./scope-css.js";
+import {
+  buildPrintPaginationReset,
+  firstSlideId,
+  scopeStyleBlocks,
+} from "./scope-css.js";
 import {
   escapeInlineScript,
   extractLinkStylesheets,
@@ -146,6 +150,7 @@ export async function runSlideBundle(opts: BundleOptions): Promise<number> {
   const allStyles: string[] = [];
   const allLocalLinks: string[] = [];
   const allRemoteLinks: string[] = [];
+  const slideIds: string[] = [];
   let hasVideo = false;
   const videoSlides: string[] = [];
 
@@ -180,6 +185,7 @@ export async function runSlideBundle(opts: BundleOptions): Promise<number> {
     // selectors don't collide once every file is merged into one document.
     const slideStyles = extractStyles(slideHtml);
     const slideId = firstSlideId(slideHtml);
+    if (slideId) slideIds.push(slideId);
     allStyles.push(
       ...(slideId ? scopeStyleBlocks(slideStyles, slideId) : slideStyles),
     );
@@ -268,6 +274,7 @@ export async function runSlideBundle(opts: BundleOptions): Promise<number> {
     fontLinksHtml,
     speakerNotesJson: notesJson,
     slideCount: allSlides.length,
+    printPaginationReset: buildPrintPaginationReset(slideIds),
   });
 
   writeFileSync(outPath, bundleHtml, "utf8");
@@ -341,6 +348,7 @@ interface BuildBundleHtmlOpts {
   fontLinksHtml: string;
   speakerNotesJson: string;
   slideCount: number;
+  printPaginationReset: string;
 }
 
 function buildBundleHtml(opts: BuildBundleHtmlOpts): string {
@@ -354,6 +362,7 @@ function buildBundleHtml(opts: BuildBundleHtmlOpts): string {
     fontLinksHtml,
     speakerNotesJson,
     slideCount,
+    printPaginationReset,
   } = opts;
 
   const slidesHtml = slides.join("\n    ");
@@ -389,6 +398,7 @@ ${viewportCss}
       }
     }
   </style>
+  ${printPaginationReset}
 </head>
 <body>
   <deck-stage>

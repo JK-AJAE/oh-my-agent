@@ -106,6 +106,20 @@ async function awaitFontsReady(page: PuppeteerPage): Promise<void> {
   }
 }
 
+/**
+ * Match the interactive "Save as PDF" path before calling page.pdf().
+ *
+ * deck-stage.js scales .deck-stage with an INLINE transform: scale(); inline
+ * styles outrank any stylesheet selector, so only its own `beforeprint` handler
+ * (which clears the inline transform/left/top/position) can undo it for print.
+ * Headless page.pdf() emulates print media but does NOT dispatch `beforeprint`,
+ * so we fire it explicitly — otherwise the inline scale survives and every page
+ * crops. This is what lets viewport-base.css print rules drop `!important`.
+ */
+async function clearInlineStageTransform(page: PuppeteerPage): Promise<void> {
+  await page.evaluate("window.dispatchEvent(new Event('beforeprint'))");
+}
+
 // ─── capture mode: screenshot-to-PDF ─────────────────────────────────────────
 
 /**
@@ -153,6 +167,7 @@ async function captureMode(
   });
 
   await awaitFontsReady(page);
+  await clearInlineStageTransform(page);
 
   // Page size = exact design size (1920×1080 px). Do NOT set `landscape` here:
   // when width/height are given explicitly, `landscape: true` ROTATES them to
@@ -197,6 +212,7 @@ async function printMode(
   });
 
   await awaitFontsReady(page);
+  await clearInlineStageTransform(page);
 
   // Print mode uses @media print CSS — slides break per page at design size.
   // `landscape: false` because width/height already define the landscape page;
