@@ -19,7 +19,7 @@ Research basis: SkillOpt — *Executive Strategy for Self-Evolving Agent Skills*
 [oma skills opt] no eval coverage for skill "oma-scholar": found 2 task fixture(s), need at least 5. Author tasks first — see web/docs/guide/skill-eval.md
 ```
 
-See the [Skill Utility Eval guide](./skill-eval.md) for the `.agents/eval/<skill>/` directory convention, fixture schema, checker types, and how to seed rollouts for mock replay.
+See the [Skill Utility Eval guide](/docs/guide/skill-eval) for the `.agents/eval/<skill>/` directory convention, fixture schema, checker types, and how to seed rollouts for mock replay.
 
 ---
 
@@ -197,5 +197,5 @@ Exit codes:
 
 ## See also
 
-- [Skill Utility Eval](./skill-eval.md) — authoring task fixtures, checker types, mock/live modes, the `_rollouts/` directory.
-- [CLI Commands](../cli-interfaces/commands.md) — flag reference for all skill management commands.
+- [Skill Utility Eval](/docs/guide/skill-eval) — authoring task fixtures, checker types, mock/live modes, the `_rollouts/` directory.
+- [CLI Commands](/docs/cli-interfaces/commands) — flag reference for all skill management commands.

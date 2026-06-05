@@ -19,7 +19,7 @@ The skill auto-activates on keywords like *video*, *shorts*, *reels*, *explainer
 
 ## When NOT to use
 
-- Single still images → use [`oma-image`](./image-generation.md).
+- Single still images → use [`oma-image`](/docs/guide/image-generation).
 - Live screen broadcasting / streaming → out of scope (capture is supervised, not streamed).
 - Standalone narration audio → use `oma-voice`.
 
@@ -142,5 +142,5 @@ The `render-spec.json` + assets are the determinism boundary; live capture is re
 
 ## Related
 
-- [`/video` workflow](../core-concepts/workflows.md) — the brief → script → assets → render-spec → Remotion pipeline.
-- [Image Generation](./image-generation.md) — the still-image router reused as a video visual provider.
+- [`/video` workflow](/docs/core-concepts/workflows) — the brief → script → assets → render-spec → Remotion pipeline.
+- [Image Generation](/docs/guide/image-generation) — the still-image router reused as a video visual provider.
