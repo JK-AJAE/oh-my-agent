@@ -4,6 +4,14 @@ export interface MemoryObservePayload {
   source: string;
 }
 
+export interface MemoryRememberPayload {
+  sessionId: string;
+  /** Human-readable narrative the provider can enrich into a recallable fact. */
+  content: string;
+  /** Optional 1-10 salience hint; higher survives consolidation/eviction longer. */
+  importance?: number;
+}
+
 export interface MemoryProviderStatus {
   provider: "agentmemory" | "none";
   reachable: boolean;
@@ -16,6 +24,11 @@ export interface MemoryProvider {
   name: "agentmemory" | "none";
   status(): Promise<MemoryProviderStatus>;
   observe(payload: MemoryObservePayload): Promise<boolean>;
+  /**
+   * Store a durable, enrichable fact (vs `observe`'s raw event envelope). Optional
+   * so existing provider stubs/mocks remain valid; callers must feature-detect.
+   */
+  remember?(payload: MemoryRememberPayload): Promise<boolean>;
 }
 
 export interface MemoryCommandStatus {
@@ -30,6 +43,7 @@ export interface AgentMemoryProviderOptions {
   homeDir?: string;
   healthTimeoutMs?: number;
   observeTimeoutMs?: number;
+  rememberTimeoutMs?: number;
 }
 
 export interface AgentMemoryEndpointConfig {

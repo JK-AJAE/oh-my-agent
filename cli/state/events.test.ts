@@ -249,6 +249,72 @@ describe("L1 state events", () => {
     );
   });
 
+  it("remembers a decision.made event as a formatted durable fact", async () => {
+    const remembered: Array<{
+      sessionId: string;
+      content: string;
+      importance?: number;
+    }> = [];
+    await emitEventWithMemory(
+      projectDir,
+      "oma-decide",
+      {
+        kind: "decision.made",
+        payload: {
+          subject: "work.remediation-choice",
+          decision: "Fix the responsible QA finding.",
+          rationale: "QA flagged a HIGH issue.",
+        },
+      },
+      {
+        name: "agentmemory",
+        async status() {
+          return { provider: "agentmemory", reachable: true };
+        },
+        async observe() {
+          return true;
+        },
+        async remember(payload) {
+          remembered.push(payload);
+          return true;
+        },
+      },
+    );
+
+    expect(remembered).toEqual([
+      {
+        sessionId: "oma-decide",
+        content:
+          "Decision [work.remediation-choice]: Fix the responsible QA finding. Rationale: QA flagged a HIGH issue.",
+        importance: 8,
+      },
+    ]);
+  });
+
+  it("does not remember non-decision/blocker semantic events", async () => {
+    let rememberCalls = 0;
+    await emitEventWithMemory(
+      projectDir,
+      "oma-gate",
+      { kind: "gate.passed", payload: { gate: "PLAN_GATE" } },
+      {
+        name: "agentmemory",
+        async status() {
+          return { provider: "agentmemory", reachable: true };
+        },
+        async observe() {
+          return true;
+        },
+        async remember() {
+          rememberCalls += 1;
+          return true;
+        },
+      },
+    );
+
+    expect(rememberCalls).toBe(0);
+  });
+
   it("does not observe non-semantic events", async () => {
     let calls = 0;
     await emitEventWithMemory(

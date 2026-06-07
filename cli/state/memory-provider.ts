@@ -6,6 +6,7 @@ import type {
   AgentMemoryProviderOptions,
   MemoryProvider,
   MemoryProviderStatus,
+  MemoryRememberPayload,
 } from "../types/memory.js";
 
 // AgentMemory's published version line moved from 0.11/0.12 (original design
@@ -78,6 +79,9 @@ export function createNoneMemoryProvider(): MemoryProvider {
       };
     },
     async observe() {
+      return false;
+    },
+    async remember() {
       return false;
     },
   };
@@ -186,6 +190,31 @@ export function createAgentMemoryProvider(
           {
             headers: { "content-type": "application/json" },
             timeout: options.observeTimeoutMs ?? 500,
+            validateStatus: () => true,
+          },
+        );
+        return response.status >= 200 && response.status < 300;
+      } catch {
+        return false;
+      }
+    },
+    async remember(payload: MemoryRememberPayload) {
+      const current = await status();
+      if (!current.reachable || !current.endpoint) return false;
+      try {
+        // `/remember` stores a durable, enrichable fact (type `decision`/`fact`)
+        // that `/search` can recall with a meaningful relevance score — unlike
+        // `/observe`, which keeps raw event envelopes that never enrich.
+        const response = await http.post(
+          `${current.endpoint}/agentmemory/remember`,
+          {
+            sessionId: payload.sessionId,
+            content: payload.content,
+            importance: payload.importance ?? 5,
+          },
+          {
+            headers: { "content-type": "application/json" },
+            timeout: options.rememberTimeoutMs ?? 500,
             validateStatus: () => true,
           },
         );

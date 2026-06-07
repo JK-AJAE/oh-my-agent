@@ -14,6 +14,8 @@ async function startServer(args: {
   healthStatus?: number;
   observeStatus?: number;
   onObserve?: (body: string) => void;
+  rememberStatus?: number;
+  onRemember?: (body: string) => void;
 }): Promise<{ server: Server; url: string }> {
   const server = createServer((req, res) => {
     if (req.url === "/agentmemory/health") {
@@ -37,6 +39,19 @@ async function startServer(args: {
         args.onObserve?.(body);
         res.statusCode = args.observeStatus ?? 200;
         res.end("ok");
+      });
+      return;
+    }
+    if (req.url === "/agentmemory/remember" && req.method === "POST") {
+      let body = "";
+      req.setEncoding("utf-8");
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+      req.on("end", () => {
+        args.onRemember?.(body);
+        res.statusCode = args.rememberStatus ?? 200;
+        res.end(JSON.stringify({ success: true }));
       });
       return;
     }
@@ -154,5 +169,43 @@ describe("AgentMemory provider", () => {
     expect(typeof parsed.project).toBe("string");
     expect(typeof parsed.cwd).toBe("string");
     expect(typeof parsed.timestamp).toBe("string");
+  });
+
+  it("posts a durable fact through remember when reachable", async () => {
+    let remembered = "";
+    const { server, url } = await startServer({
+      version: "0.9.24",
+      rememberStatus: 200,
+      onRemember: (body) => {
+        remembered = body;
+      },
+    });
+    cleanup.push(() => server.close());
+    const provider = createAgentMemoryProvider({
+      env: { AGENTMEMORY_URL: url },
+    });
+
+    await expect(
+      provider.remember?.({
+        sessionId: "oma-test",
+        content: "Decision [x]: do the thing.",
+        importance: 8,
+      }),
+    ).resolves.toBe(true);
+
+    expect(JSON.parse(remembered)).toEqual({
+      sessionId: "oma-test",
+      content: "Decision [x]: do the thing.",
+      importance: 8,
+    });
+  });
+
+  it("returns false from remember when the daemon is unreachable", async () => {
+    const provider = createAgentMemoryProvider({
+      env: { OMA_NO_AGENTMEMORY: "1" },
+    });
+    await expect(
+      provider.remember?.({ sessionId: "oma-test", content: "x" }),
+    ).resolves.toBe(false);
   });
 });

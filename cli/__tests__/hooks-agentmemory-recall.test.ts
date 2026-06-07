@@ -1,0 +1,80 @@
+import { createServer, type Server } from "node:http";
+import { afterEach, describe, expect, it } from "vitest";
+import { recallFacts } from "../../.agents/hooks/core/agentmemory-client.ts";
+
+async function startServer(searchBody: unknown): Promise<{
+  server: Server;
+  url: string;
+}> {
+  const server = createServer((req, res) => {
+    if (req.url === "/agentmemory/health") {
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json");
+      res.end(JSON.stringify({ service: "agentmemory", status: "healthy" }));
+      return;
+    }
+    if (req.url === "/agentmemory/search" && req.method === "POST") {
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json");
+      res.end(JSON.stringify(searchBody));
+      return;
+    }
+    res.statusCode = 404;
+    res.end("not found");
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  if (!address || typeof address === "string") {
+    throw new Error("expected TCP server address");
+  }
+  return { server, url: `http://127.0.0.1:${address.port}` };
+}
+
+describe("hooks recallFacts", () => {
+  const cleanup: Array<() => void> = [];
+  afterEach(() => {
+    for (const fn of cleanup.splice(0)) fn();
+    delete process.env.AGENTMEMORY_URL;
+  });
+
+  it("short-circuits an empty query without touching the network", async () => {
+    // No AGENTMEMORY_URL set, so any network attempt would fail — an empty
+    // result here proves the guard returned before dispatch.
+    await expect(recallFacts("   ", 5)).resolves.toEqual([]);
+  });
+
+  it("maps enriched results and filters the raw-observe noise floor", async () => {
+    const { server, url } = await startServer({
+      format: "full",
+      results: [
+        {
+          score: 9.3,
+          observation: {
+            narrative: "Decision [x]: adopt recall.",
+            facts: ["adopt recall"],
+            title: "Decision adopt recall",
+            type: "decision",
+          },
+        },
+        {
+          // Raw `/observe` envelope — must be dropped by the score floor.
+          score: 0.0066,
+          observation: { narrative: "", facts: [], title: "oma-workflow" },
+        },
+        {
+          // No narrative; falls back to joined facts text.
+          score: 4.1,
+          observation: { facts: ["fact a", "fact b"], type: "fact" },
+        },
+      ],
+    });
+    cleanup.push(() => server.close());
+    process.env.AGENTMEMORY_URL = url;
+
+    const facts = await recallFacts("adopt recall", 5);
+    expect(facts).toEqual([
+      { text: "Decision [x]: adopt recall.", source: "decision", score: 9.3 },
+      { text: "fact a; fact b", source: "fact", score: 4.1 },
+    ]);
+  });
+});

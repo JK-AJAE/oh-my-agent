@@ -247,6 +247,56 @@ function enqueueObserveRetry(projectDir: string, event: OmaEvent): void {
   appendFileSync(path, `${JSON.stringify(event)}\n`, "utf-8");
 }
 
+/**
+ * Build a human-readable narrative for events worth recalling across vendor /
+ * session boundaries. `observe` keeps the raw JSON envelope (which AgentMemory
+ * never enriches), so decisions and blockers are additionally `remember`ed as
+ * durable facts so `/search` can surface them with a meaningful score.
+ *
+ * Returns null for events that should not become durable facts.
+ */
+function rememberContentForEvent(
+  event: OmaEvent,
+): { content: string; importance: number } | null {
+  const payload = event.payload ?? {};
+  const str = (key: string): string => {
+    const value = payload[key];
+    return typeof value === "string" && value.trim() ? value.trim() : "";
+  };
+
+  if (event.kind === "decision.made") {
+    const subject = str("subject");
+    const decision = str("decision");
+    const rationale = str("rationale");
+    if (!subject && !decision) return null;
+    const content = [
+      subject ? `Decision [${subject}]:` : "Decision:",
+      decision,
+      rationale ? `Rationale: ${rationale}` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    return { content, importance: 8 };
+  }
+
+  if (event.kind === "blocker.raised") {
+    const summary = str("summary");
+    if (!summary) return null;
+    const severity = str("severity");
+    const remediation = str("remediation");
+    const content = [
+      `Blocker: ${summary}`,
+      severity ? `(severity: ${severity})` : "",
+      remediation ? `Remediation: ${remediation}` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    return { content, importance: 7 };
+  }
+
+  return null;
+}
+
 export async function emitEventWithMemory(
   projectDir: string,
   sid: string,
@@ -262,6 +312,22 @@ export async function emitEventWithMemory(
     source: "oma-workflow",
   });
   if (!observed) enqueueObserveRetry(projectDir, enriched);
+
+  // Durable, recallable fact for cross-boundary rehydration (best-effort: a
+  // failure here never affects L1 or the observe retry queue). Feature-detected
+  // so provider stubs without `remember` stay valid.
+  const memo = rememberContentForEvent(enriched);
+  if (memo && typeof provider.remember === "function") {
+    try {
+      await provider.remember({
+        sessionId: sid,
+        content: memo.content,
+        importance: memo.importance,
+      });
+    } catch {
+      // Non-fatal: recall is an enhancement, not an L1 correctness guarantee.
+    }
+  }
   return enriched;
 }
 
