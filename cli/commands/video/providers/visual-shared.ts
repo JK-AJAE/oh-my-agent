@@ -8,6 +8,16 @@ import type { Scene, VisualAsset } from "../types.js";
 const VISUALS_DIR = "visuals";
 
 /**
+ * Sanitize a scene id to a filesystem-safe slug. Strips path separators and
+ * any other characters that could cause path traversal (e.g. '../escape' →
+ * '__escape'). The result is guaranteed to be a flat filename component with
+ * no directory separators.
+ */
+export function sanitizeSceneId(id: string): string {
+  return id.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+/**
  * Write a deterministic placeholder asset for a scene. Pure function of the
  * scene id + provider id + seed (no clock, no randomness), so the bytes are
  * identical on replay. Returned path is run-dir-relative.
@@ -18,7 +28,8 @@ export async function writePlaceholder(
   providerId: string,
 ): Promise<VisualAsset> {
   await mkdir(path.join(opts.runDir, VISUALS_DIR), { recursive: true });
-  const rel = path.join(VISUALS_DIR, `${scene.id}-placeholder.svg`);
+  const safeId = sanitizeSceneId(scene.id);
+  const rel = path.join(VISUALS_DIR, `${safeId}-placeholder.svg`);
   await writeFile(
     path.join(opts.runDir, rel),
     placeholderSvg(scene, opts.seed),
@@ -47,7 +58,8 @@ export async function ingestVisual(
 ): Promise<VisualAsset> {
   await mkdir(path.join(runDir, VISUALS_DIR), { recursive: true });
   const ext = path.extname(sourcePath) || ".png";
-  const rel = path.join(VISUALS_DIR, `${scene.id}-${providerId}${ext}`);
+  const safeId = sanitizeSceneId(scene.id);
+  const rel = path.join(VISUALS_DIR, `${safeId}-${providerId}${ext}`);
   await copyFile(sourcePath, path.join(runDir, rel));
   return {
     sceneId: scene.id,

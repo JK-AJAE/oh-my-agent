@@ -18,7 +18,7 @@ import type {
   VisualProvider,
 } from "../providers.js";
 import type { Scene, VisualAsset } from "../types.js";
-import { writePlaceholder } from "./visual-shared.js";
+import { sanitizeSceneId, writePlaceholder } from "./visual-shared.js";
 
 const PEXELS_API = "https://api.pexels.com/videos/search";
 
@@ -97,7 +97,10 @@ export class PexelsVisualProvider implements VisualProvider {
         timeout: 60000,
       });
       await mkdir(path.join(runDir, "visuals"), { recursive: true });
-      const rel = path.join("visuals", `${scene.id}-pexels.mp4`);
+      const rel = path.join(
+        "visuals",
+        `${sanitizeSceneId(scene.id)}-pexels.mp4`,
+      );
       await writeFile(path.join(runDir, rel), Buffer.from(res.data));
       return rel;
     } catch {

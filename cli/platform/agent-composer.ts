@@ -11,6 +11,7 @@ import {
   serializeFrontmatter,
 } from "../utils/frontmatter.js";
 import type { Difficulty } from "./context-loader.js";
+import { assertContainedRelPath } from "./path-containment.js";
 
 // =============================================================================
 // Agent Tool Mapping (Abstract -> Vendor-specific)
@@ -399,8 +400,31 @@ export function installVendorAgents(
 
   if (!existsSync(agentsSrcDir) || !existsSync(variantPath)) return;
 
-  const variant: AgentVariant = JSON.parse(readFileSync(variantPath, "utf-8"));
+  // Variant JSON comes from the (untrusted) working project. Guard the parse so
+  // a malformed file doesn't abort install mid-loop, and validate destDir so a
+  // traversing value (e.g. "../../../tmp/evil") can't escape the install root.
+  let variant: AgentVariant;
+  try {
+    variant = JSON.parse(readFileSync(variantPath, "utf-8")) as AgentVariant;
+  } catch (err) {
+    console.warn(
+      `[oma] Skipping malformed agent variant ${variantPath}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return;
+  }
   if (!variant?.destDir) return;
+  try {
+    assertContainedRelPath(targetDir, variant.destDir, "agent dest dir");
+  } catch (err) {
+    console.warn(
+      `[oma] Skipping unsafe agent variant ${variantPath}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return;
+  }
 
   const destDir = join(targetDir, variant.destDir);
   mkdirSync(destDir, { recursive: true });
