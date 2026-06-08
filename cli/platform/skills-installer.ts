@@ -475,6 +475,7 @@ const HOOK_VENDORS: ReadonlySet<VendorType> = new Set([
   "antigravity",
   "claude",
   "codex",
+  "commandcode",
   "cursor",
   "gemini",
   "grok",
