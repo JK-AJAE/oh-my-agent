@@ -436,9 +436,11 @@ describe("installHooksFromVariant", () => {
     );
     const settings = JSON.parse(writeCall?.[1] as string);
     const cmd = settings.hooks.UserPromptSubmit[0].hooks[0].command;
-    // Now invokes oma-hook.sh wrapper instead of bun <script>.
+    // Now invokes oma-hook.sh wrapper instead of bun <script>. The codex
+    // variant has no projectDirEnv, so the variant-controlled relative path is
+    // single-quoted (injection-safe) rather than left bare.
     expect(cmd).toBe(
-      ".codex/hooks/oma-hook.sh --vendor 'codex' --event 'UserPromptSubmit'",
+      "'.codex/hooks/oma-hook.sh' --vendor 'codex' --event 'UserPromptSubmit'",
     );
     // No absolute paths from the local machine embedded in settings.
     expect(cmd).not.toMatch(/\/opt\/homebrew|\/Users\/|\.local\/share\/mise/);

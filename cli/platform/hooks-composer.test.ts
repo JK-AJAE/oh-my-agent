@@ -90,8 +90,10 @@ describe("Codex hook variant contract", () => {
       const promptEntry = hooksJson.hooks.UserPromptSubmit[0];
       expect(promptEntry.hooks).toHaveLength(1);
       expect(promptEntry.hooks[0].name).toBe("oma-hook-UserPromptSubmit");
+      // basePath is shell-quoted now (hookDir is variant-controlled, so the
+      // wrapper path is single-quoted to neutralise injection).
       expect(promptEntry.hooks[0].command).toBe(
-        ".codex/hooks/oma-hook.sh --vendor 'codex' --event 'UserPromptSubmit'",
+        "'.codex/hooks/oma-hook.sh' --vendor 'codex' --event 'UserPromptSubmit'",
       );
       // Timeout = sum of handler timeouts (5+5+3=13) + 5 margin = 18.
       expect(promptEntry.hooks[0].timeout).toBe(18);

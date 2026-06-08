@@ -99,12 +99,20 @@ export interface HookVariant {
  * `which bun` result.
  *
  * Only used for statusLine/hud entries — event hooks now use buildOmaHookCmd.
+ *
+ * All variant-derived values are wrapped with shellQuote() so shell
+ * metacharacters in runtime/hookDir/script (from a malicious project's
+ * .agents/hooks/variants/*.json) cannot inject commands into the generated
+ * settings string that the vendor agent executes via the shell.
  */
 function buildHookCmd(variant: HookVariant, script: string): string {
-  if (variant.projectDirEnv) {
-    return `${variant.runtime} "$${variant.projectDirEnv}/${variant.hookDir}/${script}"`;
-  }
-  return `${variant.runtime} ${variant.hookDir}/${script}`;
+  // runtime is single-quoted; the path keeps `$ENV` expandable (double-quoted)
+  // while neutralising metacharacters in the variant-controlled hookDir/script.
+  const path = buildVariantPath(
+    variant.projectDirEnv,
+    `${variant.hookDir}/${script}`,
+  );
+  return `${shellQuote(variant.runtime)} ${path}`;
 }
 
 /** Filename of the generated per-vendor oma-hook wrapper script. */
@@ -134,15 +142,55 @@ function shellQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
+/** A valid POSIX environment-variable name (so `$NAME` expansion is safe). */
+const ENV_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/**
+ * Escape the characters that are special **inside double quotes** (`\`, `"`,
+ * `` ` ``, `$`) without adding the surrounding quotes. Used to embed an
+ * untrusted path segment in a double-quoted string where a sibling `$ENV`
+ * prefix still needs to expand — single-quoting the whole path would break that
+ * expansion, so we double-quote and neutralise command-substitution / variable
+ * expansion / quote-breakout inside the untrusted portion instead.
+ */
+function escapeDoubleQuoted(value: string): string {
+  return value.replace(/([\\"`$])/g, "\\$1");
+}
+
+/**
+ * Build a settings `command` path for a wrapper/script that lives under a
+ * vendor's project-dir env var (e.g. `$CLAUDE_PROJECT_DIR`).
+ *
+ * When `projectDirEnv` is a valid env-var name, the result is
+ * `"$ENV/<escaped relPath>"` — double-quoted so `$ENV` expands at runtime while
+ * the variant-controlled `relPath` cannot inject command substitution or break
+ * out of the quotes. Otherwise (no/invalid env var) the relative path is
+ * single-quoted with no expansion.
+ */
+function buildVariantPath(
+  projectDirEnv: string | null | undefined,
+  relPath: string,
+): string {
+  if (projectDirEnv && ENV_NAME_RE.test(projectDirEnv)) {
+    return `"$${projectDirEnv}/${escapeDoubleQuoted(relPath)}"`;
+  }
+  return shellQuote(relPath);
+}
+
 export function buildOmaHookCmd(
   variant: HookVariant,
   nativeEvent: string,
   matcher?: string,
 ): string {
   const wrapperName = OMA_HOOK_WRAPPER_FILENAME;
-  const basePath = variant.projectDirEnv
-    ? `"$${variant.projectDirEnv}/${variant.hookDir}/${wrapperName}"`
-    : `${variant.hookDir}/${wrapperName}`;
+  // hookDir comes from variant JSON (potentially attacker-controlled). Keep
+  // `$ENV` expansion working (double-quoted) while neutralising command
+  // substitution / quote-breakout in the variant-controlled path segment; the
+  // no-env case falls back to a single-quoted relative path.
+  const basePath = buildVariantPath(
+    variant.projectDirEnv,
+    `${variant.hookDir}/${wrapperName}`,
+  );
   // Quote interpolated values — they originate from variant JSON and must not
   // be able to inject shell metacharacters into the registered command.
   let cmd = `${basePath} --vendor ${shellQuote(variant.vendor)} --event ${shellQuote(nativeEvent)}`;
@@ -381,8 +429,24 @@ export function mergeIntoSettings(
 }
 
 /**
+ * Escape all regex metacharacters in a string so it can be safely embedded
+ * in a `new RegExp(...)` constructor without treating any character as a
+ * special pattern token. Prevents regex-injection when variant-supplied
+ * `key` or `section` values contain parentheses, dots, brackets, etc.
+ */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
  * Ensure feature flags are enabled in a TOML config file.
  * Creates file if missing, appends section if not present.
+ *
+ * `key` and `section` originate from variant JSON (potentially attacker-
+ * controlled via .agents/hooks/variants/<vendor>.json). Both values are
+ * escaped with escapeRegExp() before being embedded in RegExp constructors so
+ * malformed values cannot cause DoS (catastrophic backtracking, invalid regex)
+ * or corrupt the file via `$`-bearing replacement strings.
  */
 export function ensureFeatureFlags(
   configPath: string,
@@ -396,26 +460,32 @@ export function ensureFeatureFlags(
     content = readFileSync(configPath, "utf-8");
   }
 
+  const safeSection = escapeRegExp(section);
+
   for (const [key, value] of Object.entries(flags)) {
-    const enabledRe = new RegExp(`${key}\\s*=\\s*${value}`, "i");
+    const safeKey = escapeRegExp(key);
+    const enabledRe = new RegExp(`${safeKey}\\s*=\\s*${value}`, "i");
     if (enabledRe.test(content)) continue;
 
-    const disabledRe = new RegExp(`${key}\\s*=\\s*${!value}`, "i");
+    const disabledRe = new RegExp(`${safeKey}\\s*=\\s*${!value}`, "i");
+    // Use a function replacer so attacker-controlled `key` cannot be
+    // interpreted as a replacement pattern (e.g. `$&`, `$1`).
+    const replacement = `${key} = ${value}`;
     if (disabledRe.test(content)) {
-      content = content.replace(disabledRe, `${key} = ${value}`);
+      content = content.replace(disabledRe, () => replacement);
       writeFileSync(configPath, content);
       continue;
     }
 
-    const sectionRe = new RegExp(`\\[${section}\\]`, "i");
+    const sectionRe = new RegExp(`\\[${safeSection}\\]`, "i");
     if (sectionRe.test(content)) {
       content = content.replace(
-        new RegExp(`(\\[${section}\\][^[]*)`, "i"),
-        `$1${key} = ${value}\n`,
+        new RegExp(`(\\[${safeSection}\\][^[]*)`, "i"),
+        (match) => `${match}${replacement}\n`,
       );
       writeFileSync(configPath, content);
     } else {
-      content = `${content.trimEnd()}\n\n[${section}]\n${key} = ${value}\n`;
+      content = `${content.trimEnd()}\n\n[${section}]\n${replacement}\n`;
       writeFileSync(configPath, content);
     }
   }

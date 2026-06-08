@@ -11,7 +11,7 @@
  * The CLI never edits translations itself — it only reports candidate pairs.
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
@@ -52,7 +52,12 @@ function countHeadings(text: string): number {
 
 function gitLastCommitUnix(repoRoot: string, file: string): number | null {
   try {
-    const out = execSync(`git log -1 --format=%ct -- "${file}"`, {
+    // Use execFileSync with an argument array so the file path is never
+    // interpreted by a shell. A crafted filename containing $(...), backticks,
+    // or quotes would be executed as a shell command by the old execSync form.
+    // The leading `--` separator ensures git treats the value as a path even
+    // when it starts with a dash.
+    const out = execFileSync("git", ["log", "-1", "--format=%ct", "--", file], {
       cwd: repoRoot,
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "ignore"],

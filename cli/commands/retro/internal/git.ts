@@ -1,8 +1,12 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import type { TimeWindow } from "../../../utils/time-window.js";
 import type { RetroCommit, RetroFileChange } from "./types.js";
 
-function execGit(cwd: string, cmd: string): string {
+/**
+ * Run a git command via execSync (shell string). Used only for safe, hard-coded
+ * commands that contain no user/repo-supplied values (fetch, config reads).
+ */
+function execGitShell(cwd: string, cmd: string): string {
   try {
     return execSync(cmd, {
       cwd,
@@ -15,20 +19,66 @@ function execGit(cwd: string, cmd: string): string {
   }
 }
 
+/**
+ * Run git with an explicit argument array via execFileSync so no shell ever
+ * interprets the arguments. Branch names, file paths, and other repo-sourced
+ * values MUST go through this function, not execGitShell, because git ref names
+ * can contain shell metacharacters ($, (), backtick, ;, |, &, etc.).
+ */
+function execGitArgs(cwd: string, args: string[]): string {
+  try {
+    return execFileSync("git", args, {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "ignore"],
+      maxBuffer: 10 * 1024 * 1024,
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Validate a git branch / ref name against a strict allowlist.
+ *
+ * Git permits almost any byte sequence in ref names except NUL, space,
+ * `..`, `@{`, control chars, and a few others — far too permissive for safe
+ * shell interpolation. We restrict to the common-case safe charset (word chars,
+ * dots, hyphens, slashes, and the leading `origin/` prefix) and fall back to
+ * "main" for anything else. This is defence-in-depth on top of the execFileSync
+ * switch: even if a caller accidentally uses execGitShell, the branch value
+ * has already been validated.
+ */
+const SAFE_BRANCH_RE = /^[\w./-]+$/;
+
+function validateBranch(branch: string): string {
+  if (SAFE_BRANCH_RE.test(branch)) return branch;
+  return "main";
+}
+
 export function fetchOrigin(cwd: string): void {
-  execGit(cwd, "git fetch origin --quiet 2>/dev/null || true");
+  // Hard-coded command, no user values — shell is fine here.
+  execGitShell(cwd, "git fetch origin --quiet 2>/dev/null || true");
 }
 
 export function getDefaultBranch(cwd: string): string {
-  const branch = execGit(
-    cwd,
-    "git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'",
-  );
-  return branch || "main";
+  // Use execFileSync so the piped shell commands are not needed.
+  // `git symbolic-ref` prints the full ref (refs/remotes/origin/main); strip
+  // the prefix in TypeScript rather than via a shell sed pipe.
+  const fullRef = execGitArgs(cwd, [
+    "symbolic-ref",
+    "refs/remotes/origin/HEAD",
+  ]);
+  const branch = fullRef
+    ? fullRef.replace(/^refs\/remotes\/origin\//, "")
+    : "main";
+  // Validate before returning so callers that use the value in git commands
+  // receive only safe tokens.
+  return validateBranch(branch || "main");
 }
 
 export function getGitUserName(cwd: string): string {
-  return execGit(cwd, "git config user.name") || "Unknown";
+  return execGitArgs(cwd, ["config", "user.name"]) || "Unknown";
 }
 
 export function getCommitsWithStats(
@@ -36,11 +86,16 @@ export function getCommitsWithStats(
   window: TimeWindow,
   branch: string,
 ): RetroCommit[] {
-  const untilArg = window.until ? ` --until="${window.until}"` : "";
-  const raw = execGit(
-    cwd,
-    `git log ${branch} --since="${window.since}"${untilArg} --format="COMMIT:%H|%aN|%ae|%at|%s" --shortstat`,
-  );
+  const safeBranch = validateBranch(branch);
+  const args = [
+    "log",
+    safeBranch,
+    `--since=${window.since}`,
+    ...(window.until ? [`--until=${window.until}`] : []),
+    "--format=COMMIT:%H|%aN|%ae|%at|%s",
+    "--shortstat",
+  ];
+  const raw = execGitArgs(cwd, args);
   if (!raw) return [];
 
   const commits: RetroCommit[] = [];
@@ -98,11 +153,16 @@ export function getFileChanges(
   window: TimeWindow,
   branch: string,
 ): RetroFileChange[] {
-  const untilArg = window.until ? ` --until="${window.until}"` : "";
-  const raw = execGit(
-    cwd,
-    `git log ${branch} --since="${window.since}"${untilArg} --format="COMMIT:%H|%aN" --numstat`,
-  );
+  const safeBranch = validateBranch(branch);
+  const args = [
+    "log",
+    safeBranch,
+    `--since=${window.since}`,
+    ...(window.until ? [`--until=${window.until}`] : []),
+    "--format=COMMIT:%H|%aN",
+    "--numstat",
+  ];
+  const raw = execGitArgs(cwd, args);
   if (!raw) return [];
 
   const changes: RetroFileChange[] = [];
@@ -138,25 +198,30 @@ export function getFileHotspots(
   branch: string,
   limit = 10,
 ): Array<{ file: string; count: number }> {
-  const untilArg = window.until ? ` --until="${window.until}"` : "";
-  const raw = execGit(
-    cwd,
-    `git log ${branch} --since="${window.since}"${untilArg} --format="" --name-only | grep -v '^$' | sort | uniq -c | sort -rn | head -${limit}`,
-  );
+  const safeBranch = validateBranch(branch);
+  // Run git with argv; do counting/sorting in TypeScript to avoid a shell pipe.
+  const args = [
+    "log",
+    safeBranch,
+    `--since=${window.since}`,
+    ...(window.until ? [`--until=${window.until}`] : []),
+    "--format=",
+    "--name-only",
+  ];
+  const raw = execGitArgs(cwd, args);
   if (!raw) return [];
 
-  return raw
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => {
-      const match = line.trim().match(/^\s*(\d+)\s+(.+)$/);
-      if (!match) return null;
-      return {
-        count: Number.parseInt(match[1] || "0", 10),
-        file: match[2] || "",
-      };
-    })
-    .filter((item): item is { file: string; count: number } => item !== null);
+  // Count occurrences in TypeScript (replaces the shell: sort | uniq -c | sort -rn | head)
+  const counts = new Map<string, number>();
+  for (const line of raw.split("\n")) {
+    const f = line.trim();
+    if (f) counts.set(f, (counts.get(f) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([file, count]) => ({ file, count }));
 }
 
 export function getShippingStreak(
@@ -164,14 +229,19 @@ export function getShippingStreak(
   branch: string,
   author?: string,
 ): number {
-  const authorArg = author ? ` --author="${author}"` : "";
-  const raw = execGit(
-    cwd,
-    `git log ${branch}${authorArg} --format="%ad" --date=format:"%Y-%m-%d" | sort -u`,
-  );
+  const safeBranch = validateBranch(branch);
+  const args = [
+    "log",
+    safeBranch,
+    "--format=%ad",
+    "--date=format:%Y-%m-%d",
+    ...(author ? [`--author=${author}`] : []),
+  ];
+  const raw = execGitArgs(cwd, args);
   if (!raw) return 0;
 
-  const dates = raw.split("\n").filter(Boolean).sort().reverse();
+  // Deduplicate and sort descending in TypeScript (replaces shell: sort -u)
+  const dates = [...new Set(raw.split("\n").filter(Boolean))].sort().reverse();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -207,10 +277,23 @@ export function countAIAssistedCommits(
   window: TimeWindow,
   branch: string,
 ): number {
-  const untilArg = window.until ? ` --until="${window.until}"` : "";
-  const raw = execGit(
-    cwd,
-    `git log ${branch} --since="${window.since}"${untilArg} --format="%b" | grep -ci "co-authored-by.*noreply@anthropic\\.com\\|co-authored-by.*copilot\\|co-authored-by.*openai" 2>/dev/null || echo 0`,
-  );
-  return Number.parseInt(raw || "0", 10);
+  const safeBranch = validateBranch(branch);
+  const args = [
+    "log",
+    safeBranch,
+    `--since=${window.since}`,
+    ...(window.until ? [`--until=${window.until}`] : []),
+    "--format=%b",
+  ];
+  const raw = execGitArgs(cwd, args);
+  if (!raw) return 0;
+
+  // Count AI co-author lines in TypeScript (replaces: grep -ci "..." || echo 0)
+  const aiPattern =
+    /co-authored-by.*noreply@anthropic\.com|co-authored-by.*copilot|co-authored-by.*openai/i;
+  let count = 0;
+  for (const line of raw.split("\n")) {
+    if (aiPattern.test(line)) count++;
+  }
+  return count;
 }

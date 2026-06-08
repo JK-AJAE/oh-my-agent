@@ -6,8 +6,11 @@ import {
   getFileChanges,
 } from "./git.js";
 
+// Repo-sourced git calls now run through execFileSync (argv, no shell) after
+// the command-injection hardening; the test mocks both entry points.
 vi.mock("node:child_process", () => ({
   execSync: vi.fn(),
+  execFileSync: vi.fn(),
 }));
 
 describe("retro/git.ts", () => {
@@ -20,13 +23,15 @@ describe("retro/git.ts", () => {
   });
 
   it("parses default branch from origin HEAD", () => {
-    vi.mocked(child_process.execSync).mockReturnValue("main");
+    vi.mocked(child_process.execFileSync).mockReturnValue(
+      "refs/remotes/origin/main",
+    );
 
     expect(getDefaultBranch("/repo")).toBe("main");
   });
 
   it("parses commits with shortstat output", () => {
-    vi.mocked(child_process.execSync).mockReturnValue(
+    vi.mocked(child_process.execFileSync).mockReturnValue(
       [
         "COMMIT:abc|Grace|g@example.com|1710000000|feat: add auth",
         " 1 file changed, 12 insertions(+), 3 deletions(-)",
@@ -53,7 +58,7 @@ describe("retro/git.ts", () => {
   });
 
   it("parses file changes from numstat output", () => {
-    vi.mocked(child_process.execSync).mockReturnValue(
+    vi.mocked(child_process.execFileSync).mockReturnValue(
       ["COMMIT:abc|Grace", "12\t3\tsrc/auth.ts"].join("\n"),
     );
 
