@@ -27,6 +27,14 @@ export const AGENTS_STATE_ARCHIVE_DIR = `${AGENTS_STATE_DIR}/archive`;
 /** Antigravity CLI (agy) local project config symlink. */
 export const ANTIGRAVITYCLI_DIR = ".antigravitycli";
 
+/**
+ * Transient backup dir written by migrations (e.g. 002/011/013) before they
+ * move files. Created at both `<root>/.migration-backup/` and
+ * `<root>/.agents/.migration-backup/`; the leading-slash-free gitignore
+ * pattern below covers both. A local restore artifact — never committed.
+ */
+export const MIGRATION_BACKUP_DIR = ".migration-backup";
+
 /** Directory pattern for `.gitignore` (trailing slash). */
 export function asGitignoreDir(relativeDir: string): string {
   return relativeDir.endsWith("/") ? relativeDir : `${relativeDir}/`;
@@ -35,12 +43,14 @@ export function asGitignoreDir(relativeDir: string): string {
 export const AGENTS_RESULTS_GITIGNORE = asGitignoreDir(AGENTS_RESULTS_DIR);
 export const AGENTS_STATE_GITIGNORE = asGitignoreDir(AGENTS_STATE_DIR);
 export const ANTIGRAVITYCLI_GITIGNORE = asGitignoreDir(ANTIGRAVITYCLI_DIR);
+export const MIGRATION_BACKUP_GITIGNORE = asGitignoreDir(MIGRATION_BACKUP_DIR);
 
 /** Lines appended by `ensureOmaProjectGitignore()` during install / link / update. */
 export const OMA_PROJECT_GITIGNORE_PATTERNS = [
   ANTIGRAVITYCLI_GITIGNORE,
   AGENTS_RESULTS_GITIGNORE,
   AGENTS_STATE_GITIGNORE,
+  MIGRATION_BACKUP_GITIGNORE,
 ] as const;
 
 /**

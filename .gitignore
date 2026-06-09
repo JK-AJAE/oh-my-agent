@@ -62,6 +62,9 @@ web/.serena/
 .agents/state/
 .agents/results/
 
+# Transient migration backups (written by oma update migrations 002/011/013)
+.migration-backup/
+
 # agy (Antigravity) hooks manifest — generated per-install with absolute paths
 .agents/hooks.json
 

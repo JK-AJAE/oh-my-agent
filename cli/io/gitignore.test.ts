@@ -13,6 +13,7 @@ import {
   AGENTS_RESULTS_GITIGNORE,
   AGENTS_STATE_GITIGNORE,
   ANTIGRAVITYCLI_GITIGNORE,
+  MIGRATION_BACKUP_GITIGNORE,
 } from "../constants/paths.js";
 import {
   ensureGitignored,
@@ -179,12 +180,14 @@ describe("ensureOmaProjectGitignore", () => {
       ANTIGRAVITYCLI_GITIGNORE,
       AGENTS_RESULTS_GITIGNORE,
       AGENTS_STATE_GITIGNORE,
+      MIGRATION_BACKUP_GITIGNORE,
     ]);
 
     const content = readFileSync(join(repo, ".gitignore"), "utf-8");
     expect(content).toContain(ANTIGRAVITYCLI_GITIGNORE);
     expect(content).toContain(AGENTS_RESULTS_GITIGNORE);
     expect(content).toContain(AGENTS_STATE_GITIGNORE);
+    expect(content).toContain(MIGRATION_BACKUP_GITIGNORE);
     expect(content).toContain(
       "# oh-my-agent runtime (local artifacts — do not commit)",
     );
@@ -198,6 +201,7 @@ describe("ensureOmaProjectGitignore", () => {
     expect(result.added).toEqual([
       AGENTS_RESULTS_GITIGNORE,
       AGENTS_STATE_GITIGNORE,
+      MIGRATION_BACKUP_GITIGNORE,
     ]);
     expect(result.alreadyPresent).toEqual([ANTIGRAVITYCLI_GITIGNORE]);
   });
@@ -205,7 +209,7 @@ describe("ensureOmaProjectGitignore", () => {
   it("does not duplicate existing entries", () => {
     writeFileSync(
       join(repo, ".gitignore"),
-      ".antigravitycli/\n.agents/results/\n.agents/state/\n",
+      ".antigravitycli/\n.agents/results/\n.agents/state/\n.migration-backup/\n",
     );
 
     const result = ensureOmaProjectGitignore(repo);
@@ -215,11 +219,13 @@ describe("ensureOmaProjectGitignore", () => {
       ANTIGRAVITYCLI_GITIGNORE,
       AGENTS_RESULTS_GITIGNORE,
       AGENTS_STATE_GITIGNORE,
+      MIGRATION_BACKUP_GITIGNORE,
     ]);
     const content = readFileSync(join(repo, ".gitignore"), "utf-8");
     expect(content.match(/\.antigravitycli\//g)?.length).toBe(1);
     expect(content.match(/\.agents\/results\//g)?.length).toBe(1);
     expect(content.match(/\.agents\/state\//g)?.length).toBe(1);
+    expect(content.match(/\.migration-backup\//g)?.length).toBe(1);
   });
 
   it("appends slash patterns when only a different line shape exists", () => {
