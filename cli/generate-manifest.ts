@@ -28,7 +28,18 @@ const EXCLUDED_PATTERNS = [
   // files. The skill's tracked source (src/, package.json, config) still ships.
   "node_modules/",
   ".remotion/",
+  // Local runtime state (L1 session events, hook state, skill sessions):
+  // written by hooks/CLI at run time on the developer's machine and never
+  // shipped via the manifest. Without this exclusion, regenerating on a used
+  // checkout sweeps hundreds of session files into the manifest.
+  ".agents/state/",
+  // Generated at install time with machine-local absolute paths (gitignored).
+  ".agents/hooks.json",
 ];
+
+export function isExcluded(fullPath: string): boolean {
+  return EXCLUDED_PATTERNS.some((p) => fullPath.includes(p));
+}
 
 interface FileInfo {
   path: string;
@@ -72,7 +83,7 @@ function getAllFiles(
     const fullPath = path.join(dirPath, file);
     const relativePath = path.join(basePath, file);
 
-    if (EXCLUDED_PATTERNS.some((p) => fullPath.includes(p))) {
+    if (isExcluded(fullPath)) {
       continue;
     }
 
