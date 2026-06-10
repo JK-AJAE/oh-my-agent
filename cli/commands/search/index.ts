@@ -1,5 +1,6 @@
 import type { Command } from "commander";
 import color from "picocolors";
+import { EXIT_CODES, exitCodeForStatus } from "../../utils/exit-codes.js";
 import { codeSearch } from "./code.js";
 import { fetchMedia } from "./media.js";
 import { metadataFromUrl, parseMetadata } from "./metadata.js";
@@ -70,17 +71,9 @@ function printResult(result: unknown, pretty: boolean) {
 }
 
 function attachExitCode(result: FetchResult | null): void {
-  if (!result) {
-    process.exitCode = 1;
-    return;
-  }
-  if (result.status === "ok") process.exitCode = 0;
-  else if (result.status === "blocked") process.exitCode = 2;
-  else if (result.status === "not-found") process.exitCode = 3;
-  else if (result.status === "invalid-input") process.exitCode = 4;
-  else if (result.status === "auth-required") process.exitCode = 5;
-  else if (result.status === "timeout") process.exitCode = 6;
-  else process.exitCode = 1;
+  process.exitCode = result
+    ? exitCodeForStatus(result.status)
+    : EXIT_CODES.generic;
 }
 
 export function registerSearchCommand(program: Command): void {
@@ -147,13 +140,13 @@ export function registerSearchCommand(program: Command): void {
             console.error(
               color.yellow(`No API handler matches host ${url.hostname}`),
             );
-            process.exitCode = 3;
+            process.exitCode = EXIT_CODES.notFound;
             return;
           }
           const ctx = buildContext(opts);
           const result = await apiStrategy(url, ctx);
           if (!result) {
-            process.exitCode = 3;
+            process.exitCode = EXIT_CODES.notFound;
             return;
           }
           printResult(result, Boolean(opts.pretty));
