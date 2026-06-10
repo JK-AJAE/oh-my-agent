@@ -712,6 +712,8 @@ export async function runSlideEdit(opts: RunSlideEditOptions): Promise<number> {
 
     server.on("error", (err) => {
       console.error(color.red(`Server error: ${(err as Error).message}`));
+      process.removeListener("SIGINT", shutdown);
+      process.removeListener("SIGTERM", shutdown);
       resolve(1);
     });
   });

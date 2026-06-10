@@ -305,7 +305,7 @@ export async function spawnAgent(
 
   const cleanAndExit = () => {
     if (child.pid && isProcessRunning(child.pid)) {
-      process.kill(child.pid);
+      process.kill(child.pid, "SIGTERM");
     }
     unregisterSignalCleanup();
     cleanup();

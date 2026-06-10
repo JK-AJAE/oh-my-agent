@@ -206,7 +206,7 @@ export async function parallelRun(
     for (const { pid, agent } of childProcesses) {
       if (!isProcessRunning(pid)) continue;
       try {
-        process.kill(pid);
+        process.kill(pid, "SIGTERM");
         console.log(
           `${color.yellow("[Parallel]")} Killed PID ${pid} (${agent})`,
         );
