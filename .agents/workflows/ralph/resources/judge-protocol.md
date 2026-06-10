@@ -79,6 +79,8 @@ remaining:
     reason: "<specific failure evidence>"
     suggested_action: "<concrete next step>"
     fail_count: {N}
+    regression: {true|false}            # true when a previously passing criterion now fails
+    previous_pass_iteration: {N|null}   # iteration where it last passed (null if never)
 ```
 
 ### Suggested Action Guidelines
@@ -197,7 +199,7 @@ Always re-execute (never cache) when:
 
 - Verification type is `file exists` (always fast, no point caching)
 - The criterion is REGRESSED or FAIL in the current snapshot (must re-verify after the fix attempt)
-- Caching is disabled for the session: `.agents/oma-config.yaml` sets `ralph.judge_cache: false`, or the user's request explicitly asks for full re-verification (e.g., "no cache", "always re-verify"). Record the disable reason in `session-ralph-{sessionId}.md`.
+- Caching is disabled for the session: the user's request explicitly asks for full re-verification (e.g., "no cache", "always re-verify"). (A `ralph.judge_cache: false` config key in `.agents/oma-config.yaml` is planned but not yet implemented.) Record the disable reason in `session-ralph-{sessionId}.md`.
 
 ### Cost-benefit guideline
 

@@ -145,6 +145,22 @@ export const REQUIRED_DECISIONS: RequiredDecisionTable = {
       },
     ],
   },
+  video: {
+    "mode-selection": [
+      {
+        subject: "video.mode-selection",
+        description:
+          "Confirmed video mode, aspect, visual track, and compositor captured before asset generation.",
+      },
+    ],
+    "cost-confirmation": [
+      {
+        subject: "video.cost-confirmation",
+        description:
+          "Paid-cost confirmation or key-free fallback decision captured when the estimate crosses the guardrail.",
+      },
+    ],
+  },
 };
 
 export interface DecisionVerificationResult {

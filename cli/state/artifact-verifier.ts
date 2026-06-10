@@ -93,6 +93,23 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/**
+ * Agent result files have two naming/location schemes depending on dispatch
+ * path: CLI fallback (`oma agent:spawn qa-agent`) writes
+ * `{memBase}/result-qa-agent*.md`, while Claude-native subagents
+ * (qa-reviewer / debug-investigator) write `.agents/results/result-qa*.md`.
+ * Scan both so a fully executed native run is not falsely gated.
+ */
+function listMatchesAcross(
+  dirs: Array<{ dir: string; label: string }>,
+  pattern: RegExp,
+  newerThanMs: number | null,
+): string[] {
+  return dirs.flatMap(({ dir, label }) =>
+    listMatches(dir, pattern, newerThanMs).map((name) => `${label}/${name}`),
+  );
+}
+
 export async function verifyRalphExecArtifacts(args: {
   projectDir: string;
   sid?: string;
@@ -140,17 +157,31 @@ export async function verifyRalphExecArtifacts(args: {
     {
       id: "A3",
       description: "a distinct QA agent ran (VERIFY phase)",
-      pattern: `${memBase}/result-qa-agent*.md`,
+      pattern: `${memBase}/result-qa*.md or ${AGENTS_RESULTS_DIR}/result-qa*.md`,
       status: "missing",
-      matches: listMatches(memDir, /^result-qa-agent.*\.md$/, newerThanMs),
+      matches: listMatchesAcross(
+        [
+          { dir: memDir, label: memBase },
+          { dir: resultsDir, label: AGENTS_RESULTS_DIR },
+        ],
+        /^result-qa.*\.md$/,
+        newerThanMs,
+      ),
     },
     {
       id: "A4",
       description:
         "a distinct Debug agent ran (REFINE phase), or a documented skip reason is recorded",
-      pattern: `${memBase}/result-debug-agent*.md`,
+      pattern: `${memBase}/result-debug*.md or ${AGENTS_RESULTS_DIR}/result-debug*.md`,
       status: "missing",
-      matches: listMatches(memDir, /^result-debug-agent.*\.md$/, newerThanMs),
+      matches: listMatchesAcross(
+        [
+          { dir: memDir, label: memBase },
+          { dir: resultsDir, label: AGENTS_RESULTS_DIR },
+        ],
+        /^result-debug.*\.md$/,
+        newerThanMs,
+      ),
     },
   ];
 

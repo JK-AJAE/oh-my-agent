@@ -91,6 +91,26 @@ describe("verifyRalphExecArtifacts", () => {
     ]);
   });
 
+  it("accepts Claude-native result naming in .agents/results (qa-reviewer/debug-investigator)", async () => {
+    writeArtifact(
+      projectDir,
+      `${MEM_BASE}/session-ultrawork.md`,
+      "## Phase completion: PLAN done",
+    );
+    writeArtifact(projectDir, ".agents/results/plan-s1.json", "{}");
+    writeArtifact(projectDir, ".agents/results/result-qa-s1.md");
+    writeArtifact(projectDir, ".agents/results/result-debug-s1.md");
+
+    const result = await verifyRalphExecArtifacts({
+      projectDir,
+      emitOnFail: false,
+    });
+
+    expect(result.ok).toBe(true);
+    const a3 = result.checks.find((check) => check.id === "A3");
+    expect(a3?.matches).toEqual([".agents/results/result-qa-s1.md"]);
+  });
+
   it("fails with a structured missing list when the QA result is absent", async () => {
     writeFullArtifactSet(projectDir);
     rmSync(join(projectDir, `${MEM_BASE}/result-qa-agent-s1.md`));

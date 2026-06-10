@@ -12,7 +12,7 @@ disable-model-invocation: true
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
   - Use memory tools (read/write/edit) for progress tracking.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
+  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
   - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface for code and memory operations.
 - **This workflow does NOT stop until all completion criteria pass or safeguards trigger.**
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
@@ -122,8 +122,8 @@ oma ralph:verify --json --session {sessionId} --newer-than {iteration_start_iso}
 |---|----------|------------------|
 | A1 | `{memBase}/session-ultrawork.md` with this iteration's phase-completion records | PLAN + gate progression |
 | A2 | `.agents/results/plan-{sessionId}.json` | PLAN produced a real task breakdown |
-| A3 | `{memBase}/result-qa-agent*.md` (VERIFY) | **a distinct QA agent ran** — absent if IMPL was the only spawn |
-| A4 | `{memBase}/result-debug-agent*.md` (REFINE) | **a distinct Debug agent ran** — same |
+| A3 | `{memBase}/result-qa*.md` or `.agents/results/result-qa*.md` (VERIFY) | **a distinct QA agent ran** — absent if IMPL was the only spawn. CLI fallback writes `result-qa-agent*` to `{memBase}`; Claude-native `qa-reviewer` writes `result-qa*` to `.agents/results/` |
+| A4 | `{memBase}/result-debug*.md` or `.agents/results/result-debug*.md` (REFINE) | **a distinct Debug agent ran** — same naming split (`debug-investigator` on the native path) |
 
 **Decision:**
 
