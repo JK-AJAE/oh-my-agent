@@ -281,6 +281,12 @@ export async function spawnAgent(
   });
 
   if (!child.pid) {
+    fs.closeSync(logStream);
+    if (worktreeHandle) {
+      console.log(
+        color.yellow(`[${agentId}] Worktree retained: ${worktreeHandle.path}`),
+      );
+    }
     console.error(color.red(`[${agentId}] Failed to spawn process`));
     process.exit(1);
   }

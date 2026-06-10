@@ -155,6 +155,7 @@ export async function parallelRun(
     });
 
     if (!child.pid) {
+      fs.closeSync(logStream);
       console.error(color.red(`[${idx}] Failed to spawn ${agent} process`));
       continue;
     }

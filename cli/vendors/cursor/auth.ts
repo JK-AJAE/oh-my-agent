@@ -43,6 +43,7 @@ export function isCursorAuthenticated(
       const output = execSync(command, {
         stdio: ["pipe", "pipe", "ignore"],
         encoding: "utf-8",
+        timeout: 5000,
       });
       if (parseCursorStatus(output)) return true;
     } catch {
