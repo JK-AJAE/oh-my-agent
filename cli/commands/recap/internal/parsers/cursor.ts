@@ -482,9 +482,11 @@ function entriesFromAgentTranscript(
     const prompt = extractUserPrompt(msg.content);
     if (!prompt) continue;
 
+    // A single-turn session starts at file birth; using endMs (file mtime)
+    // would stamp the prompt with the session's end time instead.
     const timestamp =
       userOrdinals.length <= 1
-        ? endMs
+        ? birthMs
         : birthMs + ((endMs - birthMs) * userIndex) / (userOrdinals.length - 1);
     userIndex++;
 
@@ -662,6 +664,7 @@ registerParser({
 });
 
 export {
+  entriesFromAgentTranscript,
   findAgentTranscriptFiles,
   findStoreDBs,
   hasSqlite3Cli,
