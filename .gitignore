@@ -62,6 +62,7 @@ web/.serena/
 # OMA runtime state (hook persistent mode)
 .agents/state/
 .agents/results/
+.agents/eval/
 
 # oma backups — single gitignored root for migration snapshots, stack copies,
 # and safe-write siblings (see cli/io/backup.ts)

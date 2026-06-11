@@ -36,6 +36,7 @@ const EXCLUDED_PATTERNS = [
   ".agents/state/",
   // Generated at install time with machine-local absolute paths (gitignored).
   ".agents/hooks.json",
+  ".agents/eval/",
 ];
 
 export function isExcluded(fullPath: string): boolean {
