@@ -49,7 +49,7 @@ export const ROLE_ORDER = [
   "debug",
   "docs",
   "tf-infra",
-  "retrieval",
+  "explore",
 ] as const;
 
 export type Role = (typeof ROLE_ORDER)[number];

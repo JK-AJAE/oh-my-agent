@@ -39,8 +39,8 @@ model_preset: antigravity
 | `codex` | すべてのエージェントがOpenAI Codex（GPT-5.x）をeffortレベル付きで使用 | ChatGPT Plus/Proユーザー |
 | `gemini` | すべてのエージェントがGemini CLIを使用し、実装ロールでthinkingを有効化 | Google AI Proユーザー |
 | `qwen` | すべてのエージェントがQwen Code経由で外部ルーティング、バイナリthinking（effortレベルなし） | ローカル/セルフホスト推論 |
-| `cursor` | すべてのエージェントが Cursor `composer-2.5` を使用（orchestrator/qa/pm/docs/retrieval は `composer-2.5-fast`） | Cursor Pro / Pro Student ユーザー |
-| `mixed` | 混在構成：実装ロールはCodex、architecture/qa/pmはClaude、retrievalはGemini | エージェントごとの設定を管理せずに、各ベンダーの強みを活用 |
+| `cursor` | すべてのエージェントが Cursor `composer-2.5` を使用（orchestrator/qa/pm/docs/explore は `composer-2.5-fast`） | Cursor Pro / Pro Student ユーザー |
+| `mixed` | 混在構成：実装ロールはCodex、architecture/qa/pmはClaude、exploreはGemini | エージェントごとの設定を管理せずに、各ベンダーの強みを活用 |
 
 組み込みプリセットはCLIパッケージに同梱されており、`oh-my-agent`をアップグレードすると自動的に更新されます。ローカルで保守するファイルはありません。
 
@@ -69,7 +69,7 @@ agents:
 | `thinking` | boolean | いいえ | 拡張thinkingを有効化（モデル依存） |
 | `memory` | `user` \| `project` \| `local` | いいえ | エージェントのメモリスコープ |
 
-有効なエージェントID：`orchestrator`、`architecture`、`qa`、`pm`、`backend`、`frontend`、`mobile`、`db`、`debug`、`tf-infra`、`retrieval`。
+有効なエージェントID：`orchestrator`、`architecture`、`qa`、`pm`、`backend`、`frontend`、`mobile`、`db`、`debug`、`tf-infra`、`explore`。
 
 マージは浅いマージです。オーバーライド側の各フィールドは、そのフィールドのプリセット値を置き換えます。省略したフィールドはプリセット値のまま維持されます。
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

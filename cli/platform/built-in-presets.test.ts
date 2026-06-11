@@ -35,7 +35,7 @@ const EXPECTED_AGENT_IDS = [
   "debug",
   "docs",
   "tf-infra",
-  "retrieval",
+  "explore",
 ] as const;
 
 describe("BUILT_IN_PRESETS", () => {

@@ -253,7 +253,7 @@ describe("migration 008 — model_preset", () => {
     expect(config.agents).toBeDefined();
     const agents = config.agents as Record<string, unknown>;
     expect(agents.frontend).toBeDefined();
-    expect(agents.retrieval).toBeDefined();
+    expect(agents.explore).toBeDefined();
     // Claude agents should NOT be in agents override
     expect(agents.orchestrator).toBeUndefined();
     expect(agents.backend).toBeUndefined();

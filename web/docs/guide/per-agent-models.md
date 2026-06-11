@@ -34,13 +34,13 @@ model_preset: antigravity
 
 | Key | Description | Best for |
 |:----|:-----------|:---------|
-| `antigravity` | All agents use Antigravity CLI (`agy`): Gemini 3.1 Pro for impl/architecture, Gemini 3.5 Flash for orchestration and retrieval. Model selection is config-driven inside `agy` — no `--model` or `--thinking-budget` flags are exposed. | Antigravity CLI users |
+| `antigravity` | All agents use Antigravity CLI (`agy`): Gemini 3.1 Pro for impl/architecture, Gemini 3.5 Flash for orchestration and explore. Model selection is config-driven inside `agy` — no `--model` or `--thinking-budget` flags are exposed. | Antigravity CLI users |
 | `claude` | All agents use Claude (Sonnet/Opus) | Claude Max subscription holders |
 | `codex` | All agents use OpenAI Codex (GPT-5.x) with effort levels | ChatGPT Plus/Pro users |
 | `gemini` | All agents use Gemini CLI, thinking enabled for implementation roles | Google AI Pro users |
 | `qwen` | All agents routed external via Qwen Code; binary thinking (no effort levels) | Local / self-hosted inference |
-| `cursor` | All agents use Cursor `composer-2.5` (`composer-2.5-fast` for orchestrator/qa/pm/docs/retrieval) | Cursor Pro / Pro Student users |
-| `mixed` | Mixed: impl roles use Codex, architecture/qa/pm use Claude, retrieval uses Gemini | Cross-vendor strengths without managing per-agent config |
+| `cursor` | All agents use Cursor `composer-2.5` (`composer-2.5-fast` for orchestrator/qa/pm/docs/explore) | Cursor Pro / Pro Student users |
+| `mixed` | Mixed: impl roles use Codex, architecture/qa/pm use Claude, explore uses Gemini | Cross-vendor strengths without managing per-agent config |
 
 Built-in presets ship inside the CLI package and update automatically when you upgrade `oh-my-agent`. No local file to maintain.
 
@@ -69,7 +69,7 @@ Each entry is an `AgentSpec` object:
 | `thinking` | boolean | No | Enable extended thinking (model-specific) |
 | `memory` | `user` \| `project` \| `local` | No | Memory scope for the agent |
 
-Valid agent IDs: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `retrieval`.
+Valid agent IDs: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `explore`.
 
 The merge is shallow: each field in your override replaces the preset value for that field. Fields you omit keep their preset value.
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

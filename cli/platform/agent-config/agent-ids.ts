@@ -12,7 +12,7 @@ export const AGENT_IDS: ReadonlySet<AgentId> = new Set([
   "debug",
   "docs",
   "tf-infra",
-  "retrieval",
+  "explore",
 ]);
 
 /**
@@ -32,6 +32,24 @@ export function normalizeAgentId(input: string): AgentId | undefined {
   return undefined;
 }
 
+/**
+ * Alias-aware lookup into a per-agent record (preset `agent_defaults` or the
+ * user's `agents:` override map). Tries the canonical id as a direct key
+ * first, then any key that normalizes to it — so configs written against a
+ * former canonical name (e.g. `retrieval:` for `explore`) keep resolving.
+ */
+export function lookupAgentEntry<T>(
+  map: Record<string, T> | undefined,
+  agentId: AgentId,
+): T | undefined {
+  if (!map) return undefined;
+  if (map[agentId] !== undefined) return map[agentId];
+  for (const [key, value] of Object.entries(map)) {
+    if (key !== agentId && normalizeAgentId(key) === agentId) return value;
+  }
+  return undefined;
+}
+
 export const AGENT_CONFIG_ALIASES: Record<string, string[]> = {
   "backend-engineer": ["backend"],
   "frontend-engineer": ["frontend"],
@@ -43,6 +61,7 @@ export const AGENT_CONFIG_ALIASES: Record<string, string[]> = {
   "architecture-reviewer": ["architecture", "architect"],
   "tf-infra-engineer": ["tf-infra", "infra", "terraform"],
   "docs-curator": ["docs", "documentation"],
-  "research-explorer": ["retrieval"],
-  explorer: ["retrieval"],
+  "research-explorer": ["explore"],
+  explorer: ["explore"],
+  retrieval: ["explore"],
 };

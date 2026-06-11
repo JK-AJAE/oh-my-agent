@@ -20,10 +20,11 @@ import {
 import { join } from "node:path";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 import { backupPathFromRoot } from "../../io/backup.js";
-import type {
-  AgentId,
-  AgentSpec,
-  BuiltInPresetKey,
+import {
+  type AgentId,
+  type AgentSpec,
+  type BuiltInPresetKey,
+  normalizeAgentId,
 } from "../../platform/agent-config.js";
 import { BUILT_IN_PRESETS } from "../../platform/built-in-presets.js";
 import {
@@ -228,7 +229,7 @@ export const migrateModelPreset: Migration = {
           [];
 
         for (const [rawAgentId, value] of Object.entries(legacyMapping)) {
-          const agentId = rawAgentId as AgentId;
+          const agentId = normalizeAgentId(rawAgentId) ?? (rawAgentId as AgentId);
 
           if (typeof value === "string") {
             // Legacy string vendor value
@@ -271,7 +272,7 @@ export const migrateModelPreset: Migration = {
             modelPreset = dominant;
 
             for (const [rawAgentId, value] of Object.entries(legacyMapping)) {
-              const agentId = rawAgentId as AgentId;
+              const agentId = normalizeAgentId(rawAgentId) ?? (rawAgentId as AgentId);
 
               if (typeof value === "string") {
                 const presetKey = vendorToPresetKey(value);

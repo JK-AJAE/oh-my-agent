@@ -21,7 +21,7 @@ describe("usesGeminiCli", () => {
     );
   });
 
-  it("returns true for mixed preset (retrieval routes through gemini)", () => {
+  it("returns true for mixed preset (explore routes through gemini)", () => {
     expect(usesGeminiCli({ language: "en", model_preset: "mixed" })).toBe(true);
   });
 
@@ -42,7 +42,7 @@ describe("usesGeminiCli", () => {
       usesGeminiCli({
         language: "en",
         model_preset: "claude",
-        agents: { retrieval: { model: "google/gemini-3-flash" } },
+        agents: { explore: { model: "google/gemini-3-flash" } },
       }),
     ).toBe(true);
   });
@@ -57,7 +57,7 @@ describe("usesGeminiCli", () => {
             description: "test",
             agent_defaults: {
               orchestrator: { model: "anthropic/claude-sonnet-4-6" },
-              retrieval: { model: "google/gemini-3-flash" },
+              explore: { model: "google/gemini-3-flash" },
             },
           },
         },

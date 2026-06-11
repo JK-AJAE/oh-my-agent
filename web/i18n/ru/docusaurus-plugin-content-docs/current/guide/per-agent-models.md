@@ -39,8 +39,8 @@ model_preset: antigravity
 | `codex` | Все агенты используют OpenAI Codex (GPT-5.x) с уровнями effort | Для пользователей ChatGPT Plus/Pro |
 | `gemini` | Все агенты используют Gemini CLI, для ролей реализации включён thinking | Для пользователей Google AI Pro |
 | `qwen` | Все агенты направляются вовне через Qwen Code; бинарный thinking (без уровней effort) | Для локальных или self-hosted инференс-сред |
-| `cursor` | Все агенты используют Cursor `composer-2.5` (`composer-2.5-fast` для orchestrator/qa/pm/docs/retrieval) | Подписчики Cursor Pro / Pro Student |
-| `mixed` | Смешанный: роли реализации используют Codex, architecture/qa/pm — Claude, retrieval — Gemini | Когда нужны сильные стороны разных вендоров без управления конфигурацией для каждого агента |
+| `cursor` | Все агенты используют Cursor `composer-2.5` (`composer-2.5-fast` для orchestrator/qa/pm/docs/explore) | Подписчики Cursor Pro / Pro Student |
+| `mixed` | Смешанный: роли реализации используют Codex, architecture/qa/pm — Claude, explore — Gemini | Когда нужны сильные стороны разных вендоров без управления конфигурацией для каждого агента |
 
 Встроенные пресеты поставляются в составе пакета CLI и обновляются автоматически при обновлении `oh-my-agent`. Локальный файл поддерживать не нужно.
 
@@ -69,7 +69,7 @@ agents:
 | `thinking` | boolean | Нет | Включить расширенное мышление (зависит от модели) |
 | `memory` | `user` \| `project` \| `local` | Нет | Область памяти агента |
 
-Допустимые идентификаторы агентов: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `retrieval`.
+Допустимые идентификаторы агентов: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `explore`.
 
 Слияние поверхностное: каждое поле в вашем переопределении заменяет значение из пресета для того же поля. Пропущенные поля сохраняют значения из пресета.
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

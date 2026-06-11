@@ -34,13 +34,13 @@ model_preset: antigravity
 
 | Clave | Descripción | Ideal para |
 |:----|:-----------|:---------|
-| `antigravity` | Todos los agentes usan Antigravity CLI (`agy`): Gemini 3.1 Pro para implementación/arquitectura, Gemini 3.5 Flash para orchestration y retrieval. La selección de modelo se gestiona internamente en `agy` — no se exponen flags `--model` ni `--thinking-budget`. | Usuarios de Antigravity CLI |
+| `antigravity` | Todos los agentes usan Antigravity CLI (`agy`): Gemini 3.1 Pro para implementación/arquitectura, Gemini 3.5 Flash para orchestration y explore. La selección de modelo se gestiona internamente en `agy` — no se exponen flags `--model` ni `--thinking-budget`. | Usuarios de Antigravity CLI |
 | `claude` | Todos los agentes usan Claude (Sonnet/Opus) | Suscriptores de Claude Max |
 | `codex` | Todos los agentes usan OpenAI Codex (GPT-5.x) con niveles de esfuerzo | Usuarios de ChatGPT Plus/Pro |
 | `gemini` | Todos los agentes usan Gemini CLI, con thinking habilitado para roles de implementación | Usuarios de Google AI Pro |
 | `qwen` | Todos los agentes enrutados externamente vía Qwen Code; thinking binario (sin niveles de esfuerzo) | Inferencia local / autoalojada |
-| `cursor` | Todos los agentes usan Cursor `composer-2.5` (`composer-2.5-fast` para orchestrator/qa/pm/docs/retrieval) | Suscriptores de Cursor Pro / Pro Student |
-| `mixed` | Mixto: roles de implementación usan Codex, architecture/qa/pm usan Claude, retrieval usa Gemini | Aprovechar las fortalezas de varios proveedores sin gestionar la configuración por agente |
+| `cursor` | Todos los agentes usan Cursor `composer-2.5` (`composer-2.5-fast` para orchestrator/qa/pm/docs/explore) | Suscriptores de Cursor Pro / Pro Student |
+| `mixed` | Mixto: roles de implementación usan Codex, architecture/qa/pm usan Claude, explore usa Gemini | Aprovechar las fortalezas de varios proveedores sin gestionar la configuración por agente |
 
 Los presets integrados se distribuyen dentro del paquete del CLI y se actualizan automáticamente al actualizar `oh-my-agent`. No hay archivo local que mantener.
 
@@ -69,7 +69,7 @@ Cada entrada es un objeto `AgentSpec`:
 | `thinking` | boolean | No | Habilita el thinking extendido (específico del modelo) |
 | `memory` | `user` \| `project` \| `local` | No | Alcance de memoria del agente |
 
-IDs de agente válidos: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `retrieval`.
+IDs de agente válidos: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `explore`.
 
 La fusión es superficial: cada campo de tu sobrescritura reemplaza el valor del preset para ese campo. Los campos que omites conservan el valor del preset.
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

@@ -16,7 +16,7 @@ export type AgentId =
   | "debug"
   | "docs"
   | "tf-infra"
-  | "retrieval";
+  | "explore";
 
 // ---------------------------------------------------------------------------
 // BuiltInPresetKey — the 6 shipped presets

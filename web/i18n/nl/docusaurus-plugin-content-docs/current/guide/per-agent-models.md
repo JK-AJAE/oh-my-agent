@@ -39,8 +39,8 @@ model_preset: antigravity
 | `codex` | Alle agents gebruiken OpenAI Codex (GPT-5.x) met effort levels | ChatGPT Plus/Pro-gebruikers |
 | `gemini` | Alle agents gebruiken Gemini CLI, thinking ingeschakeld voor implementatierollen | Google AI Pro-gebruikers |
 | `qwen` | Alle agents extern gerouteerd via Qwen Code; binaire thinking (geen effort levels) | Lokale / self-hosted inference |
-| `cursor` | Alle agents gebruiken Cursor `composer-2.5` (`composer-2.5-fast` voor orchestrator/qa/pm/docs/retrieval) | Cursor Pro / Pro Student-abonnees |
-| `mixed` | Gemengd: implementatierollen gebruiken Codex, architecture/qa/pm gebruiken Claude, retrieval gebruikt Gemini | Cross-vendor sterke punten zonder per-agent configuratie te beheren |
+| `cursor` | Alle agents gebruiken Cursor `composer-2.5` (`composer-2.5-fast` voor orchestrator/qa/pm/docs/explore) | Cursor Pro / Pro Student-abonnees |
+| `mixed` | Gemengd: implementatierollen gebruiken Codex, architecture/qa/pm gebruiken Claude, explore gebruikt Gemini | Cross-vendor sterke punten zonder per-agent configuratie te beheren |
 
 Ingebouwde presets worden meegeleverd binnen het CLI-pakket en updaten automatisch wanneer je `oh-my-agent` upgradet. Geen lokaal bestand om te onderhouden.
 
@@ -69,7 +69,7 @@ Elke entry is een `AgentSpec`-object:
 | `thinking` | boolean | Nee | Extended thinking inschakelen (modelspecifiek) |
 | `memory` | `user` \| `project` \| `local` | Nee | Memory scope voor de agent |
 
-Geldige agent-ID's: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `retrieval`.
+Geldige agent-ID's: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `explore`.
 
 De merge is shallow: elk veld in je override vervangt de preset-waarde voor dat veld. Velden die je weglaat behouden hun preset-waarde.
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

@@ -39,8 +39,8 @@ model_preset: antigravity
 | `codex` | 모든 에이전트가 effort 레벨이 적용된 OpenAI Codex (GPT-5.x) 사용 | ChatGPT Plus/Pro 사용자 |
 | `gemini` | 모든 에이전트가 Gemini CLI 사용, 구현 역할에는 thinking 활성화 | Google AI Pro 사용자 |
 | `qwen` | 모든 에이전트를 Qwen Code로 외부 라우팅. 이진 thinking 방식(effort 레벨 없음) | 로컬 또는 자체 호스팅 추론 |
-| `cursor` | 모든 에이전트가 Cursor `composer-2.5` 사용 (orchestrator/qa/pm/docs/retrieval은 `composer-2.5-fast`) | Cursor Pro / Pro Student 사용자 |
-| `mixed` | 혼합 구성: 구현 역할은 Codex, architecture/qa/pm은 Claude, retrieval은 Gemini | 에이전트별 설정 부담 없이 벤더별 강점을 활용하고 싶을 때 |
+| `cursor` | 모든 에이전트가 Cursor `composer-2.5` 사용 (orchestrator/qa/pm/docs/explore은 `composer-2.5-fast`) | Cursor Pro / Pro Student 사용자 |
+| `mixed` | 혼합 구성: 구현 역할은 Codex, architecture/qa/pm은 Claude, explore은 Gemini | 에이전트별 설정 부담 없이 벤더별 강점을 활용하고 싶을 때 |
 
 빌트인 프리셋은 CLI 패키지에 포함되어 제공되며, `oh-my-agent`를 업그레이드하면 자동으로 갱신됩니다. 별도로 관리할 로컬 파일이 없습니다.
 
@@ -69,7 +69,7 @@ agents:
 | `thinking` | boolean | 선택 | 확장 thinking 활성화 (모델별 동작) |
 | `memory` | `user` \| `project` \| `local` | 선택 | 에이전트의 메모리 스코프 |
 
-유효한 에이전트 ID: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `retrieval`.
+유효한 에이전트 ID: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `explore`.
 
 병합은 얕게 이루어집니다. 오버라이드에 정의한 각 필드가 해당 필드의 프리셋 값을 대체하며, 생략한 필드는 프리셋 값을 그대로 유지합니다.
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

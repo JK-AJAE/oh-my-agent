@@ -7,6 +7,7 @@ import type {
   AgentSpec,
   BuiltInPresetKey,
 } from "../../../platform/agent-config.js";
+import { lookupAgentEntry } from "../../../platform/agent-config.js";
 import { BUILT_IN_PRESETS } from "../../../platform/built-in-presets.js";
 
 // ---------------------------------------------------------------------------
@@ -87,7 +88,7 @@ export const ALL_AGENT_IDS: AgentId[] = [
   "debug",
   "docs",
   "tf-infra",
-  "retrieval",
+  "explore",
 ];
 
 /**
@@ -108,7 +109,7 @@ export function isDefaultsCustomized(
     if (!userProfile) continue; // Not customized if missing
 
     for (const agentId of ALL_AGENT_IDS) {
-      const userEntry = userProfile.agent_defaults?.[agentId];
+      const userEntry = lookupAgentEntry(userProfile.agent_defaults, agentId);
       const builtInEntry = builtIn.agent_defaults[agentId];
       if (!userEntry || !builtInEntry) continue;
 
@@ -128,7 +129,7 @@ export function isDefaultsCustomized(
   const topLevel = userDefaults.agent_defaults ?? {};
   const baseline = BUILT_IN_PRESETS.mixed.agent_defaults;
   for (const agentId of ALL_AGENT_IDS) {
-    const userEntry = topLevel[agentId];
+    const userEntry = lookupAgentEntry(topLevel, agentId);
     const builtInEntry = baseline[agentId];
     if (!userEntry || !builtInEntry) continue;
     if (

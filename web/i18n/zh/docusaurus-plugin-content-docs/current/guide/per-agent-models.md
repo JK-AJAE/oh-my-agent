@@ -39,8 +39,8 @@ model_preset: antigravity
 | `codex` | 所有智能体使用带 effort 等级的 OpenAI Codex（GPT-5.x） | ChatGPT Plus/Pro 用户 |
 | `gemini` | 所有智能体使用 Gemini CLI，实现类角色启用 thinking | Google AI Pro 用户 |
 | `qwen` | 所有智能体通过 Qwen Code 进行外部路由；二元 thinking（无 effort 等级） | 本地 / 自托管推理 |
-| `cursor` | 所有智能体使用 Cursor `composer-2.5`（orchestrator/qa/pm/docs/retrieval 使用 `composer-2.5-fast`） | Cursor Pro / Pro Student 订阅者 |
-| `mixed` | 混合：实现类角色用 Codex，architecture/qa/pm 用 Claude，retrieval 用 Gemini | 跨厂商发挥各自优势，无需逐个智能体配置 |
+| `cursor` | 所有智能体使用 Cursor `composer-2.5`（orchestrator/qa/pm/docs/explore 使用 `composer-2.5-fast`） | Cursor Pro / Pro Student 订阅者 |
+| `mixed` | 混合：实现类角色用 Codex，architecture/qa/pm 用 Claude，explore 用 Gemini | 跨厂商发挥各自优势，无需逐个智能体配置 |
 
 内置预设随 CLI 包一起发布，并在升级 `oh-my-agent` 时自动更新。无需维护任何本地文件。
 
@@ -69,7 +69,7 @@ agents:
 | `thinking` | boolean | 否 | 启用扩展思考（取决于具体模型） |
 | `memory` | `user` \| `project` \| `local` | 否 | 智能体的记忆作用域 |
 
-有效的智能体 ID：`orchestrator`、`architecture`、`qa`、`pm`、`backend`、`frontend`、`mobile`、`db`、`debug`、`tf-infra`、`retrieval`。
+有效的智能体 ID：`orchestrator`、`architecture`、`qa`、`pm`、`backend`、`frontend`、`mobile`、`db`、`debug`、`tf-infra`、`explore`。
 
 合并采用浅合并方式：你覆盖中的每个字段会替换预设中对应字段的值。未填写的字段会保留预设值。
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

@@ -18,7 +18,7 @@ import { getModelSpec } from "./model-registry.js";
 export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
   antigravity: {
     description:
-      "Antigravity CLI (agy) — nominal Gemini 3.1 Pro for impl/architecture, Gemini 3.5 Flash for orchestration & retrieval (agy 1.0 has no `--model` flag, so the model is selected by agy's own config)",
+      "Antigravity CLI (agy) — nominal Gemini 3.1 Pro for impl/architecture, Gemini 3.5 Flash for orchestration & explore (agy 1.0 has no `--model` flag, so the model is selected by agy's own config)",
     agent_defaults: {
       orchestrator: { model: "antigravity/gemini-3.5-flash" },
       architecture: { model: "antigravity/gemini-3.1-pro" },
@@ -31,7 +31,7 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "antigravity/gemini-3.1-pro" },
       docs: { model: "antigravity/gemini-3.5-flash" },
       "tf-infra": { model: "antigravity/gemini-3.1-pro" },
-      retrieval: { model: "antigravity/gemini-3.5-flash" },
+      explore: { model: "antigravity/gemini-3.5-flash" },
     },
   },
 
@@ -49,7 +49,7 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "anthropic/claude-sonnet-4-6" },
       docs: { model: "anthropic/claude-sonnet-4-6" },
       "tf-infra": { model: "anthropic/claude-sonnet-4-6" },
-      retrieval: { model: "anthropic/claude-haiku-4-5" },
+      explore: { model: "anthropic/claude-haiku-4-5" },
     },
   },
 
@@ -67,7 +67,7 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "openai/gpt-5.5", effort: "high" },
       docs: { model: "openai/gpt-5.5", effort: "medium" },
       "tf-infra": { model: "openai/gpt-5.5", effort: "high" },
-      retrieval: { model: "openai/gpt-5.4-mini", effort: "low" },
+      explore: { model: "openai/gpt-5.4-mini", effort: "low" },
     },
   },
 
@@ -85,7 +85,7 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "google/gemini-3-flash", thinking: true },
       docs: { model: "google/gemini-3-flash" },
       "tf-infra": { model: "google/gemini-3-flash", thinking: true },
-      retrieval: { model: "google/gemini-3.1-flash-lite" },
+      explore: { model: "google/gemini-3.1-flash-lite" },
     },
   },
 
@@ -104,13 +104,13 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "qwen/qwen3.6-plus", thinking: true },
       docs: { model: "qwen/qwen3-coder-next", thinking: false },
       "tf-infra": { model: "qwen/qwen3.6-plus", thinking: true },
-      retrieval: { model: "qwen/qwen3-coder-next", thinking: false },
+      explore: { model: "qwen/qwen3-coder-next", thinking: false },
     },
   },
 
   kiro: {
     description:
-      "Kiro CLI — AWS Bedrock via CodeWhisperer/Q; sonnet for impl/architecture, haiku for retrieval/orchestration",
+      "Kiro CLI — AWS Bedrock via CodeWhisperer/Q; sonnet for impl/architecture, haiku for explore/orchestration",
     agent_defaults: {
       orchestrator: { model: "kiro/claude-haiku-3-5" },
       architecture: { model: "kiro/claude-sonnet-4-5" },
@@ -123,7 +123,7 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "kiro/claude-sonnet-4-5" },
       docs: { model: "kiro/claude-haiku-3-5" },
       "tf-infra": { model: "kiro/claude-sonnet-4-5" },
-      retrieval: { model: "kiro/claude-haiku-3-5" },
+      explore: { model: "kiro/claude-haiku-3-5" },
     },
   },
 
@@ -141,13 +141,13 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "cursor/composer-2.5" },
       docs: { model: "cursor/composer-2.5-fast" },
       "tf-infra": { model: "cursor/composer-2.5" },
-      retrieval: { model: "cursor/composer-2.5-fast" },
+      explore: { model: "cursor/composer-2.5-fast" },
     },
   },
 
   mixed: {
     description:
-      "Mixed — role-optimal vendors per agent (Claude for orchestration/QA/PM, Codex for impl, Gemini for retrieval)",
+      "Mixed — role-optimal vendors per agent (Claude for orchestration/QA/PM, Codex for impl, Gemini for explore)",
     agent_defaults: {
       orchestrator: { model: "anthropic/claude-sonnet-4-6" },
       architecture: { model: "anthropic/claude-opus-4-7" },
@@ -160,7 +160,7 @@ export const BUILT_IN_PRESETS: Record<BuiltInPresetKey, ModelPreset> = {
       debug: { model: "openai/gpt-5.5", effort: "high" },
       docs: { model: "anthropic/claude-sonnet-4-6" },
       "tf-infra": { model: "openai/gpt-5.5", effort: "high" },
-      retrieval: { model: "google/gemini-3.1-flash-lite" },
+      explore: { model: "google/gemini-3.1-flash-lite" },
     },
   },
 };
@@ -196,7 +196,7 @@ const ALL_AGENT_IDS: readonly AgentId[] = [
   "debug",
   "docs",
   "tf-infra",
-  "retrieval",
+  "explore",
 ] as const;
 
 /**

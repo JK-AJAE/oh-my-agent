@@ -113,16 +113,31 @@ describe("resolveAgentPlanFromConfig — Case 2: thinking flag from override", (
     const config = {
       ...GEMINI_ONLY_CONFIG,
       agents: {
-        retrieval: {
+        explore: {
           model: "google/gemini-3-flash",
           thinking: true as const,
         },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(plan.cli).toBe("gemini");
     expect(plan.thinking).toBe(true);
     expect(plan.cliModel).toBe("gemini-3-flash");
+  });
+
+  it("legacy `retrieval` config key and agent id resolve via the explore alias", () => {
+    const config = {
+      ...GEMINI_ONLY_CONFIG,
+      agents: {
+        retrieval: {
+          model: "google/gemini-3-flash",
+          thinking: true as const,
+        },
+      },
+    } as unknown as Parameters<typeof resolveAgentPlanFromConfig>[1];
+    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    expect(plan.cli).toBe("gemini");
+    expect(plan.thinking).toBe(true);
   });
 });
 
@@ -206,9 +221,9 @@ describe("resolveAgentPlanFromConfig — Case 5: unknown slug throws ConfigError
 
 describe("resolveAgentPlanFromConfig — Case 7: vendorOverride matches native_dispatch_from", () => {
   it("overrides cli when vendorOverride is in native_dispatch_from", () => {
-    // gemini retrieval uses google/gemini-3.1-flash-lite (native_dispatch_from: gemini)
+    // gemini explore uses google/gemini-3.1-flash-lite (native_dispatch_from: gemini)
     const plan = resolveAgentPlanFromConfig(
-      "retrieval",
+      "explore",
       GEMINI_ONLY_CONFIG,
       "gemini",
     );
@@ -223,9 +238,9 @@ describe("resolveAgentPlanFromConfig — Case 7: vendorOverride matches native_d
 describe("resolveAgentPlanFromConfig — Case 8: vendorOverride not in native_dispatch_from", () => {
   it("warns and keeps original cli when vendorOverride not supported", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    // gemini retrieval; codex is NOT in native_dispatch_from
+    // gemini explore; codex is NOT in native_dispatch_from
     const plan = resolveAgentPlanFromConfig(
-      "retrieval",
+      "explore",
       GEMINI_ONLY_CONFIG,
       "codex",
     );
@@ -464,13 +479,13 @@ describe("geminiThinkingBudgetFlag — Case 12: Gemini effort translation", () =
     const config = {
       ...GEMINI_ONLY_CONFIG,
       agents: {
-        retrieval: {
+        explore: {
           model: "google/gemini-3-flash",
           effort: "high" as const,
         },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(plan.cli).toBe("gemini");
     expect(geminiThinkingBudgetFlag(plan)).toBe("--thinking-budget=dynamic");
     const args = buildAgentPlanArgs(plan);
@@ -483,13 +498,13 @@ describe("geminiThinkingBudgetFlag — Case 12: Gemini effort translation", () =
     const config = {
       ...GEMINI_ONLY_CONFIG,
       agents: {
-        retrieval: {
+        explore: {
           model: "google/gemini-3-flash",
           effort: "xhigh" as const,
         },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(geminiThinkingBudgetFlag(plan)).toBe("--thinking-budget=dynamic");
   });
 
@@ -497,13 +512,13 @@ describe("geminiThinkingBudgetFlag — Case 12: Gemini effort translation", () =
     const config = {
       ...GEMINI_ONLY_CONFIG,
       agents: {
-        retrieval: {
+        explore: {
           model: "google/gemini-3-flash",
           effort: "low" as const,
         },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(geminiThinkingBudgetFlag(plan)).toBe("--thinking-budget=none");
   });
 
@@ -511,13 +526,13 @@ describe("geminiThinkingBudgetFlag — Case 12: Gemini effort translation", () =
     const config = {
       ...GEMINI_ONLY_CONFIG,
       agents: {
-        retrieval: {
+        explore: {
           model: "google/gemini-3-flash",
           effort: "medium" as const,
         },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(geminiThinkingBudgetFlag(plan)).toBe("--thinking-budget=none");
   });
 
@@ -525,14 +540,14 @@ describe("geminiThinkingBudgetFlag — Case 12: Gemini effort translation", () =
     const config = {
       ...GEMINI_ONLY_CONFIG,
       agents: {
-        retrieval: {
+        explore: {
           model: "google/gemini-3-flash",
           effort: "low" as const,
           thinking: true as const,
         },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(geminiThinkingBudgetFlag(plan)).toBe("--thinking-budget=dynamic");
   });
 
@@ -540,14 +555,14 @@ describe("geminiThinkingBudgetFlag — Case 12: Gemini effort translation", () =
     const config = {
       ...GEMINI_ONLY_CONFIG,
       agents: {
-        retrieval: {
+        explore: {
           model: "google/gemini-3.1-pro-preview",
           effort: "xhigh" as const,
           thinking: false as const,
         },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(geminiThinkingBudgetFlag(plan)).toBe("--thinking-budget=none");
   });
 
@@ -591,14 +606,14 @@ describe("resolveAgentPlanFromConfig — Case 13: preset defaults (no override)"
 
 describe("resolveAgentPlanFromConfig — Case 14: AgentSpec model-only override", () => {
   it("produces plan without effort when base preset entry has no effort", () => {
-    // claude retrieval has no effort in preset; override just changes model
+    // claude explore has no effort in preset; override just changes model
     const config = {
       ...CLAUDE_ONLY_CONFIG,
       agents: {
-        retrieval: { model: "anthropic/claude-sonnet-4-6" },
+        explore: { model: "anthropic/claude-sonnet-4-6" },
       },
     };
-    const plan = resolveAgentPlanFromConfig("retrieval", config);
+    const plan = resolveAgentPlanFromConfig("explore", config);
     expect(plan.effort).toBeUndefined();
     expect(plan.thinking).toBeUndefined();
     expect(plan.memory).toBeUndefined();

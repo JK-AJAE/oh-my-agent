@@ -131,7 +131,7 @@ oh-my-agent routes each agent to the appropriate CLI via `model_preset` in `.age
 ```yaml
 # .agents/oma-config.yaml
 language: en
-model_preset: mixed   # mixed: Claude for QA/PM, Codex for impl, Gemini for retrieval
+model_preset: mixed   # mixed: Claude for QA/PM, Codex for impl, Gemini for explore
 
 # Override specific agents on top of the preset
 agents:

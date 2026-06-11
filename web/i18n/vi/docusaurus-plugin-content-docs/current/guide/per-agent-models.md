@@ -34,13 +34,13 @@ model_preset: antigravity
 
 | Key | Mô tả | Phù hợp với |
 |:----|:-----------|:---------|
-| `antigravity` | Mọi agent dùng Antigravity CLI (`agy`): Gemini 3.1 Pro cho triển khai/kiến trúc, Gemini 3.5 Flash cho orchestration và retrieval. Việc chọn model được điều khiển bởi cấu hình bên trong `agy` — không có flag `--model` hay `--thinking-budget`. | Người dùng Antigravity CLI |
+| `antigravity` | Mọi agent dùng Antigravity CLI (`agy`): Gemini 3.1 Pro cho triển khai/kiến trúc, Gemini 3.5 Flash cho orchestration và explore. Việc chọn model được điều khiển bởi cấu hình bên trong `agy` — không có flag `--model` hay `--thinking-budget`. | Người dùng Antigravity CLI |
 | `claude` | Mọi agent dùng Claude (Sonnet/Opus) | Người đăng ký Claude Max |
 | `codex` | Mọi agent dùng OpenAI Codex (GPT-5.x) với mức effort | Người dùng ChatGPT Plus/Pro |
 | `gemini` | Mọi agent dùng Gemini CLI, bật thinking cho vai trò triển khai | Người dùng Google AI Pro |
 | `qwen` | Mọi agent định tuyến external qua Qwen Code; thinking dạng nhị phân (không có mức effort) | Inference cục bộ / tự host |
-| `cursor` | Mọi agent dùng Cursor `composer-2.5` (`composer-2.5-fast` cho orchestrator/qa/pm/docs/retrieval) | Người dùng Cursor Pro / Pro Student |
-| `mixed` | Hỗn hợp: vai trò triển khai dùng Codex, architecture/qa/pm dùng Claude, retrieval dùng Gemini | Tận dụng thế mạnh nhiều vendor mà không phải cấu hình từng agent |
+| `cursor` | Mọi agent dùng Cursor `composer-2.5` (`composer-2.5-fast` cho orchestrator/qa/pm/docs/explore) | Người dùng Cursor Pro / Pro Student |
+| `mixed` | Hỗn hợp: vai trò triển khai dùng Codex, architecture/qa/pm dùng Claude, explore dùng Gemini | Tận dụng thế mạnh nhiều vendor mà không phải cấu hình từng agent |
 
 Preset có sẵn được đóng gói trong package CLI và tự cập nhật khi bạn nâng cấp `oh-my-agent`. Bạn không cần duy trì file cục bộ nào.
 
@@ -69,7 +69,7 @@ Mỗi mục là một object `AgentSpec`:
 | `thinking` | boolean | Không | Bật extended thinking (tùy theo model) |
 | `memory` | `user` \| `project` \| `local` | Không | Phạm vi memory cho agent |
 
-Các agent ID hợp lệ: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `retrieval`.
+Các agent ID hợp lệ: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `explore`.
 
 Việc merge là shallow: mỗi trường trong override sẽ thay thế giá trị tương ứng của preset. Trường nào bạn không khai báo sẽ giữ giá trị mặc định của preset.
 
@@ -137,7 +137,7 @@ oh-my-agent — Profile Health (preset=mixed)
 │ architecture │ anthropic/claude-opus-4-7    │ claude   │ ✓ logged in      │ (preset) │
 │ qa           │ anthropic/claude-sonnet-4-6  │ claude   │ ✓ logged in      │ (preset) │
 │ backend      │ openai/gpt-5.5         │ codex    │ ✗ not logged in  │ (override)│
-│ retrieval    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
+│ explore    │ google/gemini-3.1-flash-lite │ gemini   │ ✗ not logged in  │ (preset) │
 └──────────────┴──────────────────────────────┴──────────┴──────────────────┴──────────┘
 ```
 

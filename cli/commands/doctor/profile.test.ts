@@ -343,9 +343,9 @@ describe("collectProfileReport — model and CLI mapping", () => {
 
   it("correctly maps google/ models to gemini CLI", async () => {
     const report = await profileModule.collectProfileReport("/fake/cwd");
-    const retrieval = report.rows.find((r) => r.role === "retrieval");
-    expect(retrieval?.cli).toBe("gemini");
-    expect(retrieval?.model).toBe("google/gemini-3.1-flash-lite");
+    const explore = report.rows.find((r) => r.role === "explore");
+    expect(explore?.cli).toBe("gemini");
+    expect(explore?.model).toBe("google/gemini-3.1-flash-lite");
   });
 });
 
