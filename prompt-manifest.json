@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "8.53.0",
-  "releaseDate": "2026-06-11T23:08:11.886Z",
+  "releaseDate": "2026-06-11T23:10:15.391Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -21,8 +21,8 @@
     },
     {
       "path": ".agents/agents/debug-investigator.md",
-      "sha256": "245a7bdf523c2dcd69bee5cb4a61f15d7413768efa11c7200d4c7ef7a0b79ec0",
-      "size": 1591
+      "sha256": "4124f1e180a333eaa74c9a22111a82d51ccd180f21ee10530b62da1483462672",
+      "size": 1637
     },
     {
       "path": ".agents/agents/docs-curator.md",
@@ -31,8 +31,8 @@
     },
     {
       "path": ".agents/agents/frontend-engineer.md",
-      "sha256": "53ab22470fdd3a7478bc1d8b2998de469a3c5fef4878656b8b4b0a094adef315",
-      "size": 1477
+      "sha256": "03bae0d9cf14c61fca0cd870f34722ed68d63ac90234a0fc4244d0c8b5be2069",
+      "size": 1492
     },
     {
       "path": ".agents/agents/mobile-engineer.md",
@@ -48,6 +48,16 @@
       "path": ".agents/agents/qa-reviewer.md",
       "sha256": "f84f04d2827a50f27e2ffef6005a68c8caa46f46289ac47b934306f2a0d53d9e",
       "size": 1957
+    },
+    {
+      "path": ".agents/agents/refactor-engineer.md",
+      "sha256": "9413da2721130dd412f123f4593ce63e944ec4712338415bf301bd27a6ba36d4",
+      "size": 2861
+    },
+    {
+      "path": ".agents/agents/research-explorer.md",
+      "sha256": "378f44b465c1f4754399f703c6c1f20fcac47cacc80e8cf516467c0a071d5d62",
+      "size": 3165
     },
     {
       "path": ".agents/agents/tf-infra-engineer.md",
@@ -2046,6 +2056,6 @@
   "metadata": {
     "skillCount": 32,
     "workflowCount": 22,
-    "totalFiles": 407
+    "totalFiles": 409
   }
 }
