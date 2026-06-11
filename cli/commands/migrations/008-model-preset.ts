@@ -229,7 +229,8 @@ export const migrateModelPreset: Migration = {
           [];
 
         for (const [rawAgentId, value] of Object.entries(legacyMapping)) {
-          const agentId = normalizeAgentId(rawAgentId) ?? (rawAgentId as AgentId);
+          const agentId =
+            normalizeAgentId(rawAgentId) ?? (rawAgentId as AgentId);
 
           if (typeof value === "string") {
             // Legacy string vendor value
@@ -272,7 +273,8 @@ export const migrateModelPreset: Migration = {
             modelPreset = dominant;
 
             for (const [rawAgentId, value] of Object.entries(legacyMapping)) {
-              const agentId = normalizeAgentId(rawAgentId) ?? (rawAgentId as AgentId);
+              const agentId =
+                normalizeAgentId(rawAgentId) ?? (rawAgentId as AgentId);
 
               if (typeof value === "string") {
                 const presetKey = vendorToPresetKey(value);
