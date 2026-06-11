@@ -1,5 +1,4 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
 import {
   AGENTS_STATE_ARCHIVE_DIR,
@@ -47,8 +46,8 @@ const HOOK_SETTINGS: Array<{
     path: ".gemini/settings.json",
     promptEvents: ["BeforeAgent"],
   },
-  // antigravity is checked separately (collectAntigravityHookOrder): it is
-  // HOME-only and loads a named-map hooks.json, not settings.json event arrays.
+  // antigravity is checked separately (collectAntigravityHookOrder): it loads
+  // a named-map `.agents/hooks.json`, not settings.json event arrays.
   {
     vendor: "grok",
     path: ".grok/hooks/oma-hooks.json",
@@ -130,34 +129,42 @@ function agentMemoryOrder(
 }
 
 /**
- * agy's hooks.json is a named map (`{ "hooks": { "<name>": { event, ... } } }`)
- * rather than the settings.json event-keyed arrays the other vendors use, so it
- * needs its own order extractor. Tolerates `event` (string) or `events` (array).
+ * agy's hooks.json is a top-level map of hook NAME → event config
+ * (`{ "oma-keyword-detector": { "PreInvocation": [handler, ...] } }`, written
+ * by buildAgyHooksDoc) rather than the settings.json event-keyed arrays the
+ * other vendors use, so it needs its own order extractor. Tool events wrap
+ * handlers in `{ matcher, hooks: [...] }`; lifecycle events hold them directly.
  */
-function namedHookOrder(parsed: unknown, eventName: string): string[] {
+function agyHookOrder(parsed: unknown, eventName: string): string[] {
   if (!isRecord(parsed)) return [];
-  const hooksRoot = parsed.hooks;
-  if (!isRecord(hooksRoot)) return [];
   const ordered: string[] = [];
-  for (const [name, spec] of Object.entries(hooksRoot)) {
+  for (const spec of Object.values(parsed)) {
     if (!isRecord(spec)) continue;
-    const events = Array.isArray(spec.events) ? spec.events : [];
-    if (spec.event === eventName || events.includes(eventName)) {
-      ordered.push(name);
+    const entry = spec[eventName];
+    if (!Array.isArray(entry)) continue;
+    for (const item of entry) {
+      const handlers =
+        isRecord(item) && Array.isArray(item.hooks) ? item.hooks : [item];
+      for (const handler of handlers) {
+        const name = hookName(handler);
+        if (name) ordered.push(name);
+      }
     }
   }
   return ordered;
 }
 
 /**
- * antigravity (agy) loads hooks from `~/.gemini/antigravity-cli/hooks.json`.
- * BEST-EFFORT: agy strips `defaultHooksPath` from settings.json and headless
- * runs never fired hooks, so this only confirms the file is well-formed and
- * ordered — not that agy actually loads/executes it.
+ * antigravity (agy) auto-loads hooks.json from the workspace `.agents/` root
+ * plus the HOME `~/.gemini/config/` and `~/.gemini/antigravity-cli/` dirs
+ * (all three verified via agy load logs; see cli/vendors/antigravity/hud.ts).
+ * This check covers the workspace file — the one oma owns and whose chain
+ * ordering matters. BEST-EFFORT: it confirms the file is well-formed and
+ * ordered, not that agy executes it in the current session.
  */
-function collectAntigravityHookOrder(): HookOrderDoctorCheck {
+function collectAntigravityHookOrder(projectDir: string): HookOrderDoctorCheck {
   const vendor = "antigravity";
-  const hooksJsonPath = join(homedir(), ".gemini/antigravity-cli/hooks.json");
+  const hooksJsonPath = join(projectDir, ".agents", "hooks.json");
   if (!existsSync(hooksJsonPath)) {
     return {
       vendor,
@@ -182,7 +189,7 @@ function collectAntigravityHookOrder(): HookOrderDoctorCheck {
       error: parsed.error,
     };
   }
-  const order = namedHookOrder(parsed.value, "PreInvocation");
+  const order = agyHookOrder(parsed.value, "PreInvocation");
   if (order.length === 0) {
     return {
       vendor,
@@ -265,7 +272,7 @@ function collectHookOrder(projectDir: string): HookOrderDoctorCheck[] {
     };
   });
 
-  checks.push(collectAntigravityHookOrder());
+  checks.push(collectAntigravityHookOrder(projectDir));
   return checks;
 }
 

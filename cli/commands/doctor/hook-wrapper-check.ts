@@ -30,16 +30,14 @@ import { VARIANT_ROUTES } from "../hook/dispatch.js";
 // ---------------------------------------------------------------------------
 // Vendor → hookDir table — derived from the embedded variant route table so
 // doctor coverage can never drift from what `oma hook` actually dispatches.
-// Project-scoped vendors only; antigravity is HOME-scoped (handled separately).
+// antigravity is excluded: its `.agents/hooks.json` runs handlers directly via
+// bun from `.agents/hooks/core` — no oma-hook.sh wrapper exists for it.
 // ---------------------------------------------------------------------------
 
 const PROJECT_HOOK_DIRS: Array<{ vendor: string; hookDir: string }> =
   Object.values(VARIANT_ROUTES)
     .filter((v) => v.vendor !== "antigravity")
     .map(({ vendor, hookDir }) => ({ vendor, hookDir }));
-
-/** Antigravity writes to HOME rather than the project dir. */
-const ANTIGRAVITY_HOOK_DIR = ".gemini/antigravity-cli/hooks";
 
 /** Filename written by generateOmaHookWrapper / installHooksFromVariant. */
 const OMA_HOOK_WRAPPER_FILENAME = "oma-hook.sh";
@@ -166,7 +164,6 @@ export function collectHookWrapperChecks(
 ): HookWrapperCheck[] {
   const checks: HookWrapperCheck[] = [];
 
-  // Project-scoped vendors
   for (const { vendor, hookDir } of PROJECT_HOOK_DIRS) {
     const wrapperPath = join(
       projectDir,
@@ -175,17 +172,6 @@ export function collectHookWrapperChecks(
     );
     checks.push(checkWrapper(vendor, wrapperPath, env));
   }
-
-  // Antigravity: HOME-scoped
-  const agy = (() => {
-    const wrapperPath = join(
-      homedir(),
-      ...ANTIGRAVITY_HOOK_DIR.split("/"),
-      OMA_HOOK_WRAPPER_FILENAME,
-    );
-    return checkWrapper("antigravity", wrapperPath, env);
-  })();
-  checks.push(agy);
 
   return checks;
 }

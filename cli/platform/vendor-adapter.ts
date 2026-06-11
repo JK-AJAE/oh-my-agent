@@ -1,5 +1,6 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, rmdirSync, rmSync } from "node:fs";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 import type { VendorType } from "../types/index.js";
 import { installVendorAgents } from "./agent-composer.js";
 import { type HookVariant, installHooksFromVariant } from "./hooks-composer.js";
@@ -34,6 +35,35 @@ function safeLoadHookVariant(
 }
 
 /**
+ * Stale install location of earlier (incorrect) antigravity project installs.
+ * agy never reads a project-scoped `.gemini/antigravity-cli/` — its settings
+ * live in HOME and its workspace hooks in `.agents/hooks.json` (official
+ * contract; see cli/vendors/antigravity/hud.ts).
+ */
+const STALE_AGY_PROJECT_DIR = join(".gemini", "antigravity-cli");
+
+/**
+ * Remove the dead `.gemini/antigravity-cli/` directory that pre-homeOnly
+ * installs wrote into the project root. Guarded: when `installRoot` is the
+ * user's HOME (global-mode link run from `~`), that path IS agy's real config
+ * directory and must be left alone.
+ */
+function sweepStaleAgyProjectInstall(installRoot: string): void {
+  if (resolve(installRoot) === resolve(homedir())) return;
+  const staleDir = join(installRoot, STALE_AGY_PROJECT_DIR);
+  if (!existsSync(staleDir)) return;
+  rmSync(staleDir, { recursive: true, force: true });
+  // Drop the parent `.gemini/` too when the sweep leaves it empty (it may
+  // legitimately hold the gemini vendor's own files — keep it then).
+  const parent = join(installRoot, ".gemini");
+  try {
+    if (readdirSync(parent).length === 0) rmdirSync(parent);
+  } catch {
+    // parent missing or non-empty race — nothing to clean.
+  }
+}
+
+/**
  * Install vendor-specific agent and workflow adaptations.
  * Hooks are installed from variant configs in .agents/hooks/variants/.
  *
@@ -57,7 +87,12 @@ export function installVendorAdaptations(
     const variantPath = join(hookVariantsDir, `${vendor}.json`);
     if (existsSync(variantPath)) {
       const variant = safeLoadHookVariant(variantPath, installRoot);
-      if (variant) {
+      if (variant?.homeOnly) {
+        // HOME-scoped vendor (agy): its dedicated installer (link 4g →
+        // installAntigravityHud) owns all writes; a project-variant install
+        // would only produce dead files the vendor never loads.
+        sweepStaleAgyProjectInstall(installRoot);
+      } else if (variant) {
         installHooksFromVariant(sourceDir, installRoot, variant);
       }
     }

@@ -148,11 +148,10 @@ describe("collectHookWrapperChecks", () => {
     expect(gemini?.status).toBe("pass");
   });
 
-  it("includes the antigravity vendor in the result (HOME-scoped, no crash)", () => {
+  it("excludes the antigravity vendor (no oma-hook.sh — .agents/hooks.json runs handlers directly)", () => {
     fsState.existsSyncFn.mockReturnValue(false);
     const checks = collectHookWrapperChecks("/project", makeEnv());
     const agy = checks.find((c) => c.vendor === "antigravity");
-    expect(agy).toBeDefined();
-    expect(agy?.status).toBe("skip");
+    expect(agy).toBeUndefined();
   });
 });

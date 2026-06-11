@@ -553,17 +553,26 @@ describe("state and hook doctor checks", () => {
     expect(report.state.issues).toContain("hook order invalid: codex");
   });
 
-  it("checks antigravity hooks.json named-map order (HOME, best-effort)", async () => {
+  it("checks antigravity .agents/hooks.json named-map order (workspace, best-effort)", async () => {
+    const handler = (script: string) => ({
+      type: "command",
+      command: `bun "/project/.agents/hooks/core/${script}"`,
+      timeout: 5,
+    });
     vi.mocked(existsSync).mockImplementation((p) =>
-      String(p).endsWith(".gemini/antigravity-cli/hooks.json"),
+      String(p).endsWith(".agents/hooks.json"),
     );
     vi.mocked(readFileSync).mockImplementation((p) => {
-      if (!String(p).endsWith(".gemini/antigravity-cli/hooks.json")) return "";
+      if (!String(p).endsWith(".agents/hooks.json")) return "";
       return JSON.stringify({
-        hooks: {
-          "keyword-detector": { event: "PreInvocation" },
-          "state-boundary": { event: "PreInvocation" },
-          "skill-injector": { event: "PreInvocation" },
+        "oma-keyword-detector": {
+          PreInvocation: [handler("keyword-detector.ts")],
+        },
+        "oma-state-boundary": {
+          PreInvocation: [handler("state-boundary.ts")],
+        },
+        "oma-skill-injector": {
+          PreInvocation: [handler("skill-injector.ts")],
         },
       });
     });

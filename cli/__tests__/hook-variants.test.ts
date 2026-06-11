@@ -53,7 +53,13 @@ describe("hook variant files", () => {
     for (const vendor of KNOWN_VENDORS) {
       const v = loadVariant(vendor);
       expect(v.vendor).toBe(vendor);
-      expect(v.hookDir).toMatch(/^\.\w+(?:\/[\w-]+)?\/hooks$/);
+      if (v.homeOnly) {
+        // homeOnly vendors (agy) have no project hook dir of their own —
+        // hookDir points at the SSOT core dir their workspace hooks.json runs.
+        expect(v.hookDir).toBe(".agents/hooks/core");
+      } else {
+        expect(v.hookDir).toMatch(/^\.\w+(?:\/[\w-]+)?\/hooks$/);
+      }
       expect(v.settingsFile).toBeTruthy();
       expect(v.runtime).toBeTruthy();
       expect(Object.keys(v.events).length).toBeGreaterThan(0);

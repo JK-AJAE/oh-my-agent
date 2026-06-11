@@ -13,6 +13,15 @@ export interface HookVariant {
   projectDirEnv: string | null;
   runtime: string;
   /**
+   * When true, the vendor's runtime config lives outside the project and the
+   * generic project install (installHooksFromVariant) must be skipped.
+   * Antigravity (agy) reads settings/statusLine only from
+   * `~/.gemini/antigravity-cli/settings.json` and workspace hooks only from
+   * `<workspace>/.agents/hooks.json` (written by installAntigravityHud) — a
+   * project-scoped copy of hookDir/settingsFile is dead config it never loads.
+   */
+  homeOnly?: boolean;
+  /**
    * When true, settings hook entries are written as flat
    * `{command, timeout[, matcher]}` objects under each event key (Cursor's
    * hooks.json format — nested `{matcher, hooks: [...]}` groups do not fire

@@ -435,17 +435,18 @@ Now the installer derives a whitelist from the vendor's variant JSON (`requiredV
 ├── hud.ts                  └── filter-test-output.sh
 └── filter-test-output.sh
                             .cursor/hooks/  .commandcode/hooks/
-.gemini/hooks/  .qwen/hooks/  .gemini/antigravity-cli/hooks/
-(same as .claude)           └── oma-hook.sh
+.gemini/hooks/  .qwen/hooks/  └── oma-hook.sh
+(same as .claude)
 ```
 
 | Vendor | Materialized files | Why |
 |---|---|---|
-| claude, antigravity, qwen | `oma-hook.sh`, `hud.ts`, `filter-test-output.sh` | statusLine + test-filter |
+| claude, qwen | `oma-hook.sh`, `hud.ts`, `filter-test-output.sh` | statusLine + test-filter |
 | gemini | `oma-hook.sh`, `hud.ts`, `filter-test-output.sh` | hud-only events + test-filter |
 | codex, grok, kiro | `oma-hook.sh`, `filter-test-output.sh` | test-filter, no statusLine |
 | cursor | `oma-hook.sh` | no statusLine, no test-filter |
 | commandcode | `oma-hook.sh` | Stop only — Command Code has no prompt event and PreToolUse cannot rewrite input ([hooks reference](https://commandcode.ai/docs/hooks/reference)) |
+| antigravity | none (project) — `hud.ts` + core hooks copied to `~/.gemini/antigravity-cli/hooks/` | agy reads settings only from HOME and workspace hooks from `.agents/hooks.json`, which runs handlers straight from `.agents/hooks/core/`; a project `.gemini/antigravity-cli/` is never loaded (`homeOnly` variant flag) |
 | pi | full `.agents/hooks/core/` set under `.pi/extensions/oma/` | the pi bridge spawns handlers as subprocesses instead of using settings hooks |
 
 The destination directory is cleared before copying, so re-running `oma install`/`oma update`/`oma link` on an older install automatically sweeps the stale full-copy files.

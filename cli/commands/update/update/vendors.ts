@@ -10,7 +10,11 @@ import type { CliTool, CliVendor } from "../../../types/index.js";
 import type { UpdateOptions } from "./types.js";
 
 const VENDOR_ROOTS: Record<CliVendor, string[]> = {
-  antigravity: [".gemini/antigravity-cli"],
+  // agy's project marker is the workspace hooks file written by
+  // installAntigravityHud. The legacy `.gemini/antigravity-cli` dir (dead
+  // pre-homeOnly project installs, swept by link) is kept for one transition
+  // so existing installs are still detected and get the sweep + rewrite.
+  antigravity: [".agents/hooks.json", ".gemini/antigravity-cli"],
   claude: [".claude"],
   codex: [".codex"],
   commandcode: [".commandcode"],
