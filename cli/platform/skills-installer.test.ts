@@ -711,6 +711,7 @@ describe("createVendorSymlinks", () => {
     (fs.realpathSync as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (p: string) => p,
     );
+    (fs.readdirSync as unknown as ReturnType<typeof vi.fn>).mockReturnValue([]);
   });
 
   afterEach(() => {

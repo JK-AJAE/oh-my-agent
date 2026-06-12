@@ -81,15 +81,15 @@ const skillsState = vi.hoisted(() => ({
       targetDir: string,
       cliTools: string[],
       skillNames: string[],
-    ) => { created: string[]; skipped: string[] }
-  >(() => ({ created: [], skipped: [] })),
+    ) => { created: string[]; skipped: string[]; removed: string[] }
+  >(() => ({ created: [], skipped: [], removed: [] })),
   createCliSymlinks: vi.fn<
     (
       targetDir: string,
       cliTools: string[],
       skillNames: string[],
-    ) => { created: string[]; skipped: string[] }
-  >(() => ({ created: [], skipped: [] })),
+    ) => { created: string[]; skipped: string[]; removed: string[] }
+  >(() => ({ created: [], skipped: [], removed: [] })),
   applyCursorMcpSymlink: vi.fn(),
   applyCursorMcpConfig: vi.fn(),
   readVendorsFromConfig: vi.fn(() => []),

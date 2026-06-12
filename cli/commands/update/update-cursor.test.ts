@@ -91,8 +91,12 @@ vi.mock("../../platform/skills-installer.js", () => ({
   getInstalledSkillNames: vi.fn(() => []),
   getInstalledWorkflowNames: vi.fn(() => []),
   createVendorWorkflowSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
-  createVendorSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
-  createCliSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
+  createVendorSymlinks: vi.fn(() => ({
+    created: [],
+    skipped: [],
+    removed: [],
+  })),
+  createCliSymlinks: vi.fn(() => ({ created: [], skipped: [], removed: [] })),
   applyCursorMcpConfig: vi.fn(),
   readVendorsFromConfig: vi.fn(() => configuredVendorsForTest),
   isHookVendor: vi.fn((v: string) =>

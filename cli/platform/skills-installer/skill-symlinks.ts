@@ -5,19 +5,45 @@ import type { CliTool } from "../../types/index.js";
 import { createLink } from "../fs-link.js";
 import { resolveCliSkillsDir } from "./vendor-dirs.js";
 
+/**
+ * Remove symlinks in `linkRootDir` whose target no longer exists (e.g. legacy
+ * skill names left behind after a rename, or skills removed from SSOT).
+ * Only dangling symlinks are touched — real dirs/files and symlinks with a
+ * live target are left alone. Best-effort: fs errors abort silently.
+ */
+function pruneDanglingSymlinks(linkRootDir: string): string[] {
+  const removed: string[] = [];
+  try {
+    for (const entry of fs.readdirSync(linkRootDir, { withFileTypes: true })) {
+      if (!entry.isSymbolicLink()) continue;
+      const link = join(linkRootDir, entry.name);
+      try {
+        fs.realpathSync(link);
+      } catch {
+        fs.unlinkSync(link);
+        removed.push(entry.name);
+      }
+    }
+  } catch {
+    // Missing dir or unreadable entry — nothing to prune
+  }
+  return removed;
+}
+
 export function createVendorSymlinks(
   installRoot: string,
   cliTools: CliTool[],
   skillNames: string[],
-): { created: string[]; skipped: string[] } {
+): { created: string[]; skipped: string[]; removed: string[] } {
   const created: string[] = [];
   const skipped: string[] = [];
+  const removed: string[] = [];
   const ssotSkillsDir = resolve(installRoot, INSTALLED_SKILLS_DIR);
 
   try {
     fs.realpathSync(ssotSkillsDir);
   } catch {
-    return { created, skipped };
+    return { created, skipped, removed };
   }
 
   for (const cli of cliTools) {
@@ -30,6 +56,12 @@ export function createVendorSymlinks(
     if (!fs.existsSync(linkRootDir)) {
       fs.mkdirSync(linkRootDir, { recursive: true });
     }
+
+    removed.push(
+      ...pruneDanglingSymlinks(linkRootDir).map(
+        (name) => `${skillsDir}/${name}`,
+      ),
+    );
 
     for (const skillName of skillNames) {
       const source = join(ssotSkillsDir, skillName);
@@ -74,7 +106,7 @@ export function createVendorSymlinks(
     }
   }
 
-  return { created, skipped };
+  return { created, skipped, removed };
 }
 
 /**

@@ -1,9 +1,11 @@
 import {
   existsSync,
+  lstatSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -78,6 +80,39 @@ describe("migrateToAgents", () => {
     expect(existsSync(oldDir)).toBe(false);
     expect(existsSync(join(newDir, "config", "custom.yaml"))).toBe(true);
     expect(existsSync(join(newDir, "skills", "a.md"))).toBe(true);
+  });
+
+  it("keeps per-item symlinks in .cursor/skills (reconcile owns them)", () => {
+    const root = mkdtempSync(join(tmpdir(), "oma-migrate-"));
+    tempRoots.push(root);
+
+    const skillDir = join(root, ".agents", "skills", "oma-backend");
+    mkdirSync(skillDir, { recursive: true });
+    const cursorSkills = join(root, ".cursor", "skills");
+    mkdirSync(cursorSkills, { recursive: true });
+    symlinkSync(skillDir, join(cursorSkills, "oma-backend"), "dir");
+
+    const actions = migrateToAgents(root);
+
+    expect(lstatSync(join(cursorSkills, "oma-backend")).isSymbolicLink()).toBe(
+      true,
+    );
+    expect(actions.filter((a) => a.includes(".cursor/skills"))).toHaveLength(0);
+  });
+
+  it("removes .cursor/skills when the directory itself is a legacy symlink", () => {
+    const root = mkdtempSync(join(tmpdir(), "oma-migrate-"));
+    tempRoots.push(root);
+
+    const target = join(root, ".agents", "skills");
+    mkdirSync(target, { recursive: true });
+    mkdirSync(join(root, ".cursor"), { recursive: true });
+    symlinkSync(target, join(root, ".cursor", "skills"), "dir");
+
+    const actions = migrateToAgents(root);
+
+    expect(actions).toContain(".cursor/skills (removed symlink)");
+    expect(existsSync(join(root, ".cursor", "skills"))).toBe(false);
   });
 
   it("does nothing when only .agents/ exists", () => {

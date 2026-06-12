@@ -26,9 +26,13 @@ vi.mock("../../../platform/pi-prompts.js", () => ({
 }));
 
 vi.mock("../../../platform/skills-installer.js", () => ({
-  createVendorSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
+  createVendorSymlinks: vi.fn(() => ({
+    created: [],
+    skipped: [],
+    removed: [],
+  })),
   createVendorWorkflowSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
-  createCliSymlinks: vi.fn(() => ({ created: [], skipped: [] })),
+  createCliSymlinks: vi.fn(() => ({ created: [], skipped: [], removed: [] })),
   detectExistingCliSymlinkDirs: vi.fn(() => []),
   applyCursorMcpConfig: vi.fn(),
   getInstalledSkillNames: vi.fn(() => []),

@@ -303,7 +303,7 @@ export async function update(options: UpdateOptions = {}): Promise<void> {
                 toCliTools(updateVendors),
                 getInstalledSkillNames(cwd),
               )
-            : { created: [], skipped: [] };
+            : { created: [], skipped: [], removed: [] };
 
         // Workflows are surfaced via direct symlinks at .agents/workflows/*.md.
         if (updateVendors.length > 0) {
@@ -381,9 +381,12 @@ export async function update(options: UpdateOptions = {}): Promise<void> {
 
         noteNewSkills(ui, newSkillNotes);
 
-        if (cliSymlinks.created.length > 0) {
+        if (cliSymlinks.created.length > 0 || cliSymlinks.removed.length > 0) {
           ui.note(
-            cliSymlinks.created.map((s) => `${pc.green("→")} ${s}`).join("\n"),
+            [
+              ...cliSymlinks.removed.map((s) => `${pc.red("×")} ${s}`),
+              ...cliSymlinks.created.map((s) => `${pc.green("→")} ${s}`),
+            ].join("\n"),
             "Symlinks updated",
           );
         }

@@ -70,39 +70,19 @@ export const migrateToAgents: Migration = {
       }
     }
 
-    // Clean up legacy symlink directories
+    // Clean up the legacy layout where the whole vendor skills dir was a
+    // single symlink. Per-item symlinks are NOT bulk-deleted here: this
+    // migration runs on every update, and createVendorSymlinks already
+    // reconciles stale links and prunes dangling ones.
     for (const legacyDir of [".cursor/skills"]) {
       const dirPath = join(cwd, legacyDir);
-      if (!existsSync(dirPath)) continue;
-
       try {
-        const stat = lstatSync(dirPath);
-        if (stat.isSymbolicLink()) {
+        if (lstatSync(dirPath).isSymbolicLink()) {
           unlinkSync(dirPath);
           actions.push(`${legacyDir} (removed symlink)`);
-        } else {
-          const items = readdirSync(dirPath);
-          let removedCount = 0;
-          for (const item of items) {
-            const itemPath = join(dirPath, item);
-            const itemStat = lstatSync(itemPath);
-            if (itemStat.isSymbolicLink()) {
-              unlinkSync(itemPath);
-              removedCount++;
-            }
-          }
-          const remainingItems = readdirSync(dirPath);
-          if (remainingItems.length === 0) {
-            rmSync(dirPath, { recursive: true });
-            actions.push(
-              `${legacyDir} (removed ${removedCount} symlinks, cleaned dir)`,
-            );
-          } else if (removedCount > 0) {
-            actions.push(`${legacyDir} (removed ${removedCount} symlinks)`);
-          }
         }
       } catch {
-        // Best-effort cleanup
+        // Missing dir or best-effort cleanup
       }
     }
 
