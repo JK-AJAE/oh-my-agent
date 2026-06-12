@@ -44,8 +44,10 @@ const OMA_CONFIG_TOP_KEYS = new Set([
 // Path detection helpers
 // ---------------------------------------------------------------------------
 
-const FILE_PATH_RE =
-  /^\.{0,2}\/|^[\w-]+\/|\.(?:ts|js|mjs|cjs|tsx|jsx|json|yaml|yml|toml|md|sh|py|rs|go|java|kt|swift|dart|tf|env|lock|gitignore|npmrc|nvmrc|tool-versions|editorconfig|prettierrc|eslintrc|babelrc|html|css|scss|sass|svg|png|jpg|gif|webp|woff|woff2|ttf|eot)$/;
+const KNOWN_EXT_RE =
+  /\.(?:ts|js|mjs|cjs|tsx|jsx|json|yaml|yml|toml|md|sh|py|rs|go|java|kt|swift|dart|tf|env|lock|gitignore|npmrc|nvmrc|tool-versions|editorconfig|prettierrc|eslintrc|babelrc|html|css|scss|sass|svg|png|jpg|gif|webp|woff|woff2|ttf|eot)$/;
+
+const FILE_PATH_RE = new RegExp(`^\\.{0,2}/|^[\\w-]+/|${KNOWN_EXT_RE.source}`);
 
 export function looksLikeFilePath(str: string): boolean {
   if (
@@ -53,13 +55,20 @@ export function looksLikeFilePath(str: string): boolean {
     str.includes(" ") ||
     str.startsWith("http://") ||
     str.startsWith("https://") ||
+    // Home-relative paths (`~/.gemini/settings.json`) point outside the
+    // repo and can never be verified against the working tree.
+    str.startsWith("~") ||
     // Slash-prefixed tokens (`/plan`, `/work`, `/orchestrate`) are workflow
     // names in OMA prose, not absolute file paths. Excluding them eliminates
     // the largest class of v1 false positives (~1,500 in the source repo).
     /^\/[a-z][\w-]*$/i.test(str) ||
-    // Template-placeholder paths like `plan-{sessionId}.json` or
-    // `progress-{agent}.md` are documentation patterns, not real files.
-    /\{[^}]+\}/.test(str) ||
+    // Template-placeholder paths like `plan-{sessionId}.json`,
+    // `progress-{agent}.md`, or `data/<id>/INFO.md` are documentation
+    // patterns, not real files.
+    /\{[^}]+\}|<[^>]+>/.test(str) ||
+    // Glob patterns (`*.ts`, `src/**/*.tsx`, `file?.md`) describe sets of
+    // files, not a single verifiable path.
+    /[*?[\]]/.test(str) ||
     // Trailing-slash refs (`stack/`, `resources/`, `examples/`) are
     // directory references in prose, not file paths. v1 has no notion of
     // directory existence, so excluding them avoids false positives.
@@ -68,6 +77,23 @@ export function looksLikeFilePath(str: string): boolean {
     return false;
   }
   return FILE_PATH_RE.test(str);
+}
+
+/**
+ * Stricter path test for inline-code spans. A backtick span is a claim that
+ * a file exists only when it is unambiguously path-like: an explicit
+ * relative prefix (`./`, `../`), or a directory component AND a known file
+ * extension. This excludes package specifiers (`shadcn/ui`), bare-filename
+ * prose mentions (`DESIGN.md`), branch names, and timezone identifiers,
+ * which dominated v1 false positives (~5,300 in the source repo).
+ *
+ * Markdown link/image targets keep the looser `looksLikeFilePath` check —
+ * a link is always an explicit reference, never a prose mention.
+ */
+export function looksLikeInlineFileRef(str: string): boolean {
+  if (!looksLikeFilePath(str)) return false;
+  if (str.startsWith("./") || str.startsWith("../")) return true;
+  return str.includes("/") && KNOWN_EXT_RE.test(str);
 }
 
 // ---------------------------------------------------------------------------
@@ -102,9 +128,10 @@ export function extractEnvVars(text: string): string[] {
 // Script pattern extraction
 // ---------------------------------------------------------------------------
 
-const SCRIPT_PATTERNS = [
-  /(?:bun\s+run|npm\s+run|pnpm(?:\s+run)?)\s+([a-zA-Z][a-zA-Z0-9:_-]*)/g,
-];
+// Only explicit `<pm> run <script>` forms assert a package.json script.
+// Bare-binary forms (`pnpm install`, `pnpm deepsec`) invoke builtins or
+// external bins and must not be resolved against local package.json.
+const SCRIPT_PATTERNS = [/(?:bun|npm|pnpm)\s+run\s+([a-zA-Z][a-zA-Z0-9:_-]*)/g];
 
 export function extractScripts(text: string): string[] {
   const found = new Set<string>();
@@ -138,6 +165,36 @@ function _extractCliFromText(text: string): string[] {
 // Config key extraction
 // ---------------------------------------------------------------------------
 
+// Dotted tokens whose final segment is a file extension (`session.md`) or
+// a TLD (`telemetry.istio.io`) are filenames and domains, not config keys.
+const FILE_EXT_SEGMENTS = new Set([
+  "md",
+  "ts",
+  "js",
+  "json",
+  "yaml",
+  "yml",
+  "toml",
+  "sh",
+  "py",
+  "txt",
+  "html",
+  "css",
+]);
+const TLD_SEGMENTS = new Set([
+  "io",
+  "com",
+  "org",
+  "net",
+  "dev",
+  "ai",
+  "co",
+  "app",
+  "sh",
+  "edu",
+  "gov",
+]);
+
 export function extractConfigKeys(text: string): string[] {
   const found = new Set<string>();
   CONFIG_PATH_RE.lastIndex = 0;
@@ -145,8 +202,15 @@ export function extractConfigKeys(text: string): string[] {
   while (m !== null) {
     const dotPath = m[1];
     if (dotPath) {
-      const topKey = dotPath.split(".")[0];
-      if (topKey && OMA_CONFIG_TOP_KEYS.has(topKey)) {
+      const segments = dotPath.split(".");
+      const topKey = segments[0];
+      const lastKey = segments[segments.length - 1] ?? "";
+      if (
+        topKey &&
+        OMA_CONFIG_TOP_KEYS.has(topKey) &&
+        !FILE_EXT_SEGMENTS.has(lastKey) &&
+        !TLD_SEGMENTS.has(lastKey)
+      ) {
         found.add(dotPath);
       }
     }

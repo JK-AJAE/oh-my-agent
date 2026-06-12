@@ -152,6 +152,140 @@ describe("resolveRefs - file: doc-relative then repo-root fallback", () => {
 });
 
 // ---------------------------------------------------------------------------
+// File resolution - issue #533 (anchors, routes, extensionless, ancestors)
+// ---------------------------------------------------------------------------
+
+describe("resolveRefs - file: anchor, route, and ancestor resolution", () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = makeTmpDir();
+    mockExecSync.mockImplementation((cmd: string) => {
+      if (cmd.includes("git ls-files")) return Buffer.from("");
+      if (cmd.includes("grep")) throw new Error("no match");
+      return Buffer.from("");
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    cleanupDir(tmp);
+  });
+
+  it("strips anchor fragments before resolving", async () => {
+    const subDir = path.join(tmp, "sub");
+    fs.mkdirSync(subDir, { recursive: true });
+    fs.writeFileSync(path.join(subDir, "commands.md"), "");
+
+    const index = makeIndex("README.md", [
+      { kind: "file", target: "sub/commands.md#doctor", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(0);
+  });
+
+  it("resolves Docusaurus /docs/ routes to web/docs/**.md", async () => {
+    const routeDir = path.join(tmp, "web", "docs", "core-concepts");
+    fs.mkdirSync(routeDir, { recursive: true });
+    fs.writeFileSync(path.join(routeDir, "agents.md"), "");
+
+    const index = makeIndex("web/docs/guide/intro.md", [
+      { kind: "file", target: "/docs/core-concepts/agents", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(0);
+  });
+
+  it("resolves /docs/ routes to web/docs/**/index.md", async () => {
+    const routeDir = path.join(tmp, "web", "docs", "core-concepts", "agents");
+    fs.mkdirSync(routeDir, { recursive: true });
+    fs.writeFileSync(path.join(routeDir, "index.md"), "");
+
+    const index = makeIndex("README.md", [
+      { kind: "file", target: "/docs/core-concepts/agents", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(0);
+  });
+
+  it("missing route is broken with a route-specific reason", async () => {
+    const index = makeIndex("README.md", [
+      { kind: "file", target: "/docs/gone/page", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(1);
+    expect(report.broken[0]?.reason).toMatch(/file_missing/);
+    expect(report.broken[0]?.reason).toMatch(/route/);
+  });
+
+  it("resolves extensionless relative doc links via .md expansion", async () => {
+    const guideDir = path.join(tmp, "guide");
+    fs.mkdirSync(guideDir, { recursive: true });
+    fs.writeFileSync(path.join(guideDir, "intro.md"), "");
+
+    const index = makeIndex("README.md", [
+      { kind: "file", target: "guide/intro", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(0);
+  });
+
+  it("resolves multi-segment refs via repo-wide suffix match on tracked files", async () => {
+    mockExecSync.mockImplementation((cmd: string) => {
+      if (cmd.includes("git ls-files")) {
+        return ".agents/skills/oma-a/resources/checklist.md\n";
+      }
+      throw new Error("no match");
+    });
+
+    // Nothing on disk in tmp — only the tracked-file index matches.
+    const index = makeIndex("web/docs/agents.md", [
+      { kind: "file", target: "resources/checklist.md", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(0);
+  });
+
+  it("does NOT suffix-match bare filenames (too loose to verify)", async () => {
+    mockExecSync.mockImplementation((cmd: string) => {
+      if (cmd.includes("git ls-files")) {
+        return ".agents/skills/oma-a/resources/checklist.md\n";
+      }
+      throw new Error("no match");
+    });
+
+    const index = makeIndex("web/docs/agents.md", [
+      { kind: "file", target: "checklist.md", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(1);
+  });
+
+  it("resolves skill-root-relative refs via ancestor directory walk", async () => {
+    // Doc at skills/oma-x/resources/protocol.md references
+    // `resources/checklist.md` relative to the skill root, not the doc dir.
+    const resourcesDir = path.join(tmp, "skills", "oma-x", "resources");
+    fs.mkdirSync(resourcesDir, { recursive: true });
+    fs.writeFileSync(path.join(resourcesDir, "protocol.md"), "");
+    fs.writeFileSync(path.join(resourcesDir, "checklist.md"), "");
+
+    const index = makeIndex("skills/oma-x/resources/protocol.md", [
+      { kind: "file", target: "resources/checklist.md", line: 1 },
+    ]);
+
+    const report = await resolveRefs(index, tmp);
+    expect(report.broken).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // File resolution - case sensitivity
 // ---------------------------------------------------------------------------
 
@@ -623,14 +757,30 @@ describe("resolveRefs - config: dot-path matching", () => {
     expect(report.broken).toHaveLength(0);
   });
 
-  it("deep partial path that does not exist is broken", async () => {
+  it("unlisted subpath under a known namespace is skipped, NOT broken", async () => {
+    // The deep-path whitelist is hand-maintained and dotted prose tokens
+    // (event names, subcommands) share valid namespaces with config keys.
     const index = makeIndex("README.md", [
       { kind: "config", target: "docs.auto_verify.deeper", line: 1 },
+      { kind: "config", target: "session.created", line: 2 },
+      { kind: "config", target: "docs.sync", line: 3 },
     ]);
 
     const report = await resolveRefs(index, "/tmp");
-    expect(report.broken).toHaveLength(1);
-    expect(report.broken[0]?.reason).toMatch(/config_key_not_found/);
+    expect(report.broken).toHaveLength(0);
+    expect(report.skipped).toHaveLength(3);
+    expect(report.skipped[0]?.reason).toBe("config-key-unverified");
+  });
+
+  it("map-typed namespace accepts any user-defined subpath", async () => {
+    const index = makeIndex("README.md", [
+      { kind: "config", target: "custom_presets.user", line: 1 },
+      { kind: "config", target: "vendors.gemini", line: 2 },
+    ]);
+
+    const report = await resolveRefs(index, "/tmp");
+    expect(report.broken).toHaveLength(0);
+    expect(report.skipped).toHaveLength(0);
   });
 
   it("completely unknown config key is broken", async () => {

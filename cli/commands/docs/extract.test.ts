@@ -288,6 +288,99 @@ describe("extractDocRefs - CLI disambiguation (cli-edge.md)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// False positives — issue #533 (false-positives.md)
+// ---------------------------------------------------------------------------
+
+describe("extractDocRefs - false positives (false-positives.md)", () => {
+  async function getRefs() {
+    const index = await extractDocRefs(FIXTURES_DIR, "false-positives.md");
+    const doc = index.docs[0];
+    assert(doc, "expected at least one doc");
+    return doc.refs;
+  }
+
+  it("does NOT extract inline package specifiers as file refs", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "file")
+      .map((r) => r.target);
+    expect(targets).not.toContain("shadcn/ui");
+    expect(targets).not.toContain("motion/react");
+  });
+
+  it("does NOT extract globs as file refs", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "file")
+      .map((r) => r.target);
+    expect(targets).not.toContain("*.ts");
+    expect(targets).not.toContain("src/**/*.tsx");
+  });
+
+  it("does NOT extract conceptual bare-filename mentions as file refs", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "file")
+      .map((r) => r.target);
+    expect(targets).not.toContain("DESIGN.md");
+    expect(targets).not.toContain("SKILL.md");
+    expect(targets).not.toContain("academic-verb-tiers.md");
+  });
+
+  it("does NOT extract placeholder, home, branch, or timezone tokens", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "file")
+      .map((r) => r.target);
+    expect(targets).not.toContain("data/<id>/INFO.md");
+    expect(targets).not.toContain("~/.gemini/settings.json");
+    expect(targets).not.toContain("chore/update-oh-my-agent");
+    expect(targets).not.toContain("Asia/Seoul");
+  });
+
+  it("KEEPS explicit-relative and dir+extension inline refs as file refs", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "file")
+      .map((r) => r.target);
+    expect(targets).toContain("./relative/setup.md");
+    expect(targets).toContain("../shared/common.md");
+    expect(targets).toContain("cli/commands/docs/extract.ts");
+  });
+
+  it("does NOT extract bunx/pnpm bare-binary commands as script refs", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "script")
+      .map((r) => r.target);
+    expect(targets).not.toContain("deepsec");
+    expect(targets).not.toContain("install");
+    expect(targets).toContain("test");
+  });
+
+  it("does NOT extract filename or domain dotted tokens as config refs", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "config")
+      .map((r) => r.target);
+    expect(targets).not.toContain("session.md");
+    expect(targets).not.toContain("telemetry.istio.io");
+    expect(targets).not.toContain("telemetry.github.io");
+    expect(targets).toContain("session.created");
+  });
+
+  it("strips anchor fragments from relative links and drops pure anchors", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "file")
+      .map((r) => r.target);
+    expect(targets).toContain("sub/commands.md");
+    expect(targets).not.toContain("sub/commands.md#doctor");
+    expect(targets.some((t) => t.startsWith("#"))).toBe(false);
+  });
+
+  it("extracts Docusaurus route and extensionless doc links as file refs", async () => {
+    const targets = (await getRefs())
+      .filter((r) => r.kind === "file")
+      .map((r) => r.target);
+    expect(targets).toContain("/docs/core-concepts/agents");
+    expect(targets).toContain("guide/intro");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Exclusions - generated/** must not appear
 // ---------------------------------------------------------------------------
 

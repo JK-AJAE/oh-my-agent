@@ -205,12 +205,28 @@ function getOmaConfigDeepPaths(): Set<string> {
 
 const OMA_CONFIG_PATHS = getOmaConfigDeepPaths();
 
+// Namespaces whose sub-keys are user-defined maps: any child path is valid
+// by construction (`custom_presets.user`, `vendors.gemini`, ...).
+const MAP_TYPED_NAMESPACES = new Set(["custom_presets", "vendors"]);
+
 export function resolveConfig(target: string): {
   ok: boolean;
+  skipped?: boolean;
   reason?: string;
 } {
   if (OMA_CONFIG_PATHS.has(target)) {
     return { ok: true };
+  }
+  const topKey = target.split(".")[0] ?? "";
+  if (MAP_TYPED_NAMESPACES.has(topKey)) {
+    return { ok: true };
+  }
+  if (OMA_CONFIG_PATHS.has(topKey)) {
+    // Known namespace, unlisted subpath. The deep-path whitelist above is
+    // hand-maintained and admittedly incomplete, and dotted prose tokens
+    // (`session.created` event names, `docs.sync` subcommands) share valid
+    // namespaces with real config keys — warn, don't report as broken.
+    return { ok: false, skipped: true, reason: "config-key-unverified" };
   }
   return { ok: false, reason: "config_key_not_found" };
 }

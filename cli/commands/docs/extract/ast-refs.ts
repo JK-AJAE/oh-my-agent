@@ -14,6 +14,7 @@ import {
   extractUrls,
   KNOWN_CLI_BINARIES,
   looksLikeFilePath,
+  looksLikeInlineFileRef,
   SHELL_LANGS,
 } from "./ref-patterns.js";
 
@@ -51,8 +52,14 @@ export function extractRefsFromAst(
         if (url.startsWith("http://") || url.startsWith("https://")) {
           const stripped = url.replace(/#[^#]*$/, "");
           addRef("url", stripped, line);
-        } else if (looksLikeFilePath(url)) {
-          addRef("file", url, line);
+        } else {
+          // Anchored relative links (`commands.md#doctor`) reference the
+          // file, not a literal `commands.md#doctor` path. Pure-anchor
+          // links (`#section`) strip to empty and are dropped by addRef.
+          const stripped = url.replace(/#.*$/, "");
+          if (looksLikeFilePath(stripped)) {
+            addRef("file", stripped, line);
+          }
         }
         break;
       }
@@ -63,8 +70,11 @@ export function extractRefsFromAst(
         if (url.startsWith("http://") || url.startsWith("https://")) {
           const stripped = url.replace(/#[^#]*$/, "");
           addRef("url", stripped, line);
-        } else if (looksLikeFilePath(url)) {
-          addRef("file", url, line);
+        } else {
+          const stripped = url.replace(/#.*$/, "");
+          if (looksLikeFilePath(stripped)) {
+            addRef("file", stripped, line);
+          }
         }
         break;
       }
@@ -82,13 +92,13 @@ export function extractRefsFromAst(
             addRef("script", s, line);
           }
           // Only add as cli if no script match consumed it OR there's remaining cli context
-          const scriptPattern = /(?:bun\s+run|npm\s+run|pnpm(?:\s+run)?)\s+/;
+          const scriptPattern = /(?:bun|npm|pnpm)\s+run\s+/;
           if (!scriptPattern.test(val)) {
             addRef("cli", val.trim(), line);
           } else if (scripts.length === 0) {
             addRef("cli", val.trim(), line);
           }
-        } else if (looksLikeFilePath(val)) {
+        } else if (looksLikeInlineFileRef(val)) {
           addRef("file", val, line);
         } else if (val.startsWith("http://") || val.startsWith("https://")) {
           addRef("url", val.replace(/#[^#]*$/, ""), line);
@@ -125,7 +135,7 @@ export function extractRefsFromAst(
 
             // CLI — if first token is known binary and not a script pattern
             const firstTok = stripped.split(/\s+/)[0] ?? "";
-            const scriptPat = /(?:bun\s+run|npm\s+run|pnpm(?:\s+run)?)\s+/;
+            const scriptPat = /(?:bun|npm|pnpm)\s+run\s+/;
             if (KNOWN_CLI_BINARIES.has(firstTok) && !scriptPat.test(stripped)) {
               addRef("cli", stripped, line);
             }

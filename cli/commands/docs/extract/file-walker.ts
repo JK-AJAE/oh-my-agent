@@ -40,6 +40,16 @@ function walkMarkdownFiles(
       if (isInIgnoredSet(absPath, ignoredSet)) continue;
 
       if (entry.isDirectory()) {
+        // Test-fixture trees deliberately contain broken refs and must not
+        // pollute full-repo verification.
+        if (
+          entry.name === "__fixtures__" ||
+          entry.name === "__tests__" ||
+          entry.name === "__mocks__" ||
+          entry.name === "__snapshots__"
+        ) {
+          continue;
+        }
         const relDir = toPosixPath(path.relative(repoRoot, absPath));
         if (
           relDir === "docs/generated" ||
