@@ -14,6 +14,7 @@ import {
   printAgentMemorySetup,
   printAgentMemoryStatus,
   printAgentMemoryUpgrade,
+  printMemoryGc,
   printMemoryRetryDrain,
 } from "./memory.js";
 
@@ -239,6 +240,46 @@ export function registerMemory(program: Command): void {
         }
         printAgentMemoryMaintain(action, resolveJsonMode(options), {
           keep: options.keep,
+          dryRun: options.dryRun,
+        });
+      },
+      { supportsJsonOutput: true },
+    ),
+  );
+
+  addOutputOptions(
+    program
+      .command("memory:gc")
+      .description(
+        "Garbage-collect project-local memory: prune old L1 sessions and ephemeral Serena files",
+      )
+      .option(
+        "--scope <scope>",
+        "Stores to sweep: all, sessions, serena",
+        "all",
+      )
+      .option(
+        "--keep <count>",
+        "Most-recent L1 sessions to retain (config: memory.gc.keep_sessions, default 100)",
+      )
+      .option(
+        "--max-age-days <days>",
+        "Prune Serena run artifacts older than N days, 0 disables (config: memory.gc.max_age_days, default 50)",
+      )
+      .option("--dry-run", "Preview the prune plan without deleting files"),
+  ).action(
+    runAction(
+      async (options) => {
+        const scope = options.scope ?? "all";
+        if (!["all", "sessions", "serena"].includes(scope)) {
+          throw new Error(
+            "invalid memory gc scope: use all, sessions, or serena",
+          );
+        }
+        printMemoryGc(resolveJsonMode(options), {
+          scope,
+          keep: options.keep,
+          maxAgeDays: options.maxAgeDays,
           dryRun: options.dryRun,
         });
       },

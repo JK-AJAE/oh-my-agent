@@ -146,6 +146,45 @@ export interface MemoryUpgradeOptions {
   runner?: MemoryServiceCommandRunner;
 }
 
+/** Which project-local stores `oma memory:gc` sweeps. */
+export type MemoryGcScope = "all" | "sessions" | "serena";
+
+/** `memory.gc` defaults resolved from oma-config.yaml (normalized keys). */
+export interface MemoryGcConfig {
+  keep?: number;
+  maxAgeDays?: number;
+}
+
+export interface MemoryGcOptions {
+  /** Project root to sweep. Defaults to `process.cwd()`. */
+  baseDir?: string;
+  /** L1: number of most-recent session dirs to retain (LRU by mtime). */
+  keep?: number | string;
+  /** Serena: prune aged run artifacts older than this many days (0 disables). */
+  maxAgeDays?: number | string;
+  scope?: MemoryGcScope;
+  dryRun?: boolean;
+  /** Injectable clock for deterministic tests. */
+  nowMs?: number;
+}
+
+export interface MemoryGcResult {
+  baseDir: string;
+  scope: MemoryGcScope;
+  keep: number;
+  maxAgeDays: number;
+  dryRun: boolean;
+  /** Absolute paths of pruned L1 session directories. */
+  prunedSessions: string[];
+  /** L1 session dirs retained (incl. active + within keep window). */
+  keptSessions: number;
+  /** Absolute paths of pruned Serena ephemeral memory files. */
+  prunedSerena: string[];
+  /** Serena ephemeral files retained (matched a prunable pattern but kept). */
+  keptSerena: number;
+  message: string;
+}
+
 export interface MemoryUpgradeResult {
   homeDir: string;
   dryRun: boolean;

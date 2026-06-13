@@ -6,11 +6,13 @@ import {
   uninstallAgentMemoryService,
 } from "../../../platform/agentmemory-service.js";
 import type {
+  MemoryGcOptions,
   MemoryMaintainAction,
   MemoryMaintainOptions,
   MemoryUpgradeOptions,
 } from "../../../types/memory.js";
 import { controlAgentMemoryDaemon } from "./daemon.js";
+import { garbageCollectLocalState } from "./gc.js";
 import { maintainAgentMemory } from "./maintain.js";
 import { drainMemoryRetryQueue } from "./retry-drain.js";
 import { getAgentMemoryStatus, setupAgentMemory } from "./setup.js";
@@ -253,6 +255,33 @@ export function printAgentMemoryMaintain(
   if (result.vacuumResults.some((item) => item.status !== 0)) {
     process.exitCode = 1;
   }
+}
+
+export function printMemoryGc(
+  jsonMode = false,
+  args: MemoryGcOptions = {},
+): void {
+  const result = garbageCollectLocalState(args);
+  if (jsonMode) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  const lines = [
+    `Scope: ${pc.cyan(result.scope)}`,
+    `Sessions: pruned ${result.prunedSessions.length}, kept ${result.keptSessions} (keep ${result.keep})`,
+    `Serena: pruned ${result.prunedSerena.length}, kept ${result.keptSerena} (max-age ${result.maxAgeDays}d)`,
+    result.prunedSessions.length > 0
+      ? `Pruned sessions:\n${result.prunedSessions.map((path) => `  ${path}`).join("\n")}`
+      : null,
+    result.prunedSerena.length > 0
+      ? `Pruned Serena files:\n${result.prunedSerena.map((path) => `  ${path}`).join("\n")}`
+      : null,
+    result.dryRun ? pc.dim("Dry run: files unchanged") : null,
+    result.message,
+  ].filter((line): line is string => line !== null);
+
+  p.note(lines.join("\n"), "Memory GC: project-local stores");
 }
 
 export async function printAgentMemoryUpgrade(

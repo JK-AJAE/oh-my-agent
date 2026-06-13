@@ -9,6 +9,7 @@ import {
 } from "../../platform/agentmemory-service.js";
 
 export { controlAgentMemoryDaemon } from "./memory/daemon.js";
+export { garbageCollectLocalState } from "./memory/gc.js";
 export { maintainAgentMemory } from "./memory/maintain.js";
 export {
   initMemory,
@@ -19,6 +20,7 @@ export {
   printAgentMemorySetup,
   printAgentMemoryStatus,
   printAgentMemoryUpgrade,
+  printMemoryGc,
   printMemoryRetryDrain,
 } from "./memory/render.js";
 export { drainMemoryRetryQueue } from "./memory/retry-drain.js";
