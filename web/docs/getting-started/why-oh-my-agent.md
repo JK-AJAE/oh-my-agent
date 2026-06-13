@@ -27,9 +27,9 @@ Each capability below addresses a specific failure mode reported in the multi-ag
 
 ### Independent verification, not LLM self-assessment
 
-`oma verify <agent>` runs fourteen deterministic checks per agent type. The checks are mechanical: exit code from the test command, TypeScript strict pass, raw SQL pattern detection, hardcoded secret scan, Flutter analyze, inline style scan, scope violation against the agent's charter. No LLM judges whether the work "looks correct". A check passes if and only if its underlying command reports success.
+`oma verify <agent>` runs a deterministic battery of checks for each agent type: a shared core that always runs (scope violation against the agent's charter, charter preflight, hardcoded secret scan, TODO scan, declared-output check) plus type-specific checks (test exit code, TypeScript strict pass, raw SQL pattern detection, inline style scan, Flutter analyze). The checks are mechanical. No LLM judges whether the work "looks correct". A check passes if and only if its underlying command reports success.
 
-This addresses the most common complaint in the category, summarized by one community post as "agents lie - they say tests pass when tests do not". See `cli/commands/verify/verify.ts` for the check list.
+This addresses the most common complaint in the category, summarized by one community post as "agents lie - they say tests pass when tests do not". See `cli/commands/verify/report.ts` for the check list (`collectVerifyReport` assembles the core checks and `runAgentChecks` adds the type-specific ones).
 
 ### Re-verification across iterations
 

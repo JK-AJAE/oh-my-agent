@@ -473,7 +473,7 @@ echo '{"cwd":"/path/to/project"}' \
 
 #### Migration from pre-019 installs
 
-Existing installs that have the old `bun "$CLAUDE_PROJECT_DIR/.claude/hooks/keyword-detector.ts"` entries are automatically migrated the next time you run `oma install`, `oma update`, or `oma link`. The installer uses marker-based replacement: only OMA-managed hook groups (identified by their `name`/`command` patterns) are replaced; any hook groups you added yourself are preserved in their original order. The `statusLine`/hud path is not changed. The pi in-process bridge is not affected. See `docs/plans/designs/019-hook-oma-call-dispatch.md` for the full design and `019-appendix-handler-result-pi-mapping.md` for the daemon/pi-ext future phase.
+Existing installs that have the old `bun "$CLAUDE_PROJECT_DIR/.claude/hooks/keyword-detector.ts"` entries are automatically migrated the next time you run `oma install`, `oma update`, or `oma link`. The installer uses marker-based replacement: only OMA-managed hook groups (identified by their `name`/`command` patterns) are replaced; any hook groups you added yourself are preserved in their original order. The `statusLine`/hud path is not changed. The pi in-process bridge is not affected. See `cli/commands/hook/command.ts` for the router implementation (internally referred to as "design 019") and `cli/platform/hooks-composer/` for the per-vendor materialization logic.
 
 ### skills/
 

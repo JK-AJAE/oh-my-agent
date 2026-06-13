@@ -1,6 +1,6 @@
 ---
 title: Agents
-description: Complete reference for all 22 oh-my-agent agents, covering their domains, tech stacks, resource files, capabilities, charter preflight protocol, two-layer skill loading, scoped execution rules, quality gates, workspace strategy, orchestration flow, and runtime memory.
+description: Complete reference for all 32 oh-my-agent agents, covering their domains, tech stacks, resource files, capabilities, charter preflight protocol, two-layer skill loading, scoped execution rules, quality gates, workspace strategy, orchestration flow, and runtime memory.
 ---
 
 # Agents
@@ -39,6 +39,13 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 | **Search & Retrieval** | oma-search | Intent-based search router with trust scoring (Context7 docs, web, `gh`/`glab` code, Serena local) |
 | **Retrospective** | oma-recap | Cross-tool conversation history analysis and themed work summaries |
 | **Document Processing** | oma-hwp, oma-pdf | HWP/HWPX/HWPML and PDF to Markdown conversion for LLM/RAG ingestion |
+| **Documentation** | oma-docs | Documentation drift detection (verify broken refs, propose sync patches for diff-affected docs) |
+| **Academic Writing** | oma-academic-writer, oma-scholar | Publication-grade academic prose drafting/audit and Knows-sidecar scholarly research, search, and peer review |
+| **Security** | oma-deepsec | Driving Vercel's deepsec agent-powered vulnerability scanner (scan, PR gate, matchers, triage) cost-consciously |
+| **Refactoring** | oma-refactor | Behavior-preserving incremental restructuring with hotspot targeting, characterization-test safety nets, refactor-only commits |
+| **Market Research** | oma-market | Community-signal pain/trend/competitor/discovery research with intent-auto SWOT/Porter's 5F/PESTEL frameworks |
+| **Skill Authoring** | oma-skill-creator | Creating and validating OMA skills in the SSL-lite format |
+| **Media Generation** | oma-image, oma-slide, oma-video, oma-voice | AI image generation, HTML presentation decks, short-form/explainer/demo video, and local TTS/STT |
 
 ---
 
@@ -545,6 +552,251 @@ When a workflow maps an agent to the same vendor as the current runtime, it shou
 - Report any conversion issues (missing tables, garbled text) to the user
 
 **Resources:** `SKILL.md`, `config/`, `resources/`.
+
+---
+
+### oma-academic-writer
+
+**Domain:** Publication-grade academic English prose: drafting, revising, and auditing essays, reports, analysis sections, executive summaries, conclusions, and literature reviews.
+
+**When to use:** Drafting or revising academic reports/essays/analysis sections, writing executive summaries or conclusions or literature reviews, rewriting AI-sounding prose into natural academic English, polishing a draft to top-band rubric quality (HD, A, top-band), reviewing prose for sentence variety / verb quality / hedging / anti-AI compliance.
+
+**When NOT to use:** Translation (use oma-translator), source discovery / citation gathering / literature search (use oma-scholar), rubric parsing and task decomposition (use oma-pm), code documentation / README / API reference text (use the relevant domain skill), informal or marketing copy, non-English academic writing (draft in English, then hand off to oma-translator).
+
+**Modes:** `draft` (heading + prose + Writing Notes + Claim-Evidence Map), `revise` (original + revised + change list), `review` (PASS/FAIL compliance report across sentence structure, verb quality, anti-AI, specificity, hedging, paragraph clarity, rhythm, claim-evidence alignment).
+
+**Core rules:**
+- Quote-before-judgment: cite the literal rubric/constraint text before applying any rule
+- Every sentence verifiable; never fabricate data, statistics, or citations
+- Banned generic verbs (`show`, `have`, `make`, `do`, `get`, `use`, …) must not be main verbs
+- Vary sentence type, length, and openers; never 3+ same-type sentences in a row
+- Match hedge strength to evidence strength; no first-person `I think`/`I believe`
+- Every claim maps to evidence in the Claim-Evidence Map; weaken or remove unsupported claims
+
+**Workflow:** 6 steps — READ rubric/draft and quote constraints, PLAN paragraphs as Topic-Support-Conclude, DRAFT under all four protocols, AUDIT against the anti-AI checklist, REVERSE-OUTLINE + build Claim-Evidence Map, POLISH (read-aloud, cohesion, specificity, word-count, rhythm).
+
+**Resources:** `anti-ai-checklist.md`, `sentence-structure-reference.md`, `academic-verb-tiers.md`, `hedging-guide.md`, plus shared `context-loading`, `quality-principles`.
+
+---
+
+### oma-deepsec
+
+**Domain:** Driving Vercel's `deepsec` agent-powered vulnerability scanner end-to-end, safely and cost-consciously, inside a target repository.
+
+**When to use:** First-time deepsec install in a repo (`init`, `INFO.md` write, calibration scan), running a full or scoped scan and processing findings, setting up a per-PR CI gate with `process --diff`, writing project-specific matchers, triaging a findings backlog (severity bucketing, FP cuts via `revalidate`, export), diagnosing deepsec failures.
+
+**When NOT to use:** Generic OWASP / lint-style review without deepsec (use oma-qa), generic CVE / dependency advisories (use oma-qa or oma-search), architecting a non-deepsec SAST pipeline (use oma-architecture), writing or auditing application code (route to oma-backend/frontend/mobile), cloud/IAM/Terraform hardening (use oma-tf-infra), reasoning about a finding's fix in product code (use oma-debug once deepsec produced the finding).
+
+**Core rules:**
+- Never launch an unbounded `process` on a repo whose size you have not measured; calibrate first (`--limit 50 --concurrency 5`) when file count is unknown or > 500
+- State cost and stopping condition before any AI pass (≈ $25-60 for 100 files up to $500-1,200 for 2,000, with a ×2-3 swing)
+- Resume, do not reset: after any quota/network/Ctrl-C interruption, re-run the same command; never delete `data/<id>/` to start clean
+- Keep `INFO.md` short and project-specific (50-100 lines, 3-5 examples per section)
+- For PR/CI gates use the two-job pattern; never grant `pull-requests: write` to the job that runs PR-controlled code; pin actions to full SHAs in production
+- Ask agent choice (`codex`/`gpt-5.5` vs `claude`/`claude-opus-4-8`) before the first paid call; never echo or commit credentials
+
+**Workflow:** PREPARE (intent, repo root, credential, budget, severity floor, agent) → ACQUIRE (config, `INFO.md`, run history, repo signals) → REASON (pick smallest sufficient pass) → ACT (run from inside `.deepsec/`) → VERIFY (`status`, `RunMeta`, exit code) → FINALIZE (findings by severity/verdict, dollar cost, follow-ups).
+
+**Resources:** `setup.md`, `scanning.md`, `pr-review.md`, `matchers.md`, `triage.md`, `config.md`.
+
+---
+
+### oma-docs
+
+**Domain:** Documentation drift detection: verifying `docs/**/*.md` references against the current codebase (verify mode) and proposing patches for diff-affected docs (sync mode).
+
+**When to use:** After a refactor/rename/file deletion to find stale references in docs, before a release to confirm CLI commands / file paths / config keys still exist, after a significant git diff to find which docs reference changed files, routine drift checks on a docs-heavy repo.
+
+**When NOT to use:** Generating docs from scratch for undocumented features, multilingual translation of docs (use oma-translator), symbol-level semantic drift, CI-blocking enforcement (v1 is warn-only).
+
+**Core rules:**
+- Never modify `.agents/` (SSOT protection) in any mode
+- Never auto-apply sync patches; sync is always interactive (`[y]` confirm required per doc)
+- LLM unavailable → graceful degradation: verify falls back to raw JSON, sync to candidate-list-only
+- Secret-bearing files (`.env*`, `*.pem`, `*.key`, `id_rsa*`, gitignored) never appear in sync output
+- No direct LLM API calls from the CLI: it emits structured data; the host LLM does all synthesis and patch drafting (vendor-agnostic)
+- URL link checking is delegated to `lychee`; the hook is warn-only in v1 and never blocks workflow completion
+
+**Workflow:** verify mode — extract → resolve → report (deterministic CLI, exit 0 clean / 1 broken). sync mode — git diff → reverse lookup → candidate list → host-LLM patch proposals → interactive accept/reject → regenerate `doc-refs.json`.
+
+**Resources:** Uses shared resources only; the implementation lives in `cli/commands/docs/` (`extract.ts`, `resolve.ts`, `reporter.ts`, `sync-propose.ts`).
+
+---
+
+### oma-image
+
+**Domain:** Multi-vendor AI image generation with authentication-aware parallel dispatch (Codex `gpt-image-2`, Antigravity `gemini-2.5-flash-image`/nano-banana via `agy`, Pollinations flux/zimage).
+
+**When to use:** Generating images, visual assets, illustrations, product photos, concept art, or mockups; comparing output across multiple image models for the same prompt; producing images from prompts inside editor workflows.
+
+**When NOT to use:** Editing an existing image or photo manipulation, generating videos or audio (use oma-video / oma-voice), inline vector/SVG composition from structured data, simple asset resizing or format conversion.
+
+**Core rules:**
+- Clarify before invoking: if subject/style/composition/usage is ambiguous, ask first or amplify the prompt and show the user the expanded version
+- Authentication-aware dispatch: run only authenticated vendors; with `--vendor all`, every requested vendor must be available
+- Cost guardrail: confirm before runs whose estimated cost is ≥ $0.20 (`--yes`/`OMA_IMAGE_YES=1` bypass); default `pollinations` and `antigravity` are free
+- Path safety: output outside `$PWD` requires `--allow-external-out`; max `n` = 5
+- Deterministic outputs: every run writes `manifest.json` next to the images
+- Auto-forward attached reference images via `--reference <path>` (codex/antigravity)
+
+**Workflow:** PREPARE (clarify/amplify prompt, choose vendor) → ACQUIRE (validate auth, references, output path) → ACT (`oma image generate`) → VERIFY (manifest, files, exit code) → FINALIZE (output paths + warnings).
+
+**Resources:** `execution-protocol.md`, `vendor-matrix.md`, `prompt-tips.md`, `checklist.md`, plus `config/image-config.yaml`.
+
+---
+
+### oma-market
+
+**Domain:** Community-signal market research: pain-point extraction, trend detection, competitor positioning, and discovery across Reddit, HN, Bluesky, Mastodon, GitHub Issues, and web.
+
+**When to use:** Extracting real user pain points from community posts, detecting trends in a category over a 7d/30d/90d/180d window, competitor sentiment analysis and SWOT positioning, open-ended discovery research across multiple sources.
+
+**When NOT to use:** General web research without market framing (use oma-search directly), single-source queries (use `oma search fetch` standalone), live dashboards or scheduled monitoring (v1 is one-shot).
+
+**Core rules:**
+- detect-trap first: never harvest without preflight (`--force` bypasses only in test mode)
+- Delegate all fetches: `harvest` calls `oma search fetch --only api`; no direct platform HTTP
+- Trust labels read-only: no re-scoring; Trust Registry ownership stays with oma-search
+- Paid sources (X, TikTok, Instagram, YouTube, Perplexity) auto-skip silently when their env key is absent
+- LAW self-check mandatory before file write; no raw evidence dump in the markdown body
+- Single brief per run at `.agents/results/market/{topic-slug}-{YYYYMMDD}.md`; framework auto-toggles by intent (pain/trend → SWOT, competitor → SWOT + Porter's 5F, discovery → SWOT + PESTEL)
+
+**Workflow:** PREPARE (parse topic/flags, detect-trap, resolve intent/pack/window) → ACT (build per-source fetch URLs) → ACQUIRE (parallel harvest) → VERIFY (score, fuse, cluster) → FINALIZE (render LAW-compliant brief, self-check, write).
+
+**Resources:** `intent-rules.md`, `output-laws.md`, `execution-protocol.md`, `checklist.md`, `error-playbook.md`, `examples.md`, plus `frameworks/` (swot, porters-5f, pestel) and `operator-packs/` (pain, positive, competitor, discovery).
+
+---
+
+### oma-refactor
+
+**Domain:** Behavior-preserving refactoring: safe incremental restructuring with code-smell / SATD / hotspot targeting, characterization-test safety nets, and refactor-only commits.
+
+**When to use:** Executing a refactoring on specific files/modules (extract, move, rename, decompose, idiom alignment), preparatory refactoring before a feature, legacy/brownfield rescue (seam discovery + characterization tests), refactoring target selection by hotspot (churn × complexity), auditing whether code is safe to refactor now.
+
+**When NOT to use:** Fixing a reported bug or failing behavior (use oma-debug; refactoring must not change behavior), security/performance/accessibility audit (use oma-qa), system design / module boundaries / ADRs (use oma-architecture), DB schema design or migration mechanics (use oma-db), commit splitting / staging (use oma-scm), performance optimization as a goal.
+
+**Core rules:**
+- Behavior-preserving: the consumer contract (Hyrum-aware) is inviolable; tuning is a side effect, never a goal
+- Verifiable: never restructure without a net; if the safety net is missing/weak, write characterization (golden-master) tests FIRST as separate commits
+- Incremental: one named transformation per commit; on repeated failure use Mikado (record prerequisite, revert fully, recurse)
+- Separated (two hats): never mix behavior changes into refactor commits (`refactor:`-typed only)
+- Economic: readability is the dominant objective; don't refactor code slated for deletion or cold low-churn code
+- Convention deviation requires the oma-architecture ADR route, not a local edit; all metrics are proxies (Goodhart)
+
+**Workflow:** PREPARE (classify green/brownfield, size gates, hotspot rank) → ACQUIRE (read code via symbol tools, collect metrics + git signals) → REASON (plan atomic transformation sequence / expand-contract) → ACT (one engine-first transformation) → VERIFY (re-run tests unchanged → commit, or Mikado revert) → FINALIZE (metric delta + readability verdict).
+
+**Resources:** `definition.md`, `measurement.md`, `governance.md`, plus shared `context-loading`, `quality-principles`.
+
+---
+
+### oma-scholar
+
+**Domain:** Scholarly research companion using the Knows `.knows.yaml` sidecar spec: generating, validating, reviewing, querying, and comparing structured paper sidecars, plus fetching from knows.academy.
+
+**When to use:** Token-efficient paper reading via sidecars (~700 tokens claims-only vs ~10K full PDF), generating `.knows.yaml` from drafts/LaTeX/notes, validating sidecar structure before sharing, producing peer reviews as sidecars, querying or summarizing existing sidecars, structurally comparing two papers, searching/fetching from knows.academy.
+
+**When NOT to use:** General web search or non-academic content (use oma-search), translating papers (use oma-translator), PDF parsing only without a sidecar (use oma-pdf), full peer-review workflow with editor system.
+
+**Modes:** Generate, Validate, Review, Analyze, Compare, Remote (search/fetch).
+
+**Core rules:**
+- Target spec is v0.9.0 / `paper@1` profile; the host LLM generates sidecars (never shell out to an external LLM SDK)
+- Anti-fabrication: if DOI/venue/year is not visible in source, omit the key entirely; never write `doi: TODO` or guess
+- Exact field names, single `provenance.actor` object, closed enums, unquoted numbers
+- Relation density ≥ 1.5 per statement; every claim needs `supported_by` evidence
+- Validate before sharing (`oma scholar lint`); use `--lenient` for third-party sidecars
+- knows.academy → OpenAlex fallback for older/non-2026 papers; the public proxy API needs no auth
+
+**Workflow:** PREPARE (mode + source) → ACQUIRE (metadata, sections, or local text) → REASON (extract claims/evidence/relations) → ACT (generate/lint/review/analyze/compare/fetch) → VERIFY (schema, enums, IDs, relations) → FINALIZE (sidecar/report/summary with caveats).
+
+**Resources:** `execution-protocol.md`, `sidecar-spec.md`, `api-endpoints.md`, `setup-openalex.md`, `upstream-spec-cache.md`, `fallback-providers.md`, `checklist.md`, plus `config/scholar-config.yaml`.
+
+---
+
+### oma-skill-creator
+
+**Domain:** Authoring and validating OMA skills in the SSL-lite Markdown format (Scheduling / Structural Flow / Logical Operations / References).
+
+**When to use:** Creating a new skill under `.agents/skills/{name}/SKILL.md`, updating an existing skill to the SSL-lite format, adding a canonical command/workflow path to an execution-heavy skill, auditing whether a skill has enough routing/execution/validation/recovery detail, deciding whether examples belong inline or in `resources/`.
+
+**When NOT to use:** Installing third-party skills into `$CODEX_HOME/skills` (external), creating a Codex plugin bundle (external), writing a general project plan unrelated to skill authoring (use oma-pm), editing product/infrastructure/frontend/backend/mobile code directly (use the matching specialist skill).
+
+**Core rules:**
+- Keep the four top-level sections exactly: Scheduling, Structural Flow, Logical Operations, References
+- Keep YAML frontmatter with clear `name` and `description`; run `oma skills audit` after editing the description (warn ≥ 60%, fail ≥ 75% TF-IDF cosine collision)
+- Include concrete `When NOT to use` boundaries with cross-routes to adjacent skills
+- Add exactly one inline canonical path (`Canonical command path` for fragile/repeatable commands, `Canonical workflow path` for judgment/research flow)
+- Put long variant-specific detail in `resources/`, not the main body; do not create README/changelog/install docs inside a skill
+
+**Workflow:** PREPARE (purpose, triggers, boundaries, I/O, dependencies) → ACQUIRE (read 1-3 analogous skills + conventions) → REASON (inline vs `resources/`) → ACT (draft from the SSL-lite template) → VERIFY (structural/routing/execution/formatting checks) → FINALIZE (changed files + validation report).
+
+**Resources:** `ssl-lite-template.md`, `validation-checklist.md`, plus shared `context-loading`, `quality-principles`.
+
+---
+
+### oma-slide
+
+**Domain:** Animation-rich HTML presentation deck generation at a fixed 1920×1080 stage, with deterministic validate/bundle/export to PDF/PNG/PPTX via the `oma slide` CLI.
+
+**When to use:** Creating a new presentation from a topic or outline, enhancing or reformatting an existing deck, generating per-slide HTML with animations and design-doctrine aesthetics, exporting a deck to PDF/PNG/PPTX, applying a named style preset, exporting to or importing from Canva.
+
+**When NOT to use:** Plain document creation with no slides, image generation alone (use oma-image directly), brand/design-system definition (use oma-design), deterministic CLI ops (validate/bundle/export) without generation (call the `oma slide` CLI directly).
+
+**Core rules:**
+- Skill authors the HTML; the CLI does everything else (scaffold, validate, bundle, export)
+- Local assets only: no remote URLs in `<img src>`/`<video src>`, only `./assets/<file>`
+- CJK → Pretendard font required on any Korean/Japanese/Chinese slide
+- `prefers-reduced-motion` wrapper, visible focus states, and `data-om-validate` required on every slide
+- Max 3 auto-fix iterations on validation, then surface the diff to the user
+- Defers image generation to oma-image; Canva MCP is optional and auto-provisioned only with explicit user consent
+
+**Workflow:** 7 phases — DETECT (mode), DISCOVER (clarify + evaluate assets), STYLE (3 live previews → user picks), GENERATE (`slide-NN.html` at 1920×1080), VALIDATE (`oma slide validate`, ≤3 auto-fix loops), REVIEW (viewer + optional bbox editor), DELIVER (`bundle` + optional PDF/PNG/PPTX export).
+
+**Resources:** `generation-protocol.md`, `design-doctrine.md`, `fixed-stage.md`, `style-presets.md`, `selection-index.json`, `animation-patterns.md`, `canva-integration.md`, `checklist.md`, plus an `assets/` directory.
+
+---
+
+### oma-video
+
+**Domain:** Short-form, explainer, and demo video generation via a key-optional 3-tier (CLI-first / MCP / guided) provider router, composing script → narration → visuals → captions → Remotion render.
+
+**When to use:** Generating short-form video (shorts/reels, 9:16) from a topic, explainers (16:9/9:16) from a README/code/data, demos/walkthroughs from a screen capture (`--source file`) or supervised headed web-app capture of any URL (`--source web`), re-rendering an existing run deterministically.
+
+**When NOT to use:** Generating a single still image (use oma-image), generating a slide deck (use oma-slide; video calls it internally for explainer frames), generating speech audio only (use oma-voice), non-linear editing of an existing finished mp4, live streaming (supervised web capture is in scope).
+
+**Core rules:**
+- Clarify or infer the mode before invoking; show the user the inferred plan rather than silently rendering from a vague brief
+- Key-optional dispatch: every external capability has a real path AND a key-free fallback; paid providers (Pexels, Pixelle) auto-enable only when their env key is present
+- Cost guardrail at ≥ `$0.20` (`--yes`/`OMA_VIDEO_YES=1` bypass); limits of 180s duration / 40 scenes
+- Deterministic outputs: `render-spec.json` + assets (+ seed + embedded Pretendard) are the determinism boundary; `OMA_VIDEO_MOCK=1` replays golden fixtures
+- Demo is human-in-the-loop: web capture only opens a headed browser and records while a human drives the flow — NO credential automation; `--url` and tokens masked in logs/manifest
+- Path safety (`--allow-external-out` for output outside `$PWD`)
+
+**Workflow:** PREPARE (mode/aspect/locale, clarify/amplify brief) → ACQUIRE (probe provider availability, validate capture path, check cost) → ACT (script → voice ∥ visuals ∥ captions → render-spec → render) → VERIFY (schema, manifest hashes, exit code, mp4) → FINALIZE (run-dir + mp4 path + coverage warnings).
+
+**Resources:** `execution-protocol.md`, `vendor-matrix.md`, `prompt-tips.md`, `checklist.md`, plus the vendored `remotion/` compositor, the `playwright/` web-capture driver, and the `mpt/` fallback compositor; `config/video-config.yaml`.
+
+---
+
+### oma-voice
+
+**Domain:** Local-first text-to-speech and speech-to-text via the Voicebox MCP server — fully on-device, no cloud, no API keys, no per-call cost.
+
+**When to use:** Generating short notification audio for agent task completion or blockers, producing voiceover/narration/audio assets (mp3 or wav), transcribing local audio files (mp3, wav, m4a, webm, flac) to Markdown, comparing voice profiles by re-running the same text against different profile ids.
+
+**When NOT to use:** Cloud TTS or high-fidelity multilingual cloud voices, real-time terminal microphone dictation (use Voicebox's hotkey dictation), voice cloning sample upload / profile creation (done in the Voicebox desktop app UI), video/music/sound design.
+
+**Core rules:**
+- Voicebox required: on handshake / `GET /health` failure, exit with a one-shot install/launch hint; do not retry or auto-relaunch
+- Profile required: if `voicebox_list_profiles` is empty, point the user at the app UI, then exit
+- Length limits: TTS caps at 5000 chars per call (warn at 2000), STT at 30 minutes; v1 does not auto-chunk
+- Auto-invocation transparency: notifications fire only when the task exceeds `auto_notify_after_sec` (default 60s); always announce intent in one line
+- Path safety (warn + confirm for output outside `$PWD`); SIGINT writes no partial output
+- Manifest required on every generation; no cost guard (Voicebox is free)
+
+**Workflow:** PREPARE (validate text/audio/language/path/profile) → ACQUIRE (clarify once if a signal is missing) → ACT (MCP `voicebox_speak` or `voicebox_transcribe`) → VERIFY (audio/transcript presence + manifest fields) → FINALIZE (write `manifest.json`, report path).
+
+**Resources:** `voice-matrix.md`, `prompt-tips.md`, `execution-protocol.md`, `checklist.md`, plus `config/voice-config.yaml`.
 
 ---
 

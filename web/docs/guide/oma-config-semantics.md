@@ -16,7 +16,7 @@ When both files exist, the project file wins for every key. This is intentional:
 
 | Key | Project wins? | Notes |
 |-----|:---:|-------|
-| `auto_update_cli` | Yes | Project value overrides global. Implemented in `resolveAutoUpdateCli` (`cli/commands/update/update.ts`). |
+| `auto_update_cli` | Yes | Project value overrides global. Implemented in `resolveAutoUpdateCli` (`cli/commands/update/auto-update-config.ts`). |
 | `serena.mode` | Yes | Controls Serena MCP transport mode (e.g., `stdio`, `sse`). |
 | `telemetry` | Yes | Vendor telemetry opt-in (`true` / `false`). |
 | `language` | Yes | Response language for agent outputs (e.g., `en`, `ko`, `ja`). |

@@ -388,7 +388,7 @@ oma agent:spawn <agent-id> <prompt> <session-id> [-m <vendor>] [-w <workspace>] 
 
 | Flag | Description |
 |:-----|:-----------|
-| `-m, --model <vendor>` | CLI vendor override: `antigravity`, `claude`, `codex`, `qwen` |
+| `-m, --model <vendor>` | CLI vendor override: `antigravity`, `claude`, `codex`, `cursor`, `qwen`, `grok`, `pi` |
 | `-w, --workspace <path>` | Working directory for the agent. Auto-detected from monorepo config if omitted. |
 | `--isolation <mode>` | Per-spawn isolation mode. Currently supports `worktree`: creates a fresh git worktree at `${tmpdir}/oma-worktrees/{sessionId}/{agentId}` on branch `oma/{sessionId}/{agentId}` and runs the agent there. The worktree is retained after exit; merge or discard commands are printed for manual review (no auto-merge). |
 | `--read-only` | Restrict the spawned agent to non-destructive tools (suppresses auto-approve flags). Used internally by `oma skills eval --live` for both eval arms. |
@@ -521,7 +521,7 @@ oma agent:review [-m <vendor>] [-p <prompt>] [-w <path>] [--no-uncommitted]
 
 | Flag | Description |
 |:-----|:-----------|
-| `-m, --model <vendor>` | CLI vendor to use: `antigravity`, `codex`, `claude`, `qwen`. Defaults to resolved vendor from config. |
+| `-m, --model <vendor>` | CLI vendor to use: `codex`, `claude`, `gemini`, `qwen`, `grok`. Defaults to `codex` when the resolved config vendor is unsupported. |
 | `-p, --prompt <prompt>` | Custom review prompt. If omitted, a default code review prompt is used. |
 | `-w, --workspace <path>` | Path to review. Defaults to the current working directory. |
 | `--no-uncommitted` | Skip uncommitted changes review. When set, only committed changes in the session are reviewed. |
@@ -707,7 +707,7 @@ oma hook --vendor <v> --event <nativeEvent> [--matcher <tool>]
 
 | Flag | Required | Description |
 |:-----|:---------|:-----------|
-| `--vendor <v>` | Yes | Vendor identity. One of: `claude`, `codex`, `gemini`, `qwen`, `cursor`, `grok`, `kiro`, `antigravity`, `pi` |
+| `--vendor <v>` | Yes | Vendor identity. One of: `claude`, `codex`, `cursor`, `gemini`, `grok`, `kiro`, `qwen`, `antigravity`. (The `pi` vendor is **not** valid here — it uses the in-process `installPiExtension` bridge instead of `oma hook`.) |
 | `--event <e>` | Yes | Native hook event name as registered in the vendor settings (e.g. `UserPromptSubmit`, `PreToolUse`, `Stop`) |
 | `--matcher <m>` | No | Optional tool name / matcher forwarded from the hook registration (e.g. `Bash`) |
 
@@ -754,7 +754,7 @@ Empty stdout means the chain produced a no-op for that event. A JSON object on s
 - The pi vendor uses its in-process `installPiExtension` bridge, not `oma hook`.
 - The daemon socket path (`SocketTransport`) is a future phase; the current transport is always in-process.
 
-See `docs/plans/designs/019-hook-oma-call-dispatch.md` for the full design and `019-appendix-handler-result-pi-mapping.md` for the daemon/pi-ext future arc.
+See `cli/commands/hook/command.ts` for the router implementation (internally referred to as "design 019") and `cli/commands/hook/probe/` for the per-vendor compatibility matrix.
 
 **Examples:**
 ```bash

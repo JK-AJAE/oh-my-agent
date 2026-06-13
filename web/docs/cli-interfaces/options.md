@@ -70,7 +70,6 @@ Set this environment variable to `json` to force JSON output on all commands tha
 | `visualize` | Yes | Yes | Dependency graph as JSON |
 | `describe` | Always JSON | N/A | Always outputs JSON (introspection command) |
 | `recap` | Yes | Yes | Conversation history per tool/session |
-| `export` | Yes | Yes | Export status and target paths |
 | `image generate` / `image doctor` / `image list-vendors` | `--format json` | N/A | Use `--format json` instead of `--json` |
 | `search ...` | Always JSON | N/A | All `search` subcommands stream JSON; use `--pretty` for human reading |
 
@@ -181,13 +180,13 @@ oma agent:spawn <agent-id> <prompt> <session-id> [-m <vendor>] [-w <workspace>]
 
 | Flag | Short | Description | Default |
 |:-----|:------|:-----------|:--------|
-| `--model` | `-m` | CLI vendor override. Must be one of: `antigravity`, `claude`, `codex`, `qwen`. Overrides all config-based vendor resolution. | Resolved from config |
+| `--model` | `-m` | CLI vendor override. Must be one of: `antigravity`, `claude`, `codex`, `cursor`, `qwen`, `grok`, `pi`. Overrides all config-based vendor resolution. | Resolved from config |
 | `--workspace` | `-w` | Working directory for the agent. If omitted or set to `.`, the CLI auto-detects the workspace from monorepo configuration files (pnpm-workspace.yaml, package.json, lerna.json, nx.json, turbo.json, mise.toml). | Auto-detected or `.` |
 
 **Validation:**
 - `agent-id` must be one of: `backend`, `frontend`, `mobile`, `qa`, `debug`, `pm`.
 - `session-id` must not contain `..`, `?`, `#`, `%`, or control characters.
-- `vendor` must be one of: `antigravity`, `claude`, `codex`, `qwen`.
+- `vendor` must be one of: `antigravity`, `claude`, `codex`, `cursor`, `qwen`, `grok`, `pi`.
 
 **Vendor-specific behavior:**
 
@@ -253,23 +252,13 @@ oma recap [--window <period>] [--date <date>] [--tool <tools>] [--top <n>] [--so
 |:-----|:-----------|:--------|
 | `--window <period>` | Time window: `1d`, `3d`, `7d`, `2w`, `30d`. Ignored when `--date` is set. | `1d` |
 | `--date <date>` | Specific date (`YYYY-MM-DD`). Takes precedence over `--window`. | |
-| `--tool <tools>` | Filter sessions by tool. Comma-separated: `claude`, `codex`, `qwen`, `cursor`, `antigravity`. | all tools |
+| `--tool <tools>` | Filter sessions by tool. Comma-separated: `grok`, `claude`, `codex`, `qwen`, `cursor`, `antigravity`. | all tools |
 | `--top <n>` | Show only top N projects/topics in the summary. | unlimited |
 | `--sort <metric>` | Sort sessions by `count` or `duration`. | `count` |
 | `--mermaid` | Output a Mermaid Gantt chart instead of the default summary. | `false` |
 | `--graph` | Open an interactive graph in the browser. Mutually exclusive with `--mermaid`. | `false` |
 
-### export
-
-```
-oma export <format> [-d <path>] [--json] [--output <format>]
-```
-
-| Flag | Short | Description | Default |
-|:-----|:------|:-----------|:--------|
-| `--dir <path>` | `-d` | Target directory to write the exported rules into. | `process.cwd()` |
-
-**Supported formats:** `cursor` (writes `.cursor/rules` files derived from the installed skills).
+> **Note:** Generating vendor rule files (e.g. `.cursor/rules`) from the installed skills is handled by [`oma link <vendor>`](./commands.md#link), not a separate `export` command.
 
 ### search
 
