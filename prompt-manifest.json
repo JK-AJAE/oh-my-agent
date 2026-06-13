@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "9.2.0",
-  "releaseDate": "2026-06-13T04:14:23.860Z",
+  "releaseDate": "2026-06-13T05:23:46.242Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -106,8 +106,8 @@
     },
     {
       "path": ".agents/config/defaults.yaml",
-      "sha256": "415ba0186e147b04759bacd22f27e5bf30d7305195c8a1b883ce16ee321bbb21",
-      "size": 7040
+      "sha256": "76961af8bb2d9d189b1ac8feb7cfa1552210ae8ce3cfaef5a68e2d51b0636544",
+      "size": 6206
     },
     {
       "path": ".agents/hooks/core/agentmemory-client.ts",
@@ -281,8 +281,8 @@
     },
     {
       "path": ".agents/oma-config.yaml",
-      "sha256": "4c9797067f797e16c41cb6558b47643661bcc29f34e59a97d99e128d1c05d49e",
-      "size": 10392
+      "sha256": "e844a7071dc8d37e5ce6fc08ead73ef9a1399dd4f3a08788f9577115ecc475d1",
+      "size": 11333
     },
     {
       "path": ".agents/rules/backend.md",
@@ -1126,13 +1126,13 @@
     },
     {
       "path": ".agents/skills/oma-mobile/SKILL.md",
-      "sha256": "830eb2a94d14f2fcab7b4817eb0a6a98db31de5920f5ccf1e907685d888ce61f",
-      "size": 7256
+      "sha256": "41f06b05ba59b08c2dc258c2c7c13b6b6d3f24969f6093015db0001a27d8560b",
+      "size": 7516
     },
     {
       "path": ".agents/skills/oma-mobile/resources/checklist.md",
-      "sha256": "8f0df05fc61ff6e382462aeaf7736e0efd32a95838cde2902e2ab64fd8a21125",
-      "size": 2227
+      "sha256": "5bb0879ee762c0090bbbc88afa9682d69408675c0bbc3bfdd65f724e0653bdb0",
+      "size": 2471
     },
     {
       "path": ".agents/skills/oma-mobile/resources/error-playbook.md",
@@ -1186,8 +1186,8 @@
     },
     {
       "path": ".agents/skills/oma-mobile/variants/swift-ios/snippets.md",
-      "sha256": "e9d77ec856eb858b08f297b1704cdfb2c4e8d81b39ee198aa3af821e6058a63c",
-      "size": 11461
+      "sha256": "918d1985440046b52a14e1d6803c6c20975e55d15ce8181c7b6c931137c9d99f",
+      "size": 15876
     },
     {
       "path": ".agents/skills/oma-mobile/variants/swift-ios/stack.yaml",
@@ -1196,8 +1196,8 @@
     },
     {
       "path": ".agents/skills/oma-mobile/variants/swift-ios/tech-stack.md",
-      "sha256": "5f3ce2f377e2f8fa36b6156fef6c339396d0d24f55d818d8d168ff1c0c94e18d",
-      "size": 4727
+      "sha256": "2e79afb52a92f5e142a4e60278d8a8cc44bb0e796a4f33d03271b0aeae8c4377",
+      "size": 5481
     },
     {
       "path": ".agents/skills/oma-observability/SKILL.md",
