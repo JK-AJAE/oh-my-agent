@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.8.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v9.7.0...cli-v9.8.0) (2026-06-16)
+
+
+### Features
+
+* **scm:** honor oma-config language for user-facing output ([629b9d7](https://github.com/first-fluke/oh-my-agent/commit/629b9d7a433b8f8417a7f7a072986e4a7b410e1b)), closes [#552](https://github.com/first-fluke/oh-my-agent/issues/552)
+
 ## [9.7.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v9.6.0...cli-v9.7.0) (2026-06-16)
 
 
