@@ -870,6 +870,7 @@ oma cleanup [--dry-run] [-y | --yes] [--json] [--output <format>]
 **What it cleans:**
 - Orphaned PID files in the system temp directory (`/tmp/subagent-*.pid`).
 - Orphaned log files (`/tmp/subagent-*.log`).
+- **Orphaned Serena language servers** — when an MCP client (e.g. Claude) exits, its `serena start-mcp-server` reparents to init and its LSP children (`tsserver`, `pyright`, …, hundreds of MB) keep running with no client. These are reaped here. The *idle-but-still-attached* case is handled separately by [`serena reap`](#serena).
 - Gemini Antigravity directories (brain, implicit, knowledge) under `.gemini/antigravity/`.
 
 **Examples:**
@@ -885,6 +886,64 @@ oma cleanup --yes
 
 # JSON output for automation
 oma cleanup --json
+```
+
+### serena
+
+Reclaim memory from Serena's per-project language servers. Serena spawns an LSP
+stack (`tsserver`, `pyright`, …, ~300 MB) per open project and keeps it warm for
+the whole session — with several projects open this adds up. The reaper kills
+idle LSP children; Serena self-heals and respawns them on the next tool call (no
+restart needed).
+
+```
+oma serena reap [--dry-run] [--quiet]
+oma serena reaper:enable [--dry-run]
+oma serena reaper:disable [--dry-run]
+```
+
+**Subcommands:**
+
+| Command | Description |
+|:--------|:-----------|
+| `serena reap` | Reap idle LSPs once now. Interactive runs always execute; `--quiet` (the scheduled path) honors the `enabled` opt-in. |
+| `serena reap --dry-run` | Preview reap targets and projected freed memory — never kills. |
+| `serena reaper:enable` | Install a background task that runs `serena reap --quiet` every 5 minutes (launchd / systemd timer / Windows Task Scheduler). |
+| `serena reaper:disable` | Remove the background task. |
+
+**Policy:** `lru` (default) keeps the `keepWarm` most-recently-active projects
+warm and reaps the rest; `idle` reaps any project idle past `idleMinutes`. A
+`graceSeconds` window protects in-flight tool calls.
+
+**Configuration** (`.agents/oma-config.yaml`, opt-in — disabled by default):
+
+```yaml
+serena_reaper:
+  enabled: false     # gates the scheduled (--quiet) path; interactive reap always runs
+  policy: lru        # lru | idle
+  keepWarm: 2        # LRU: keep this many most-recently-active projects warm
+  idleMinutes: 10    # idle threshold / LRU secondary floor
+  graceSeconds: 90   # in-flight protection; SIGTERM→SIGKILL window
+```
+
+Diagnostics (per-project KEEP/REAP state and the activity signal source) are
+shown by [`oma doctor`](#doctor). Orphaned (dead-client) Serena LSPs are reaped
+by [`oma cleanup`](#cleanup) regardless of this setting.
+
+**Examples:**
+```bash
+# See what would be reclaimed across all open projects
+oma serena reap --dry-run
+
+# Reap idle LSPs once, right now
+oma serena reap
+
+# Turn on automatic 5-minute background reaping
+#   (set serena_reaper.enabled: true in oma-config.yaml first)
+oma serena reaper:enable
+
+# Turn it back off
+oma serena reaper:disable
 ```
 
 ### visualize
