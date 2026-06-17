@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "9.9.0",
-  "releaseDate": "2026-06-17T11:34:55.605Z",
+  "releaseDate": "2026-06-17T13:42:47.307Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -1261,8 +1261,8 @@
     },
     {
       "path": ".agents/skills/oma-mobile/variants/swift-ios/tech-stack.md",
-      "sha256": "1c6753a1c31b13e9d2a72aef3ed5f0223b06f932156ee329b3d11d041b0f0a5b",
-      "size": 8299
+      "sha256": "b077b7eb5cc69a982ceb3547c692dd3a32221252e4ac5d87de28a81ef867c180",
+      "size": 10690
     },
     {
       "path": ".agents/skills/oma-observability/SKILL.md",
