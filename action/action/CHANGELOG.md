@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/first-fluke/oh-my-agent/compare/action-v1.2.0...action-v1.2.1) (2026-06-18)
+
+
+### Documentation
+
+* fix stale doc references found by oma docs verify ([932bd2c](https://github.com/first-fluke/oh-my-agent/commit/932bd2ceec4caa6cd9e261f70f5e9e6b06c639b6))
+
 ## [1.2.0](https://github.com/first-fluke/oh-my-agent/compare/action-v1.1.2...action-v1.2.0) (2026-05-19)
 
 
