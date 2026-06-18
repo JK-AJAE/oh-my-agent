@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.2.0",
-  "releaseDate": "2026-06-18T23:04:33.855Z",
+  "releaseDate": "2026-06-18T23:31:02.402Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -471,8 +471,8 @@
     },
     {
       "path": ".agents/skills/_shared/runtime/event-spec.md",
-      "sha256": "5132df9398ac805fae948ad55561d1bbd926b23ea85ac65e0fa8b12be8cceac5",
-      "size": 4887
+      "sha256": "8f1b177703cdec8e0981d3414bb2b7cc5a0a2766e3ab0641630cd436111af0fc",
+      "size": 5110
     },
     {
       "path": ".agents/skills/_shared/runtime/execution-protocols/antigravity.md",
@@ -2006,13 +2006,13 @@
     },
     {
       "path": ".agents/workflows/architecture.md",
-      "sha256": "467232627f62c4d512b418c03da75872042e6521dad88b241e97fd019fb2cd2a",
-      "size": 5004
+      "sha256": "83112e7b388c59890866bd2fff9a5a5c9fcd6c72ecdcf1cf0f85f66c3e9b2daa",
+      "size": 4977
     },
     {
       "path": ".agents/workflows/brainstorm.md",
-      "sha256": "f9f7b71bb21144b42327027a2cbacd084d4e901fbd811557894221b7e799efee",
-      "size": 6214
+      "sha256": "2703cbc4b43d32385956af548edad6790fb9808df04d4d60ae6f85133cc69168",
+      "size": 6187
     },
     {
       "path": ".agents/workflows/convert.md",
@@ -2021,8 +2021,8 @@
     },
     {
       "path": ".agents/workflows/debug.md",
-      "sha256": "03e4560cb942b556e4ded3aa6aa3d1927f1ec5dce03ecbea45500f98019a5fd0",
-      "size": 4501
+      "sha256": "ea45eb0bdbf8d92f4f3ae175b1d0de929869bae24b377b175461c1b100bc2b5c",
+      "size": 4474
     },
     {
       "path": ".agents/workflows/deepinit.md",
@@ -2031,8 +2031,8 @@
     },
     {
       "path": ".agents/workflows/deepsec.md",
-      "sha256": "f3e8292e3a12ebd0d1217dbf21ba2b685bbd21976dbac0cbf3a6c03820c0c632",
-      "size": 12557
+      "sha256": "3277ccf28d0c65c7732f5ff6c6fe24c05d49f9be4d659dd3f560e2b74bffa873",
+      "size": 12530
     },
     {
       "path": ".agents/workflows/design.md",
@@ -2041,18 +2041,18 @@
     },
     {
       "path": ".agents/workflows/docs.md",
-      "sha256": "7cb5b2c5e8816add335cf299c2848e4d92cde7c054e745765e12780b6255c4d7",
-      "size": 7685
+      "sha256": "d7ad4191cde9d386d8b868023342f0614737606ea9854c2f49f363f6f74e924b",
+      "size": 7658
     },
     {
       "path": ".agents/workflows/orchestrate.md",
-      "sha256": "39103b51618bbdf83ca951a23caa9d950d90e2b317d014b347106ffdeff77d7c",
-      "size": 9950
+      "sha256": "72124b5dfe3d2731e67a2df8ce87f4f891caa80cd5ca40dd10b3a2fcfaa1e698",
+      "size": 9943
     },
     {
       "path": ".agents/workflows/plan.md",
-      "sha256": "8732d0056526893784054c67d8b71635e972e8c0717d76961d78dd831f0109fe",
-      "size": 8377
+      "sha256": "38b9792edbbc654190d8c6439149dea41c896a7647ae004d1ab8eeca836099b5",
+      "size": 8350
     },
     {
       "path": ".agents/workflows/ralph/resources/judge-protocol.md",
@@ -2061,8 +2061,8 @@
     },
     {
       "path": ".agents/workflows/ralph.md",
-      "sha256": "afe1df62f1de5f27671766f2163a98d708a12e6fa3ca37dcf48f289bd7b6bd87",
-      "size": 19007
+      "sha256": "09d6e000ec91714b40887496b69de82c6667254204e470db7a0f0d583a8ac520",
+      "size": 19020
     },
     {
       "path": ".agents/workflows/recap.md",
@@ -2071,8 +2071,8 @@
     },
     {
       "path": ".agents/workflows/review.md",
-      "sha256": "ec5373fc389153dc3f50ff2ca18899920a100622e8b25e6850fb4a5e691e7f03",
-      "size": 5495
+      "sha256": "90b8694c8aa0caa188c19a0c8f6ca2718d779ea9fb88ea0ad43ab43ffb969653",
+      "size": 5468
     },
     {
       "path": ".agents/workflows/schedule.md",
@@ -2081,8 +2081,8 @@
     },
     {
       "path": ".agents/workflows/scm.md",
-      "sha256": "6474d17d67f89a3a350068b88815ac52cd84ed1e00b6b56bbaccb8d9c08ab0dc",
-      "size": 7392
+      "sha256": "ece9c8c27c65420d98f550bbc917a2e65f9850916f5ae9606474246bf8de1bd2",
+      "size": 7365
     },
     {
       "path": ".agents/workflows/stack-set.md",
@@ -2106,18 +2106,18 @@
     },
     {
       "path": ".agents/workflows/ultrawork.md",
-      "sha256": "047c1928dde730820b0a6f13a8f67a4dbd14ad0d8370beedd61f74fc50635844",
-      "size": 21380
+      "sha256": "00fe60bfac0c622e1d67603f41424e48f372a91d5db3338a49418510440edc06",
+      "size": 21379
     },
     {
       "path": ".agents/workflows/video.md",
-      "sha256": "ffa17dd109c60fc355148130d27906ff51e67b6a847fc039dcdc761fa0f2cf04",
-      "size": 21166
+      "sha256": "80827eb713e1a663878869e6a993b75f1f399e34afe351f74c7a3ace845fbe0e",
+      "size": 21054
     },
     {
       "path": ".agents/workflows/work.md",
-      "sha256": "fd2f758034d3d2b3825d91daa9a4ba6c8cf5fc6598579699b43dcdef901033ac",
-      "size": 8191
+      "sha256": "70e1fcaec5624468b025094b5682b7fe082cc0ded211188742204ab24e79076c",
+      "size": 8178
     }
   ],
   "checksums": {
