@@ -22,22 +22,46 @@ export interface Vendor {
   id: VendorId;
   label: string;
   isAuthenticated(): boolean;
+  /** CLI login command shown by `oma auth:status` when not authenticated.
+   * Omit for vendors with no interactive login surface. */
+  authHint?: string;
 }
 
 export const VENDORS: readonly Vendor[] = [
-  { id: "claude", label: "Claude CLI", isAuthenticated: isClaudeAuthenticated },
-  { id: "codex", label: "Codex CLI", isAuthenticated: isCodexAuthenticated },
+  {
+    id: "claude",
+    label: "Claude CLI",
+    isAuthenticated: isClaudeAuthenticated,
+    authHint: "claude auth",
+  },
+  {
+    id: "codex",
+    label: "Codex CLI",
+    isAuthenticated: isCodexAuthenticated,
+    authHint: "codex login",
+  },
   {
     id: "commandcode",
     label: "Command Code",
     isAuthenticated: isCommandCodeAuthenticated,
   },
-  { id: "cursor", label: "Cursor CLI", isAuthenticated: isCursorAuthenticated },
-  { id: "qwen", label: "Qwen CLI", isAuthenticated: isQwenAuthenticated },
+  {
+    id: "cursor",
+    label: "Cursor CLI",
+    isAuthenticated: isCursorAuthenticated,
+    authHint: "cursor agent login",
+  },
+  {
+    id: "qwen",
+    label: "Qwen CLI",
+    isAuthenticated: isQwenAuthenticated,
+    authHint: "qwen /auth",
+  },
   {
     id: "antigravity",
     label: "Antigravity CLI (agy)",
     isAuthenticated: () => isAntigravityAuthenticated(),
+    authHint: "agy auth",
   },
   {
     id: "grok",
@@ -53,6 +77,7 @@ export const VENDORS: readonly Vendor[] = [
     id: "kiro",
     label: "Kiro CLI",
     isAuthenticated: isKiroAuthenticated,
+    authHint: "kiro-cli login",
   },
   {
     id: "pi",
@@ -63,6 +88,7 @@ export const VENDORS: readonly Vendor[] = [
     id: "opencode",
     label: "OpenCode CLI",
     isAuthenticated: isOpencodeAuthenticated,
+    authHint: "opencode auth login",
   },
 ];
 
