@@ -114,6 +114,50 @@ function applyResolvedPlan(
   return applyPlanArgs(invocation, plan);
 }
 
+/** A vendor's native-invocation builder; all share one signature. */
+type NativeInvocationBuilder = (
+  agentId: string,
+  promptContent: string,
+  vendorConfig: VendorConfig,
+  options: NativeInvocationOptions,
+) => Invocation;
+
+/**
+ * Same-vendor native dispatch table: when runtimeVendor === targetVendor and the
+ * vendor appears here, dispatch natively using its builder and reason. Vendors
+ * absent from this table (pi, unknown, …) fall through to external dispatch.
+ * qwen is intentionally excluded — it is forced external before this lookup.
+ */
+const NATIVE_DISPATCH: Record<
+  string,
+  { build: NativeInvocationBuilder; reason: string }
+> = {
+  antigravity: {
+    build: buildAntigravityNativeInvocation,
+    reason: "same-vendor Antigravity (agy) runtime detected",
+  },
+  claude: {
+    build: buildClaudeNativeInvocation,
+    reason: "same-vendor Claude runtime detected",
+  },
+  codex: {
+    build: buildCodexNativeInvocation,
+    reason: "same-vendor Codex runtime detected",
+  },
+  gemini: {
+    build: buildGeminiNativeInvocation,
+    reason: "same-vendor Gemini runtime detected",
+  },
+  cursor: {
+    build: buildCursorAgentPrintInvocation,
+    reason: "same-vendor Cursor agent CLI (--print)",
+  },
+  kiro: {
+    build: buildKiroNativeInvocation,
+    reason: "same-vendor Kiro CLI (--no-interactive)",
+  },
+};
+
 export interface PlanDispatchOptions {
   /** When true, constrains the spawned agent to non-destructive tools.
    * Suppresses auto_approve_flag and appends the vendor's read_only_flag.
@@ -200,8 +244,11 @@ export function planDispatch(
     };
   }
 
-  if (runtimeVendor === "antigravity" && targetVendor === "antigravity") {
-    const inv = buildAntigravityNativeInvocation(
+  // Same-vendor native dispatch: one table lookup replaces a per-vendor if-chain.
+  const native =
+    runtimeVendor === targetVendor ? NATIVE_DISPATCH[targetVendor] : undefined;
+  if (native) {
+    const inv = native.build(
       agentId,
       promptContent,
       effectiveVendorConfig,
@@ -212,92 +259,7 @@ export function planDispatch(
       mode: "native",
       runtimeVendor,
       targetVendor,
-      reason: "same-vendor Antigravity (agy) runtime detected",
-      invocation: inv,
-    };
-  }
-
-  if (runtimeVendor === "claude" && targetVendor === "claude") {
-    const inv = buildClaudeNativeInvocation(
-      agentId,
-      promptContent,
-      effectiveVendorConfig,
-      invOptions,
-    );
-    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-    return {
-      mode: "native",
-      runtimeVendor,
-      targetVendor,
-      reason: "same-vendor Claude runtime detected",
-      invocation: inv,
-    };
-  }
-
-  if (runtimeVendor === "codex" && targetVendor === "codex") {
-    const inv = buildCodexNativeInvocation(
-      agentId,
-      promptContent,
-      effectiveVendorConfig,
-      invOptions,
-    );
-    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-    return {
-      mode: "native",
-      runtimeVendor,
-      targetVendor,
-      reason: "same-vendor Codex runtime detected",
-      invocation: inv,
-    };
-  }
-
-  if (runtimeVendor === "gemini" && targetVendor === "gemini") {
-    const inv = buildGeminiNativeInvocation(
-      agentId,
-      promptContent,
-      effectiveVendorConfig,
-      invOptions,
-    );
-    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-    return {
-      mode: "native",
-      runtimeVendor,
-      targetVendor,
-      reason: "same-vendor Gemini runtime detected",
-      invocation: inv,
-    };
-  }
-
-  if (runtimeVendor === "cursor" && targetVendor === "cursor") {
-    const inv = buildCursorAgentPrintInvocation(
-      agentId,
-      promptContent,
-      effectiveVendorConfig,
-      invOptions,
-    );
-    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-    return {
-      mode: "native",
-      runtimeVendor,
-      targetVendor,
-      reason: "same-vendor Cursor agent CLI (--print)",
-      invocation: inv,
-    };
-  }
-
-  if (runtimeVendor === "kiro" && targetVendor === "kiro") {
-    const inv = buildKiroNativeInvocation(
-      agentId,
-      promptContent,
-      effectiveVendorConfig,
-      invOptions,
-    );
-    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-    return {
-      mode: "native",
-      runtimeVendor,
-      targetVendor,
-      reason: "same-vendor Kiro CLI (--no-interactive)",
+      reason: native.reason,
       invocation: inv,
     };
   }
