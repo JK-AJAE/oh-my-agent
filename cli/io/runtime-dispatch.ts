@@ -18,6 +18,7 @@ import { buildAgentPlanArgs } from "./runtime-dispatch/plan-args.js";
 import { resolveAgentPlan } from "./runtime-dispatch/resolve-plan.js";
 import type {
   AgentPlan,
+  DispatchMode,
   DispatchPlan,
   Invocation,
 } from "./runtime-dispatch/types.js";
@@ -215,27 +216,42 @@ export function planDispatch(
     persistCodexEffortToToml(process.cwd(), activePlan.effort);
   }
 
-  // Qwen has no native parallel subagent dispatch → force external
-  if (runtimeVendor === "qwen") {
-    console.warn(
-      `[runtime-dispatch] ${runtimeVendor} runtime: all agents dispatched as external subprocess`,
-    );
+  // Shared tail for every dispatch path: apply the resolved per-agent plan flags
+  // (vendor-aware) and assemble the DispatchPlan result.
+  const finalize = (
+    mode: DispatchMode,
+    reason: string,
+    inv: Invocation,
+  ): DispatchPlan => {
+    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
+    return { mode, runtimeVendor, targetVendor, reason, invocation: inv };
+  };
+
+  // External subprocess dispatch. opencode resolves the per-agent persona from
+  // the generated `.opencode/agents/<id>.md` via `--agent <id>`; other external
+  // vendors keep the historical plain-prompt form (agentId stays undefined → no
+  // regression).
+  const dispatchExternal = (reason: string): DispatchPlan => {
+    const externalAgentId = targetVendor === "opencode" ? agentId : undefined;
     const inv = buildExternalInvocation(
       targetVendor,
       effectiveVendorConfig,
       promptFlag,
       promptContent,
-      targetVendor === "opencode" ? agentId : undefined,
+      externalAgentId,
       invOptions,
     );
-    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-    return {
-      mode: "external",
-      runtimeVendor,
-      targetVendor,
-      reason: `${runtimeVendor} runtime has no native parallel dispatch`,
-      invocation: inv,
-    };
+    return finalize("external", reason, inv);
+  };
+
+  // Qwen has no native parallel subagent dispatch → force external
+  if (runtimeVendor === "qwen") {
+    console.warn(
+      `[runtime-dispatch] ${runtimeVendor} runtime: all agents dispatched as external subprocess`,
+    );
+    return dispatchExternal(
+      `${runtimeVendor} runtime has no native parallel dispatch`,
+    );
   }
 
   // Same-vendor native dispatch: one table lookup replaces a per-vendor if-chain.
@@ -248,37 +264,12 @@ export function planDispatch(
       effectiveVendorConfig,
       invOptions,
     );
-    if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-    return {
-      mode: "native",
-      runtimeVendor,
-      targetVendor,
-      reason: native.reason,
-      invocation: inv,
-    };
+    return finalize("native", native.reason, inv);
   }
 
-  // opencode resolves the per-agent persona from the generated
-  // `.opencode/agents/<id>.md` via `--agent <id>`; other external vendors keep
-  // the historical plain-prompt form (agentId stays undefined → no regression).
-  const externalAgentId = targetVendor === "opencode" ? agentId : undefined;
-  const inv = buildExternalInvocation(
-    targetVendor,
-    effectiveVendorConfig,
-    promptFlag,
-    promptContent,
-    externalAgentId,
-    invOptions,
+  return dispatchExternal(
+    runtimeVendor === "unknown"
+      ? "runtime vendor not detected"
+      : "cross-vendor or unsupported native path",
   );
-  if (activePlan) applyResolvedPlan(inv, activePlan, targetVendor);
-  return {
-    mode: "external",
-    runtimeVendor,
-    targetVendor,
-    reason:
-      runtimeVendor === "unknown"
-        ? "runtime vendor not detected"
-        : "cross-vendor or unsupported native path",
-    invocation: inv,
-  };
 }
