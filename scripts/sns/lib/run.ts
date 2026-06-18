@@ -17,6 +17,7 @@ import {
   ensureDraftDir,
   writeEnglishDraft,
   writeJapaneseDraft,
+  writePortugueseDraft,
   writePrompt,
 } from "./drafts.ts";
 import {
@@ -29,9 +30,16 @@ import {
   reviewJapaneseDraft,
   translateToJapanese,
 } from "./qiita.ts";
-import type { EnglishDraft, JapaneseDraft } from "./types.ts";
+import {
+  prepareSyncReviewPrompt as prepareTabnewsReviewPrompt,
+  prepareTranslatePrompt as prepareTabnewsTranslatePrompt,
+  publishToTabnews,
+  reviewPortugueseDraft,
+  translateToPortuguese,
+} from "./tabnews.ts";
+import type { EnglishDraft, JapaneseDraft, PortugueseDraft } from "./types.ts";
 
-export type SnsTarget = "devto" | "qiita";
+export type SnsTarget = "devto" | "qiita" | "tabnews";
 
 export interface SnsArgs {
   since: string;
@@ -160,6 +168,77 @@ async function finalizeJapanese(
   return japanese;
 }
 
+async function finalizePortuguese(
+  label: string,
+  draft: PortugueseDraft,
+  args: SnsArgs,
+  outDir: string,
+  reviewPrompt?: string,
+): Promise<PortugueseDraft | null> {
+  const draftPaths = writePortugueseDraft(outDir, `${label}-draft`, draft);
+  console.log(`[pt/tabnews draft] ${draft.title}`);
+  console.log(`  md: ${draftPaths.mdPath}`);
+
+  let portuguese = draft;
+  if (!args.skipReview && reviewPrompt) {
+    const reviewPromptPath = writePrompt(
+      outDir,
+      `${label}-tabnews-review`,
+      reviewPrompt,
+    );
+    console.log(`  prompt (review): ${reviewPromptPath}`);
+    console.log(`Spawning reviewer (vendor=${args.vendor ?? "auto"})...`);
+    const reviewed = reviewPortugueseDraft(draft, args.vendor, reviewPrompt);
+    if ("skip" in reviewed) {
+      console.log(
+        `[pt/tabnews review] skipped: ${reviewed.reason}; using first-pass draft`,
+      );
+    } else {
+      portuguese = reviewed;
+    }
+  }
+
+  const ptPaths = writePortugueseDraft(outDir, label, portuguese);
+  console.log(`[pt/tabnews final] ${portuguese.title}`);
+  console.log(`  md: ${ptPaths.mdPath}`);
+
+  if (args.dryRun) return null;
+
+  const posted = await publishToTabnews(portuguese, args.force);
+  const where = args.force ? "published" : "saved as draft";
+  console.log(`TabNews: ${where} (${posted.url ?? `id=${posted.id}`})`);
+  return portuguese;
+}
+
+async function runSyncTabnews(
+  label: string,
+  english: EnglishDraft,
+  args: SnsArgs,
+  outDir: string,
+): Promise<void> {
+  const translatePrompt = prepareTabnewsTranslatePrompt(english);
+  const translatePromptPath = writePrompt(
+    outDir,
+    `${label}-tabnews-translate`,
+    translatePrompt,
+  );
+  console.log(`  prompt (tabnews translate): ${translatePromptPath}`);
+
+  if (args.dryRun) return;
+
+  console.log(`Spawning pt-BR translator (vendor=${args.vendor ?? "auto"})...`);
+  const draft = translateToPortuguese(english, args.vendor, translatePrompt);
+  if ("skip" in draft) {
+    console.log(`[pt/tabnews] skipped: ${draft.reason}`);
+    return;
+  }
+
+  const reviewPrompt = args.skipReview
+    ? undefined
+    : prepareTabnewsReviewPrompt(english, draft);
+  await finalizePortuguese(label, draft, args, outDir, reviewPrompt);
+}
+
 async function runWeeklyDevto(
   args: SnsArgs,
   outDir: string,
@@ -251,10 +330,6 @@ async function runSyncQiita(
   args: SnsArgs,
   outDir: string,
 ): Promise<void> {
-  const enPaths = writeEnglishDraft(outDir, label, english);
-  console.log(`[en/dev.to source] ${english.title}`);
-  console.log(`  md: ${enPaths.mdPath}`);
-
   const translatePrompt = prepareTranslatePrompt(english);
   const translatePromptPath = writePrompt(
     outDir,
@@ -292,7 +367,15 @@ async function runSync(args: SnsArgs, outDir: string): Promise<void> {
     console.log(`\nFetching dev.to article id=${summary.id}...`);
     const article = await fetchDevtoArticle(summary.id);
     const english = articleToEnglishDraft(article);
-    await runSyncQiita(String(summary.id), english, args, outDir);
+    const enPaths = writeEnglishDraft(outDir, String(summary.id), english);
+    console.log(`[en/dev.to source] ${english.title}`);
+    console.log(`  md: ${enPaths.mdPath}`);
+    if (args.targets.has("qiita")) {
+      await runSyncQiita(String(summary.id), english, args, outDir);
+    }
+    if (args.targets.has("tabnews")) {
+      await runSyncTabnews(String(summary.id), english, args, outDir);
+    }
   }
 }
 
