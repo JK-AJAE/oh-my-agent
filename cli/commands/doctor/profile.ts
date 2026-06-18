@@ -19,7 +19,7 @@ import {
   BUILT_IN_PRESET_ALIASES,
   BUILT_IN_PRESETS,
 } from "../../platform/built-in-presets.js";
-import { getModelSpec } from "../../platform/model-registry.js";
+import { getModelSpec, ownerToVendor } from "../../platform/model-registry.js";
 import {
   isAntigravityAuthenticated,
   isClaudeAuthenticated,
@@ -173,17 +173,9 @@ function resolvePreset(
 // Model slug → CLI vendor
 // ---------------------------------------------------------------------------
 
-const OWNER_TO_CLI: Record<string, string> = {
-  anthropic: "claude",
-  openai: "codex",
-  qwen: "qwen",
-  cursor: "cursor",
-  antigravity: "antigravity",
-};
-
 function cliFromModelSlug(slug: string): string {
   const owner = slug.split("/")[0] ?? "";
-  return OWNER_TO_CLI[owner] ?? "unknown";
+  return ownerToVendor(owner) ?? "unknown";
 }
 
 // ---------------------------------------------------------------------------

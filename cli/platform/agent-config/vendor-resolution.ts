@@ -4,7 +4,7 @@ import {
   BUILT_IN_PRESET_ALIASES,
   BUILT_IN_PRESETS,
 } from "../built-in-presets.js";
-import { getModelSpec } from "../model-registry.js";
+import { getModelSpec, ownerToVendor } from "../model-registry.js";
 import { AGENT_CONFIG_ALIASES, AGENT_IDS } from "./agent-ids.js";
 import {
   findConfigFileUp,
@@ -38,12 +38,7 @@ function resolveVendorFromModelSlug(
   if (spec?.cli) return spec.cli;
 
   const owner = modelSlug.split("/")[0] ?? modelSlug;
-  const OWNER_TO_VENDOR: Record<string, string> = {
-    anthropic: "claude",
-    openai: "codex",
-    qwen: "qwen",
-  };
-  return OWNER_TO_VENDOR[owner] ?? owner;
+  return ownerToVendor(owner) ?? owner;
 }
 
 export function splitArgs(value: string): string[] {
