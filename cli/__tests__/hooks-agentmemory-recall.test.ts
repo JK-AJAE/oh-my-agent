@@ -1,6 +1,7 @@
 import { createServer, type Server } from "node:http";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  _resetReachableCache,
   parseSearchResults,
   recallFacts,
 } from "../../.agents/hooks/core/agentmemory-client.ts";
@@ -38,12 +39,22 @@ describe("hooks recallFacts", () => {
   afterEach(() => {
     for (const fn of cleanup.splice(0)) fn();
     delete process.env.AGENTMEMORY_URL;
+    _resetReachableCache();
   });
 
   it("short-circuits an empty query without touching the network", async () => {
     // No AGENTMEMORY_URL set, so any network attempt would fail — an empty
     // result here proves the guard returned before dispatch.
     await expect(recallFacts("   ", 5)).resolves.toEqual([]);
+  });
+
+  it("never rejects when the daemon transport fails (contract: best-effort)", async () => {
+    // Point at a port nothing is listening on so the request fails. recallFacts
+    // must honor its "never throws" contract and resolve to [] rather than
+    // reject — an unguarded throw here would blank the boundary snapshot the
+    // state-boundary hook emits, which surfaced as a flaky empty-output failure.
+    process.env.AGENTMEMORY_URL = "http://127.0.0.1:1";
+    await expect(recallFacts("adopt recall", 5)).resolves.toEqual([]);
   });
 
   it("maps enriched results and filters the raw-observe noise floor", async () => {
