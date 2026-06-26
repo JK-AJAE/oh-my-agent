@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.4.2",
-  "releaseDate": "2026-06-25T15:58:16.911Z",
+  "releaseDate": "2026-06-26T01:40:51.036Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -291,7 +291,7 @@
     },
     {
       "path": ".agents/mcp_config.json",
-      "sha256": "81e8363cbb78a666513724cc06d869de10be8fa35fae27f50142f067678bb5fa",
+      "sha256": "73dcb1cc4847ff34ca5d3f037b98a489243c1db864fc328e81b6b678d3a3aa39",
       "size": 624
     },
     {
