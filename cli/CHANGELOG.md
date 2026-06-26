@@ -1,5 +1,12 @@
 # Changelog
 
+## [10.6.1](https://github.com/first-fluke/oh-my-agent/compare/cli-v10.6.0...cli-v10.6.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* **sns:** harden agent JSON parsing with jsonrepair and retry ([fda16b9](https://github.com/first-fluke/oh-my-agent/commit/fda16b99632d2661f0e1f3b84a9f465b82bd1ca3))
+
 ## [10.6.0](https://github.com/first-fluke/oh-my-agent/compare/cli-v10.5.0...cli-v10.6.0) (2026-06-26)
 
 
