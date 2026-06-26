@@ -3,8 +3,10 @@ import { join } from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
 import {
+  ensureSerenaBinary,
   ensureSerenaProject,
   resolveSerenaLanguages,
+  SERENA_INSTALL_HINT,
 } from "../../io/serena.js";
 import { downloadAndExtract } from "../../io/tarball.js";
 import {
@@ -410,6 +412,27 @@ export async function install(options: InstallOptions = {}): Promise<void> {
         }
         if (registered) {
           p.log.success(pc.green("Project registered in Serena"));
+        }
+
+        // The Serena MCP transport runs `command: "serena"` (migration 009), so
+        // the binary must be on PATH. Best-effort self-install when missing —
+        // graceful when `uv` is absent (e.g. CI), so install never hard-fails.
+        const serenaBinary = ensureSerenaBinary({
+          onInstallStart: () =>
+            p.log.info(
+              "Installing serena-agent (uv tool install — first run may take a minute)…",
+            ),
+        });
+        if (serenaBinary.status === "installed") {
+          p.log.success(pc.green("Installed serena-agent"));
+        } else if (serenaBinary.status === "install-failed") {
+          p.log.warn(
+            `serena-agent install failed — run \`${SERENA_INSTALL_HINT}\` manually.`,
+          );
+        } else if (serenaBinary.status === "uv-missing") {
+          p.log.warn(
+            `serena not found and uv is unavailable — install uv, then run \`${SERENA_INSTALL_HINT}\`.`,
+          );
         }
       }
 

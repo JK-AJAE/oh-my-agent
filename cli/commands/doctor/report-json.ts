@@ -25,7 +25,15 @@ export function serializeReportAsJson(report: DoctorReport): string {
           }))
         : [],
     missingSkills: report.missingSkills.map((s) => s.name),
-    serena: { exists: report.hasSerena, fileCount: report.serenaFileCount },
+    serena: {
+      exists: report.hasSerena,
+      fileCount: report.serenaFileCount,
+      binary: {
+        installed: report.serenaBinary.installed,
+        version: report.serenaBinary.version || null,
+        installCmd: report.serenaBinary.installCmd,
+      },
+    },
     agentMemory: {
       status: report.agentMemory.status,
       binary: report.agentMemory.binary,

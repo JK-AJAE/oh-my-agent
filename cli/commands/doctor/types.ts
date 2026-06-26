@@ -128,6 +128,8 @@ export interface DoctorReport {
   vendorDocs: VendorDocCheck[];
   hasSerena: boolean;
   serenaFileCount: number;
+  /** Whether the `serena` binary (the MCP transport command) is on PATH. */
+  serenaBinary: CLICheck;
   agentMemory: AgentMemoryDoctorCheck;
   serenaReap: SerenaReapDoctorCheck;
   totalIssues: number;

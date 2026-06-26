@@ -125,6 +125,7 @@ const miscState = vi.hoisted(() => ({
   mergeRulesIndexForVendor: vi.fn(() => false),
   ensureSerenaProject: vi.fn(() => ({ configured: false, registered: false })),
   resolveSerenaLanguages: vi.fn(() => ["typescript"]),
+  ensureSerenaBinary: vi.fn(() => ({ status: "present" })),
   acquireLock: vi.fn(() => ({ ok: true, release: vi.fn() })),
   bindInstallLockRelease: vi.fn((release: () => void) => release),
 }));
@@ -166,6 +167,9 @@ vi.mock("../../platform/rules.js", () => ({
 vi.mock("../../io/serena.js", () => ({
   ensureSerenaProject: miscState.ensureSerenaProject,
   resolveSerenaLanguages: miscState.resolveSerenaLanguages,
+  ensureSerenaBinary: miscState.ensureSerenaBinary,
+  SERENA_INSTALL_HINT:
+    "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",
 }));
 vi.mock("../../utils/install-lock.js", () => ({
   acquireLock: miscState.acquireLock,

@@ -169,7 +169,7 @@ describe("checkCLI via collectDoctorReport", () => {
 
     // Let the Promise constructors run so spawn() is called for all CLIs
     await vi.advanceTimersByTimeAsync(0);
-    expect(spawnState.lastProcs).toHaveLength(8);
+    expect(spawnState.lastProcs).toHaveLength(9);
 
     settleProcs(0, "1.2.3\n");
     await vi.advanceTimersByTimeAsync(0);
@@ -187,7 +187,7 @@ describe("checkCLI via collectDoctorReport", () => {
     const reportPromise = collectDoctorReport();
 
     await vi.advanceTimersByTimeAsync(0);
-    expect(spawnState.lastProcs).toHaveLength(8);
+    expect(spawnState.lastProcs).toHaveLength(9);
 
     settleProcs(1);
     await vi.advanceTimersByTimeAsync(0);
@@ -203,7 +203,7 @@ describe("checkCLI via collectDoctorReport", () => {
     const reportPromise = collectDoctorReport();
 
     await vi.advanceTimersByTimeAsync(0);
-    expect(spawnState.lastProcs).toHaveLength(8);
+    expect(spawnState.lastProcs).toHaveLength(9);
 
     errorProcs();
     await vi.advanceTimersByTimeAsync(0);
@@ -220,7 +220,7 @@ describe("checkCLI via collectDoctorReport", () => {
     const reportPromise = collectDoctorReport();
 
     await vi.advanceTimersByTimeAsync(0);
-    expect(spawnState.lastProcs).toHaveLength(8);
+    expect(spawnState.lastProcs).toHaveLength(9);
 
     // Advance past the 5000ms probe timeout + 200ms SIGKILL grace
     await vi.advanceTimersByTimeAsync(5200);
@@ -306,6 +306,49 @@ describe("vendor doc OMA block checks", () => {
     const agents = report.vendorDocs.find((d) => d.fileName === "AGENTS.md");
 
     expect(agents?.required).toBe(false);
+  });
+});
+
+describe("serena binary doctor check", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    spawnState.lastProcs.length = 0;
+    vi.clearAllMocks();
+    spawnState.execFileSyncFn.mockReturnValue("");
+    // Mark the project as Serena-activated so a missing binary counts as an issue.
+    vi.mocked(existsSync).mockImplementation((p) =>
+      String(p).endsWith("memories"),
+    );
+    vi.mocked(readFileSync).mockReturnValue("");
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("flags a missing serena binary as an issue with the uv install hint", async () => {
+    const reportPromise = collectDoctorReport();
+    await vi.advanceTimersByTimeAsync(0);
+    settleProcs(1); // every probe (incl. serena) exits non-zero → not installed
+    await vi.advanceTimersByTimeAsync(0);
+
+    const report = await reportPromise;
+
+    expect(report.serenaBinary.installed).toBe(false);
+    expect(report.serenaBinary.installCmd).toContain("uv tool install");
+    expect(report.totalIssues).toBeGreaterThanOrEqual(1);
+  });
+
+  it("does not flag the serena binary when it is on PATH", async () => {
+    const reportPromise = collectDoctorReport();
+    await vi.advanceTimersByTimeAsync(0);
+    settleProcs(0, "Serena 1.3.0\n"); // every probe exits 0 → installed
+    await vi.advanceTimersByTimeAsync(0);
+
+    const report = await reportPromise;
+
+    expect(report.serenaBinary.installed).toBe(true);
+    expect(report.serenaBinary.version).toBe("Serena 1.3.0");
   });
 });
 

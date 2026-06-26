@@ -16,6 +16,18 @@ export function renderFooter(report: DoctorReport): void {
     );
   }
 
+  if (report.serenaBinary.installed) {
+    p.note(
+      `${pc.green("✅")} serena binary on PATH${report.serenaBinary.version ? `\n${pc.dim(report.serenaBinary.version)}` : ""}`,
+      "Serena Binary",
+    );
+  } else {
+    p.note(
+      `${pc.yellow("⚠️")} serena binary not found on PATH\n${pc.dim("MCP would fail with 'MCP error -32001: Request timed out'")}\n${pc.dim(`Fix: ${report.serenaBinary.installCmd}`)}`,
+      "Serena Binary",
+    );
+  }
+
   renderSerenaReap(report);
 
   for (const doc of report.vendorDocs) {

@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { SERENA_INSTALL_HINT } from "../../io/serena.js";
 import { downloadAndExtract } from "../../io/tarball.js";
 import {
   getAllSkills,
@@ -90,11 +91,17 @@ export async function collectDoctorReport(
   const cwd = process.cwd();
   const dualInstall = await checkDualInstall(cwd);
 
-  const clis = await Promise.all(
-    CLI_DEFINITIONS.map(([name, cmd, installCmd]) =>
-      checkCLI(name, cmd, installCmd),
+  // Probe the serena binary in the same batch as the vendor CLIs so every
+  // `spawn` is created up front (migration 009's MCP transport runs
+  // `command: "serena"`, so a missing binary is a real failure mode).
+  const [clis, serenaBinary] = await Promise.all([
+    Promise.all(
+      CLI_DEFINITIONS.map(([name, cmd, installCmd]) =>
+        checkCLI(name, cmd, installCmd),
+      ),
     ),
-  );
+    checkCLI("serena", "serena", SERENA_INSTALL_HINT),
+  ]);
 
   const mcpChecks: McpCheck[] = clis
     .filter((c) => c.installed)
@@ -140,6 +147,8 @@ export async function collectDoctorReport(
     (d) => d.required && !d.hasOmaBlock,
   ).length;
   const selfHealingIssues = selfHealing && !selfHealing.ok ? 1 : 0;
+  // Only an issue when the project is Serena-activated — don't flag plain dirs.
+  const serenaBinaryIssues = hasSerena && !serenaBinary.installed ? 1 : 0;
 
   const totalIssues =
     missingCLIs.length +
@@ -148,7 +157,8 @@ export async function collectDoctorReport(
     agentMemory.issues.length +
     serenaReap.issues.length +
     state.issues.length +
-    selfHealingIssues;
+    selfHealingIssues +
+    serenaBinaryIssues;
 
   return {
     cwd,
@@ -160,6 +170,7 @@ export async function collectDoctorReport(
     vendorDocs,
     hasSerena,
     serenaFileCount,
+    serenaBinary,
     agentMemory,
     serenaReap,
     totalIssues,
