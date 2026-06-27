@@ -1,6 +1,11 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { EnglishDraft, JapaneseDraft, PortugueseDraft } from "./types.ts";
+import type {
+  BlueskyPost,
+  EnglishDraft,
+  JapaneseDraft,
+  PortugueseDraft,
+} from "./types.ts";
 
 export function ensureDraftDir(baseDir: string): string {
   mkdirSync(baseDir, { recursive: true });
@@ -44,6 +49,17 @@ export function writePortugueseDraft(
   writeFileSync(mdPath, draft.body);
   writeFileSync(jsonPath, JSON.stringify(draft, null, 2));
   return { mdPath, jsonPath };
+}
+
+export function writeBlueskyDraft(
+  dir: string,
+  label: string,
+  post: BlueskyPost,
+): { txtPath: string } {
+  const safe = label.replace(/[^a-zA-Z0-9._-]+/g, "-");
+  const txtPath = join(dir, `${safe}-bsky.txt`);
+  writeFileSync(txtPath, post.text);
+  return { txtPath };
 }
 
 export function writePrompt(

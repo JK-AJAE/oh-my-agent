@@ -6,6 +6,12 @@ import {
   formatContextForPrompt,
 } from "../../utils/git-context.ts";
 import {
+  announceLink,
+  generateBlueskyAnnounce,
+  prepareAnnouncePrompt,
+  publishToBluesky,
+} from "./bluesky.ts";
+import {
   articleToEnglishDraft,
   fetchDevtoArticle,
   fetchDevtoList,
@@ -15,6 +21,7 @@ import {
 } from "./devto.ts";
 import {
   ensureDraftDir,
+  writeBlueskyDraft,
   writeEnglishDraft,
   writeJapaneseDraft,
   writePortugueseDraft,
@@ -39,7 +46,7 @@ import {
 } from "./tabnews.ts";
 import type { EnglishDraft, JapaneseDraft, PortugueseDraft } from "./types.ts";
 
-export type SnsTarget = "devto" | "qiita" | "tabnews";
+export type SnsTarget = "devto" | "qiita" | "tabnews" | "bluesky";
 
 export interface SnsArgs {
   since: string;
@@ -239,6 +246,45 @@ async function runSyncTabnews(
   await finalizePortuguese(label, draft, args, outDir, reviewPrompt);
 }
 
+async function runAnnounceBluesky(
+  label: string,
+  english: EnglishDraft,
+  url: string,
+  args: SnsArgs,
+  outDir: string,
+): Promise<void> {
+  const prompt = prepareAnnouncePrompt(english, url);
+  const promptPath = writePrompt(outDir, `${label}-bluesky`, prompt);
+  console.log(`  prompt (bluesky): ${promptPath}`);
+
+  if (args.dryRun) return;
+
+  console.log(
+    `Spawning Bluesky announcer (vendor=${args.vendor ?? "auto"})...`,
+  );
+  const post = generateBlueskyAnnounce(english, url, args.vendor, prompt);
+  if ("skip" in post) {
+    console.log(`[bluesky] skipped: ${post.reason}`);
+    return;
+  }
+
+  const draftPaths = writeBlueskyDraft(outDir, label, post);
+  const preview =
+    post.text.length > 60 ? `${post.text.slice(0, 60)}...` : post.text;
+  console.log(`[bluesky] ${preview}`);
+  console.log(`  txt: ${draftPaths.txtPath}`);
+
+  if (!args.force) {
+    console.log(
+      "[bluesky] not posted: Bluesky has no draft mode; rerun with --force to post.",
+    );
+    return;
+  }
+
+  const posted = await publishToBluesky(post, announceLink(english, url));
+  console.log(`Bluesky: posted (${posted.url ?? posted.uri})`);
+}
+
 async function runWeeklyDevto(
   args: SnsArgs,
   outDir: string,
@@ -263,6 +309,10 @@ async function runWeeklyDevto(
   const posted = await publishToDevto(english, args.force);
   const where = args.force ? "published" : "saved as draft";
   console.log(`dev.to: ${where} (${posted.url ?? `id=${posted.id}`})`);
+
+  if (args.targets.has("bluesky") && posted.url) {
+    await runAnnounceBluesky("weekly", english, posted.url, args, outDir);
+  }
 }
 
 async function runWeeklyQiita(
@@ -375,6 +425,15 @@ async function runSync(args: SnsArgs, outDir: string): Promise<void> {
     }
     if (args.targets.has("tabnews")) {
       await runSyncTabnews(String(summary.id), english, args, outDir);
+    }
+    if (args.targets.has("bluesky")) {
+      await runAnnounceBluesky(
+        String(summary.id),
+        english,
+        article.url,
+        args,
+        outDir,
+      );
     }
   }
 }

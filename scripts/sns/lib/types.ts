@@ -19,6 +19,12 @@ export interface PortugueseDraft {
   source_url: string;
 }
 
+// Bluesky is a micro-post (<=300 graphemes) that announces a dev.to article;
+// the link itself is carried by an attached external embed card, not the text.
+export interface BlueskyPost {
+  text: string;
+}
+
 export interface SkipPayload {
   skip: true;
   reason: string;
