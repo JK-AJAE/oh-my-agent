@@ -6,6 +6,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+import { loadUserConfig } from "../io/runtime-dispatch/config-loader.js";
+import { resolveAgentPlanFromConfig } from "../io/runtime-dispatch/resolve-plan.js";
 import {
   parseFrontmatter,
   serializeFrontmatter,
@@ -219,7 +221,12 @@ function buildMarkdownAgentFile(
     fm[getMaxTurnsField(vendor)] =
       config.maxTurns || frontmatter.maxTurns || variant.maxTurnsDefault;
   }
-  if (config.effort) fm.effort = config.effort;
+  if (config.effort) {
+    // opencode expresses reasoning depth as a model `variant`, not `effort`
+    // (#583-2); other markdown vendors keep the abstract `effort` key.
+    if (vendor === "opencode") fm.variant = config.effort;
+    else fm.effort = config.effort;
+  }
   if (config.kind) fm.kind = config.kind;
   if (config.temperature !== undefined) fm.temperature = config.temperature;
   if (config.timeoutMins !== undefined) {
@@ -335,6 +342,7 @@ const ALLOWED_FIELDS: Record<string, readonly string[]> = {
     "description",
     "mode",
     "model",
+    "variant",
     "temperature",
     "tools",
     "permission",
@@ -382,6 +390,34 @@ export function sanitizeFrontmatterForVendor(
 }
 
 /**
+ * Resolve the OpenCode model slug + variant (effort) for an agent from
+ * oma-config (#583-2).
+ *
+ * OpenCode subagents inherit the invoking primary agent's model when their own
+ * frontmatter pins none. That silently discards OMA's per-agent routing during
+ * native `task` dispatch. So when oma-config routes this agent to OpenCode, we
+ * pin the resolved catalog slug (`cli_model`) and map `effort` → `variant`.
+ *
+ * This is NOT a hardcoded default: it only pins a model the user explicitly
+ * routed to OpenCode. Agents routed elsewhere (or an unreadable/missing config)
+ * return `{}`, leaving the generator's "inherit" sentinel intact (#580).
+ */
+function resolveOpencodeAgentModel(
+  sourceDir: string,
+  agentKey: string,
+): { model?: string; effort?: string } {
+  try {
+    const config = loadUserConfig(sourceDir);
+    const plan = resolveAgentPlanFromConfig(agentKey, config);
+    if (plan.cli !== "opencode") return {};
+    return { model: plan.cliModel, effort: plan.effort };
+  } catch {
+    // Missing/invalid config or unknown slug → fall back to inherit.
+    return {};
+  }
+}
+
+/**
  * Generate vendor-specific agent files from core definitions and variant config.
  */
 export function installVendorAgents(
@@ -424,7 +460,22 @@ export function installVendorAgents(
   mkdirSync(destDir, { recursive: true });
 
   for (const definition of readAbstractAgentDefinitions(sourceDir)) {
-    const config = variant.agents[definition.agentKey] || {};
+    const config: AgentConfig = {
+      ...(variant.agents[definition.agentKey] || {}),
+    };
+
+    // #583-2: pin the OpenCode-routed model/variant so native task-dispatched
+    // subagents stop inheriting the primary agent's model. An explicit variant
+    // override (config.model / config.effort) still wins.
+    if (vendor === "opencode") {
+      const resolved = resolveOpencodeAgentModel(
+        sourceDir,
+        definition.agentKey,
+      );
+      if (resolved.model && !config.model) config.model = resolved.model;
+      if (resolved.effort && !config.effort) config.effort = resolved.effort;
+    }
+
     const output =
       vendor === "codex"
         ? buildCodexAgentFile(definition, variant, config)

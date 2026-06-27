@@ -661,6 +661,77 @@ describe("installVendorAgents — opencode variant", () => {
     warnSpy.mockRestore();
   });
 
+  // #583-2: when oma-config routes the agent to OpenCode, the generated
+  // frontmatter must pin the resolved catalog slug + variant so a native
+  // task-dispatched subagent stops inheriting the primary agent's model.
+  function writeOmaConfig(sourceDir: string, body: string[]): void {
+    writeFileSync(
+      join(sourceDir, ".agents", "oma-config.yaml"),
+      body.join("\n"),
+    );
+  }
+
+  const OPENCODE_ROUTED_CONFIG = [
+    "language: en",
+    "model_preset: antigravity",
+    "models:",
+    "  opencode-go/deepseek-v4-flash:",
+    "    cli: opencode",
+    "    cli_model: openai/gpt-5.5",
+    '    auth_hint: "OpenCode Go subscription"',
+    "    supports:",
+    "      effort: null",
+    "      apply_patch: false",
+    "      task_budget: false",
+    "      prompt_cache: false",
+    "      computer_use: false",
+    "      native_dispatch_from: [opencode]",
+    "      api_only: false",
+    "agents:",
+    "  backend:",
+    "    model: opencode-go/deepseek-v4-flash",
+    "    effort: high",
+  ];
+
+  it("pins the OpenCode-routed model and maps effort → variant (#583-2)", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const sourceDir = makeOpencodeSourceDir();
+    writeOmaConfig(sourceDir, OPENCODE_ROUTED_CONFIG);
+    const targetDir = makeTargetDir();
+
+    installVendorAgents(sourceDir, targetDir, "opencode");
+
+    const content = readFileSync(
+      join(targetDir, ".opencode", "agents", "backend-engineer.md"),
+      "utf-8",
+    );
+    expect(content).toContain("mode: subagent");
+    expect(content).toMatch(/^model: openai\/gpt-5\.5$/m);
+    expect(content).toMatch(/^variant: high$/m);
+    // Reasoning depth is `variant`, never the abstract `effort` key, for opencode.
+    expect(content).not.toMatch(/^effort:/m);
+    warnSpy.mockRestore();
+  });
+
+  it("keeps the inherit sentinel when the agent is NOT routed to OpenCode (#583-2)", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const sourceDir = makeOpencodeSourceDir();
+    // claude preset → backend resolves to a non-opencode cli → no model pin.
+    writeOmaConfig(sourceDir, ["language: en", "model_preset: claude"]);
+    const targetDir = makeTargetDir();
+
+    installVendorAgents(sourceDir, targetDir, "opencode");
+
+    const content = readFileSync(
+      join(targetDir, ".opencode", "agents", "backend-engineer.md"),
+      "utf-8",
+    );
+    expect(content).toContain("mode: subagent");
+    expect(content).not.toMatch(/^model:/m);
+    expect(content).not.toMatch(/^variant:/m);
+    warnSpy.mockRestore();
+  });
+
   it("generated frontmatter does not contain sandbox_mode or effort", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const sourceDir = makeOpencodeSourceDir();
