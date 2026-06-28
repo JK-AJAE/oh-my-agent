@@ -17,6 +17,7 @@ import {
   resolveJsonMode,
   runAction,
 } from "../../utils/cli-framework.js";
+import { resolveProjectRoot } from "../../utils/fs-utils.js";
 import { listInjectLogs, viewInjectLog } from "./inject-log.js";
 import {
   archiveStateSessions,
@@ -111,12 +112,12 @@ function registerDecisionVerifyCommand(
         const workflow = options.workflow as string;
         const checkpoint = options.checkpoint as string;
         const sid = resolveDecisionVerifierSid({
-          projectDir: process.cwd(),
+          projectDir: resolveProjectRoot(),
           sid: options.sid as string | undefined,
           category: options.category as string | undefined,
         });
         const result = await verifyRequiredDecisions({
-          projectDir: process.cwd(),
+          projectDir: resolveProjectRoot(),
           sid,
           workflow,
           checkpoint,
@@ -338,12 +339,12 @@ export function registerState(program: Command): void {
     runAction(
       async (sid: string | undefined, options) => {
         const resolvedSid = resolveDecisionVerifierSid({
-          projectDir: process.cwd(),
+          projectDir: resolveProjectRoot(),
           sid,
           category: options.category as string | undefined,
         });
         const result = await mirrorSessionToSerena({
-          projectDir: process.cwd(),
+          projectDir: resolveProjectRoot(),
           sid: resolvedSid,
         });
         if (resolveJsonMode(options)) {
@@ -368,7 +369,7 @@ export function registerState(program: Command): void {
     runAction(
       async (options) => {
         const result = evaluateSelfHealingGate({
-          workspace: process.cwd(),
+          workspace: resolveProjectRoot(),
           agentType: options.agent as string,
         });
 

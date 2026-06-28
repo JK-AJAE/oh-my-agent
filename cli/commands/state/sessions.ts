@@ -15,6 +15,7 @@ import {
   setActiveSession,
   sortEvents,
 } from "../../state/events.js";
+import { resolveProjectRoot } from "../../utils/fs-utils.js";
 import type {
   ArchivedSession,
   ArchivedStateView,
@@ -79,7 +80,7 @@ function loadArchivedSession(
   };
 }
 
-export function collectState(projectDir = process.cwd()): StateView {
+export function collectState(projectDir = resolveProjectRoot()): StateView {
   const index = readIndex(projectDir);
   const root = sessionsDir(projectDir);
   const sessions: SessionMeta[] = [];
@@ -95,7 +96,7 @@ export function collectState(projectDir = process.cwd()): StateView {
 }
 
 export function collectArchivedState(
-  projectDir = process.cwd(),
+  projectDir = resolveProjectRoot(),
 ): ArchivedStateView {
   const root = archiveRoot(projectDir);
   const sessions: ArchivedSession[] = [];
@@ -126,7 +127,7 @@ export function collectArchivedState(
 
 export function viewSession(
   sid: string,
-  projectDir = process.cwd(),
+  projectDir = resolveProjectRoot(),
 ): SessionView {
   const livePath = join(sessionsDir(projectDir), sid);
   if (existsSync(livePath)) {
@@ -154,7 +155,7 @@ export function viewSession(
 export function activateStateSession(
   sid: string,
   category = "main",
-  projectDir = process.cwd(),
+  projectDir = resolveProjectRoot(),
 ): void {
   setActiveSession(projectDir, category, sid);
 }

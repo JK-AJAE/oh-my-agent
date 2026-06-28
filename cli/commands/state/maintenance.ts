@@ -23,6 +23,7 @@ import {
   type SessionMeta,
   sessionsDir,
 } from "../../state/events.js";
+import { resolveProjectRoot } from "../../utils/fs-utils.js";
 import {
   archiveRoot,
   collectState,
@@ -102,7 +103,7 @@ function sessionTimestampMs(
 export function repairStateSessions(
   args: { projectDir?: string; dryRun?: boolean } = {},
 ): RepairResult {
-  const projectDir = args.projectDir ?? process.cwd();
+  const projectDir = args.projectDir ?? resolveProjectRoot();
   const dryRun = args.dryRun === true;
   const result: RepairResult = {
     dryRun,
@@ -191,7 +192,7 @@ export function purgeStateSessions(args: {
   dryRun?: boolean;
   now?: Date;
 }): PurgeResult {
-  const projectDir = args.projectDir ?? process.cwd();
+  const projectDir = args.projectDir ?? resolveProjectRoot();
   const olderThanMs = parseOlderThan(args.olderThan);
   const cutoffMs = (args.now ?? new Date()).getTime() - olderThanMs;
   const view = collectState(projectDir);
@@ -246,7 +247,7 @@ export function archiveStateSessions(args: {
   dryRun?: boolean;
   now?: Date;
 }): ArchiveResult {
-  const projectDir = args.projectDir ?? process.cwd();
+  const projectDir = args.projectDir ?? resolveProjectRoot();
   const olderThanMs = parseOlderThan(args.olderThan);
   const cutoffMs = (args.now ?? new Date()).getTime() - olderThanMs;
   const view = collectState(projectDir);

@@ -48,6 +48,40 @@ export function clearConflictingEntries(
 }
 
 /**
+ * Resolve the OMA project root for ambient (cwd-based) filesystem I/O.
+ *
+ * CLI commands that write `.agents/` state historically anchored on a bare
+ * `process.cwd()`, so invoking `oma` with a working directory inside a
+ * monorepo sub-package (e.g. `apps/api` during a per-app build/lint/test, or
+ * a subagent scoped to that package) materialized a *stray* `apps/api/.agents/`
+ * runtime tree instead of writing to the repo-level `.agents/`. The hooks
+ * already guard against this via `resolveGitRoot` (see
+ * `.agents/hooks/core/fs-utils.ts`); this mirrors that hardening for the CLI.
+ *
+ * Resolution walks up from `startDir` and returns:
+ *   1. the first ancestor that already contains `.agents/` — the canonical
+ *      OMA project root (an installed project always has one at its root); else
+ *   2. the first ancestor that contains `.git/` — the repo boundary, which is
+ *      never crossed so we cannot escape into a parent repo's `.agents/`; else
+ *   3. `startDir` unchanged.
+ */
+const PROJECT_ROOT_MAX_DEPTH = 20;
+
+export function resolveProjectRoot(startDir: string = process.cwd()): string {
+  let dir = resolve(startDir);
+  const fsRoot = parse(dir).root;
+  for (let depth = 0; depth < PROJECT_ROOT_MAX_DEPTH; depth++) {
+    if (fs.existsSync(join(dir, ".agents"))) return dir;
+    if (fs.existsSync(join(dir, ".git"))) return dir;
+    if (dir === fsRoot) break;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return resolve(startDir);
+}
+
+/**
  * Walk up from `startDir` to the filesystem root looking for
  * `<dir>/<relativePath>`; return the first existing match or null. The root
  * directory itself is not checked (matches the historical behavior of the

@@ -13,6 +13,7 @@ import {
   resolveJsonMode,
   runAction,
 } from "../../utils/cli-framework.js";
+import { resolveProjectRoot } from "../../utils/fs-utils.js";
 
 export interface EmitOptions {
   sid?: string;
@@ -70,8 +71,12 @@ export function registerEmit(program: Command): void {
       async (kind: string, payloadRaw: string | undefined, options) => {
         const jsonMode = resolveJsonMode(options);
         const emitOptions = options as EmitOptions;
-        const sid = resolveEmitSid(process.cwd(), emitOptions);
-        const event = await emitEventWithMemory(process.cwd(), sid, {
+        // Normalize cwd to the OMA project root so running `oma state:emit`
+        // from a monorepo sub-package writes to the repo-level `.agents/`
+        // instead of materializing a stray `<sub-package>/.agents/`.
+        const projectDir = resolveProjectRoot();
+        const sid = resolveEmitSid(projectDir, emitOptions);
+        const event = await emitEventWithMemory(projectDir, sid, {
           kind,
           ts: emitOptions.ts,
           vendor: emitOptions.vendor,
@@ -86,7 +91,7 @@ export function registerEmit(program: Command): void {
         let mirror: SerenaMirrorResult | undefined;
         if (kind === "session.ended" && options.mirror !== false) {
           mirror = await mirrorSessionToSerena({
-            projectDir: process.cwd(),
+            projectDir,
             sid,
           });
         }

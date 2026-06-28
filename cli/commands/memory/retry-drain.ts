@@ -5,6 +5,7 @@ import type {
   MemoryProvider,
   MemoryRetryDrainResult,
 } from "../../types/memory.js";
+import { resolveProjectRoot } from "../../utils/fs-utils.js";
 
 function parseRetryLine(line: string): OmaEvent | null {
   try {
@@ -30,7 +31,7 @@ export async function drainMemoryRetryQueue(
     dryRun?: boolean;
   } = {},
 ): Promise<MemoryRetryDrainResult> {
-  const projectDir = args.projectDir ?? process.cwd();
+  const projectDir = args.projectDir ?? resolveProjectRoot();
   const provider = args.provider ?? createAgentMemoryProvider();
   const retryPath = retryObservePath(projectDir);
   if (!existsSync(retryPath)) {

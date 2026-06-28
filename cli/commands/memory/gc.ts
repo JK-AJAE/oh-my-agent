@@ -13,7 +13,7 @@ import type {
   MemoryGcResult,
   MemoryGcScope,
 } from "../../types/memory.js";
-import { findFileUpwards } from "../../utils/fs-utils.js";
+import { findFileUpwards, resolveProjectRoot } from "../../utils/fs-utils.js";
 
 const SESSIONS_REL = join(".agents", "state", "sessions");
 const SERENA_REL = join(".serena", "memories");
@@ -176,7 +176,7 @@ function gcSerena(
 export function garbageCollectLocalState(
   opts: MemoryGcOptions = {},
 ): MemoryGcResult {
-  const baseDir = opts.baseDir ?? process.cwd();
+  const baseDir = opts.baseDir ?? resolveProjectRoot();
   // Resolution: explicit option (CLI flag) > oma-config.yaml > built-in default.
   const cfg = loadMemoryGcConfig(baseDir);
   const keep = parseNonNegativeInteger(opts.keep ?? cfg.keep, DEFAULT_KEEP);

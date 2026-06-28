@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { sessionsDir } from "../../state/events.js";
+import { resolveProjectRoot } from "../../utils/fs-utils.js";
 import { collectArchivedState } from "./sessions.js";
 import type { InjectLogEntryRef, InjectLogView } from "./types.js";
 
@@ -20,7 +21,7 @@ function resolveInjectLogDir(projectDir: string, sid: string): string | null {
 
 export function listInjectLogs(
   sid: string,
-  projectDir = process.cwd(),
+  projectDir = resolveProjectRoot(),
 ): InjectLogEntryRef[] {
   const dir = resolveInjectLogDir(projectDir, sid);
   if (!dir) return [];
@@ -34,7 +35,7 @@ export function viewInjectLog(
   sid: string,
   options: { entry?: string; projectDir?: string } = {},
 ): InjectLogView {
-  const projectDir = options.projectDir ?? process.cwd();
+  const projectDir = options.projectDir ?? resolveProjectRoot();
   const dir = resolveInjectLogDir(projectDir, sid);
   const entries = listInjectLogs(sid, projectDir);
   if (!options.entry) return { sid, dir, entries };

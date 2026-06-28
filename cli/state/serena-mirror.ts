@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { getMemoriesPath } from "../io/memory.js";
+import { resolveProjectRoot } from "../utils/fs-utils.js";
 import {
   deriveMeta,
   emitEvent,
@@ -123,7 +124,7 @@ export async function mirrorSessionToSerena(args: {
   projectDir?: string;
   writer?: SerenaMirrorWriter;
 }): Promise<SerenaMirrorResult> {
-  const projectDir = args.projectDir ?? process.cwd();
+  const projectDir = args.projectDir ?? resolveProjectRoot();
   const events = readEvents(projectDir, args.sid);
   const meta = deriveMeta(args.sid, events);
   const workflow = meta.workflow || "session";

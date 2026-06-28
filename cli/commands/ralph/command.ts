@@ -5,6 +5,7 @@ import {
   resolveJsonMode,
   runAction,
 } from "../../utils/cli-framework.js";
+import { resolveProjectRoot } from "../../utils/fs-utils.js";
 
 export function registerRalph(program: Command): void {
   addOutputOptions(
@@ -30,7 +31,7 @@ export function registerRalph(program: Command): void {
       async (options) => {
         const jsonMode = resolveJsonMode(options);
         const result = await verifyRalphExecArtifacts({
-          projectDir: process.cwd(),
+          projectDir: resolveProjectRoot(),
           sid: options.session as string | undefined,
           newerThan: options.newerThan as string | undefined,
           emitOnFail: options.emit !== false,
