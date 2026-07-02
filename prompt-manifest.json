@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.7.2",
-  "releaseDate": "2026-06-28T23:35:15.911Z",
+  "releaseDate": "2026-07-02T04:10:35.626Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -201,8 +201,8 @@
     },
     {
       "path": ".agents/hooks/core/triggers.json",
-      "sha256": "3591983a38aaad43d94780720253917f5d8201374e3e281af0f5c0fe47a5b87d",
-      "size": 84696
+      "sha256": "44400428d82f49bcc2abd8ce0118fbcefeb98d0c7ce5d84affaf1a5e3f00d858",
+      "size": 84740
     },
     {
       "path": ".agents/hooks/core/types.ts",
@@ -966,8 +966,13 @@
     },
     {
       "path": ".agents/skills/oma-frontend/SKILL.md",
-      "sha256": "a804ceb046c9b631af5a960e66851904a7c97ede3846e684932fb0d544a7d52c",
-      "size": 11118
+      "sha256": "e3251d009654a35053f2e4a69efad7d7f71282237a61a77390ead05bfb914040",
+      "size": 12211
+    },
+    {
+      "path": ".agents/skills/oma-frontend/resources/angular-rules.md",
+      "sha256": "64de18128560953fbd15e86c197d580a6b63a59555551b3aee9c3a7291025ce8",
+      "size": 5052
     },
     {
       "path": ".agents/skills/oma-frontend/resources/checklist.md",
@@ -2081,8 +2086,8 @@
     },
     {
       "path": ".agents/workflows/stack-set.md",
-      "sha256": "2d41f31200c97dff13ccc15ce24101fd3b6a748bbf52d9c577a1e45054b48718",
-      "size": 10420
+      "sha256": "b663d54741789ac857563fe970f17c4c658d77bbbfddb40dbba967d348940dee",
+      "size": 16151
     },
     {
       "path": ".agents/workflows/tools.md",
@@ -2121,6 +2126,6 @@
   "metadata": {
     "skillCount": 32,
     "workflowCount": 23,
-    "totalFiles": 422
+    "totalFiles": 423
   }
 }
