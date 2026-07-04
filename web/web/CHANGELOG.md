@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.17.2](https://github.com/first-fluke/oh-my-agent/compare/web-v3.17.1...web-v3.17.2) (2026-07-04)
+
+
+### Documentation
+
+* **web:** drop evaluator-tuning references from skills docs ([9a228cb](https://github.com/first-fluke/oh-my-agent/commit/9a228cbaf39ef458a01c87a6703f59b5a5e43232))
+
 ## [3.17.1](https://github.com/first-fluke/oh-my-agent/compare/web-v3.17.0...web-v3.17.1) (2026-06-22)
 
 
