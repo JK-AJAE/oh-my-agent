@@ -337,7 +337,7 @@ export async function update(options: UpdateOptions = {}): Promise<void> {
         }
 
         // --- Optional Serena Binary Upgrade ---
-        // Opt-in via `serena.auto_update: true` in .agents/oma-config.yaml.
+        // On by default; opt out via `serena.auto_update: false` in .agents/oma-config.yaml.
         // Skip silently if uv is not installed or the upgrade fails — the
         // serena MCP still works on the previously installed version.
         if (loadSerenaConfig(cwd).autoUpdate) {

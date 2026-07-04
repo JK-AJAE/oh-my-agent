@@ -89,9 +89,9 @@ export function loadTimezone(cwd?: string): string {
  * entry instead of stdio. Other vendors stay on stdio unless explicitly added
  * to a future `bridge_clients` list.
  *
- * `autoUpdate` is opt-in (default false). When true, `oma update` runs
- * `uv tool upgrade serena-agent --prerelease=allow` so the locally-installed
- * serena binary tracks the latest prerelease.
+ * `autoUpdate` is opt-out (default true). Unless set to false, `oma update`
+ * runs `uv tool upgrade serena-agent --prerelease=allow` so the
+ * locally-installed serena binary tracks the latest prerelease.
  */
 export interface SerenaConfig {
   mode: "stdio" | "bridge";
@@ -117,6 +117,6 @@ export function loadSerenaConfig(cwd?: string): SerenaConfig {
     typeof raw?.bridge_host === "string" ? raw.bridge_host : undefined;
   const bridgeUrl =
     typeof raw?.bridge_url === "string" ? raw.bridge_url : DEFAULT_BRIDGE_URL;
-  const autoUpdate = raw?.auto_update === true;
+  const autoUpdate = raw?.auto_update !== false;
   return { mode, bridgeHost, bridgeUrl, autoUpdate };
 }
