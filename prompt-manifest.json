@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.8.0",
-  "releaseDate": "2026-07-02T07:42:06.803Z",
+  "releaseDate": "2026-07-04T07:03:15.779Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -821,8 +821,8 @@
     },
     {
       "path": ".agents/skills/oma-design/SKILL.md",
-      "sha256": "bebf85ff001064ec0397f67c94c8aabab612467fcba0de4504dc509489352be5",
-      "size": 11947
+      "sha256": "365cdb50b4a4b2e91c1c27cdffc1978885e17ce45cb4efa871770074dbca715b",
+      "size": 14064
     },
     {
       "path": ".agents/skills/oma-design/examples/design-context-example.md",
@@ -881,13 +881,18 @@
     },
     {
       "path": ".agents/skills/oma-design/resources/anti-patterns.md",
-      "sha256": "eca06dc6e3398ff2198abddfb8a35c0df59805c63024b966b7f7d441397487ad",
-      "size": 4141
+      "sha256": "fb758a15500c91024efa495bc06ed18012979830a82a0e79ced69e0d2b6eb78d",
+      "size": 8587
+    },
+    {
+      "path": ".agents/skills/oma-design/resources/asset-strategy.md",
+      "sha256": "61e0c1f2aa0f636536e9aeada0fbca073436782da1fb57a8eee98ad93651ab9e",
+      "size": 3077
     },
     {
       "path": ".agents/skills/oma-design/resources/checklist.md",
-      "sha256": "542a9ac09711e35657e1c7b7bdaddc65af60a574f0923c32eae157a6f3abfd88",
-      "size": 3003
+      "sha256": "5c146e8c6981bfebe2fbf2b4c6338cbde5c39ab58aeb708c37e82346fd00e541",
+      "size": 5731
     },
     {
       "path": ".agents/skills/oma-design/resources/design-md-spec.md",
@@ -906,8 +911,8 @@
     },
     {
       "path": ".agents/skills/oma-design/resources/execution-protocol.md",
-      "sha256": "fb9e1c875399180c78e15ed2c7cecdf96ee7782ea0a14848279658442b2d6aa2",
-      "size": 9456
+      "sha256": "3319119ef028e55ee18d0b64d2f58658cb34bafdc5a89029ee2da70ae9ba299c",
+      "size": 11514
     },
     {
       "path": ".agents/skills/oma-design/resources/getdesign-fetcher.md",
@@ -918,6 +923,11 @@
       "path": ".agents/skills/oma-design/resources/prompt-enhancement.md",
       "sha256": "dc42f159999acd34d33209b2f45df24d7df59c7d988580614ad9d588037e7170",
       "size": 4548
+    },
+    {
+      "path": ".agents/skills/oma-design/resources/redesign-protocol.md",
+      "sha256": "ac7558b346969951a02c8f9efc0b0bd385187b729eaeacbc782b0bf2f0b97f44",
+      "size": 3766
     },
     {
       "path": ".agents/skills/oma-design/resources/stitch-integration.md",
@@ -2126,6 +2136,6 @@
   "metadata": {
     "skillCount": 32,
     "workflowCount": 23,
-    "totalFiles": 423
+    "totalFiles": 425
   }
 }
