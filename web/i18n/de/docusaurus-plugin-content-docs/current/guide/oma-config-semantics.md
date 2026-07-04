@@ -18,6 +18,7 @@ Wenn beide Dateien existieren, gewinnt die Projektdatei für jeden Schlüssel. D
 |-----|:---:|-------|
 | `auto_update_cli` | Ja | Der Projektwert überschreibt den globalen Wert. Implementiert in `resolveAutoUpdateCli` (`cli/commands/update/update.ts`). |
 | `serena.mode` | Ja | Steuert den Transportmodus von Serena MCP (z. B. `stdio`, `sse`). |
+| `serena.auto_update` | Ja | Aktualisiert `serena-agent` während `oma update` (`uv tool upgrade serena-agent --prerelease=allow`). |
 | `telemetry` | Ja | Vendor-Telemetrie aktivieren (`true` / `false`). |
 | `language` | Ja | Antwortsprache für Agent-Ausgaben (z. B. `en`, `ko`, `ja`). |
 | `model_preset` | Ja | Modell-Auswahl-Preset (z. B. `claude`, `mixed`, `codex`). |
@@ -32,6 +33,7 @@ Wenn beide Dateien existieren, gewinnt die Projektdatei für jeden Schlüssel. D
 |-----|---------|--------------|
 | `auto_update_cli` | `true` | Beide Dateien fehlen oder Schlüssel fehlt |
 | `serena.mode` | `stdio` | Beide Dateien fehlen oder Schlüssel fehlt |
+| `serena.auto_update` | `true` | Beide Dateien fehlen oder Schlüssel fehlt |
 | `telemetry` | `false` | Beide Dateien fehlen oder Schlüssel fehlt |
 | `language` | `en` | Beide Dateien fehlen oder Schlüssel fehlt |
 | `model_preset` | `claude` | Beide Dateien fehlen oder Schlüssel fehlt |

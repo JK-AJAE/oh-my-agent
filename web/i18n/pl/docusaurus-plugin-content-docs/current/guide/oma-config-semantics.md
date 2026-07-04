@@ -18,6 +18,7 @@ Gdy oba pliki istnieją, dla każdego klucza wygrywa plik projektowy. Jest to ce
 |-----|:---:|-------|
 | `auto_update_cli` | Tak | Wartość projektowa nadpisuje globalną. Zaimplementowane w `resolveAutoUpdateCli` (`cli/commands/update/update.ts`). |
 | `serena.mode` | Tak | Steruje trybem transportu Serena MCP (np. `stdio`, `sse`). |
+| `serena.auto_update` | Tak | Aktualizuje `serena-agent` podczas `oma update` (`uv tool upgrade serena-agent --prerelease=allow`). |
 | `telemetry` | Tak | Zgoda na telemetrię vendora (`true` / `false`). |
 | `language` | Tak | Język odpowiedzi agentów (np. `en`, `ko`, `ja`). |
 | `model_preset` | Tak | Preset wyboru modelu (np. `claude`, `mixed`, `codex`). |
@@ -32,6 +33,7 @@ Gdy oba pliki istnieją, dla każdego klucza wygrywa plik projektowy. Jest to ce
 |-----|---------|--------------|
 | `auto_update_cli` | `true` | Oba pliki nieobecne lub brak klucza |
 | `serena.mode` | `stdio` | Oba pliki nieobecne lub brak klucza |
+| `serena.auto_update` | `true` | Oba pliki nieobecne lub brak klucza |
 | `telemetry` | `false` | Oba pliki nieobecne lub brak klucza |
 | `language` | `en` | Oba pliki nieobecne lub brak klucza |
 | `model_preset` | `claude` | Oba pliki nieobecne lub brak klucza |

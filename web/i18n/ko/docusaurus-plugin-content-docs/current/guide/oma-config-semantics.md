@@ -18,6 +18,7 @@ description: 프로젝트 설치와 글로벌 설치가 모두 존재할 때 oma
 |-----|:---:|-------|
 | `auto_update_cli` | 예 | 프로젝트 값이 글로벌 값을 오버라이드합니다. `resolveAutoUpdateCli`(`cli/commands/update/update.ts`)에 구현되어 있습니다. |
 | `serena.mode` | 예 | Serena MCP 전송 모드를 제어합니다(예: `stdio`, `sse`). |
+| `serena.auto_update` | 예 | `oma update` 시 `serena-agent`를 업그레이드합니다(`uv tool upgrade serena-agent --prerelease=allow`). |
 | `telemetry` | 예 | 벤더 텔레메트리 opt-in (`true` / `false`). |
 | `language` | 예 | 에이전트 출력의 응답 언어(예: `en`, `ko`, `ja`). |
 | `model_preset` | 예 | 모델 선택 프리셋(예: `claude`, `mixed`, `codex`). |
@@ -32,6 +33,7 @@ description: 프로젝트 설치와 글로벌 설치가 모두 존재할 때 oma
 |-----|---------|--------------|
 | `auto_update_cli` | `true` | 두 파일 모두 없거나 키가 누락된 경우 |
 | `serena.mode` | `stdio` | 두 파일 모두 없거나 키가 누락된 경우 |
+| `serena.auto_update` | `true` | 두 파일 모두 없거나 키가 누락된 경우 |
 | `telemetry` | `false` | 두 파일 모두 없거나 키가 누락된 경우 |
 | `language` | `en` | 두 파일 모두 없거나 키가 누락된 경우 |
 | `model_preset` | `claude` | 두 파일 모두 없거나 키가 누락된 경우 |

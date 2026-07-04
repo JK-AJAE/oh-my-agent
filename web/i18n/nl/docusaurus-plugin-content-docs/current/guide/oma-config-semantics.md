@@ -18,6 +18,7 @@ Wanneer beide bestanden bestaan, wint het projectbestand voor elke sleutel. Dit 
 |-----|:---:|-------|
 | `auto_update_cli` | Ja | De projectwaarde overschrijft de globale waarde. Geïmplementeerd in `resolveAutoUpdateCli` (`cli/commands/update/update.ts`). |
 | `serena.mode` | Ja | Bepaalt de transportmodus van Serena MCP (bijv. `stdio`, `sse`). |
+| `serena.auto_update` | Ja | Werkt `serena-agent` bij tijdens `oma update` (`uv tool upgrade serena-agent --prerelease=allow`). |
 | `telemetry` | Ja | Opt-in voor vendor-telemetrie (`true` / `false`). |
 | `language` | Ja | Antwoordtaal voor agent-uitvoer (bijv. `en`, `ko`, `ja`). |
 | `model_preset` | Ja | Preset voor modelselectie (bijv. `claude`, `mixed`, `codex`). |
@@ -32,6 +33,7 @@ Wanneer beide bestanden bestaan, wint het projectbestand voor elke sleutel. Dit 
 |-----|---------|--------------|
 | `auto_update_cli` | `true` | Beide bestanden ontbreken of sleutel ontbreekt |
 | `serena.mode` | `stdio` | Beide bestanden ontbreken of sleutel ontbreekt |
+| `serena.auto_update` | `true` | Beide bestanden ontbreken of sleutel ontbreekt |
 | `telemetry` | `false` | Beide bestanden ontbreken of sleutel ontbreekt |
 | `language` | `en` | Beide bestanden ontbreken of sleutel ontbreekt |
 | `model_preset` | `claude` | Beide bestanden ontbreken of sleutel ontbreekt |

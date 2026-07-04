@@ -18,6 +18,7 @@ Cuando ambos archivos existen, el archivo de proyecto gana para todas las claves
 |-----|:---:|-------|
 | `auto_update_cli` | Sí | El valor del proyecto sobrescribe al global. Implementado en `resolveAutoUpdateCli` (`cli/commands/update/update.ts`). |
 | `serena.mode` | Sí | Controla el modo de transporte del MCP de Serena (p. ej., `stdio`, `sse`). |
+| `serena.auto_update` | Sí | Actualiza `serena-agent` durante `oma update` (`uv tool upgrade serena-agent --prerelease=allow`). |
 | `telemetry` | Sí | Opt-in de telemetría del proveedor (`true` / `false`). |
 | `language` | Sí | Idioma de respuesta para las salidas del agente (p. ej., `en`, `ko`, `ja`). |
 | `model_preset` | Sí | Preset de selección de modelo (p. ej., `claude`, `mixed`, `codex`). |
@@ -32,6 +33,7 @@ Cuando ambos archivos existen, el archivo de proyecto gana para todas las claves
 |-----|---------|--------------|
 | `auto_update_cli` | `true` | Ambos archivos ausentes o falta la clave |
 | `serena.mode` | `stdio` | Ambos archivos ausentes o falta la clave |
+| `serena.auto_update` | `true` | Ambos archivos ausentes o falta la clave |
 | `telemetry` | `false` | Ambos archivos ausentes o falta la clave |
 | `language` | `en` | Ambos archivos ausentes o falta la clave |
 | `model_preset` | `claude` | Ambos archivos ausentes o falta la clave |

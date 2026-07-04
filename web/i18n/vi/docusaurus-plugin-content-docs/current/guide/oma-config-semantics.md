@@ -18,6 +18,7 @@ Khi cả hai file đều tồn tại, file dự án sẽ thắng cho mọi key. 
 |-----|:---:|-------|
 | `auto_update_cli` | Có | Giá trị dự án ghi đè toàn cục. Cài đặt trong `resolveAutoUpdateCli` (`cli/commands/update/update.ts`). |
 | `serena.mode` | Có | Điều khiển chế độ transport của Serena MCP (ví dụ `stdio`, `sse`). |
+| `serena.auto_update` | Có | Nâng cấp `serena-agent` trong khi chạy `oma update` (`uv tool upgrade serena-agent --prerelease=allow`). |
 | `telemetry` | Có | Tùy chọn telemetry của vendor (`true` / `false`). |
 | `language` | Có | Ngôn ngữ phản hồi của agent (ví dụ `en`, `ko`, `ja`). |
 | `model_preset` | Có | Preset chọn model (ví dụ `claude`, `mixed`, `codex`). |
@@ -32,6 +33,7 @@ Khi cả hai file đều tồn tại, file dự án sẽ thắng cho mọi key. 
 |-----|---------|--------------|
 | `auto_update_cli` | `true` | Cả hai file vắng mặt hoặc thiếu key |
 | `serena.mode` | `stdio` | Cả hai file vắng mặt hoặc thiếu key |
+| `serena.auto_update` | `true` | Cả hai file vắng mặt hoặc thiếu key |
 | `telemetry` | `false` | Cả hai file vắng mặt hoặc thiếu key |
 | `language` | `en` | Cả hai file vắng mặt hoặc thiếu key |
 | `model_preset` | `claude` | Cả hai file vắng mặt hoặc thiếu key |

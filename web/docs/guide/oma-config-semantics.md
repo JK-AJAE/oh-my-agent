@@ -18,6 +18,7 @@ When both files exist, the project file wins for every key. This is intentional:
 |-----|:---:|-------|
 | `auto_update_cli` | Yes | Project value overrides global. Implemented in `resolveAutoUpdateCli` (`cli/commands/update/auto-update-config.ts`). |
 | `serena.mode` | Yes | Controls Serena MCP transport mode (e.g., `stdio`, `sse`). |
+| `serena.auto_update` | Yes | Upgrade `serena-agent` during `oma update` (`uv tool upgrade serena-agent --prerelease=allow`). |
 | `telemetry` | Yes | Vendor telemetry opt-in (`true` / `false`). |
 | `language` | Yes | Response language for agent outputs (e.g., `en`, `ko`, `ja`). |
 | `model_preset` | Yes | Model selection preset (e.g., `claude`, `mixed`, `codex`). |
@@ -32,6 +33,7 @@ When both files exist, the project file wins for every key. This is intentional:
 |-----|---------|--------------|
 | `auto_update_cli` | `true` | Both files absent or key missing |
 | `serena.mode` | `stdio` | Both files absent or key missing |
+| `serena.auto_update` | `true` | Both files absent or key missing |
 | `telemetry` | `false` | Both files absent or key missing |
 | `language` | `en` | Both files absent or key missing |
 | `model_preset` | `claude` | Both files absent or key missing |
