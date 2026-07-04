@@ -277,6 +277,43 @@ agents through pi.
 > not match what your pi install exposes, check `pi --list-models` — pi's
 > `--model` matching is fuzzy, so most provider slugs resolve as-is.
 
+### Models outside pi's built-in registry (e.g. Z.ai GLM)
+
+pi resolves `--model` against its **built-in model registry**, and its
+`defaultProvider` setting is only consulted when no model is passed at all. For
+Z.ai, pi ships only a subset of GLM ids (`glm-4.7`, `glm-4.5-air`,
+`glm-5-turbo`, `glm-5.1`, `glm-5v-turbo` as of pi 0.80.x) — a preset that names
+any other GLM id will fail to resolve.
+
+Two ways to handle this:
+
+1. **Registry ids** — constrain your preset to registry model ids. Use the
+   `provider/id` form (e.g. `zai/glm-4.7`) to pin the provider explicitly; oma
+   passes it through to pi's `--model` as-is.
+2. **Unregistered ids** — register them with a pi extension. The `api` field
+   must name one of pi's **api adapter ids** (`openai-completions`,
+   `anthropic-messages`, …) — not the provider name. Provider names like
+   `"zai"` or shorthands like `"openai"` are not adapter ids and fail at
+   dispatch with `No API provider registered for api: …`.
+
+```typescript
+// ~/.pi/agent/extensions/zai-glm-models/index.ts  (or <project>/.pi/extensions/)
+export default function (pi: ExtensionAPI) {
+  pi.registerProvider("zai", {
+    baseUrl: "https://api.z.ai/api/coding/paas/v4",
+    api: "openai-completions", // adapter id, NOT "zai"
+    apiKey: "$ZAI_API_KEY",
+    models: [
+      { id: "glm-4.7-flash", api: "openai-completions", /* … */ },
+      // NOTE: `models` replaces ALL existing models for the provider —
+      // re-declare the built-in ids here if you still want them.
+    ],
+  });
+}
+```
+
+Verify with `pi --list-models` before wiring the ids into a preset.
+
 ---
 
 ## Dispatching through OpenCode
