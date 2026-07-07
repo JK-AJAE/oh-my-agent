@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.17.5](https://github.com/first-fluke/oh-my-agent/compare/web-v3.17.4...web-v3.17.5) (2026-07-07)
+
+
+### Documentation
+
+* **schedule:** fix rounding example and document windows cron shapes ([a1f00bd](https://github.com/first-fluke/oh-my-agent/commit/a1f00bd08af8057851006bed0467f077f4916ae4))
+
 ## [3.17.4](https://github.com/first-fluke/oh-my-agent/compare/web-v3.17.3...web-v3.17.4) (2026-07-04)
 
 
