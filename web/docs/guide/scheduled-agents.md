@@ -114,7 +114,7 @@ Exactly one of `--cron` or `--every` is required.
 | Every + word | `every 5 minutes`, `every 2 hours` | Plural unit words accepted |
 | Seconds | `30s` | Ceiled to 1-minute minimum; cron cannot express sub-minute intervals |
 
-Non-divisible intervals are rounded to the nearest clean step and a note is printed. For example, `--every 7m` rounds to `5m` because 7 does not divide 60.
+Non-divisible intervals are rounded to the nearest clean step and a note is printed. For example, `--every 7m` rounds to `6m` (`*/6`) because 7 does not divide 60.
 
 **Examples:**
 
@@ -124,7 +124,7 @@ oma schedule:add backend "Optimize slow queries" --cron "0 */4 * * *"
 
 # Natural language (oma converts to cron)
 oma schedule:add frontend "Run lighthouse audit" --every "every 6 hours"
-# Note printed: rounds to 0 */6 * * * if that is exact
+# Converts to 0 */6 * * * (6 divides 24 cleanly, so no rounding note)
 
 # Pin to a vendor and a workspace
 oma schedule:add qa "Run security scan" --cron "0 2 * * 0" -m claude -w /home/user/myproject
@@ -322,3 +322,5 @@ oma schedule:list --json | jq -r '.jobs[] | select(.projectLabel == "my-project"
 **Windows support:**
 
 On Windows, oma uses `schtasks` to register jobs. The `schedule:list` drift detection and `schedule:sync` commands work the same way across all platforms.
+
+Note that `schtasks` cannot express every cron shape. Supported shapes are: `*/N * * * *` (every N minutes), `M * * * *` (hourly at :M), `M H * * *` (daily), `M H * * D` (weekly; `D` may be a single day, a range like `1-5`, or a comma list like `1,3,5`), and `M H D * *` (monthly). Other expressions (e.g. a comma list in the minute field) are rejected at `schedule:add` time on Windows.
