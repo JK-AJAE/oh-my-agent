@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.11.0",
-  "releaseDate": "2026-07-07T10:59:14.938Z",
+  "releaseDate": "2026-07-07T11:22:43.820Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -351,8 +351,8 @@
     },
     {
       "path": ".agents/rules/market.md",
-      "sha256": "cfe8b5b849643623647219a3fb6ee78daa22913d6f53cb681a3b4f2bd3ab2efa",
-      "size": 1966
+      "sha256": "7df1eddb51c917e5f77ddb16d0e27aaeb15a44f99366b7d19ee57f36e7dc877f",
+      "size": 2202
     },
     {
       "path": ".agents/rules/mobile.md",
@@ -1091,8 +1091,8 @@
     },
     {
       "path": ".agents/skills/oma-market/SKILL.md",
-      "sha256": "8f63048aaa709b68ebf2da7160393939ee14851300a0d8a4367adfb97e86def7",
-      "size": 10799
+      "sha256": "f288b30a6a1d1eb6a4cd4ae62dca70eba40313941ca5b2f740bf4153cbd88534",
+      "size": 11233
     },
     {
       "path": ".agents/skills/oma-market/resources/checklist.md",
@@ -1101,8 +1101,8 @@
     },
     {
       "path": ".agents/skills/oma-market/resources/error-playbook.md",
-      "sha256": "a309141652ad56588f49bcc89a06b356ed67210be9f0c00022e833c01f273609",
-      "size": 2537
+      "sha256": "5a4436155a83b7b5846f5380847d073b896151648b4e8392d83ad4d5611c0f0d",
+      "size": 2658
     },
     {
       "path": ".agents/skills/oma-market/resources/examples.md",
@@ -1156,7 +1156,7 @@
     },
     {
       "path": ".agents/skills/oma-market/resources/output-laws.md",
-      "sha256": "8bfdeddf75d26dd18a59b1a50e436f385239a24c32b959e471ce65a5eebdb05d",
+      "sha256": "8a319ffe1fb4e43804d09f42e51acc9bdeeba0a8a7799ae76e1bed65ab01868f",
       "size": 5529
     },
     {
@@ -2086,8 +2086,8 @@
     },
     {
       "path": ".agents/workflows/schedule.md",
-      "sha256": "b370c3ee0af766f7d850ab079ac89f011eac71dfaee98d78e7ae9e5c8a7541f0",
-      "size": 2866
+      "sha256": "254b9f208443dcf21e7b266dedd1e93418aa0980e65a24f01252d5f978270316",
+      "size": 3092
     },
     {
       "path": ".agents/workflows/scm.md",
