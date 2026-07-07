@@ -388,9 +388,40 @@ describe("cronToSchtasksFlags", () => {
     );
   });
 
-  it("throws on range+step cron like '0 9 * * 1-5'", () => {
-    // dow list with range -- not a simple number, not a wildcard
-    expect(() => cronToSchtasksFlags("0 9 * * 1-5")).toThrow();
+  it("'0 9 * * 1-5' -> /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 09:00 (dow range)", () => {
+    const { scheduleArgs } = cronToSchtasksFlags("0 9 * * 1-5");
+    expect(scheduleArgs).toEqual([
+      "/SC",
+      "WEEKLY",
+      "/D",
+      "MON,TUE,WED,THU,FRI",
+      "/ST",
+      "09:00",
+    ]);
+  });
+
+  it("'0 9 * * 1,3,5' -> /SC WEEKLY /D MON,WED,FRI /ST 09:00 (dow list)", () => {
+    const { scheduleArgs } = cronToSchtasksFlags("0 9 * * 1,3,5");
+    expect(scheduleArgs).toEqual([
+      "/SC",
+      "WEEKLY",
+      "/D",
+      "MON,WED,FRI",
+      "/ST",
+      "09:00",
+    ]);
+  });
+
+  it("throws on invalid dow like '0 9 * * 8'", () => {
+    expect(() => cronToSchtasksFlags("0 9 * * 8")).toThrow(
+      /invalid day-of-week/,
+    );
+  });
+
+  it("throws on reversed dow range like '0 9 * * 5-1'", () => {
+    expect(() => cronToSchtasksFlags("0 9 * * 5-1")).toThrow(
+      /invalid day-of-week/,
+    );
   });
 
   it("throws on unsupported complex shape '0 9 1 * 1'", () => {

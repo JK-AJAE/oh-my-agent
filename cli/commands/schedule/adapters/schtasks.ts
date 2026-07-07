@@ -84,6 +84,35 @@ function pad2(n: number): string {
 }
 
 /**
+ * Expand a cron day-of-week field (single number, range "1-5", or comma list
+ * "1,3,5") to a comma-separated schtasks day-name list ("MON,WED,FRI").
+ * Returns null when the field is not a numeric dow expression.
+ */
+function dowFieldToSchtasksDays(field: string): string | null {
+  const numbers: number[] = [];
+  for (const part of field.split(",")) {
+    const range = /^(\d+)-(\d+)$/.exec(part);
+    if (range) {
+      const from = Number(range[1]);
+      const to = Number(range[2]);
+      if (to < from) return null;
+      for (let d = from; d <= to; d++) numbers.push(d);
+    } else if (/^\d+$/.test(part)) {
+      numbers.push(Number(part));
+    } else {
+      return null;
+    }
+  }
+  const names: string[] = [];
+  for (const n of numbers) {
+    const name = DOW_MAP[String(n)];
+    if (!name) return null;
+    if (!names.includes(name)) names.push(name);
+  }
+  return names.length > 0 ? names.join(",") : null;
+}
+
+/**
  * Translate a 5-field cron expression to schtasks /Create schedule flags.
  * Throws for unsupported shapes.
  */
@@ -152,15 +181,18 @@ export function cronToSchtasksFlags(cron: string): SchtasksFlags {
     return { scheduleArgs: ["/SC", "DAILY", "/ST", startTime] };
   }
 
-  // Shape: M H * * D  -> weekly on day D at H:M
-  if (isWildcard(domStr) && isWildcard(monthStr) && isNumber(dowStr)) {
-    const dowName = DOW_MAP[dowStr];
-    if (!dowName) {
+  // Shape: M H * * D  -> weekly on day(s) D at H:M
+  // D may be a single day ("1"), a range ("1-5"), or a comma list ("1,3,5").
+  if (isWildcard(domStr) && isWildcard(monthStr) && !isWildcard(dowStr)) {
+    const dowNames = dowFieldToSchtasksDays(dowStr);
+    if (!dowNames) {
       throw new Error(
         `SchtasksAdapter: invalid day-of-week "${dowStr}" in cron "${cron}".`,
       );
     }
-    return { scheduleArgs: ["/SC", "WEEKLY", "/D", dowName, "/ST", startTime] };
+    return {
+      scheduleArgs: ["/SC", "WEEKLY", "/D", dowNames, "/ST", startTime],
+    };
   }
 
   // Shape: M H D * *  -> monthly on day D at H:M
@@ -172,7 +204,7 @@ export function cronToSchtasksFlags(cron: string): SchtasksFlags {
     `SchtasksAdapter: cron expression "${cron}" cannot be translated to a ` +
       `single schtasks /Create schedule. Supported shapes: ` +
       `"*/N * * * *" (every N minutes), "M * * * *" (hourly at :M), ` +
-      `"M H * * *" (daily), "M H * * D" (weekly), "M H D * *" (monthly).`,
+      `"M H * * *" (daily), "M H * * D" (weekly; D may be a day, range, or comma list), "M H D * *" (monthly).`,
   );
 }
 
