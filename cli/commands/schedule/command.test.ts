@@ -134,6 +134,12 @@ describe("schedule:add", () => {
     expect(manifestMock.addJob.mock.calls[0]?.[0]?.vendor).toBe("codex");
   });
 
+  it("rejects an unknown --model vendor", async () => {
+    await run("schedule:add", "a", "p", "--cron", "0 0 * * *", "-m", "foobar");
+    expect(process.exitCode).toBe(1);
+    expect(manifestMock.addJob).not.toHaveBeenCalled();
+  });
+
   it("rejects a negative --max-age-days", async () => {
     await run(
       "schedule:add",

@@ -71,6 +71,18 @@ function captureEnv(id: string, keysCsv: string): string | null {
   return path.join("env", id);
 }
 
+/** Vendors accepted by `--model`; mirrors the `oma agent:spawn -m` surface. */
+const SCHEDULE_VENDORS = [
+  "antigravity",
+  "claude",
+  "codex",
+  "cursor",
+  "grok",
+  "opencode",
+  "pi",
+  "qwen",
+] as const;
+
 async function scheduleAdd(
   agentId: string,
   prompt: string,
@@ -92,6 +104,16 @@ async function scheduleAdd(
   }
   if (options.cron === undefined && options.every === undefined) {
     throw new Error("Either --cron or --every is required.");
+  }
+
+  if (
+    options.model !== undefined &&
+    !(SCHEDULE_VENDORS as readonly string[]).includes(options.model)
+  ) {
+    throw new Error(
+      `Unknown vendor "${options.model}" for --model. ` +
+        `Valid vendors: ${SCHEDULE_VENDORS.join(", ")}.`,
+    );
   }
 
   let cronExpr: string;
