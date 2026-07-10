@@ -142,6 +142,94 @@ describe("test-filter hook", () => {
     });
   });
 
+  describe('"Shell" tool name (Cursor terminal tool)', () => {
+    // Verifies the toolName gate accepts "Shell". Vendor detection in the
+    // standalone path is orthogonal (real cursor dispatch passes --vendor
+    // cursor); a claude-detecting event keeps this focused on the gate.
+    it("should rewrite a test command run via a Shell tool", () => {
+      const result = runHook({
+        tool_name: "Shell",
+        tool_input: { command: "vitest --run" },
+        hook_event_name: "PreToolUse",
+        sessionId: "s1",
+      });
+      expect(result).toContain("filter-test-output.sh");
+    });
+  });
+
+  describe('"execute_bash" tool name (Kiro shell tool)', () => {
+    // Verifies the toolName gate accepts Kiro's canonical execute_bash. As
+    // with the Shell case above, vendor detection is orthogonal — a
+    // claude-detecting event keeps this focused on the gate.
+    it("should rewrite a test command run via an execute_bash tool", () => {
+      const result = runHook({
+        tool_name: "execute_bash",
+        tool_input: { command: "vitest --run" },
+        hook_event_name: "PreToolUse",
+        sessionId: "s1",
+      });
+      expect(result).toContain("filter-test-output.sh");
+    });
+  });
+
+  describe("filter script fallback resolution", () => {
+    // opencode has no core Vendor identity: its bridge subprocess payload
+    // detects as claude, whose hook dir does not exist in an opencode-only
+    // install. The hook must fall back to the bridge dir, then the SSOT core
+    // dir, instead of silently no-opping.
+    function runHookInBareProject(scriptDir: string): string {
+      const root = mkdtempSync(join(tmpdir(), "oma-test-filter-bare-"));
+      const dir = join(root, scriptDir);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, "filter-test-output.sh"), "#!/bin/sh\ncat\n", {
+        mode: 0o755,
+      });
+      const tmp = mkdtempSync(join(tmpdir(), "oma-test-filter-"));
+      const inputFile = join(tmp, "input.json");
+      writeFileSync(
+        inputFile,
+        JSON.stringify({
+          cwd: root,
+          tool_name: "Bash",
+          tool_input: { command: "vitest --run" },
+          hook_event_name: "PreToolUse",
+          sessionId: "s1",
+        }),
+        "utf-8",
+      );
+      try {
+        const result = spawnSync("bun", [HOOK_PATH], {
+          encoding: "utf-8",
+          stdio: ["ignore", "pipe", "pipe"],
+          env: {
+            ...process.env,
+            CLAUDE_PROJECT_DIR: root,
+            QWEN_PROJECT_DIR: "",
+            OMA_HOOK_INPUT_FILE: inputFile,
+          },
+        });
+        return (result.stdout ?? "").trim();
+      } finally {
+        rmSync(tmp, { recursive: true, force: true });
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+
+    it("falls back to the opencode bridge dir when the vendor dir is absent", () => {
+      const result = runHookInBareProject(join(".opencode", "plugins", "oma"));
+      const normalized = result.replace(/\\\\/g, "/").replace(/\\/g, "/");
+      expect(normalized).toContain(
+        ".opencode/plugins/oma/filter-test-output.sh",
+      );
+    });
+
+    it("falls back to the SSOT core dir as the last resort", () => {
+      const result = runHookInBareProject(join(".agents", "hooks", "core"));
+      const normalized = result.replace(/\\\\/g, "/").replace(/\\/g, "/");
+      expect(normalized).toContain(".agents/hooks/core/filter-test-output.sh");
+    });
+  });
+
   describe("vendor output format", () => {
     it("should output hookSpecificOutput for Claude", () => {
       const result = runHook({

@@ -34,10 +34,18 @@ import type { HookInput, Vendor } from "./types.js";
 // stop    : Stop        (claude, codex, commandcode, grok, qwen, antigravity)
 //           stop        (kiro — lowercase, per kiro.json)
 //           AfterAgent  (gemini)
+//
+// session-start (routed through the prompt pipeline so serena-primer /
+// state-boundary — both guarded on kind==="prompt", both no-op on an empty
+// prompt — inject once-per-session context):
+//           SessionStart (commandcode)
+//           sessionStart (cursor)
+//   Other vendors register SessionStart for HUD/status-line only (e.g. gemini),
+//   so the mapping is vendor-scoped and stays null for them.
 // ---------------------------------------------------------------------------
 
 export function nativeEventToKind(
-  _vendor: Vendor,
+  vendor: Vendor,
   nativeEvent: string,
 ): HookInput["kind"] | null {
   switch (nativeEvent) {
@@ -48,6 +56,12 @@ export function nativeEventToKind(
     case "PreInvocation":
     case "userPromptSubmit":
       return "prompt";
+
+    // session-start context injection — only for vendors that wire it as a
+    // handler event (commandcode / cursor). HUD-only SessionStart (gemini) → null.
+    case "SessionStart":
+    case "sessionStart":
+      return vendor === "commandcode" || vendor === "cursor" ? "prompt" : null;
 
     // pre_tool events
     case "PreToolUse":

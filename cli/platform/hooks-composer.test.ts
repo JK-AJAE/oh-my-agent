@@ -78,7 +78,7 @@ describe("hook self-dedup preamble (EC-6 / T2.1)", () => {
 });
 
 describe("Codex hook variant contract", () => {
-  it("installs one oma-hook.sh entry per event, wrapper, and hooks feature flag", () => {
+  it("installs one oma-hook.sh entry per event and the wrapper (no feature flag)", () => {
     // Design 019: each event now emits ONE oma-hook.sh entry (the whole handler
     // chain runs in-process via `oma hook`). Per-handler bun script entries are gone.
     const targetDir = mkdtempSync(join(tmpdir(), "oma-codex-hooks-"));
@@ -125,13 +125,9 @@ describe("Codex hook variant contract", () => {
         "--vendor 'codex' --event 'Stop'",
       );
 
-      // featureFlags: Codex config.toml must have hooks = true.
-      const codexConfig = readFileSync(
-        join(targetDir, ".codex", "config.toml"),
-        "utf-8",
-      );
-      expect(codexConfig).toContain("[features]");
-      expect(codexConfig).toContain("hooks = true");
+      // Hooks are stable/default-on in Codex 0.144+, so the variant no longer
+      // carries featureFlags — the hooks install must not write config.toml.
+      expect(existsSync(join(targetDir, ".codex", "config.toml"))).toBe(false);
 
       // oma-hook.sh wrapper must be present with dedup preamble and oma resolution.
       const wrapperPath = join(targetDir, ".codex", "hooks", "oma-hook.sh");
@@ -391,8 +387,10 @@ describe("requiredVariantScripts", () => {
     );
   });
 
-  it("cursor requires nothing (no statusLine, no test-filter, no hud-only events)", () => {
-    expect(requiredVariantScripts(loadVariant("cursor"))).toEqual(new Set());
+  it("cursor requires filter-test-output.sh (preToolUse test-filter; no statusLine)", () => {
+    expect(requiredVariantScripts(loadVariant("cursor"))).toEqual(
+      new Set(["filter-test-output.sh"]),
+    );
   });
 
   it("codex requires only filter-test-output.sh (test-filter, no statusLine)", () => {
@@ -481,5 +479,91 @@ describe("isOmaManagedHookGroup — flat entries (flatHookEntries vendors)", () 
         timeout: 5,
       }),
     ).toBe(false);
+  });
+});
+
+describe("Cursor hook variant contract (flat entries)", () => {
+  const loadCursor = (): HookVariant =>
+    JSON.parse(
+      readFileSync(
+        join(repoRoot, ".agents", "hooks", "variants", "cursor.json"),
+        "utf-8",
+      ),
+    ) as HookVariant;
+
+  it("writes flat oma-hook entries per event with loop_limit on stop", () => {
+    const targetDir = mkdtempSync(join(tmpdir(), "oma-cursor-hooks-"));
+    try {
+      installHooksFromVariant(repoRoot, targetDir, loadCursor());
+      const hooksJson = JSON.parse(
+        readFileSync(join(targetDir, ".cursor", "hooks.json"), "utf-8"),
+      );
+
+      // beforeSubmitPrompt — flat entry, no matcher, no loop_limit.
+      const promptEntry = hooksJson.hooks.beforeSubmitPrompt[0];
+      expect(promptEntry.command).toContain(
+        "--vendor 'cursor' --event 'beforeSubmitPrompt'",
+      );
+      expect(promptEntry.matcher).toBeUndefined();
+      expect("loop_limit" in promptEntry).toBe(false);
+
+      // preToolUse — flat entry with matcher Shell.
+      const preToolEntry = hooksJson.hooks.preToolUse[0];
+      expect(preToolEntry.matcher).toBe("Shell");
+      expect(preToolEntry.command).toContain(
+        "--vendor 'cursor' --event 'preToolUse' --matcher 'Shell'",
+      );
+
+      // stop — flat entry carrying loop_limit: null (uncapped auto-resubmit).
+      const stopEntry = hooksJson.hooks.stop[0];
+      expect(stopEntry.command).toContain("--vendor 'cursor' --event 'stop'");
+      expect("loop_limit" in stopEntry).toBe(true);
+      expect(stopEntry.loop_limit).toBeNull();
+
+      // sessionStart — one flat entry for the whole chain (serena + boundary).
+      const sessionEntry = hooksJson.hooks.sessionStart[0];
+      expect(sessionEntry.command).toContain(
+        "--vendor 'cursor' --event 'sessionStart'",
+      );
+
+      // filter-test-output.sh must be materialized for the preToolUse rewrite.
+      expect(
+        existsSync(
+          join(targetDir, ".cursor", "hooks", "filter-test-output.sh"),
+        ),
+      ).toBe(true);
+    } finally {
+      rmSync(targetDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("Kiro settings-merge skip (skipSettingsMerge)", () => {
+  const loadKiro = (): HookVariant =>
+    JSON.parse(
+      readFileSync(
+        join(repoRoot, ".agents", "hooks", "variants", "kiro.json"),
+        "utf-8",
+      ),
+    ) as HookVariant;
+
+  it("writes the wrapper + scripts but does NOT pollute cli.json with hooks", () => {
+    const targetDir = mkdtempSync(join(tmpdir(), "oma-kiro-hooks-"));
+    try {
+      installHooksFromVariant(repoRoot, targetDir, loadKiro());
+
+      // The agent-JSON commands reference this wrapper — it MUST still be written.
+      expect(existsSync(join(targetDir, ".kiro", "hooks", "oma-hook.sh"))).toBe(
+        true,
+      );
+
+      // cli.json (settingsFile) must NOT be created — Kiro never reads it, so the
+      // generic hook-entry merge would be dead config.
+      expect(existsSync(join(targetDir, ".kiro", "settings", "cli.json"))).toBe(
+        false,
+      );
+    } finally {
+      rmSync(targetDir, { recursive: true, force: true });
+    }
   });
 });

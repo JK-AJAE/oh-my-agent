@@ -115,14 +115,17 @@ describe("vendor wiring contract (variant JSON ↔ dispatch)", () => {
     }
   });
 
-  it("PROBE_VENDORS covers every variant vendor that registers a prompt event", () => {
-    // The probe exercises the prompt-injection flow, so vendors whose hook
-    // surface has no prompt event (commandcode: only PreToolUse/PostToolUse/
-    // Stop per commandcode.ai/docs/hooks/reference) are exempt.
+  it("PROBE_VENDORS covers every variant vendor that registers a prompt-submit event", () => {
+    // The probe simulates the prompt-SUBMIT injection flow (UserPromptSubmit /
+    // beforeSubmitPrompt / …), so vendors whose only prompt-kind event is
+    // session-start (commandcode: SessionStart; the rest of its surface is
+    // PreToolUse/Stop) have no prompt-submit channel to probe and are exempt.
+    const SESSION_START_EVENTS = new Set(["SessionStart", "sessionStart"]);
     for (const v of variants) {
       const hasPromptEvent = Object.keys(v.events).some(
         (eventName) =>
-          nativeEventToKind(v.vendor as Vendor, eventName) === "prompt",
+          nativeEventToKind(v.vendor as Vendor, eventName) === "prompt" &&
+          !SESSION_START_EVENTS.has(eventName),
       );
       if (!hasPromptEvent) continue;
       expect(

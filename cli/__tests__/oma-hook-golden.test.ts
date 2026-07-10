@@ -112,6 +112,27 @@ describe("hook-output golden — makePromptOutput (context/prompt)", () => {
     expect(steps.length).toBeGreaterThanOrEqual(1);
     expect(steps[0]?.ephemeralMessage).toBe(ctx);
   });
+
+  it("commandcode SessionStart -> hookSpecificOutput.hookEventName='SessionStart'", () => {
+    // commandcode injects context on SessionStart; dispatch passes the event.
+    const out = JSON.parse(
+      makePromptOutput("commandcode", ctx, "SessionStart"),
+    ) as Record<string, unknown>;
+    expect(out.additionalContext).toBe(ctx);
+    const hso = out.hookSpecificOutput as Record<string, unknown>;
+    expect(hso.hookEventName).toBe("SessionStart");
+    expect(hso.additionalContext).toBe(ctx);
+  });
+
+  it("cursor sessionStart -> additional_context + hookEventName='SessionStart'", () => {
+    const out = JSON.parse(
+      makePromptOutput("cursor", ctx, "SessionStart"),
+    ) as Record<string, unknown>;
+    // Cursor reads top-level additional_context on sessionStart.
+    expect(out.additional_context).toBe(ctx);
+    const hso = out.hookSpecificOutput as Record<string, unknown>;
+    expect(hso.hookEventName).toBe("SessionStart");
+  });
 });
 
 describe("hook-output golden — makeBlockOutput (stop/block)", () => {
@@ -141,12 +162,14 @@ describe("hook-output golden — makeBlockOutput (stop/block)", () => {
     expect(out).toStrictEqual({ decision: "block", reason });
   });
 
-  it("cursor -> {decision:'block',reason}", () => {
+  it("cursor -> {followup_message} (stop ignores Claude {decision:'block'})", () => {
     const out = JSON.parse(makeBlockOutput("cursor", reason)) as Record<
       string,
       unknown
     >;
-    expect(out).toStrictEqual({ decision: "block", reason });
+    // Cursor's stop hook re-enters the loop via followup_message (auto-submitted
+    // as the next turn), not the Claude-style block decision.
+    expect(out).toStrictEqual({ followup_message: reason });
   });
 
   it("grok -> {decision:'block',reason}", () => {

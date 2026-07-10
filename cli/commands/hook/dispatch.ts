@@ -120,6 +120,18 @@ export const VARIANT_ROUTES: Readonly<Record<VendorType, VariantJson>> = {
   qwen: qwenVariant as VariantJson,
 };
 
+/**
+ * Name the prompt-kind context injection is emitted for. Session-start events
+ * (commandcode SessionStart / cursor sessionStart) name "SessionStart" so the
+ * hookSpecificOutput matches the vendor's actual event; all other prompt events
+ * are prompt-submit → "UserPromptSubmit".
+ */
+function promptHookEventName(nativeEvent: string): string {
+  return nativeEvent === "SessionStart" || nativeEvent === "sessionStart"
+    ? "SessionStart"
+    : "UserPromptSubmit";
+}
+
 /** Look up the embedded variant config for a vendor (null if unknown). */
 function loadVariant(vendor: Vendor): VariantJson | null {
   // Vendor includes pi (extension-based, no settings variant) → undefined → null.
@@ -315,7 +327,11 @@ export async function runHookDispatch(req: HookRequest): Promise<HookResponse> {
   let output: string;
   switch (merged.type) {
     case "context":
-      output = makePromptOutput(vendor, merged.additionalContext);
+      output = makePromptOutput(
+        vendor,
+        merged.additionalContext,
+        promptHookEventName(nativeEvent),
+      );
       break;
     case "mutate":
       output = makePreToolOutput(vendor, merged.updatedInput);

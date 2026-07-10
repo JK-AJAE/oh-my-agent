@@ -126,6 +126,10 @@ export function installHooksFromVariant(
         // directly — nested {matcher, hooks: [...]} groups do not fire there.
         entry = { command: omaHookCmd, timeout: handlerTimeout };
         if (matcher) entry.matcher = matcher;
+        // Cursor `stop` caps auto-resubmits via `loop_limit` (null = uncapped).
+        // A config with `loopLimit` explicitly set (incl. null) forwards it.
+        const loopLimitConfig = configs.find((c) => c.loopLimit !== undefined);
+        if (loopLimitConfig) entry.loop_limit = loopLimitConfig.loopLimit;
       } else {
         entry = {
           hooks: [
@@ -170,6 +174,16 @@ export function installHooksFromVariant(
     mkdirSync(dirname(grokHookFile), { recursive: true });
     const grokPayload = { hooks: hookEntries };
     writeFileSync(grokHookFile, `${JSON.stringify(grokPayload, null, 2)}\n`);
+  } else if (variant.skipSettingsMerge) {
+    // Kiro: the CLI reads hooks from .kiro/agents/oma-hooks.json (written by
+    // applyKiroOmaHooksAgent), not from settingsFile — merging hookEntries into
+    // .kiro/settings/cli.json would be dead config it never loads. The wrapper
+    // (step 2) and copied scripts still back the agent JSON's commands. Only
+    // `extra` (statusLine/permissions) is still merged, when the variant has any
+    // (Kiro has none today).
+    if (Object.keys(extra).length > 0) {
+      mergeIntoSettings(join(targetDir, variant.settingsFile), {}, extra);
+    }
   } else {
     mergeIntoSettings(
       join(targetDir, variant.settingsFile),

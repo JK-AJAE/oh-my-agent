@@ -4,6 +4,13 @@ export interface HookEvent {
   hook: string;
   matcher?: string;
   timeout: number;
+  /**
+   * Cursor `stop` hook only: emitted as `loop_limit` on the flat settings
+   * entry. Caps how many times the hook may auto-resubmit its followup_message.
+   * `null` = uncapped; `undefined` (omitted) = Cursor's default (5). Ignored by
+   * vendors other than Cursor.
+   */
+  loopLimit?: number | null;
 }
 
 export interface HookVariant {
@@ -26,8 +33,22 @@ export interface HookVariant {
    * `{command, timeout[, matcher]}` objects under each event key (Cursor's
    * hooks.json format — nested `{matcher, hooks: [...]}` groups do not fire
    * in Cursor CLI). Defaults to the Claude Code nested-group format.
+   *
+   * NOTE (Cursor limitation): Cursor's `beforeSubmitPrompt` event supports only
+   * `{continue, user_message}` output — it does NOT deliver additionalContext /
+   * additional_context, so the prompt-injection chain's stdout is silently
+   * dropped there. Its file side-effects (workflow state, skill-session dedup,
+   * L1 boundary events) still run and still matter. Per-session context
+   * injection for Cursor happens on `sessionStart` (additional_context) instead.
    */
   flatHookEntries?: boolean;
+  /**
+   * When true, skip merging hook entries into `settingsFile` (still copy hook
+   * scripts + write the oma-hook.sh wrapper, and still apply `extra`). Kiro's
+   * CLI reads hooks from a dedicated agent config (.kiro/agents/oma-hooks.json);
+   * a `.kiro/settings/cli.json` merge would be dead config it never loads.
+   */
+  skipSettingsMerge?: boolean;
   events: Record<string, HookEvent | HookEvent[]>;
   statusLine?: { hook: string };
   /**
