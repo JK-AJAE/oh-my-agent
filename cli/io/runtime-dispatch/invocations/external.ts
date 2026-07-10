@@ -391,6 +391,16 @@ const buildGenericExternalInvocation: ExternalInvocationBuilder = ({
     }
   }
 
+  // Codex gates every non-managed command hook behind a per-invocation trust
+  // (TOFU) check, so oma-installed .codex/hooks.json stays untrusted until the
+  // user runs `/hooks`. oma-spawned subprocesses vet their own hook source, so
+  // set the documented BYPASS_HOOK_TRUST env (equivalent to
+  // --dangerously-bypass-hook-trust) to run hooks without the manual trust step.
+  // Applied only to oma-spawned processes, never written to user config.
+  if (vendor === "codex") {
+    env.BYPASS_HOOK_TRUST = "1";
+  }
+
   return { command, args, env };
 };
 

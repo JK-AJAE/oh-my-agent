@@ -36,15 +36,20 @@ export const RECOMMENDED_CODEX_MCP = {
 // already defaults to true upstream.
 export const RECOMMENDED_CODEX_FEATURES = {
   goals: true,
-  child_agents_md: true,
 } as const;
 
 // Codex CLI feature flags that have been renamed/removed upstream and should
 // be stripped from the user's `[features]` table on install/update.
-// - `codex_hooks` → `hooks` (Codex 0.124+, 2026-05): the variant now writes
-//   `hooks = true`; we drop the old key so Codex stops emitting deprecation
-//   warnings.
-export const DEPRECATED_CODEX_FEATURES = ["codex_hooks"] as const;
+// - `codex_hooks` → `hooks` (Codex 0.124+, 2026-05): hooks is now a stable,
+//   default-on feature, so we no longer write it and drop the old alias key.
+// - `child_agents_md` (removed by Codex 0.144.1): the flag no longer exists in
+//   `codex features list`, and `--strict-config` rejects it as dead config that
+//   oma previously wrote. We strip it so existing installs stop failing strict
+//   validation.
+export const DEPRECATED_CODEX_FEATURES = [
+  "codex_hooks",
+  "child_agents_md",
+] as const;
 
 // `analytics.enabled` (default true) sends anonymized usage data to OpenAI.
 // `feedback.enabled` (default true) controls user feedback submission.

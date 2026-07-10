@@ -583,3 +583,47 @@ describe("buildExternalInvocation — kimi", () => {
     expect(inv.args).toEqual(["--kimi-ro", "-p", "do work"]);
   });
 });
+
+describe("buildExternalInvocation — codex hook-trust bypass", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const codexConfig = (): VendorConfig => ({
+    command: "codex",
+    auto_approve_flag: "--full-auto",
+    read_only_flag: "--sandbox read-only",
+    model_flag: undefined,
+    default_model: undefined,
+    output_format_flag: undefined,
+    output_format: undefined,
+    subcommand: "exec",
+    isolation_flags: undefined,
+    isolation_env: undefined,
+    prompt_flag: undefined,
+  });
+
+  it("sets BYPASS_HOOK_TRUST=1 for oma-spawned codex invocations", () => {
+    const inv = buildExternalInvocation(
+      "codex",
+      codexConfig(),
+      null,
+      "do work",
+      undefined,
+      { readOnly: false },
+    );
+    expect(inv.env.BYPASS_HOOK_TRUST).toBe("1");
+  });
+
+  it("does not set BYPASS_HOOK_TRUST for non-codex vendors", () => {
+    const inv = buildExternalInvocation(
+      "gemini",
+      cursorConfig(),
+      null,
+      "do work",
+      undefined,
+      { readOnly: false },
+    );
+    expect(inv.env.BYPASS_HOOK_TRUST).toBeUndefined();
+  });
+});

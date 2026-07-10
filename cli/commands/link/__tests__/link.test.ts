@@ -439,4 +439,48 @@ describe("link kernel", () => {
       expect(forbidden).toBeUndefined();
     });
   });
+
+  describe("codex hook-trust notice", () => {
+    // installVendorAdaptations is mocked to write .codex/hooks.json, so the
+    // link kernel can detect the create/change and emit the trust reminder.
+    function writeCodexHooksOnInstall(contents: string): void {
+      (
+        skills.installVendorAdaptations as ReturnType<typeof vi.fn>
+      ).mockImplementation(() => {
+        const hooksPath = join(process.cwd(), ".codex", "hooks.json");
+        mkdirSync(join(process.cwd(), ".codex"), { recursive: true });
+        writeFileSync(hooksPath, contents, "utf-8");
+      });
+    }
+
+    it("prints the trust reminder when .codex/hooks.json is created", () => {
+      const projectDir = makeProject(["codex"]);
+      process.chdir(projectDir);
+      writeCodexHooksOnInstall('{"hooks":{}}');
+      const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      link({ quiet: true });
+
+      const logged = logSpy.mock.calls.map((c) => String(c[0])).join("\n");
+      expect(logged).toContain("Codex hooks installed/updated");
+      expect(logged).toContain("/hooks");
+      logSpy.mockRestore();
+    });
+
+    it("does not print the notice when hooks.json is unchanged", () => {
+      const projectDir = makeProject(["codex"]);
+      process.chdir(projectDir);
+      const stable = '{"hooks":{"Stop":[]}}';
+      mkdirSync(join(projectDir, ".codex"), { recursive: true });
+      writeFileSync(join(projectDir, ".codex", "hooks.json"), stable, "utf-8");
+      writeCodexHooksOnInstall(stable);
+      const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      link({ quiet: true });
+
+      const logged = logSpy.mock.calls.map((c) => String(c[0])).join("\n");
+      expect(logged).not.toContain("Codex hooks installed/updated");
+      logSpy.mockRestore();
+    });
+  });
 });

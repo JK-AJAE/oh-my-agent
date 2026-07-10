@@ -80,7 +80,13 @@ export function buildCodexNativeInvocation(
 
   args.push(buildMentionPrompt(agentId, promptContent));
 
-  return { command, args, env: { ...process.env } };
+  // Codex gates every non-managed command hook behind a per-invocation trust
+  // (TOFU) check: oma-installed .codex/hooks.json stays untrusted until the user
+  // runs `/hooks`, and re-installs that change the command string silently
+  // revert trust. oma-spawned subprocesses vet their own hook source, so set the
+  // documented BYPASS_HOOK_TRUST env (equivalent to --dangerously-bypass-hook-trust)
+  // to run hooks without the manual trust step. Never written to user config.
+  return { command, args, env: { ...process.env, BYPASS_HOOK_TRUST: "1" } };
 }
 
 /**

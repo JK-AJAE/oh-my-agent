@@ -203,6 +203,20 @@ describe("planDispatch — regression: native paths unaffected", () => {
       "--no-interactive",
     ]);
   });
+
+  it("codex runtime + codex target → native invocation sets BYPASS_HOOK_TRUST=1", () => {
+    const plan = planDispatch(
+      "test-agent",
+      "codex",
+      { command: "codex", subcommand: "exec" },
+      null,
+      "hello",
+      { OMA_RUNTIME_VENDOR: "codex" },
+    );
+    expect(plan.mode).toBe("native");
+    expect(plan.runtimeVendor).toBe("codex");
+    expect(plan.invocation.env.BYPASS_HOOK_TRUST).toBe("1");
+  });
 });
 
 // ---------------------------------------------------------------------------

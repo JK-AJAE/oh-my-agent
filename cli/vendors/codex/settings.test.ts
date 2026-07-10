@@ -38,13 +38,15 @@ describe("codex settings", () => {
     expect(
       needsCodexSettingsUpdate({
         ...baseMcp,
-        features: { goals: true },
+        features: { goals: false },
       }),
     ).toBe(true);
+    // Recommended goals present but the removed child_agents_md key still needs
+    // stripping.
     expect(
       needsCodexSettingsUpdate({
         ...baseMcp,
-        features: { goals: false, child_agents_md: true },
+        features: { goals: true, child_agents_md: true },
       }),
     ).toBe(true);
   });
@@ -231,15 +233,44 @@ describe("codex settings", () => {
       mcp_servers: {
         serena: { command: "uvx", args: ["serena"] },
       },
-      features: { goals: false, child_agents_md: false, custom_flag: true },
+      features: { goals: false, custom_flag: true },
     };
 
     const result = applyCodexSettings(settings);
     expect(result.features).toEqual({
       goals: true,
-      child_agents_md: true,
       custom_flag: true,
     });
+  });
+
+  it("strips removed child_agents_md key during apply", () => {
+    const settings = {
+      features: { child_agents_md: true, custom_flag: true },
+      mcp_servers: {
+        serena: { command: "uvx", args: ["serena"] },
+      },
+    };
+
+    const result = applyCodexSettings(settings);
+    expect(result.features).toEqual({
+      custom_flag: true,
+      ...RECOMMENDED_CODEX_FEATURES,
+    });
+    expect(result.features?.child_agents_md).toBeUndefined();
+    expect(needsCodexSettingsUpdate(result)).toBe(false);
+  });
+
+  it("requires update when removed child_agents_md key is present", () => {
+    const settings = {
+      mcp_servers: {
+        serena: {
+          command: "uvx",
+          args: ["--from", "git+https://github.com/oraios/serena", "serena"],
+        },
+      },
+      features: { ...RECOMMENDED_CODEX_FEATURES, child_agents_md: true },
+    };
+    expect(needsCodexSettingsUpdate(settings)).toBe(true);
   });
 
   it("preserves existing serena config when transport is present", () => {

@@ -251,7 +251,30 @@ export function link(opts: LinkOptions = {}): LinkResult {
   const telemetryOptions = { telemetry };
 
   // 3. Install vendor-specific adaptations (agents, hooks, settings).
+  //    Snapshot .codex/hooks.json first: Codex re-gates hook trust (TOFU)
+  //    whenever the command string changes, so we notify the user to re-trust
+  //    when this install creates or updates the file.
+  const codexConfigured = configuredVendors.includes("codex");
+  const codexHooksPath = join(cwd, ".codex", "hooks.json");
+  const codexHooksBefore =
+    codexConfigured && existsSync(codexHooksPath)
+      ? readFileSync(codexHooksPath, "utf-8")
+      : null;
+
   installVendorAdaptations(cwd, cwd, hookVendors);
+
+  // Codex hook-trust notice: printed even in quiet mode because untrusted hooks
+  // silently do not run — install/update (quiet) callers must surface it too.
+  if (codexConfigured) {
+    const codexHooksAfter = existsSync(codexHooksPath)
+      ? readFileSync(codexHooksPath, "utf-8")
+      : null;
+    if (codexHooksAfter !== null && codexHooksAfter !== codexHooksBefore) {
+      console.log(
+        `${pc.yellow("⚠")} Codex hooks installed/updated — run ${pc.cyan("codex")} and use ${pc.cyan("/hooks")} to trust them (untrusted hooks do not run).`,
+      );
+    }
+  }
 
   // 4a. Claude `.claude/settings.json` — telemetry-aware env opt-out.
   if (configuredVendors.includes("claude")) {
