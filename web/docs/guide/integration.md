@@ -382,8 +382,10 @@ For each selected skill, `installSkill()` copies the skill directory to `.agents
 `installVendorAdaptations()` installs IDE-specific files for all supported vendors (Antigravity, Claude, Codex, Qwen):
 
 - Agent definitions (`.claude/agents/*.md`, `.codex/agents/*.toml`, `.gemini/agents/*.md`)
-- Hook configurations (`.claude/hooks/`)
+- Hook configurations (`.claude/hooks/`, `.codex/hooks.json`)
 - Settings files and vendor integration docs (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`)
+
+Codex gates its hooks behind a one-time trust step, so `.codex/hooks.json` does not run until you review it once via the Codex `/hooks` browser. See [Codex Hook Trust](/docs/guide/codex-hook-trust) for details.
 
 ### 9. CLI symlinks
 

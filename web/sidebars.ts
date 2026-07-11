@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "guide/usage",
         "guide/integration",
+        "guide/codex-hook-trust",
         "guide/single-skill",
         "guide/multi-agent-project",
         "guide/bug-fixing",
