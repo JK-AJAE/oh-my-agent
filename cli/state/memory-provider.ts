@@ -9,10 +9,6 @@ import type {
   MemoryRememberPayload,
 } from "../types/memory.js";
 
-// AgentMemory's published version line moved from 0.11/0.12 (original design
-// target) to 0.9.x service builds; accept 0.9.x and the 0.1x.x range.
-const SUPPORTED_AGENTMEMORY_VERSION = /^0\.(9|1\d)\./;
-
 function headerValue(value: string | string[] | undefined): string | undefined {
   if (Array.isArray(value)) return value[0];
   return value;
@@ -136,24 +132,21 @@ export function createAgentMemoryProvider(
         };
         return cachedStatus;
       }
-      const supported =
-        health.isAgentMemory ||
-        (version !== undefined && SUPPORTED_AGENTMEMORY_VERSION.test(version));
-      if (!supported) {
-        cachedStatus = {
-          provider: "agentmemory",
-          endpoint,
-          reachable: false,
-          version,
-          reason: `unsupported version ${version ?? "(missing)"}`,
-        };
-        return cachedStatus;
-      }
+      // Capability-based acceptance: a 2xx health response from the
+      // explicitly configured endpoint is treated as reachable. Version
+      // pinning proved brittle (AgentMemory's published line already jumped
+      // from 0.11/0.12 design targets to 0.9.x service builds), so an
+      // unrecognized payload only downgrades to a warning, never a reject.
       cachedStatus = {
         provider: "agentmemory",
         endpoint,
         reachable: true,
         version,
+        ...(health.isAgentMemory
+          ? {}
+          : {
+              reason: `unrecognized health payload (version ${version ?? "unknown"}) — proceeding`,
+            }),
       };
       return cachedStatus;
     } catch (error) {

@@ -117,7 +117,23 @@ function agentMemoryIssues(args: {
 }): string[] {
   const issues: string[] = [];
   if (args.status.endpoint && !args.status.reachable) {
-    issues.push(args.status.reason ?? "AgentMemory endpoint is not reachable");
+    issues.push(
+      `AgentMemory recall inactive: ${args.status.reason ?? "endpoint is not reachable"} — cross-session facts will not be recalled`,
+    );
+  }
+  // Recall failing silently is the worst mode: the user set the service up
+  // (or a binary is present) but no endpoint resolves, so every session
+  // starts without memory and nothing ever says so. Surface it here.
+  const explicitlyDisabled = args.status.reason?.includes("disabled") ?? false;
+  if (
+    !args.status.endpoint &&
+    !explicitlyDisabled &&
+    (args.service.installed || args.binary.available)
+  ) {
+    issues.push(
+      "AgentMemory recall inactive: endpoint not configured " +
+        "(~/.agentmemory/endpoint.json missing) — run `oma memory:setup`",
+    );
   }
   if (!args.binary.available && args.service.installed) {
     issues.push(`AgentMemory binary not found: ${args.binary.command}`);

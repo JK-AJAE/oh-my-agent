@@ -97,8 +97,35 @@ describe("AgentMemory provider", () => {
     ).toBeNull();
   });
 
-  it("requires a supported health version before observe", async () => {
+  it("accepts an unrecognized health payload with a warning (capability-based)", async () => {
+    // Version pinning proved brittle across AgentMemory's release line, so a
+    // 2xx health response from the configured endpoint is reachable even when
+    // neither the body shape nor the version is recognized — the mismatch is
+    // surfaced as a `reason` note instead of a hard reject.
     const { server, url } = await startServer({ version: "9.0.0" });
+    cleanup.push(() => server.close());
+    const provider = createAgentMemoryProvider({
+      env: { AGENTMEMORY_URL: url },
+    });
+
+    const status = await provider.status();
+    expect(status).toMatchObject({
+      provider: "agentmemory",
+      reachable: true,
+      version: "9.0.0",
+    });
+    expect(status.reason).toContain("unrecognized health payload");
+    await expect(
+      provider.observe({
+        sessionId: "oma-test",
+        content: "{}\n",
+        source: "oma-workflow",
+      }),
+    ).resolves.toBe(true);
+  });
+
+  it("stays unreachable on a non-2xx health response", async () => {
+    const { server, url } = await startServer({ healthStatus: 503 });
     cleanup.push(() => server.close());
     const provider = createAgentMemoryProvider({
       env: { AGENTMEMORY_URL: url },
@@ -107,15 +134,7 @@ describe("AgentMemory provider", () => {
     await expect(provider.status()).resolves.toMatchObject({
       provider: "agentmemory",
       reachable: false,
-      version: "9.0.0",
     });
-    await expect(
-      provider.observe({
-        sessionId: "oma-test",
-        content: "{}\n",
-        source: "oma-workflow",
-      }),
-    ).resolves.toBe(false);
   });
 
   it("treats a healthy body as reachable when the version header is missing", async () => {
