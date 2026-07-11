@@ -93,7 +93,7 @@ export function registerSlideCommand(program: Command): void {
   slide
     .command("viewer")
     .description(
-      "Build viewer.html (deck-stage web component + presenter view)",
+      "Build viewer.html (deck-stage web component + speaker-notes panel, toggle with `n`)",
     )
     .requiredOption("--dir <path>", "Slide working directory")
     .action(async (opts: { dir: string }) => {
@@ -311,7 +311,9 @@ export function registerSlideCommand(program: Command): void {
   // ── doctor ─────────────────────────────────────────────────────────────────
   slide
     .command("doctor")
-    .description("Probe system Chrome, yt-dlp, and the pptxgenjs optional dep")
+    .description(
+      "Probe required deps (chrome, puppeteer-core) and optional deps (yt-dlp, pptxgenjs)",
+    )
     .action(async () => {
       try {
         const code = await runSlideDoctor();

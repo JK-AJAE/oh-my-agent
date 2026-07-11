@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { isAllowedFontUrl, neutralizeStyleBreakout } from "./bundle.js";
+import {
+  ALLOWED_FONT_HOSTS,
+  isAllowedFontUrl as isAllowedFontUrlShared,
+} from "./font-hosts.js";
 
 describe("neutralizeStyleBreakout (XSS guard for --inline-fonts)", () => {
   it("neutralizes a </style> breakout so fetched CSS cannot inject markup", () => {
@@ -46,5 +50,39 @@ describe("isAllowedFontUrl (SSRF guard for --inline-fonts)", () => {
     expect(isAllowedFontUrl("http://fonts.googleapis.com/css")).toBe(false);
     expect(isAllowedFontUrl("file:///etc/passwd")).toBe(false);
     expect(isAllowedFontUrl("not a url")).toBe(false);
+  });
+});
+
+describe("font-hosts shared allowlist (validate/export render interceptors)", () => {
+  it("bundle.ts re-exports the shared helper (single source of truth)", () => {
+    expect(isAllowedFontUrl).toBe(isAllowedFontUrlShared);
+  });
+
+  it("allows the CDNs the docs promise (Google Fonts + jsdelivr Pretendard)", () => {
+    // Regression: validate/export interceptors used to abort ALL non-local
+    // requests, so overflow validation measured fallback fonts and exports
+    // rendered without the chosen typeface.
+    for (const host of [
+      "fonts.googleapis.com",
+      "fonts.gstatic.com",
+      "cdn.jsdelivr.net",
+    ]) {
+      expect(ALLOWED_FONT_HOSTS.has(host)).toBe(true);
+      expect(isAllowedFontUrlShared(`https://${host}/some/font.css`)).toBe(
+        true,
+      );
+    }
+    expect(
+      isAllowedFontUrlShared(
+        "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css",
+      ),
+    ).toBe(true);
+  });
+
+  it("still blocks everything that is not an allowlisted https font CDN", () => {
+    expect(isAllowedFontUrlShared("https://internal.corp/secret.css")).toBe(
+      false,
+    );
+    expect(isAllowedFontUrlShared("http://cdn.jsdelivr.net/x.css")).toBe(false);
   });
 });

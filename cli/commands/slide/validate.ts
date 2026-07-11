@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import color from "picocolors";
 import { findChromeExecutable } from "../../io/chrome.js";
+import { isAllowedFontUrl } from "./font-hosts.js";
 import { FRAME_H_PX, FRAME_W_PX } from "./validate/constants.js";
 import { pxToPt } from "./validate/geometry.js";
 import { loadPuppeteer } from "./validate/puppeteer.js";
@@ -138,11 +139,12 @@ export async function runSlideValidate(opts: ValidateOptions): Promise<number> {
       const page = await browser.newPage();
       await page.setViewport({ width: FRAME_W_PX, height: FRAME_H_PX });
 
-      // Intercept requests — block non-local network (offline render context)
+      // Intercept requests — block non-local network, except allowlisted font
+      // CDNs (fonts must load so geometry is measured with the real typeface)
       await page.setRequestInterception(true);
       page.on("request", (req) => {
         const url = req.url();
-        if (isLocalUrl(url, ws.dir)) {
+        if (isLocalUrl(url, ws.dir) || isAllowedFontUrl(url)) {
           req.continue().catch(() => {});
         } else {
           req.abort().catch(() => {});

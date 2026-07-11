@@ -328,7 +328,9 @@ export async function runSlideImportPptx(
     writeFileSync(join(outDir, fileName), buildSlideHtml(slide.lines), "utf8");
     order.push(fileName);
     const note = notes.get(slide.slideNumber);
-    if (note) speakerNotes[fileName] = note;
+    // speakerNotes contract: keyed by 0-based slide index as a string
+    // ("0", "1", …) — deck-stage.js looks notes up by index, not filename.
+    if (note) speakerNotes[String(idx)] = note;
     console.log(
       color.green(`  ✓ ${fileName}`) +
         color.dim(` (${slide.lines.length} text block(s))`),
@@ -339,7 +341,8 @@ export async function runSlideImportPptx(
     title: file.replace(/\.pptx$/i, "").replace(/.*[/\\]/, ""),
     order,
     style: "imported",
-    density: "reading-first",
+    // An imported deck is a reading-first document → canonical enum value "dense"
+    density: "dense",
     speakerNotes,
   };
   writeFileSync(

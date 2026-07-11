@@ -22,6 +22,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import color from "picocolors";
 import { findChromeExecutable } from "../../../io/chrome.js";
+import { isAllowedFontUrl } from "../font-hosts.js";
 import { resolveWorkspace } from "../workspace.js";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -161,9 +162,12 @@ async function screenshotSlide(
 ): Promise<Buffer> {
   const fileUrl = `file://${slidePath.replace(/\\/g, "/")}`;
 
+  // Block non-local requests, except allowlisted font CDNs (fonts must load
+  // so the export renders with the chosen typeface, not a fallback).
   await page.setRequestInterception(true);
   page.on("request", (req) => {
-    if (isLocalUrl(req.url())) {
+    const url = req.url();
+    if (isLocalUrl(url) || isAllowedFontUrl(url)) {
       req.continue().catch(() => {});
     } else {
       req.abort().catch(() => {});

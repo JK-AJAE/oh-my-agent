@@ -53,3 +53,35 @@ describe("deck-stage.js asset — early-upgrade guard", () => {
     );
   });
 });
+
+describe("deck-stage.js asset — speaker-notes panel (presenter view)", () => {
+  const assetPath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "..",
+    "..",
+    ".agents",
+    "skills",
+    "oma-slide",
+    "resources",
+    "assets",
+    "deck-stage.js",
+  );
+  const source = readFileSync(assetPath, "utf8");
+
+  it("toggles the notes panel with the n key", () => {
+    // The documented presenter view is an embedded on-screen panel toggled
+    // with `n` — not a separate presenter window.
+    expect(source).toMatch(/case\s*["']n["']\s*:/);
+    expect(source).toMatch(/#toggleNotesPanel\(\)/);
+  });
+
+  it("creates a deck-notes-panel element that is hidden by default", () => {
+    expect(source).toContain("deck-notes-panel");
+    expect(source).toMatch(/display:\s*none/);
+  });
+
+  it("refreshes the panel on slide change", () => {
+    expect(source).toMatch(/this\.#updateNotesPanel\(\)/);
+  });
+});

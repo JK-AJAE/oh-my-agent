@@ -17,6 +17,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import color from "picocolors";
+import { isAllowedFontUrl } from "./font-hosts.js";
 import {
   buildPrintPaginationReset,
   firstSlideId,
@@ -66,33 +67,12 @@ export function hasLocalVideoRef(html: string): boolean {
 // ─── Font CDN link extraction ─────────────────────────────────────────────────
 
 /**
- * Hosts allowed for `--inline-fonts` remote fetches. Deck HTML is
- * agent-generated / import-pptx-ingested and therefore attacker-influenceable,
- * so the `<link href>` it carries is untrusted. Restricting fetches to known
- * public font CDNs closes the SSRF vector (no internal/metadata endpoints, no
- * loopback/link-local) — anything else degrades gracefully to a kept `<link>`
+ * Font-CDN allowlist for `--inline-fonts` remote fetches — shared with the
+ * validate/export request interceptors. See font-hosts.ts for the SSRF
+ * rationale. A non-allowlisted link degrades gracefully to a kept `<link>`
  * tag (the same as not passing --inline-fonts).
  */
-const ALLOWED_FONT_HOSTS = new Set<string>([
-  "fonts.googleapis.com",
-  "fonts.gstatic.com",
-  "fonts.bunny.net",
-  "use.typekit.net",
-  "cdn.jsdelivr.net",
-]);
-
-/**
- * Return true only for an https URL whose host is an allowlisted font CDN.
- */
-export function isAllowedFontUrl(href: string): boolean {
-  let url: URL;
-  try {
-    url = new URL(href);
-  } catch {
-    return false;
-  }
-  return url.protocol === "https:" && ALLOWED_FONT_HOSTS.has(url.hostname);
-}
+export { isAllowedFontUrl };
 
 /**
  * Neutralise a `</style>` (or `</style ...>`) sequence inside fetched CSS so it

@@ -17,6 +17,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import color from "picocolors";
 import { findChromeExecutable } from "../../../io/chrome.js";
+import { isAllowedFontUrl } from "../font-hosts.js";
 import { runSlideViewer } from "../viewer.js";
 import { resolveWorkspace } from "../workspace.js";
 
@@ -152,9 +153,12 @@ async function captureMode(
 ): Promise<void> {
   const fileUrl = `file://${viewerPath.replace(/\\/g, "/")}`;
 
+  // Block non-local requests, except allowlisted font CDNs (fonts must load
+  // so the export renders with the chosen typeface, not a fallback).
   await page.setRequestInterception(true);
   page.on("request", (req) => {
-    if (isLocalUrl(req.url())) {
+    const url = req.url();
+    if (isLocalUrl(url) || isAllowedFontUrl(url)) {
       req.continue().catch(() => {});
     } else {
       req.abort().catch(() => {});
@@ -197,9 +201,12 @@ async function printMode(
 ): Promise<void> {
   const fileUrl = `file://${viewerPath.replace(/\\/g, "/")}`;
 
+  // Block non-local requests, except allowlisted font CDNs (fonts must load
+  // so the export renders with the chosen typeface, not a fallback).
   await page.setRequestInterception(true);
   page.on("request", (req) => {
-    if (isLocalUrl(req.url())) {
+    const url = req.url();
+    if (isLocalUrl(url) || isAllowedFontUrl(url)) {
       req.continue().catch(() => {});
     } else {
       req.abort().catch(() => {});

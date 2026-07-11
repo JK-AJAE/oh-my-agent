@@ -7,6 +7,10 @@ interface CheckResult {
   ok: boolean;
   detail: string;
   hint?: string;
+  /** Required deps gate exit code 1; optional deps only disable subcommands. */
+  required?: boolean;
+  /** Subcommands that become unavailable when this dep is missing. */
+  usedBy?: string;
 }
 
 async function checkBinary(
@@ -42,53 +46,60 @@ async function checkBinary(
   });
 }
 
-async function checkOptionalDep(
-  pkgName: string,
-  hint?: string,
-): Promise<CheckResult> {
+async function checkNodeDep(pkgName: string): Promise<boolean> {
   try {
     await import(pkgName);
-    return { name: pkgName, ok: true, detail: "installed" };
+    return true;
   } catch {
-    return {
-      name: pkgName,
-      ok: false,
-      detail: "not installed",
-      hint: hint ?? `bun add ${pkgName}`,
-    };
+    return false;
   }
 }
 
 export async function runSlideDoctor(): Promise<number> {
   const checks: CheckResult[] = [];
 
-  // System Chrome / Chromium (required for validate, pdf, png)
+  // System Chrome / Chromium (required — every validate/export path needs it)
   const chromePath = findChromeExecutable();
   checks.push({
     name: "chrome",
     ok: Boolean(chromePath),
     detail: chromePath ?? "not found",
+    required: true,
+    usedBy: "validate, pdf, png, pptx, edit",
     hint: chromePath
       ? undefined
       : "Install Google Chrome, Chromium, or set OMA_CHROME_PATH",
   });
 
-  // yt-dlp (required for fetch-video)
-  checks.push(
-    await checkBinary(
-      "yt-dlp",
-      ["--version"],
-      "Install with: pip install yt-dlp  OR  brew install yt-dlp",
-    ),
-  );
+  // puppeteer-core (required — every validate/export path needs it)
+  const puppeteerOk = await checkNodeDep("puppeteer-core");
+  checks.push({
+    name: "puppeteer-core",
+    ok: puppeteerOk,
+    detail: puppeteerOk ? "installed" : "not installed",
+    required: true,
+    usedBy: "validate, pdf, png, pptx, edit",
+    hint: puppeteerOk ? undefined : "bun add puppeteer-core",
+  });
 
-  // Optional Node.js deps (lazy-loaded only when their subcommand runs)
-  checks.push(
-    await checkOptionalDep(
-      "pptxgenjs",
-      "bun add --optional pptxgenjs  (required for: oma slide pptx)",
-    ),
+  // yt-dlp (optional — needed only by fetch-video)
+  const ytdlp = await checkBinary(
+    "yt-dlp",
+    ["--version"],
+    "Install with: pip install yt-dlp  OR  brew install yt-dlp",
   );
+  checks.push({ ...ytdlp, required: false, usedBy: "fetch-video" });
+
+  // pptxgenjs (optional — needed only by pptx export)
+  const pptxOk = await checkNodeDep("pptxgenjs");
+  checks.push({
+    name: "pptxgenjs",
+    ok: pptxOk,
+    detail: pptxOk ? "installed" : "not installed",
+    required: false,
+    usedBy: "pptx",
+    hint: pptxOk ? undefined : "bun add --optional pptxgenjs",
+  });
 
   // Print table
   const nameWidth = Math.max(...checks.map((c) => c.name.length)) + 2;
@@ -97,19 +108,19 @@ export async function runSlideDoctor(): Promise<number> {
   for (const check of checks) {
     const mark = check.ok ? color.green("✓") : color.yellow("!");
     const name = check.name.padEnd(nameWidth);
+    const optTag = check.required ? "" : color.dim(" (optional)");
     const detail = check.ok
       ? color.dim(check.detail)
       : color.yellow(check.detail);
-    console.log(`  ${mark} ${name} ${detail}`);
+    console.log(`  ${mark} ${name} ${detail}${optTag}`);
     if (!check.ok && check.hint) {
       console.log(`      ${color.cyan("→")} ${check.hint}`);
     }
   }
 
   const missing = checks.filter((c) => !c.ok);
-  const required = ["chrome", "yt-dlp"];
-  const missingRequired = missing.filter((c) => required.includes(c.name));
-  const missingOptional = missing.filter((c) => !required.includes(c.name));
+  const missingRequired = missing.filter((c) => c.required);
+  const missingOptional = missing.filter((c) => !c.required);
 
   console.log();
   if (missingRequired.length > 0) {
@@ -118,6 +129,11 @@ export async function runSlideDoctor(): Promise<number> {
         `${missingRequired.length} required dependency(ies) missing — some subcommands will fail.`,
       ),
     );
+    for (const check of missingRequired) {
+      console.log(
+        color.yellow(`  ${check.name} missing → unavailable: ${check.usedBy}`),
+      );
+    }
   }
   if (missingOptional.length > 0) {
     console.log(
@@ -125,10 +141,18 @@ export async function runSlideDoctor(): Promise<number> {
         `${missingOptional.length} optional dep(s) not installed — install when you need those subcommands.`,
       ),
     );
+    for (const check of missingOptional) {
+      console.log(
+        color.dim(
+          `  ${check.name} missing → unavailable: oma slide ${check.usedBy}`,
+        ),
+      );
+    }
   }
   if (missing.length === 0) {
     console.log(color.green("All dependencies present."));
   }
 
+  // Optional-only gaps exit 0 — only missing REQUIRED deps gate exit 1.
   return missingRequired.length > 0 ? 1 : 0;
 }

@@ -11,9 +11,11 @@
  *        </deck-stage>
  *   2. Inlines viewport-base.css and deck-stage.js from the working dir.
  *   3. Embeds per-slide <style>/<head> styles from each source file.
- *   4. Adds a presenter view: reads meta.json.speakerNotes and embeds as
+ *   4. Embeds speaker notes: reads meta.json.speakerNotes and embeds as
  *        <script type="application/json" id="speaker-notes">
- *      which deck-stage.js reads on connectedCallback.
+ *      which deck-stage.js reads on connectedCallback and shows in an
+ *      on-screen notes panel toggled with the `n` key (no separate
+ *      presenter window).
  *   5. Keeps ./assets/ refs intact (viewer lives in the same dir).
  *   6. Injects accessible nav controls + slide counter.
  *

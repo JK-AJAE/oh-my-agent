@@ -104,12 +104,14 @@ const DEFAULT_SLIDE_HTML = `<!DOCTYPE html>
 </html>
 `;
 
-// Minimal placeholder viewport-base.css — written when the canonical asset
-// from oma-slide resources is not yet present (frontend agent task T3).
-const PLACEHOLDER_VIEWPORT_BASE_CSS = `/* viewport-base.css — minimal placeholder
- * TODO(oma-deferred): replace with canonical asset from
- *   .agents/skills/oma-slide/resources/assets/viewport-base.css
- * once the frontend agent delivers task T3.
+// Minimal fallback viewport-base.css — written only when the canonical asset
+// (.agents/skills/oma-slide/resources/assets/viewport-base.css) cannot be
+// resolved, e.g. a broken/partial skill install. Reinstall/repair the
+// oma-slide skill to get the full asset.
+const PLACEHOLDER_VIEWPORT_BASE_CSS = `/* viewport-base.css — minimal fallback
+ * The canonical asset from .agents/skills/oma-slide/resources/assets/
+ * could not be found. Reinstall or repair the oma-slide skill assets,
+ * then re-run \`oma slide new --force\` to replace this fallback.
  */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -123,14 +125,14 @@ html, body {
 }
 `;
 
-// Minimal placeholder deck-stage.js
-const PLACEHOLDER_DECK_STAGE_JS = `/* deck-stage.js — minimal placeholder
- * TODO(oma-deferred): replace with canonical asset from
- *   .agents/skills/oma-slide/resources/assets/deck-stage.js
- * once the frontend agent delivers task T3.
+// Minimal fallback deck-stage.js (scaling only — no navigation/notes)
+const PLACEHOLDER_DECK_STAGE_JS = `/* deck-stage.js — minimal fallback
+ * The canonical asset from .agents/skills/oma-slide/resources/assets/
+ * could not be found. Reinstall or repair the oma-slide skill assets,
+ * then re-run \`oma slide new --force\` to replace this fallback.
  */
 (function () {
-  var stage = document.querySelector('.stage');
+  var stage = document.querySelector('.deck-stage');
   if (!stage) return;
   var DESIGN_W = ${FRAME_W}, DESIGN_H = ${FRAME_H};
   function scale() {
@@ -229,8 +231,8 @@ function copyOrPlaceholder(
   } else {
     writeFileSync(destPath, placeholder, "utf8");
     console.log(
-      color.dim(
-        `  [TODO] ${filename} not yet available — wrote minimal placeholder.`,
+      color.yellow(
+        `  Warning: canonical ${filename} not found in skill assets — wrote minimal fallback.`,
       ),
     );
   }
@@ -279,7 +281,8 @@ export async function runSlideNew(opts: {
       PLACEHOLDER_DECK_STAGE_JS,
     );
   } else {
-    // Canonical assets not yet delivered by the frontend agent (T3).
+    // Canonical assets could not be resolved (broken/partial skill install) —
+    // write minimal fallbacks so the workspace is still usable.
     writeFileSync(
       join(workDir, "viewport-base.css"),
       PLACEHOLDER_VIEWPORT_BASE_CSS,
@@ -291,13 +294,18 @@ export async function runSlideNew(opts: {
       "utf8",
     );
     console.log(
-      color.dim(
-        "  [TODO] Stage assets not found — wrote minimal placeholders.",
+      color.yellow(
+        "  Warning: canonical stage assets not found — wrote minimal fallbacks.",
       ),
     );
     console.log(
-      color.dim(
-        "         Run `oma slide new` again after the frontend agent delivers T3.",
+      color.yellow(
+        "           Reinstall/repair the oma-slide skill (.agents/skills/oma-slide/resources/assets/),",
+      ),
+    );
+    console.log(
+      color.yellow(
+        "           then re-run `oma slide new --force` to replace the fallbacks.",
       ),
     );
   }
