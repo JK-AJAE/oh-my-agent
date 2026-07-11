@@ -198,7 +198,7 @@ Displays a live table with:
 - Latest activity from progress files
 - Elapsed time
 
-The dashboard watches `.serena/memories/` for real-time updates. It refreshes as agents write progress.
+The dashboard watches `.agents/state/memories/` for real-time updates. It refreshes as agents write progress.
 
 ### Web dashboard
 

@@ -141,7 +141,7 @@ oma verify # Verify agent output (build/test/scope/secrets)
 oma visualize # Dependency visualization (alias: `oma viz`)
 oma describe # Introspect CLI commands as JSON
 oma bridge # MCP stdio ↔ Streamable HTTP bridge
-oma memory:init # Initialize Serena memory schema
+oma memory:init # Initialize coordination memory schema
 oma auth:status # Check CLI auth status (gh/claude/codex/cursor/qwen)
 oma search # Mechanical search primitives (alias: `oma s`)
 oma image # Multi-vendor AI image generation (alias: `oma img`)

@@ -924,9 +924,9 @@ These generated files are refreshed by `oma link`, `oma install`, and `oma updat
 
 ---
 
-## Runtime state (Serena memory)
+## Runtime state (project memory store)
 
-During orchestration sessions, agents coordinate through shared memory files in `.serena/memories/` (configurable via `mcp.json`):
+During orchestration sessions, agents coordinate through shared memory files in `.agents/state/memories/` (older projects fall back to the legacy `.serena/memories/` path; configurable via `mcp.json`):
 
 | File | Owner | Purpose | Others |
 |------|-------|---------|--------|
@@ -937,17 +937,16 @@ During orchestration sessions, agents coordinate through shared memory files in 
 | `session-metrics.md` | Orchestrator | Clarification Debt tracking, Quality Score progression | QA reads |
 | `experiment-ledger.md` | Orchestrator/QA | Experiment tracking when Quality Score is active | All read |
 
-Memory tools are configurable. Default uses Serena MCP (`read_memory`, `write_memory`, `edit_memory`), but custom tools can be configured in `mcp.json`:
+Memory tools are configurable. By default agents read and write these coordination files directly with their native file tools (`Read`, `Write`, `Edit`), but custom tools and a custom base path can be configured in `mcp.json`:
 
 ```json
 {
 "memoryConfig": {
-"provider": "serena",
-"basePath": ".serena/memories",
+"basePath": ".agents/state/memories",
 "tools": {
-"read": "read_memory",
-"write": "write_memory",
-"edit": "edit_memory"
+"read": "Read",
+"write": "Write",
+"edit": "Edit"
 }
 }
 }

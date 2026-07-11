@@ -14,7 +14,7 @@ oh-my-agent provides two real-time dashboards for monitoring agent activity duri
 | `oma dashboard` | Terminal (TUI) | N/A (renders in your terminal) | chokidar file watcher, picocolors rendering |
 | `oma dashboard:web` | Browser | `http://localhost:9847` | HTTP server, WebSocket, chokidar file watcher |
 
-Both dashboards watch the same data source: `.serena/memories/` directory.
+Both dashboards watch the same data source: the `.agents/state/memories/` directory (older projects fall back to the legacy `.serena/memories/` path).
 
 ### Terminal dashboard
 
@@ -26,7 +26,7 @@ Renders a box-drawing UI directly in the terminal. Updates automatically when me
 
 ```
 ╔════════════════════════════════════════════════════════╗
-║  Serena Memory Dashboard                              ║
+║  OMA Memory Dashboard                                 ║
 ║  Session: session-20260324-143052  [RUNNING]          ║
 ╠════════════════════════════════════════════════════════╣
 ║  Agent        Status       Turn   Task                ║
@@ -65,7 +65,7 @@ Opens a web server on port 9847 (configurable via `DASHBOARD_PORT` environment v
 DASHBOARD_PORT=8080 oma dashboard:web
 
 # Custom memories directory
-MEMORIES_DIR=/path/to/.serena/memories oma dashboard:web
+MEMORIES_DIR=/path/to/.agents/state/memories oma dashboard:web
 ```
 
 The web dashboard shows the same information as the terminal dashboard but with a styled dark-theme UI featuring:
@@ -112,9 +112,9 @@ For multi-agent workflows, the recommended setup uses three terminal panes:
 
 ---
 
-## Data sources in .serena/memories/
+## Data sources in .agents/state/memories/
 
-The dashboards read from the `.serena/memories/` directory. This directory is populated by agents and workflows using MCP memory tools during execution.
+The dashboards read from the `.agents/state/memories/` directory (older projects fall back to the legacy `.serena/memories/` path). This directory is populated by agents and workflows writing coordination files during execution.
 
 ### File types and their contents
 
@@ -217,14 +217,14 @@ The dashboard detects completion by the presence of this file and updates the ag
 
 **Possible causes:**
 - The workflow has not reached the agent spawning step yet.
-- The `.serena/memories/` directory is empty.
+- The `.agents/state/memories/` directory is empty.
 - The dashboard is watching the wrong directory.
 
 **Actions:**
-1. Verify the memories directory: `ls -la .serena/memories/`
+1. Verify the memories directory: `ls -la .agents/state/memories/`
 2. Check if the workflow is still in the planning phase (agents have not been spawned yet).
 3. Ensure the dashboard is watching the correct project directory: the dashboard resolves the memories path from the current working directory.
-4. If using a custom path: `MEMORIES_DIR=/path/to/.serena/memories oma dashboard`
+4. If using a custom path: `MEMORIES_DIR=/path/to/.agents/state/memories oma dashboard`
 
 ### Signal 4: web dashboard shows "disconnected"
 
@@ -272,7 +272,7 @@ Dashboard monitoring is done when:
 
 - **File watching:** Uses [chokidar](https://github.com/paulmillr/chokidar) with `awaitWriteFinish` (200ms stability threshold, 50ms poll interval) to avoid rendering partial file writes.
 - **Rendering:** Clears and redraws the entire terminal on every file change event. Uses `picocolors` for ANSI color output and Unicode box-drawing characters for the border.
-- **Memory directory:** Resolved from `MEMORIES_DIR` env var, CLI argument, or `{cwd}/.serena/memories`.
+- **Memory directory:** Resolved from `MEMORIES_DIR` env var, CLI argument, or `{cwd}/.agents/state/memories` (falling back to the legacy `{cwd}/.serena/memories` for older projects).
 - **Graceful shutdown:** Catches `SIGINT` and `SIGTERM`, closes the chokidar watcher, and exits cleanly.
 
 ### Web dashboard (oma dashboard:web)

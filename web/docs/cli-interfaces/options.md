@@ -208,10 +208,10 @@ oma agent:status <session-id> [agent-ids...] [-r <root>]
 
 | Flag | Short | Description | Default |
 |:-----|:------|:-----------|:--------|
-| `--root` | `-r` | Root path for locating memory files (`.serena/memories/result-{agent}.md`) and PID files. | Current working directory |
+| `--root` | `-r` | Root path for locating memory files (`.agents/state/memories/result-{agent}.md`) and PID files. | Current working directory |
 
 **Status determination logic:**
-1. If `.serena/memories/result-{agent}.md` exists: reads `## Status:` header. If no header, reports `completed`.
+1. If `.agents/state/memories/result-{agent}.md` exists: reads `## Status:` header. If no header, reports `completed`.
 2. If PID file exists at `/tmp/subagent-{session-id}-{agent}.pid`: checks if the PID is alive. Reports `running` if alive, `crashed` if dead.
 3. If neither file exists: reports `crashed`.
 
@@ -318,7 +318,7 @@ oma memory:init [--json] [--output <format>] [--force]
 
 | Flag | Description | Default |
 |:-----|:-----------|:--------|
-| `--force` | Overwrite empty or existing schema files in `.serena/memories/`. Without this flag, existing files are not touched. | `false` |
+| `--force` | Overwrite empty or existing schema files in `.agents/state/memories/`. Without this flag, existing files are not touched. | `false` |
 
 ### verify
 

@@ -157,7 +157,7 @@ Everything oh-my-agent needs lives in the `.agents/` directory:
 └── mcp.json                # MCP server configuration
 ```
 
-The `.claude/` directory exists only as an IDE integration layer. It contains symlinks pointing back to `.agents/`, plus hooks for keyword detection and the HUD statusline. The `.serena/memories/` directory holds runtime state during orchestration sessions.
+The `.claude/` directory exists only as an IDE integration layer. It contains symlinks pointing back to `.agents/`, plus hooks for keyword detection and the HUD statusline. The `.agents/state/memories/` directory holds runtime coordination state during orchestration sessions (older projects fall back to the legacy `.serena/memories/` path).
 
 This architecture means your agent configuration is:
 - **Portable**: switch IDEs without reconfiguring

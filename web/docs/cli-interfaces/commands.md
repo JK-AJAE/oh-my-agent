@@ -64,7 +64,7 @@ oma doctor [--json] [--output <format>] [--profile]
 - Authentication status for each CLI.
 - MCP configuration: `~/.gemini/settings.json`, `~/.claude.json`, `~/.codex/config.toml`.
 - Installed skills: which skills are present and their status.
-- Serena memory directory: `.serena/memories/` existence and file count.
+- Memory store directory: `.agents/state/memories/` existence and file count (older projects fall back to the legacy `.serena/memories/` path).
 - Global workflows: checks `~/.gemini/antigravity/global_workflows/` installation status.
 - Git rerere: whether `rerere.enabled` is configured globally.
 - Claude Code recommended settings: checks `~/.claude/settings.json` for optimal configuration:
@@ -194,7 +194,7 @@ Start the terminal dashboard for real-time agent monitoring.
 oma dashboard
 ```
 
-No options. Watches `.serena/memories/` in the current directory. Renders a box-drawing UI with session status, agent table, and activity feed. Updates on every file change. Press `Ctrl+C` to exit.
+No options. Watches `.agents/state/memories/` in the current directory (older projects fall back to the legacy `.serena/memories/` path). Renders a box-drawing UI with session status, agent table, and activity feed. Updates on every file change. Press `Ctrl+C` to exit.
 
 The memories directory can be overridden with the `MEMORIES_DIR` environment variable.
 
@@ -204,7 +204,7 @@ The memories directory can be overridden with the `MEMORIES_DIR` environment var
 oma dashboard
 
 # Custom memories directory
-MEMORIES_DIR=/path/to/.serena/memories oma dashboard
+MEMORIES_DIR=/path/to/.agents/state/memories oma dashboard
 ```
 
 ### dashboard:web
@@ -222,7 +222,7 @@ Starts an HTTP server on `http://localhost:9847` with a WebSocket connection for
 | Variable | Default | Description |
 |:---------|:--------|:-----------|
 | `DASHBOARD_PORT` | `9847` | Port for the HTTP/WebSocket server |
-| `MEMORIES_DIR` | `{cwd}/.serena/memories` | Path to the memories directory |
+| `MEMORIES_DIR` | `{cwd}/.agents/state/memories` | Path to the memories directory (falls back to the legacy `{cwd}/.serena/memories` for older projects) |
 
 **Example:**
 ```bash
@@ -257,7 +257,7 @@ oma stats [--json] [--output <format>] [--reset]
 - Files changed, lines added, lines removed
 - Last updated timestamp
 
-**Cost telemetry** (aggregated across every `session-cost-*.md` file under `.serena/memories/`):
+**Cost telemetry** (aggregated across every `session-cost-*.md` file under `.agents/state/memories/`):
 - Total input tokens (prompt character approximation, no output tokens yet)
 - Total spawns
 - Estimated USD using a conservative per-vendor input-token rate table (Claude $3/M, Codex $5/M, Gemini $0.3/M, Qwen $0/M, Cursor $5/M, Antigravity $0.3/M)
@@ -699,7 +699,7 @@ oma schedule:sync --prune
 
 ### memory:init
 
-Initialize the Serena memory schema.
+Initialize the coordination memory store schema.
 
 ```
 oma memory:init [--json] [--output <format>] [--force]
@@ -713,7 +713,7 @@ oma memory:init [--json] [--output <format>] [--force]
 | `--output <format>` | Output format (`text` or `json`) |
 | `--force` | Overwrite empty or existing schema files |
 
-**What it does:** Creates the `.serena/memories/` directory structure with initial schema files that the MCP memory tools use for reading and writing agent state.
+**What it does:** Creates the `.agents/state/memories/` directory structure with initial schema files that agents and workflows use for reading and writing coordination state.
 
 **Examples:**
 ```bash

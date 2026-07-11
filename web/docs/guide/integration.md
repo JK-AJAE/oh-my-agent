@@ -179,7 +179,7 @@ EOF
 ```bash
 oma memory:init
 # Or manually:
-mkdir -p /path/to/your/project/.serena/memories
+mkdir -p /path/to/your/project/.agents/state/memories
 ```
 
 ---
@@ -221,7 +221,7 @@ ls -la .claude/skills/
 cat .agents/oma-config.yaml
 
 # Verify memory directory
-ls .serena/memories/ 2>/dev/null || echo "Memory not initialized"
+ls .agents/state/memories/ 2>/dev/null || echo "Memory not initialized"
 
 # Check version
 cat .agents/skills/_version.json 2>/dev/null
@@ -262,6 +262,8 @@ your-project/
       ultrawork.md
       plan.md
       ...
+    state/                          # Runtime coordination state
+      memories/                     # Coordination artifacts (progress-*, result-*, task-board, session-cost-*)
     results/                        # Agent execution results
   .claude/                          # Claude Code — symlinks only
     skills/                         # -> .agents/skills/* and .agents/workflows/*
@@ -270,8 +272,8 @@ your-project/
     skills/                         # -> .agents/skills/*
   .zcode/                           # ZCode — workflow commands only (optional)
     commands/                       # -> .agents/workflows/*
-  .serena/                          # MCP memory storage
-    memories/                       # Runtime memory files
+  .serena/                          # Serena MCP storage (legacy memory fallback)
+    memories/                       # Serena's own onboarding memories; legacy coordination fallback
     metrics.json                    # Productivity metrics
 ```
 
@@ -332,7 +334,7 @@ After installation, you can set up real-time monitoring. See the [Dashboard Moni
 Quick setup:
 
 ```bash
-# Terminal dashboard (watches .serena/memories/ for changes)
+# Terminal dashboard (watches .agents/state/memories/ for changes)
 oma dashboard
 
 # Web dashboard (browser-based, http://localhost:9847)

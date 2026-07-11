@@ -340,7 +340,7 @@ oma dashboard
 Displays a live-updating table in your terminal:
 - Session ID and overall status (RUNNING / COMPLETED / FAILED)
 - Per-agent rows: status, turn count, latest activity, elapsed time
-- Watches `.serena/memories/` for real-time progress updates
+- Watches `.agents/state/memories/` for real-time progress updates
 
 ### Web dashboard
 
@@ -386,12 +386,12 @@ When you run `oma agent:spawn`, the CLI:
 2. Injects the vendor-specific execution protocol from `.agents/skills/_shared/runtime/execution-protocols/{vendor}.md`
 3. Composes the agent prompt using the SKILL.md core rules, execution protocol, and task-relevant resources
 4. Spawns the agent as an independent CLI process
-5. The agent writes progress to `.serena/memories/progress-{agent}.md`
-6. On completion, writes final result to `.serena/memories/result-{agent}.md`
+5. The agent writes progress to `.agents/state/memories/progress-{agent}.md`
+6. On completion, writes final result to `.agents/state/memories/result-{agent}.md`
 
-### Serena memory
+### Project memory store
 
-Agents coordinate through shared memory files at `.serena/memories/`. The orchestrator writes `orchestrator-session.md` (session state) and `task-board.md` (task assignments). Each agent writes its own `progress-{agent}.md` (turn-by-turn updates) and `result-{agent}.md` (final output). Memory tools are configurable; defaults are `read_memory`, `write_memory`, `edit_memory` via Serena MCP.
+Agents coordinate through shared memory files at `.agents/state/memories/` (older projects fall back to the legacy `.serena/memories/` path). The orchestrator writes `orchestrator-session.md` (session state) and `task-board.md` (task assignments). Each agent writes its own `progress-{agent}.md` (turn-by-turn updates) and `result-{agent}.md` (final output). Agents read and write these as plain files with their native file tools; the tool mapping stays configurable via `mcp.json → memoryConfig.tools`.
 
 ### Workspaces
 
