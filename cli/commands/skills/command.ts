@@ -6,6 +6,7 @@ import {
 } from "../../utils/cli-framework.js";
 import { runSkillsAudit } from "./audit.js";
 import { runSkillsEval } from "./eval.js";
+import { runSkillsLint } from "./lint.js";
 import {
   OPT_EDITS_PER_EPOCH,
   OPT_LR_MAX_CHARS,
@@ -30,6 +31,28 @@ export function registerSkillsCommand(program: Command): void {
     runAction(
       (options) => {
         runSkillsAudit(resolveJsonMode(options));
+      },
+      { supportsJsonOutput: true },
+    ),
+  );
+
+  addOutputOptions(
+    skills
+      .command("lint")
+      .description(
+        "Detect per-skill authoring smells (frontmatter, structure, broken refs)",
+      )
+      .option("--skill <id>", "Lint a single skill"),
+    "Output as JSON for CI/CD",
+  ).action(
+    runAction(
+      (options) => {
+        const opts = options as {
+          json?: boolean;
+          output?: string;
+          skill?: string;
+        };
+        runSkillsLint(resolveJsonMode(opts), { skill: opts.skill });
       },
       { supportsJsonOutput: true },
     ),
