@@ -33,6 +33,23 @@ function listFilesRecursive(dir) {
   return out;
 }
 
+// Version fields in these files track cli/package.json, which release-please
+// bumps on every release — that bump alone must not count as drift (the gate
+// would fail on the first push after every release). Substantive changes to
+// the same files still fail the check.
+const VERSION_INSENSITIVE_FILES = new Set(["claude-plugin/marketplace.json"]);
+
+function normalizeForCompare(rel, content) {
+  if (!VERSION_INSENSITIVE_FILES.has(rel.replaceAll("\\", "/"))) return content;
+  try {
+    return JSON.stringify(JSON.parse(content), (key, value) =>
+      key === "version" ? "<version-normalized>" : value,
+    );
+  } catch {
+    return content;
+  }
+}
+
 function diffDirs(freshDir, committedDir) {
   const freshFiles = new Set(
     listFilesRecursive(freshDir).map((f) => relative(freshDir, f)),
@@ -47,8 +64,14 @@ function diffDirs(freshDir, committedDir) {
 
   for (const rel of freshFiles) {
     if (!committedFiles.has(rel)) continue;
-    const freshContent = readFileSync(join(freshDir, rel), "utf-8");
-    const committedContent = readFileSync(join(committedDir, rel), "utf-8");
+    const freshContent = normalizeForCompare(
+      rel,
+      readFileSync(join(freshDir, rel), "utf-8"),
+    );
+    const committedContent = normalizeForCompare(
+      rel,
+      readFileSync(join(committedDir, rel), "utf-8"),
+    );
     if (freshContent !== committedContent) changed.push(rel);
   }
 
