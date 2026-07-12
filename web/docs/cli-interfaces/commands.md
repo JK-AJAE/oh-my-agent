@@ -1323,6 +1323,7 @@ oma skills audit [--json] [--output <format>]
 - **Pairwise description similarity**: TF-IDF cosine similarity between every pair of installed skills. Warns at ≥ 60%, fails at ≥ 75%.
 - **Black-hole detection**: flags any skill whose mean similarity to all others is a positive outlier (≥ mean + 1.5 × stddev), indicating an over-generic description that could hijack routing.
 - **Library-size decay**: warns when more than 60 skills are installed (routing accuracy decays logarithmically as the library grows).
+- **Focus check**: warns when a skill sprawls into a bundle — more than 20 reference docs (`.md` files besides `SKILL.md`, vendored trees excluded) or a `SKILL.md` body over 25,000 chars. Focused skills outperform bundles (SkillsBench, arXiv:2602.12670); the fix is splitting, not deleting.
 
 **Exit codes:** `0` all findings in warn band or none; `1` at least one fail-band pair.
 
@@ -1330,6 +1331,50 @@ oma skills audit [--json] [--output <format>]
 ```bash
 oma skills audit
 oma skills audit --json | jq '.findings'
+```
+
+### skills lint
+
+Detect per-skill authoring smells: quality defects inside a single `SKILL.md`, as opposed to `skills audit` which checks relations *between* skills. Based on the skill-smell taxonomy of arXiv:2607.01456 (over 99% of in-the-wild SKILL.md files carry at least one smell).
+
+```
+oma skills lint [--skill <id>] [--json] [--output <format>]
+```
+
+**Options:**
+
+| Flag | Description |
+|:-----|:-----------|
+| `--skill <id>` | Lint a single skill |
+| `--json` | Output as JSON for CI/CD |
+| `--output <format>` | Output format (`text` or `json`) |
+
+**Generic smells (every skill):**
+
+| Smell | Severity | Meaning |
+|:------|:---------|:--------|
+| `missing-name` | fail | frontmatter `name` absent or empty |
+| `missing-description` | fail | frontmatter `description` absent or empty — routing depends on it |
+| `weak-description` | warn | description under 40 chars — too thin to route on |
+| `template-placeholder` | warn | leftover `{Placeholder}` text outside code spans |
+| `broken-reference` | fail | references a `resources/`, `config/`, `scripts/`, or `assets/` file that does not exist |
+
+**SSL-lite smells** (only for skills that opt into the format, i.e. have a `## Scheduling` heading — third-party skills are not held to it):
+
+| Smell | Severity | Meaning |
+|:------|:---------|:--------|
+| `ssl-structure` | fail | top-level sections deviate from `Scheduling / Structural Flow / Logical Operations / References` |
+| `canonical-path` | fail | not exactly one `### Canonical command path` or `### Canonical workflow path` |
+| `missing-boundaries` | warn | no `### When NOT to use` — boundary-less skills hijack routing |
+| `empty-failure-recovery` | warn | `### Failure and recovery` missing or empty (accepts bullets or table rows) — encode failure mechanisms per SkillLens |
+
+**Exit codes:** `0` no fail-severity smells; `1` at least one fail smell.
+
+**Examples:**
+```bash
+oma skills lint
+oma skills lint --skill oma-scholar
+oma skills lint --json | jq '.smells'
 ```
 
 ### skills eval
