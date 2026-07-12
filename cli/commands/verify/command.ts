@@ -6,6 +6,12 @@ import {
   runAction,
 } from "../../utils/cli-framework.js";
 import { collectVerifyReport, isValidAgent, VALID_AGENTS } from "./report.js";
+import {
+  DEFAULT_MAX_FALSE_FIRE_PCT,
+  DEFAULT_MAX_MISSED_FIRE_PCT,
+  runVerifyTriggers,
+} from "./triggers-command.js";
+import { renderTriggersReport } from "./triggers-ui.js";
 import { printVerifyError, renderVerifyReport } from "./ui.js";
 
 export async function verify(
@@ -40,18 +46,88 @@ export async function verify(
   process.exit(report.summary.failed > 0 ? 1 : 0);
 }
 
+export interface VerifyTriggersOptions {
+  json?: boolean;
+  output?: string;
+  corpus?: string;
+  maxFalseFire?: string;
+  maxMissedFire?: string;
+}
+
+export async function verifyTriggers(
+  options: VerifyTriggersOptions,
+): Promise<void> {
+  const jsonMode = resolveJsonMode(options);
+  const maxFalseFire = options.maxFalseFire
+    ? Number(options.maxFalseFire)
+    : DEFAULT_MAX_FALSE_FIRE_PCT;
+  const maxMissedFire = options.maxMissedFire
+    ? Number(options.maxMissedFire)
+    : DEFAULT_MAX_MISSED_FIRE_PCT;
+
+  const { report, thresholds, passed } = await runVerifyTriggers({
+    corpusPath: options.corpus,
+    maxFalseFire,
+    maxMissedFire,
+  });
+
+  if (jsonMode) {
+    console.log(JSON.stringify({ ok: passed, thresholds, report }, null, 2));
+  } else {
+    renderTriggersReport(report, thresholds, passed);
+  }
+  process.exit(passed ? 0 : 1);
+}
+
+/**
+ * `verify` is a parent command with two faces, kept backward compatible:
+ *   - `oma verify <agent-type>` (default subcommand — original behavior,
+ *     unchanged) verifies a subagent's output against acceptance checks.
+ *   - `oma verify triggers` (sibling subcommand) measures the keyword
+ *     detector's trigger accuracy against a labeled prompt corpus.
+ * Commander resolves an argument that doesn't match a known subcommand name
+ * (e.g. "backend") to the `isDefault` subcommand below, so `verify backend`
+ * keeps working exactly as before.
+ */
 export function registerVerify(program: Command): void {
+  const verifyCmd = program
+    .command("verify")
+    .description(
+      "Verify subagent output (backend/frontend/mobile/qa/debug/pm), or measure keyword-detector trigger accuracy",
+    );
+
   addOutputOptions(
-    program
-      .command("verify <agent-type>")
-      .description(
-        "Verify subagent output (backend/frontend/mobile/qa/debug/pm)",
-      )
+    verifyCmd
+      .command("agent <agent-type>", { isDefault: true, hidden: true })
       .option("-w, --workspace <path>", "Workspace path", process.cwd()),
   ).action(
     runAction(
       async (agentType, options) => {
         await verify(agentType, options.workspace, resolveJsonMode(options));
+      },
+      { supportsJsonOutput: true },
+    ),
+  );
+
+  addOutputOptions(
+    verifyCmd
+      .command("triggers")
+      .description(
+        "Measure keyword-detector trigger accuracy against a labeled prompt corpus",
+      )
+      .option("--corpus <path>", "Override the trigger corpus JSON path")
+      .option(
+        "--max-false-fire <pct>",
+        `Fail if false-fire rate exceeds this percent (default ${DEFAULT_MAX_FALSE_FIRE_PCT})`,
+      )
+      .option(
+        "--max-missed-fire <pct>",
+        `Fail if missed-fire rate exceeds this percent (default ${DEFAULT_MAX_MISSED_FIRE_PCT})`,
+      ),
+  ).action(
+    runAction(
+      async (options) => {
+        await verifyTriggers(options);
       },
       { supportsJsonOutput: true },
     ),
