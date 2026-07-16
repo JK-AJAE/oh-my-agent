@@ -280,7 +280,7 @@
 <body>
   <div id="app">
     <!-- Toolbar -->
-    <header id="toolbar" role="banner">
+    <header id="toolbar">
       <h1>oma slide editor</h1>
       <label for="slide-select" class="sr-only">Select slide</label>
       <select id="slide-select" aria-label="Select slide to edit">
@@ -318,7 +318,7 @@
       <!-- Slide info -->
       <div class="panel-section">
         <h2>Selected region</h2>
-        <div id="bbox-display" aria-label="Bounding box coordinates">
+        <div id="bbox-display" role="status" aria-label="Bounding box coordinates">
           Drag on the canvas to select a region
         </div>
         <p class="hint">Drag on the slide to draw a bounding box around the element you want to edit.</p>

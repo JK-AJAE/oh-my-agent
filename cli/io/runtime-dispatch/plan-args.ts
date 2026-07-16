@@ -8,7 +8,7 @@ import type { AgentPlan } from "./types.js";
  */
 export function qwenThinkingFlag(plan: AgentPlan): string | null {
   const effortSpec = plan.spec.supports.effort;
-  if (!effortSpec || effortSpec.type !== "binary-thinking") return null;
+  if (effortSpec?.type !== "binary-thinking") return null;
 
   // Explicit thinking boolean takes priority
   if (plan.thinking === true) return "--thinking";

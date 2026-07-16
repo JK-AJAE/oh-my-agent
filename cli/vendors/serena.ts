@@ -16,7 +16,7 @@ export type SerenaMcpServerLike = {
 export function isLegacyUvxSerena(
   server: SerenaMcpServerLike | undefined,
 ): boolean {
-  if (!server || server.command !== "uvx") return false;
+  if (server?.command !== "uvx") return false;
   if (!Array.isArray(server.args)) return false;
   return server.args.some(
     (arg) =>
@@ -40,7 +40,7 @@ export function serenaStartMcpArgs(context: string): string[] {
 export function hasSerenaDashboardOpenDisabled(
   server: SerenaMcpServerLike | undefined,
 ): boolean {
-  if (!server || server.command !== "serena" || !Array.isArray(server.args)) {
+  if (server?.command !== "serena" || !Array.isArray(server.args)) {
     return true;
   }
   const idx = server.args.indexOf("--open-web-dashboard");

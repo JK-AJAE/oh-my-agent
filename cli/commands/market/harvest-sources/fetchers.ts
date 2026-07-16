@@ -81,7 +81,7 @@ const fetchGrounding: SourceFetcher = async ({
     try {
       const results = await apiKeywordSearch(q, ctx, ["duckduckgo"]);
       const r = results[0];
-      if (!r || r.status !== "ok") {
+      if (r?.status !== "ok") {
         failures.push(
           `${q}: ${r?.status === "timeout" ? "timeout" : (r?.error ?? "fetch failed")}`,
         );
@@ -211,7 +211,7 @@ function apiSearchFetcher(
         results = await apiKeywordSearch(query, ctx, [handlerId]);
         result = results[0];
       }
-      if (!result || result.status !== "ok") {
+      if (result?.status !== "ok") {
         return fail(
           source,
           result?.status === "timeout"

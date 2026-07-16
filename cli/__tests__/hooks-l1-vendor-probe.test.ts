@@ -191,176 +191,174 @@ describe("L1 hook vendor probe", () => {
     }
   }
 
-  it.each<Vendor>([
-    "antigravity",
-    "claude",
-    "codex",
-    "cursor",
-    "qwen",
-  ])("%s runs keyword-detector -> state-boundary and records L1 events", (vendor) => {
-    const { input, env } = makeCase(vendor);
-    const keywordOutput = runHook("keyword-detector.ts", input, env);
-    expectPromptOutput(vendor, keywordOutput);
+  it.each<Vendor>(["antigravity", "claude", "codex", "cursor", "qwen"])(
+    "%s runs keyword-detector -> state-boundary and records L1 events",
+    (vendor) => {
+      const { input, env } = makeCase(vendor);
+      const keywordOutput = runHook("keyword-detector.ts", input, env);
+      expectPromptOutput(vendor, keywordOutput);
 
-    const boundaryOutput = runHook("state-boundary.ts", input, env);
-    expectPromptOutput(vendor, boundaryOutput);
+      const boundaryOutput = runHook("state-boundary.ts", input, env);
+      expectPromptOutput(vendor, boundaryOutput);
 
-    const skillOutput = runHook("skill-injector.ts", input, env);
-    if (skillOutput.trim()) expectPromptOutput(vendor, skillOutput);
+      const skillOutput = runHook("skill-injector.ts", input, env);
+      if (skillOutput.trim()) expectPromptOutput(vendor, skillOutput);
 
-    const index = readIndex(projectDir);
-    const sid = index.active.main;
-    expect(sid).toMatch(/^oma-/);
-    if (!sid) throw new Error("expected active main sid");
+      const index = readIndex(projectDir);
+      const sid = index.active.main;
+      expect(sid).toMatch(/^oma-/);
+      if (!sid) throw new Error("expected active main sid");
 
-    const events = readEvents(projectDir, sid);
-    expect(events.map((event) => event.kind)).toEqual([
-      "session.created",
-      "boundary",
-    ]);
-    expect(events[0]).toMatchObject({
-      sid,
-      kind: "session.created",
-      vendor,
-    });
-    expect(events[1]).toMatchObject({
-      sid,
-      kind: "boundary",
-      vendor,
-    });
-    expect(
-      existsSync(
-        join(projectDir, ".agents", "state", "sessions", sid, "meta.json"),
-      ),
-    ).toBe(true);
-  });
+      const events = readEvents(projectDir, sid);
+      expect(events.map((event) => event.kind)).toEqual([
+        "session.created",
+        "boundary",
+      ]);
+      expect(events[0]).toMatchObject({
+        sid,
+        kind: "session.created",
+        vendor,
+      });
+      expect(events[1]).toMatchObject({
+        sid,
+        kind: "boundary",
+        vendor,
+      });
+      expect(
+        existsSync(
+          join(projectDir, ".agents", "state", "sessions", sid, "meta.json"),
+        ),
+      ).toBe(true);
+    },
+  );
 
-  it.each<CloseReopenVendor>([
-    "claude",
-    "codex",
-    "cursor",
-    "qwen",
-  ])("%s close-reopen keeps the OMA sid and flushes an L1-only snapshot", (vendor) => {
-    const caseByVendor = {
-      claude: {
-        env: { CLAUDE_PROJECT_DIR: projectDir },
-        firstInput: {
-          hook_event_name: "UserPromptSubmit",
-          sessionId: "claude-session-1",
-          prompt: "work",
+  it.each<CloseReopenVendor>(["claude", "codex", "cursor", "qwen"])(
+    "%s close-reopen keeps the OMA sid and flushes an L1-only snapshot",
+    (vendor) => {
+      const caseByVendor = {
+        claude: {
+          env: { CLAUDE_PROJECT_DIR: projectDir },
+          firstInput: {
+            hook_event_name: "UserPromptSubmit",
+            sessionId: "claude-session-1",
+            prompt: "work",
+          },
+          reopenedInput: {
+            hook_event_name: "UserPromptSubmit",
+            sessionId: "claude-session-2",
+            prompt: "continue",
+          },
+          firstVendorSid: "claude-session-1",
+          reopenedVendorSid: "claude-session-2",
         },
-        reopenedInput: {
-          hook_event_name: "UserPromptSubmit",
-          sessionId: "claude-session-2",
-          prompt: "continue",
+        codex: {
+          env: {},
+          firstInput: {
+            hook_event_name: "UserPromptSubmit",
+            session_id: "codex-session-1",
+            cwd: projectDir,
+            prompt: "work",
+          },
+          reopenedInput: {
+            hook_event_name: "UserPromptSubmit",
+            session_id: "codex-session-2",
+            cwd: projectDir,
+            prompt: "continue",
+          },
+          firstVendorSid: "codex-session-1",
+          reopenedVendorSid: "codex-session-2",
         },
-        firstVendorSid: "claude-session-1",
-        reopenedVendorSid: "claude-session-2",
-      },
-      codex: {
-        env: {},
-        firstInput: {
-          hook_event_name: "UserPromptSubmit",
-          session_id: "codex-session-1",
-          cwd: projectDir,
-          prompt: "work",
+        cursor: {
+          env: {},
+          firstInput: {
+            hook_event_name: "beforeSubmitPrompt",
+            sessionId: "cursor-session-1",
+            cwd: projectDir,
+            prompt: "work",
+          },
+          reopenedInput: {
+            hook_event_name: "beforeSubmitPrompt",
+            sessionId: "cursor-session-2",
+            cwd: projectDir,
+            prompt: "continue",
+          },
+          firstVendorSid: "cursor-session-1",
+          reopenedVendorSid: "cursor-session-2",
         },
-        reopenedInput: {
-          hook_event_name: "UserPromptSubmit",
-          session_id: "codex-session-2",
-          cwd: projectDir,
-          prompt: "continue",
+        qwen: {
+          env: { QWEN_PROJECT_DIR: projectDir },
+          firstInput: {
+            hook_event_name: "UserPromptSubmit",
+            sessionId: "qwen-session-1",
+            prompt: "work",
+          },
+          reopenedInput: {
+            hook_event_name: "UserPromptSubmit",
+            sessionId: "qwen-session-2",
+            prompt: "continue",
+          },
+          firstVendorSid: "qwen-session-1",
+          reopenedVendorSid: "qwen-session-2",
         },
-        firstVendorSid: "codex-session-1",
-        reopenedVendorSid: "codex-session-2",
-      },
-      cursor: {
-        env: {},
-        firstInput: {
-          hook_event_name: "beforeSubmitPrompt",
-          sessionId: "cursor-session-1",
-          cwd: projectDir,
-          prompt: "work",
-        },
-        reopenedInput: {
-          hook_event_name: "beforeSubmitPrompt",
-          sessionId: "cursor-session-2",
-          cwd: projectDir,
-          prompt: "continue",
-        },
-        firstVendorSid: "cursor-session-1",
-        reopenedVendorSid: "cursor-session-2",
-      },
-      qwen: {
-        env: { QWEN_PROJECT_DIR: projectDir },
-        firstInput: {
-          hook_event_name: "UserPromptSubmit",
-          sessionId: "qwen-session-1",
-          prompt: "work",
-        },
-        reopenedInput: {
-          hook_event_name: "UserPromptSubmit",
-          sessionId: "qwen-session-2",
-          prompt: "continue",
-        },
-        firstVendorSid: "qwen-session-1",
-        reopenedVendorSid: "qwen-session-2",
-      },
-    } satisfies Record<
-      CloseReopenVendor,
-      {
-        env: Record<string, string>;
-        firstInput: Record<string, unknown>;
-        reopenedInput: Record<string, unknown>;
-        firstVendorSid: string;
-        reopenedVendorSid: string;
-      }
-    >;
-    const {
-      env,
-      firstInput,
-      reopenedInput,
-      firstVendorSid,
-      reopenedVendorSid,
-    } = caseByVendor[vendor];
+      } satisfies Record<
+        CloseReopenVendor,
+        {
+          env: Record<string, string>;
+          firstInput: Record<string, unknown>;
+          reopenedInput: Record<string, unknown>;
+          firstVendorSid: string;
+          reopenedVendorSid: string;
+        }
+      >;
+      const {
+        env,
+        firstInput,
+        reopenedInput,
+        firstVendorSid,
+        reopenedVendorSid,
+      } = caseByVendor[vendor];
 
-    expectPromptOutput(vendor, runHook("keyword-detector.ts", firstInput, env));
-    expectPromptOutput(vendor, runHook("state-boundary.ts", firstInput, env));
+      expectPromptOutput(
+        vendor,
+        runHook("keyword-detector.ts", firstInput, env),
+      );
+      expectPromptOutput(vendor, runHook("state-boundary.ts", firstInput, env));
 
-    const firstIndex = readIndex(projectDir);
-    const sid = firstIndex.active.main;
-    expect(sid).toMatch(/^oma-/);
-    if (!sid) throw new Error("expected active main sid");
+      const firstIndex = readIndex(projectDir);
+      const sid = firstIndex.active.main;
+      expect(sid).toMatch(/^oma-/);
+      if (!sid) throw new Error("expected active main sid");
 
-    const reopenedOutput = runHook("state-boundary.ts", reopenedInput, env);
-    expectPromptOutput(vendor, reopenedOutput);
-    const additionalContext = getAdditionalContext(vendor, reopenedOutput);
-    expect(additionalContext).toContain("[OMA STATE SNAPSHOT]");
-    expect(additionalContext).toContain(`sid: ${sid}`);
-    expect(additionalContext).toContain("boundary");
+      const reopenedOutput = runHook("state-boundary.ts", reopenedInput, env);
+      expectPromptOutput(vendor, reopenedOutput);
+      const additionalContext = getAdditionalContext(vendor, reopenedOutput);
+      expect(additionalContext).toContain("[OMA STATE SNAPSHOT]");
+      expect(additionalContext).toContain(`sid: ${sid}`);
+      expect(additionalContext).toContain("boundary");
 
-    const reopenedIndex = readIndex(projectDir);
-    expect(reopenedIndex.active.main).toBe(sid);
+      const reopenedIndex = readIndex(projectDir);
+      expect(reopenedIndex.active.main).toBe(sid);
 
-    const events = readEvents(projectDir, sid);
-    expect(events.map((event) => event.kind)).toEqual([
-      "session.created",
-      "boundary",
-      "boundary",
-    ]);
-    expect(events[2]).toMatchObject({
-      sid,
-      kind: "boundary",
-      vendor,
-      vendorSid: reopenedVendorSid,
-      payload: {
-        reason: "vendor-session-transition",
-        fromVendor: vendor,
-        fromVendorSid: firstVendorSid,
-        toVendor: vendor,
-        toVendorSid: reopenedVendorSid,
-        previousSid: sid,
-      },
-    });
-  });
+      const events = readEvents(projectDir, sid);
+      expect(events.map((event) => event.kind)).toEqual([
+        "session.created",
+        "boundary",
+        "boundary",
+      ]);
+      expect(events[2]).toMatchObject({
+        sid,
+        kind: "boundary",
+        vendor,
+        vendorSid: reopenedVendorSid,
+        payload: {
+          reason: "vendor-session-transition",
+          fromVendor: vendor,
+          fromVendorSid: firstVendorSid,
+          toVendor: vendor,
+          toVendorSid: reopenedVendorSid,
+          previousSid: sid,
+        },
+      });
+    },
+  );
 });

@@ -50,66 +50,70 @@ describe("BUILT_IN_PRESETS", () => {
     expect(BUILT_IN_PRESETS[key]).toBeDefined();
   });
 
-  it.each(
-    EXPECTED_PRESET_KEYS,
-  )("preset '%s' has a non-empty description", async (key) => {
-    const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
-    expect(typeof BUILT_IN_PRESETS[key].description).toBe("string");
-    expect(BUILT_IN_PRESETS[key].description.length).toBeGreaterThan(0);
-  });
+  it.each(EXPECTED_PRESET_KEYS)(
+    "preset '%s' has a non-empty description",
+    async (key) => {
+      const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
+      expect(typeof BUILT_IN_PRESETS[key].description).toBe("string");
+      expect(BUILT_IN_PRESETS[key].description.length).toBeGreaterThan(0);
+    },
+  );
 
-  it.each(
-    EXPECTED_PRESET_KEYS,
-  )("preset '%s' defines every canonical agent role", async (key) => {
-    const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
-    const preset = BUILT_IN_PRESETS[key];
-    expect(Object.keys(preset.agent_defaults)).toHaveLength(
-      EXPECTED_AGENT_IDS.length,
-    );
-    for (const agentId of EXPECTED_AGENT_IDS) {
-      expect(
-        preset.agent_defaults[agentId],
-        `Preset '${key}' is missing agent_defaults for '${agentId}'`,
-      ).toBeDefined();
-    }
-  });
+  it.each(EXPECTED_PRESET_KEYS)(
+    "preset '%s' defines every canonical agent role",
+    async (key) => {
+      const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
+      const preset = BUILT_IN_PRESETS[key];
+      expect(Object.keys(preset.agent_defaults)).toHaveLength(
+        EXPECTED_AGENT_IDS.length,
+      );
+      for (const agentId of EXPECTED_AGENT_IDS) {
+        expect(
+          preset.agent_defaults[agentId],
+          `Preset '${key}' is missing agent_defaults for '${agentId}'`,
+        ).toBeDefined();
+      }
+    },
+  );
 
-  it.each(
-    EXPECTED_PRESET_KEYS,
-  )("every agent_defaults entry in '%s' has a non-empty model slug", async (key) => {
-    const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
-    const preset = BUILT_IN_PRESETS[key];
-    for (const agentId of EXPECTED_AGENT_IDS) {
-      const spec = preset.agent_defaults[agentId];
-      assert(spec, `Preset '${key}' missing agent '${agentId}'`);
-      expect(
-        typeof spec.model,
-        `Preset '${key}' agent '${agentId}' must have a string model slug`,
-      ).toBe("string");
-      expect(
-        spec.model.length,
-        `Preset '${key}' agent '${agentId}' model slug must be non-empty`,
-      ).toBeGreaterThan(0);
-    }
-  });
+  it.each(EXPECTED_PRESET_KEYS)(
+    "every agent_defaults entry in '%s' has a non-empty model slug",
+    async (key) => {
+      const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
+      const preset = BUILT_IN_PRESETS[key];
+      for (const agentId of EXPECTED_AGENT_IDS) {
+        const spec = preset.agent_defaults[agentId];
+        assert(spec, `Preset '${key}' missing agent '${agentId}'`);
+        expect(
+          typeof spec.model,
+          `Preset '${key}' agent '${agentId}' must have a string model slug`,
+        ).toBe("string");
+        expect(
+          spec.model.length,
+          `Preset '${key}' agent '${agentId}' model slug must be non-empty`,
+        ).toBeGreaterThan(0);
+      }
+    },
+  );
 
-  it.each(
-    EXPECTED_PRESET_KEYS,
-  )("every model slug in '%s' resolves via getModelSpec", async (key) => {
-    const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
-    const { getModelSpec } = await import("./model-registry.js");
-    const preset = BUILT_IN_PRESETS[key];
-    for (const agentId of EXPECTED_AGENT_IDS) {
-      const agentSpec = preset.agent_defaults[agentId];
-      assert(agentSpec, `Preset '${key}' missing agent '${agentId}'`);
-      const slug = agentSpec.model;
-      const spec = getModelSpec(slug);
-      expect(
-        spec,
-        `Preset '${key}' agent '${agentId}' slug '${slug}' not in registry`,
-      ).toBeDefined();
-    }
-  });
+  it.each(EXPECTED_PRESET_KEYS)(
+    "every model slug in '%s' resolves via getModelSpec",
+    async (key) => {
+      const { BUILT_IN_PRESETS } = await import("./built-in-presets.js");
+      const { getModelSpec } = await import("./model-registry.js");
+      const preset = BUILT_IN_PRESETS[key];
+      for (const agentId of EXPECTED_AGENT_IDS) {
+        const agentSpec = preset.agent_defaults[agentId];
+        assert(agentSpec, `Preset '${key}' missing agent '${agentId}'`);
+        const slug = agentSpec.model;
+        const spec = getModelSpec(slug);
+        expect(
+          spec,
+          `Preset '${key}' agent '${agentId}' slug '${slug}' not in registry`,
+        ).toBeDefined();
+      }
+    },
+  );
 
   it("assertPresetIntegrity() does not throw", async () => {
     const { assertPresetIntegrity } = await import("./built-in-presets.js");

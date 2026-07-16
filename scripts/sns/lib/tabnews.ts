@@ -186,7 +186,7 @@ export function prepareSyncReviewPrompt(
 }
 
 export function reviewPortugueseDraft(
-  draft: PortugueseDraft,
+  _draft: PortugueseDraft,
   vendor?: AgentVendor,
   prompt?: string,
 ): PortugueseDraft | SkipPayload {

@@ -360,27 +360,28 @@ describe("schedule/runner.ts — runScheduledJob", () => {
       "Not logged in",
     ];
 
-    it.each(
-      authExpiredOutputs,
-    )('exits non-zero and writes "re-auth required" to stderr for: %s', async (errorOutput) => {
-      mockSpawnSync.mockReturnValue({
-        status: 1,
-        stdout: errorOutput,
-        stderr: "",
-        error: null,
-      });
+    it.each(authExpiredOutputs)(
+      'exits non-zero and writes "re-auth required" to stderr for: %s',
+      async (errorOutput) => {
+        mockSpawnSync.mockReturnValue({
+          status: 1,
+          stdout: errorOutput,
+          stderr: "",
+          error: null,
+        });
 
-      const stderrSpy = vi
-        .spyOn(process.stderr, "write")
-        .mockImplementation(() => true);
+        const stderrSpy = vi
+          .spyOn(process.stderr, "write")
+          .mockImplementation(() => true);
 
-      await runScheduledJob(JOB_ID);
+        await runScheduledJob(JOB_ID);
 
-      expect(process.exitCode).toBe(1);
-      expect(stderrSpy).toHaveBeenCalledWith(
-        expect.stringContaining("re-auth required: codex"),
-      );
-    });
+        expect(process.exitCode).toBe(1);
+        expect(stderrSpy).toHaveBeenCalledWith(
+          expect.stringContaining("re-auth required: codex"),
+        );
+      },
+    );
 
     it("does NOT self-remove a recurring job on auth failure", async () => {
       mockSpawnSync.mockReturnValue({

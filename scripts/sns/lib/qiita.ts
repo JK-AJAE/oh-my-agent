@@ -259,7 +259,7 @@ export function prepareSyncReviewPrompt(
 }
 
 export function reviewJapaneseDraft(
-  draft: JapaneseDraft,
+  _draft: JapaneseDraft,
   vendor?: AgentVendor,
   prompt?: string,
 ): JapaneseDraft | SkipPayload {

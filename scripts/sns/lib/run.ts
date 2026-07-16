@@ -104,7 +104,7 @@ export function parseSnsArgs(argv: string[]): SnsArgs {
       args.skipReview = true;
     } else if (arg === "--targets" && argv[i + 1]) {
       args.targets = new Set(
-        argv[i + 1]!.split(",").map((t) => t.trim() as SnsTarget),
+        argv[i + 1]?.split(",").map((t) => t.trim() as SnsTarget),
       );
       i += 1;
     } else if (arg?.startsWith("--targets=")) {

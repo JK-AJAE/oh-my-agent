@@ -94,7 +94,7 @@ export async function discoverCompetitors(
     try {
       const results = await apiKeywordSearch(q, ctx, ["duckduckgo"]);
       const r = results[0];
-      if (!r || r.status !== "ok") continue;
+      if (r?.status !== "ok") continue;
       let parsed: unknown;
       try {
         parsed = JSON.parse(r.content);

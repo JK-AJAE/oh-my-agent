@@ -49,7 +49,7 @@ function hasClaudeMcpTransport(
 }
 
 function hasStaleContext(server: ClaudeMcpServer | undefined): boolean {
-  if (!server || server.command !== "serena") return false;
+  if (server?.command !== "serena") return false;
   if (!Array.isArray(server.args)) return false;
   const idx = server.args.indexOf("--context");
   if (idx === -1) return true;

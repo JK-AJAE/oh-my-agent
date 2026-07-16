@@ -177,7 +177,7 @@ export class PlaywrightCaptureProvider implements CaptureProvider {
         env: process.env,
       });
       const parsed = parseDriverResult(res.stdout);
-      if (!parsed || parsed.ok !== true || !parsed.output) {
+      if (parsed?.ok !== true || !parsed.output) {
         const reason =
           parsed?.error ??
           (res.stderr || res.stdout).trim().split("\n").slice(-1)[0] ??

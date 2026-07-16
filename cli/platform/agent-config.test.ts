@@ -272,51 +272,54 @@ describe("loadExecutionProtocol — execution-protocol parity", () => {
     expect(protocol.toLowerCase()).toContain("headless");
   });
 
-  it.each(
-    REQUIRED_PROTOCOL_VENDORS,
-  )("%s (external-dispatch) protocol resolves and instructs the result artifact write", (vendor) => {
-    const protocol = loadExecutionProtocol(vendor, repoRoot);
-    expect(protocol.length).toBeGreaterThan(0);
-    expect(protocol).toContain("result-{agent-id}");
-  });
+  it.each(REQUIRED_PROTOCOL_VENDORS)(
+    "%s (external-dispatch) protocol resolves and instructs the result artifact write",
+    (vendor) => {
+      const protocol = loadExecutionProtocol(vendor, repoRoot);
+      expect(protocol.length).toBeGreaterThan(0);
+      expect(protocol).toContain("result-{agent-id}");
+    },
+  );
 
-  it.each(
-    REQUIRED_PROTOCOL_VENDORS,
-  )("%s protocol prescribes a status line that checkStatus's regex can parse", (vendor) => {
-    // Systemic defect found during repro: protocols documented Status as a
-    // sub-bullet (`- Status: completed`), which checkStatus's
-    // `^## Status:\s*(\S+)` regex never matches — so a failed run silently
-    // falls back to the "completed" default. Every external-dispatch protocol
-    // must prescribe the exact heading shape the parser actually reads.
-    const protocol = loadExecutionProtocol(vendor, repoRoot);
-    // The status-parsing regex used by checkStatus (spawn-status.ts).
-    const statusRegex = /^## Status:\s*(\S+)/m;
-    // The example the protocol prescribes must itself match that regex.
-    expect(protocol).toMatch(/^## Status: completed$/m);
-    const match = protocol.match(statusRegex);
-    expect(match?.[1]).toBe("completed");
-  });
+  it.each(REQUIRED_PROTOCOL_VENDORS)(
+    "%s protocol prescribes a status line that checkStatus's regex can parse",
+    (vendor) => {
+      // Systemic defect found during repro: protocols documented Status as a
+      // sub-bullet (`- Status: completed`), which checkStatus's
+      // `^## Status:\s*(\S+)` regex never matches — so a failed run silently
+      // falls back to the "completed" default. Every external-dispatch protocol
+      // must prescribe the exact heading shape the parser actually reads.
+      const protocol = loadExecutionProtocol(vendor, repoRoot);
+      // The status-parsing regex used by checkStatus (spawn-status.ts).
+      const statusRegex = /^## Status:\s*(\S+)/m;
+      // The example the protocol prescribes must itself match that regex.
+      expect(protocol).toMatch(/^## Status: completed$/m);
+      const match = protocol.match(statusRegex);
+      expect(match?.[1]).toBe("completed");
+    },
+  );
 
-  it.each(
-    REQUIRED_PROTOCOL_VENDORS,
-  )("%s protocol routes coordination files to the .agents/state/memories store the readers use", (vendor) => {
-    // Path defect found during repro: codex/grok protocols told agents to
-    // write `result-{agent-id}.md` under `.agents/results/`, but every reader
-    // of those coordination files — checkStatus (spawn-status.ts),
-    // findResultFile (verify.ts), and getMemoriesPath (io/memory.ts) — reads
-    // the canonical store. Files written elsewhere are orphaned → `crashed`.
-    const protocol = loadExecutionProtocol(vendor, repoRoot);
-    expect(protocol).toContain(".agents/state/memories");
-    // Coordination artifacts must NOT be routed to `.agents/results/`
-    // (that dir is for human-facing deliverables: plans, bug reports, etc.),
-    // nor to Serena's own memory dir (pinned to `.serena/memories`, which is
-    // now knowledge-only).
-    expect(protocol).not.toContain(".agents/results/result-");
-    expect(protocol).not.toContain(".agents/results/progress-");
-    expect(protocol).not.toContain(".agents/results/task-board");
-    expect(protocol).not.toContain(".serena/memories/result-");
-    expect(protocol).not.toContain(".serena/memories/progress-");
-  });
+  it.each(REQUIRED_PROTOCOL_VENDORS)(
+    "%s protocol routes coordination files to the .agents/state/memories store the readers use",
+    (vendor) => {
+      // Path defect found during repro: codex/grok protocols told agents to
+      // write `result-{agent-id}.md` under `.agents/results/`, but every reader
+      // of those coordination files — checkStatus (spawn-status.ts),
+      // findResultFile (verify.ts), and getMemoriesPath (io/memory.ts) — reads
+      // the canonical store. Files written elsewhere are orphaned → `crashed`.
+      const protocol = loadExecutionProtocol(vendor, repoRoot);
+      expect(protocol).toContain(".agents/state/memories");
+      // Coordination artifacts must NOT be routed to `.agents/results/`
+      // (that dir is for human-facing deliverables: plans, bug reports, etc.),
+      // nor to Serena's own memory dir (pinned to `.serena/memories`, which is
+      // now knowledge-only).
+      expect(protocol).not.toContain(".agents/results/result-");
+      expect(protocol).not.toContain(".agents/results/progress-");
+      expect(protocol).not.toContain(".agents/results/task-board");
+      expect(protocol).not.toContain(".serena/memories/result-");
+      expect(protocol).not.toContain(".serena/memories/progress-");
+    },
+  );
 
   it("claude (native) protocol also routes coordination files to .agents/state/memories", () => {
     // claude is exempt from external-dispatch checks, but the result/progress

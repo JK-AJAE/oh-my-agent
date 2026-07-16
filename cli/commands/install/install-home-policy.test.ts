@@ -330,8 +330,9 @@ describe("install home policy", () => {
       call[0]?.message?.startsWith("CLI tools to configure"),
     );
     expect(cliToolsCall).toBeDefined();
+    if (!cliToolsCall) throw new Error("CLI tools prompt not found");
 
-    const optionValues = (cliToolsCall?.[0].options as { value: string }[]).map(
+    const optionValues = (cliToolsCall[0].options as { value: string }[]).map(
       (opt) => opt.value,
     );
 

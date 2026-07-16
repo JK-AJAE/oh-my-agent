@@ -66,7 +66,7 @@ function retargetMcpMemoryConfig(cwd: string): string[] {
   }
 
   const config = parsed.memoryConfig;
-  if (!config || config.basePath !== ".serena/memories") return [];
+  if (config?.basePath !== ".serena/memories") return [];
 
   parsed.memoryConfig = {
     ...config,

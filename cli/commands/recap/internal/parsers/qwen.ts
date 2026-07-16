@@ -112,7 +112,7 @@ registerParser({
 
       for (let i = 0; i < msgs.length; i++) {
         const row = msgs[i];
-        if (!row || row.type !== "user") continue;
+        if (row?.type !== "user") continue;
 
         const ts = row.timestamp ? new Date(row.timestamp).getTime() : 0;
         if (!inWindow(ts, start, end)) continue;

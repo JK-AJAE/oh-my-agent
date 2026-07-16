@@ -219,7 +219,7 @@ export class RemotionLikeCompositor implements Compositor {
       throw new Error(`mpt render timed out after ${RENDER_TIMEOUT_MS}ms`);
     }
     const parsed = this.parseDriverResult(res.stdout);
-    if (!parsed || parsed.ok !== true) {
+    if (parsed?.ok !== true) {
       const reason =
         parsed?.error ||
         (res.stderr || res.stdout).trim().split("\n").slice(-2).join(" | ") ||

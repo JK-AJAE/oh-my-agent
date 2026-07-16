@@ -91,7 +91,7 @@ export function entriesFromAgentTranscript(
 
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
-    if (!msg || msg.role !== "user") continue;
+    if (msg?.role !== "user") continue;
 
     const prompt = extractUserPrompt(msg.content);
     if (!prompt) continue;
@@ -178,7 +178,7 @@ export function entriesFromStore(
   const entries: NormalizedEntry[] = [];
   for (let i = 0; i < store.messages.length; i++) {
     const msg = store.messages[i];
-    if (!msg || msg.role !== "user") continue;
+    if (msg?.role !== "user") continue;
 
     const prompt = extractUserPrompt(msg.content);
     if (!prompt) continue;

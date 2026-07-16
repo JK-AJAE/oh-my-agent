@@ -152,7 +152,7 @@ registerParser({
           // accept a startsWith relationship to handle display truncation.
           for (let i = 0; i < messages.length - 1; i++) {
             const curr = messages[i];
-            if (!curr || curr.role !== "user") continue;
+            if (curr?.role !== "user") continue;
             const next = messages[i + 1];
             if (next && next.role === "assistant") {
               const match = entries.find(

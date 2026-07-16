@@ -106,7 +106,7 @@ function hasCursorMcpTransport(
 }
 
 function isWrongContextSerena(server: CursorMcpServer | undefined): boolean {
-  if (!server || server.command !== "serena") return false;
+  if (server?.command !== "serena") return false;
   if (!Array.isArray(server.args)) return false;
   const contextIdx = server.args.indexOf("--context");
   if (contextIdx === -1) return false;

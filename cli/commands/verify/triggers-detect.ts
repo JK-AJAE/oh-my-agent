@@ -37,7 +37,7 @@ const WORKFLOW_TAG_RE = /\[OMA WORKFLOW: ([A-Z0-9_-]+)\]/;
 function extractWorkflow(
   result: Awaited<ReturnType<typeof keywordDetector.run>>,
 ): string | null {
-  if (!result || result.type !== "context") return null;
+  if (result?.type !== "context") return null;
   const match = WORKFLOW_TAG_RE.exec(result.additionalContext);
   return match?.[1] ? match[1].toLowerCase() : null;
 }

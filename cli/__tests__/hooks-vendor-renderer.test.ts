@@ -31,38 +31,41 @@ describe("hook vendor renderer", () => {
   it.each([
     ["codex", "UserPromptSubmit"],
     ["qwen", "UserPromptSubmit"],
-  ] as const)("wraps a %s state snapshot in the vendor prompt output contract", (vendor, hookEventName) => {
-    const sid = `oma-${vendor}-test`;
-    const rendered = renderStateSnapshot({
-      vendor,
-      sid,
-      reason: "vendor/session boundary",
-      recentEvents: [
-        {
-          eventId: "evt-1",
-          ts: "2026-05-27T00:00:00.000Z",
-          sid,
-          kind: "boundary",
-          writerPid: 1,
-        },
-      ],
-      facts: [],
-    });
-    const parsed = JSON.parse(makePromptOutput(vendor, rendered)) as {
-      hookSpecificOutput?: {
-        hookEventName?: string;
-        additionalContext?: string;
+  ] as const)(
+    "wraps a %s state snapshot in the vendor prompt output contract",
+    (vendor, hookEventName) => {
+      const sid = `oma-${vendor}-test`;
+      const rendered = renderStateSnapshot({
+        vendor,
+        sid,
+        reason: "vendor/session boundary",
+        recentEvents: [
+          {
+            eventId: "evt-1",
+            ts: "2026-05-27T00:00:00.000Z",
+            sid,
+            kind: "boundary",
+            writerPid: 1,
+          },
+        ],
+        facts: [],
+      });
+      const parsed = JSON.parse(makePromptOutput(vendor, rendered)) as {
+        hookSpecificOutput?: {
+          hookEventName?: string;
+          additionalContext?: string;
+        };
       };
-    };
 
-    expect(parsed.hookSpecificOutput?.hookEventName).toBe(hookEventName);
-    expect(parsed.hookSpecificOutput?.additionalContext).toContain(
-      "[OMA STATE SNAPSHOT]",
-    );
-    expect(parsed.hookSpecificOutput?.additionalContext).toContain(
-      `sid: ${sid}`,
-    );
-  });
+      expect(parsed.hookSpecificOutput?.hookEventName).toBe(hookEventName);
+      expect(parsed.hookSpecificOutput?.additionalContext).toContain(
+        "[OMA STATE SNAPSHOT]",
+      );
+      expect(parsed.hookSpecificOutput?.additionalContext).toContain(
+        `sid: ${sid}`,
+      );
+    },
+  );
 
   it("renders Codex prompt output only through hookSpecificOutput", () => {
     const rendered = renderStateSnapshot({
