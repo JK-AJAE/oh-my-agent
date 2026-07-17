@@ -50,7 +50,7 @@ export function registerDocsCommands(program: Command): void {
     )
     .option(
       "--report-file <path>",
-      "Write the full markdown report to this file path (stdout receives a summary)",
+      "Write the full markdown report to this file path (works with or without --json)",
     )
     .option(
       "--no-urls",
@@ -95,19 +95,18 @@ export function registerDocsCommands(program: Command): void {
           kinds: ["file", "cli", "script", "env", "config"],
         });
 
-        // Render core results to stdout (or JSON / file)
+        // Render core results to stdout (JSON or markdown). The markdown
+        // report file, when requested, is written regardless of stdout format.
         if (opts.json) {
           console.log(renderJson(report));
         } else {
-          const markdown = renderMarkdown(report);
-          console.log(markdown);
+          console.log(renderMarkdown(report));
+        }
 
-          if (opts.reportFile) {
-            const reportPath = path.resolve(repoRoot, opts.reportFile);
-            const reportDir = path.dirname(reportPath);
-            fs.mkdirSync(reportDir, { recursive: true });
-            fs.writeFileSync(reportPath, markdown, "utf-8");
-          }
+        if (opts.reportFile) {
+          const reportPath = path.resolve(repoRoot, opts.reportFile);
+          fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+          fs.writeFileSync(reportPath, renderMarkdown(report), "utf-8");
         }
 
         // Exit code reflects core-pass broken refs only.
