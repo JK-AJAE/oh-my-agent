@@ -114,6 +114,7 @@ export const ALL_AGENT_IDS: AgentId[] = [
   "mobile",
   "db",
   "debug",
+  "refactor",
   "docs",
   "tf-infra",
   "explore",

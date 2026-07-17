@@ -32,6 +32,7 @@ const EXPECTED_AGENT_IDS = [
   "mobile",
   "db",
   "debug",
+  "refactor",
   "docs",
   "tf-infra",
   "explore",

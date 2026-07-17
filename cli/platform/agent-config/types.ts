@@ -1,7 +1,7 @@
 import type { AgentSpec } from "./schemas.js";
 
 // ---------------------------------------------------------------------------
-// AgentId — canonical set of agent role identifiers (11 values)
+// AgentId — canonical set of agent role identifiers (13 values)
 // ---------------------------------------------------------------------------
 
 export type AgentId =
@@ -14,6 +14,7 @@ export type AgentId =
   | "mobile"
   | "db"
   | "debug"
+  | "refactor"
   | "docs"
   | "tf-infra"
   | "explore";

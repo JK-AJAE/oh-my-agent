@@ -41,6 +41,7 @@ export const ROLE_ORDER = [
   "mobile",
   "db",
   "debug",
+  "refactor",
   "docs",
   "tf-infra",
   "explore",

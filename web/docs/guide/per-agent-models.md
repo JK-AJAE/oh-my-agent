@@ -69,7 +69,7 @@ Each entry is an `AgentSpec` object:
 | `thinking` | boolean | No | Enable extended thinking (model-specific) |
 | `memory` | `user` \| `project` \| `local` | No | Memory scope for the agent |
 
-Valid agent IDs: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `tf-infra`, `explore`.
+Valid agent IDs: `orchestrator`, `architecture`, `qa`, `pm`, `backend`, `frontend`, `mobile`, `db`, `debug`, `refactor`, `docs`, `tf-infra`, `explore`.
 
 The merge is shallow: each field in your override replaces the preset value for that field. Fields you omit keep their preset value.
 
