@@ -1,6 +1,6 @@
 ---
 otel_spec: "1.x (stable API/SDK)"
-otel_semconv: "1.27.0 (2024-11)"
+otel_semconv: "1.43.0 (2026-07)"
 ---
 
 # Meta-Observability
@@ -263,7 +263,7 @@ Consequences of label explosion:
 | `user.email` | **NEVER** as metric label | PII + cardinality double violation |
 | `tenant.id` | Cap at top-N (e.g., top-1000); overflow → label value `"other"` | Bounded set of known tenants |
 | `endpoint` / `route` | Normalize high-cardinality routes: `/users/42` → `/users/_` | URL parameters are unbounded |
-| `http.url` | **NEVER** raw; use `http.route` (normalized) | Query strings are unbounded |
+| `url.full` | **NEVER** raw; use `http.route` (normalized) | Query strings are unbounded |
 | `error.message` | **NEVER** as label; use error type/code only | Free-text strings are unbounded |
 
 Implement route normalization in the Collector `transform` processor:
@@ -303,7 +303,7 @@ from opentelemetry.sdk.metrics.view import View
 
 view = View(
     instrument_name="http_request_duration",
-    attribute_keys={"http.method", "http.status_code", "http.route"},  # explicit allow-list
+    attribute_keys={"http.request.method", "http.response.status_code", "http.route"},  # explicit allow-list
 )
 provider = MeterProvider(views=[view])
 ```

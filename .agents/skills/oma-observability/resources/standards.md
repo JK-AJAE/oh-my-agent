@@ -1,6 +1,6 @@
 ---
 otel_spec: "1.x (stable API/SDK)"
-otel_semconv: "1.27.0 (2024-11)"
+otel_semconv: "1.43.0 (2026-07)"
 specs:
   - "W3C Trace Context: Level 1 Recommendation 2020-02-06; Level 2 Candidate Recommendation"
   - "W3C Baggage: Recommendation 2022-12-22"
@@ -86,12 +86,12 @@ Source: <https://opentelemetry.io/docs/specs/semconv/general/attribute-requireme
 | Stable | `service.*`, `host.*`, `cloud.*`, `k8s.*`, `http.*`, `db.*` (core), `network.*` (core), `error.*` | Yes, without caveat |
 | Release Candidate (RC) | `rpc.*`, gRPC semconv | Yes, expect minor changes |
 | Development | `tls.*`, `network.connection.*` | Test environments; production use requires change-tolerance |
-| Experimental | `gen_ai.*`, profiles (OTEP 0239 alpha) | Not for production SLOs |
+| Experimental | `gen_ai.*` (deprecated in core registry since semconv 1.42; maintained in the dedicated GenAI semconv repository), profiles (OTEP 0239; Development) | Not for production SLOs |
 
 Notes:
 - `network.*` core attributes (e.g., `network.protocol.name`, `network.transport`) are Stable. `network.connection.*` (e.g., `network.connection.type`, `network.connection.subtype`) are Development.
-- `tls.*` (all) are Development as of semconv 1.27.0. For TLS deep inspection, use Wireshark or vendor-specific TLS tooling rather than OTel attributes.
-- OTEP 0239 (profiling signal) is alpha. Parca and Pyroscope are in production, but the OTel profiling spec is not yet stable. Mark any profiling-related SLOs as experimental.
+- `tls.*` (all) are Development as of semconv 1.43.0 (verified 2026-07). For TLS deep inspection, use Wireshark or vendor-specific TLS tooling rather than OTel attributes.
+- OTEP 0239 (profiling signal) is Development; SDK support is Java-only as of 2026-Q2. Parca and Pyroscope are in production, but the OTel profiling spec is not yet stable. Mark any profiling-related SLOs as experimental.
 
 Verified sources:
 - TLS attrs: <https://opentelemetry.io/docs/specs/semconv/attributes-registry/tls/>
