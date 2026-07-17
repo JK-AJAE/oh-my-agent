@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.20.0",
-  "releaseDate": "2026-07-17T08:00:26.230Z",
+  "releaseDate": "2026-07-17T08:17:35.722Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -416,8 +416,8 @@
     },
     {
       "path": ".agents/skills/_shared/core/context-loading.md",
-      "sha256": "16eb645833ad82d683bd34b1ce5bb65cb1859ddf482869a7134b6954ab4cab65",
-      "size": 9208
+      "sha256": "bad3b7906b3b408c6b0d9db3826c07c8d8b902bc5e290f7690170493a1dac383",
+      "size": 9174
     },
     {
       "path": ".agents/skills/_shared/core/difficulty-guide.md",
@@ -841,18 +841,8 @@
     },
     {
       "path": ".agents/skills/oma-design/SKILL.md",
-      "sha256": "365cdb50b4a4b2e91c1c27cdffc1978885e17ce45cb4efa871770074dbca715b",
-      "size": 14064
-    },
-    {
-      "path": ".agents/skills/oma-design/examples/design-context-example.md",
-      "sha256": "81232e21d8c3ff5bdae50cd0b3ec32fbb389e9d91ad63f098f9421a5232c3464",
-      "size": 3039
-    },
-    {
-      "path": ".agents/skills/oma-design/examples/landing-page-prompt.md",
-      "sha256": "5798139fab0374c18eca49fec6e8d054b66c0634e99fb65b89f84e2d4eb734eb",
-      "size": 4864
+      "sha256": "9bfbb957cbb1c5326c40802935b9dd59cfcf218a76aa28839db8d349f98d69df",
+      "size": 13994
     },
     {
       "path": ".agents/skills/oma-design/reference/accessibility.md",
@@ -916,7 +906,7 @@
     },
     {
       "path": ".agents/skills/oma-design/resources/design-md-spec.md",
-      "sha256": "a5a99f974aec6d695140e8040699049cf1524de4526ec4eba57fd1ae1715b527",
+      "sha256": "f31e463a3e2911f5d04baa389a267ada0bbb9c4a3d93a1498113a0546e740903",
       "size": 8532
     },
     {
@@ -931,8 +921,8 @@
     },
     {
       "path": ".agents/skills/oma-design/resources/execution-protocol.md",
-      "sha256": "3319119ef028e55ee18d0b64d2f58658cb34bafdc5a89029ee2da70ae9ba299c",
-      "size": 11514
+      "sha256": "cf2c1d959dd649c669cb865e6bd7b7121e6ff4c6331be1b924fd7045d1359b5f",
+      "size": 14600
     },
     {
       "path": ".agents/skills/oma-design/resources/getdesign-fetcher.md",
@@ -941,8 +931,8 @@
     },
     {
       "path": ".agents/skills/oma-design/resources/prompt-enhancement.md",
-      "sha256": "dc42f159999acd34d33209b2f45df24d7df59c7d988580614ad9d588037e7170",
-      "size": 4548
+      "sha256": "c7a6657c9c185a1636f31c575a164207cc4b7066a290dc74ae0a6440376a046f",
+      "size": 9401
     },
     {
       "path": ".agents/skills/oma-design/resources/redesign-protocol.md",
@@ -2161,6 +2151,6 @@
   "metadata": {
     "skillCount": 32,
     "workflowCount": 23,
-    "totalFiles": 430
+    "totalFiles": 428
   }
 }
