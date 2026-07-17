@@ -42,7 +42,7 @@
 - [ ] Verify `tenant.region` drives data residency routing; EU and KR tenants must have telemetry routed to compliant regional Collector pipelines before reaching a cross-region backend (P0)
 - [ ] Configure two-tier Collector topology for Kubernetes; DaemonSet agent (hostmetrics, filelog, kubeletstats, k8sattributes) forwarding to Deployment gateway (batch, tail_sampling, exporters) (P1)
 - [ ] Deploy loadbalancing exporter upstream of tail_sampling processor; consistent hash by `trace_id` ensures complete traces arrive at the same gateway replica (P0)
-- [ ] Confirm `exception.type`, `exception.message`, `exception.stacktrace`, `code.function.name`, `code.file.path`, `code.line.number` are populated on every ERROR span; use `span.recordException(e)` for atomicity (P0)
+- [ ] Confirm `exception.type`, `exception.message`, `exception.stacktrace`, `code.function.name`, `code.file.path`, `code.line.number` are populated on every ERROR span or on exception LogRecords joinable by `trace_id`/`span_id`; `span.recordException(e)` remains valid for atomicity, but the span-event form is deprecated since semconv 1.40 — set `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN=logs/dup` during migration (P0)
 - [ ] Confirm IP address logging is masked or hashed before long-term retention; IP addresses are personal data under GDPR Art. 4(1) and PIPA; apply prefix truncation or HMAC+salt at pipeline ingress (P0)
 
 ---

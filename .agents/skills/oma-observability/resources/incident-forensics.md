@@ -62,6 +62,8 @@ Error spans (those where `status.code = ERROR`) MUST additionally carry code and
 
 Set these via the OTel SDK `span.recordException(e)` call, which populates all three `exception.*` attributes atomically.
 
+> **Migration note (semconv 1.40+)**: recording exceptions as span events is deprecated in favor of exception LogRecords (`OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN=logs|logs/dup`). Default SDK behavior still emits span events, and log-based exceptions can be routed back to span events at the SDK layer, so this pivot keeps working. For instrumentation that has migrated, run the same pivot by joining exception LogRecords on `trace_id`/`span_id` (§2.3).
+
 ### 2.3 Structured log mandatory fields
 
 Every structured log record MUST carry these correlation keys. Without `trace_id`, log-trace join is impossible. Without `request_id`, user-support correlation is impossible.

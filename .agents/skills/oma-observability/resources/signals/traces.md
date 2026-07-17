@@ -231,7 +231,7 @@ Use `http.*` attributes for REST and JSON-RPC over HTTP. `rpc.*` is for binary R
 
 ### Error handling
 
-Set `status.code = ERROR` and `status.description` on RPC failures. Use `span.recordException(e)` to atomically populate `exception.type`, `exception.message`, and `exception.stacktrace`; required by MRA in `../incident-forensics.md §2.2`.
+Set `status.code = ERROR` and `status.description` on RPC failures. Use `span.recordException(e)` to atomically populate `exception.type`, `exception.message`, and `exception.stacktrace`; required by MRA in `../incident-forensics.md §2.2`. Note: since semconv 1.40 the span-event form of exception recording is deprecated in favor of exception LogRecords (`OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN`); during migration prefer `logs/dup` so both the span pivot and log-based queries keep working.
 
 ---
 
