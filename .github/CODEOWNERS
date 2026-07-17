@@ -1,0 +1,6 @@
+# Default owner for everything in the repo.
+* @gracefullight
+
+# Critical SSOT paths (see .agents/skills/oma-scm/config/cm-config.yaml ownership.critical_paths)
+/.agents/hooks/ @gracefullight
+/.agents/workflows/ @gracefullight
