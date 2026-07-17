@@ -83,7 +83,7 @@ oma state:emit "decision.made" '{"subject":"orchestrate.fanout-strategy","decisi
 oma state:verify --workflow orchestrate --checkpoint fanout-strategy
 ```
 
-For each priority tier (P0 first, then P1, etc.):
+For each priority tier (lowest first: tier 1, then tier 2, etc.):
 
 - Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`, and only its task's `exposed_skill_set` as the available specialist list (see `subagent-prompt-template.md` `{EXPOSED_SKILL_SET}`).
 - Use memory edit tool to update `task-board.md` with agent status.

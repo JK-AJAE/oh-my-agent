@@ -12,7 +12,7 @@ When you encounter a failure during planning, follow these recovery steps.
 2. List specific assumptions you're making
 3. Create plan based on reasonable assumptions
 4. Mark assumptions clearly: `Assumption: [description]`
-5. **NEVER do this**: Create tasks while still ambiguous (agents will lose direction)
+5. **NEVER do this**: Create tasks whose ambiguity is left unstated. If you cannot even state a reasonable assumption for a task, stop and ask instead of planning it (agents will lose direction)
 
 ---
 
@@ -64,7 +64,7 @@ When you encounter a failure during planning, follow these recovery steps.
 
 ## Serena Memory / Quota Issues
 
-Same as backend-agent playbook: See relevant sections.
+Same as backend-agent playbook: see the "Rate Limit / Quota Error (LLM runtime)" and "Serena Memory Unavailable" sections in `../../oma-backend/resources/error-playbook.md`.
 
 ---
 

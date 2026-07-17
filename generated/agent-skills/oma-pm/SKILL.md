@@ -126,7 +126,7 @@ outputs:
 
 ### Guardrails
 1. API-first design: define contracts before implementation tasks
-2. Every task has: agent, title, acceptance criteria, priority, dependencies
+2. Every task has: agent, title, acceptance criteria, priority tier (1 = independent, lower runs first), dependencies, scope
 3. Minimize dependencies for maximum parallel execution
 4. Security and testing are part of every task (not separate phases)
 5. Tasks should be completable by a single agent
