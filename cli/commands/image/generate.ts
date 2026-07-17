@@ -1,6 +1,11 @@
 import color from "picocolors";
 import { loadConfig } from "./config.js";
-import { estimateCost, formatCost, promptConfirm } from "./cost.js";
+import {
+  costGateDecision,
+  estimateCost,
+  formatCost,
+  promptConfirm,
+} from "./cost.js";
 import { startHeartbeat } from "./heartbeat.js";
 import { writeManifest } from "./manifest.js";
 import { getMessages } from "./messages.js";
@@ -228,10 +233,19 @@ export async function runGenerate({
     return 0;
   }
 
-  if (
-    costEstimate >= config.costGuardrail.estimateThresholdUsd &&
-    !skipConfirm
-  ) {
+  const costGate = costGateDecision({
+    estimate: costEstimate,
+    thresholdUsd: config.costGuardrail.estimateThresholdUsd,
+    skipConfirm,
+    isTTY: Boolean(process.stdin.isTTY),
+  });
+  if (costGate === "block-non-interactive") {
+    console.error(
+      color.red(msgs.costConfirmNonInteractive(formatCost(costEstimate))),
+    );
+    return 1;
+  }
+  if (costGate === "prompt") {
     const proceed = await promptConfirm(
       msgs.costConfirm(formatCost(costEstimate)),
     );

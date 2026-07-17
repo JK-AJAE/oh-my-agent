@@ -8,6 +8,7 @@ export interface Messages {
   dryRunHeader: string;
   costConfirm: (cost: string) => string;
   costDeclined: string;
+  costConfirmNonInteractive: (cost: string) => string;
   using: (vendors: string) => string;
   heartbeat: (vendor: string, elapsedSec: number) => string;
   runOk: (vendor: string, ms: number, file: string) => string;
@@ -25,6 +26,8 @@ const en: Messages = {
   dryRunHeader: "[oma image] dry-run plan:",
   costConfirm: (cost) => `Estimated cost ${cost}. Proceed? (y/N) `,
   costDeclined: "[oma image] Cancelled by user.",
+  costConfirmNonInteractive: (cost) =>
+    `[oma image] Estimated cost ${cost} requires confirmation, but no interactive terminal is attached. Re-run with --yes (or OMA_IMAGE_YES=1) after confirming with the user.`,
   using: (vendors) => `[oma image] using: ${vendors}`,
   heartbeat: (vendor, elapsed) =>
     `[oma image] ${vendor} generating... ${elapsed}s`,
@@ -45,6 +48,8 @@ const ko: Messages = {
   dryRunHeader: "[oma image] dry-run 계획:",
   costConfirm: (cost) => `예상 비용 ${cost}. 진행할까요? (y/N) `,
   costDeclined: "[oma image] 사용자가 취소했습니다.",
+  costConfirmNonInteractive: (cost) =>
+    `[oma image] 예상 비용 ${cost}은(는) 확인이 필요하지만 대화형 터미널이 연결되어 있지 않습니다. 사용자 확인 후 --yes(또는 OMA_IMAGE_YES=1)로 다시 실행하세요.`,
   using: (vendors) => `[oma image] 사용 vendor: ${vendors}`,
   heartbeat: (vendor, elapsed) =>
     `[oma image] ${vendor} 생성 중... ${elapsed}s`,

@@ -35,6 +35,22 @@ export function formatCost(cost: number): string {
   return `$${cost.toFixed(2)}`;
 }
 
+export type CostGate = "proceed" | "prompt" | "block-non-interactive";
+
+// Decide how the cost guardrail applies before dispatch. Non-interactive
+// callers (agents, CI) cannot answer a stdin prompt, so instead of silently
+// auto-declining we block with an actionable message telling them to re-run
+// with --yes after confirming with the user.
+export function costGateDecision(args: {
+  estimate: number;
+  thresholdUsd: number;
+  skipConfirm: boolean;
+  isTTY: boolean;
+}): CostGate {
+  if (args.skipConfirm || args.estimate < args.thresholdUsd) return "proceed";
+  return args.isTTY ? "prompt" : "block-non-interactive";
+}
+
 export async function promptConfirm(question: string): Promise<boolean> {
   if (!process.stdin.isTTY) return false;
   const rl = readline.createInterface({

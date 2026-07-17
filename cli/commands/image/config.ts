@@ -62,12 +62,19 @@ const DEFAULTS: ImageConfig = {
       antigravity: {
         "": { low: 0, medium: 0, high: 0, auto: 0 },
       },
+      // Mirrors FREE_MODELS/CREDIT_MODELS in providers/pollinations.ts.
+      // Credit-gated models bill prepaid pollen credits, not USD, so the
+      // USD guardrail estimate stays 0 for all of them.
       pollinations: {
         flux: { low: 0, medium: 0, high: 0, auto: 0 },
-        sana: { low: 0, medium: 0, high: 0, auto: 0 },
-        turbo: { low: 0, medium: 0, high: 0, auto: 0 },
-        gptimage: { low: 0, medium: 0, high: 0, auto: 0 },
+        zimage: { low: 0, medium: 0, high: 0, auto: 0 },
         "qwen-image": { low: 0, medium: 0, high: 0, auto: 0 },
+        "wan-image": { low: 0, medium: 0, high: 0, auto: 0 },
+        gptimage: { low: 0, medium: 0, high: 0, auto: 0 },
+        "gptimage-large": { low: 0, medium: 0, high: 0, auto: 0 },
+        "gpt-image-2": { low: 0, medium: 0, high: 0, auto: 0 },
+        klein: { low: 0, medium: 0, high: 0, auto: 0 },
+        kontext: { low: 0, medium: 0, high: 0, auto: 0 },
       },
     },
   },
