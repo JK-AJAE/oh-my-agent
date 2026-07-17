@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.19.1",
-  "releaseDate": "2026-07-17T00:20:54.236Z",
+  "releaseDate": "2026-07-17T01:03:19.076Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -531,28 +531,28 @@
     },
     {
       "path": ".agents/skills/oma-academic-writer/SKILL.md",
-      "sha256": "6839f1054d7497972a1a187e67e8e86f1fae7df279a09d71f19fec2b81c587e9",
-      "size": 13507
+      "sha256": "0b3c70cc433ee7d4e2df53e80393cacb82264c20932a9c121d0c6dd5eb3ccb5c",
+      "size": 13670
     },
     {
       "path": ".agents/skills/oma-academic-writer/resources/academic-verb-tiers.md",
-      "sha256": "4e51df0c0a77f41f1e0eaf26a955af85ec479dfa610f0cab0e84398d94e04e4a",
-      "size": 9551
+      "sha256": "6832b7f8f133d381311b6dfc94c1a24425946b57ac033b56ca866f1be5e592ac",
+      "size": 9990
     },
     {
       "path": ".agents/skills/oma-academic-writer/resources/anti-ai-checklist.md",
-      "sha256": "bc703b2bddb25bdda9a09971771cc787a3652a6f0feb3b2bf2698e8d063b153e",
-      "size": 9405
+      "sha256": "2325ea953c6bc241737743a6bb9ffd93ffa8c06ab443cdb9bee7c9d46b535d7e",
+      "size": 9422
     },
     {
       "path": ".agents/skills/oma-academic-writer/resources/hedging-guide.md",
-      "sha256": "edcaf0c67bfa42c433c9b066be9c7ef8807b1747adc6fe44083bae07e7996864",
-      "size": 5463
+      "sha256": "5597dbd39726eb2b83154c8e5eb3336f42298a434ef452ae38710779a6e21fc4",
+      "size": 5612
     },
     {
       "path": ".agents/skills/oma-academic-writer/resources/sentence-structure-reference.md",
-      "sha256": "5cb2d61f6459dc8ea057fad37fe9dcb8e6987e6951b0f02f777ec1fef8fe9b3d",
-      "size": 7703
+      "sha256": "549b386b6a8bf770e03ce253094687c6f86bed7e21b1014ab906050374c7cf2d",
+      "size": 7876
     },
     {
       "path": ".agents/skills/oma-architecture/SKILL.md",
@@ -1861,18 +1861,18 @@
     },
     {
       "path": ".agents/skills/oma-translator/SKILL.md",
-      "sha256": "efdd348bbbebbd843ffd1b4941e6951fd24df68c866141c9c1b98365c05effbd",
-      "size": 31704
+      "sha256": "bd733f995c0d5a90ea21f77ae838ecf4df3faa8a76b0e0327558199465bf5f1c",
+      "size": 31769
     },
     {
       "path": ".agents/skills/oma-translator/resources/anti-ai-patterns.md",
-      "sha256": "0af22272b8b05d2e78c0886b955046326f4e8ac1e250e8b9df741092683541a8",
-      "size": 20713
+      "sha256": "5a9093b49dc86ce4a89022218a344d18617f2cf1daca9f3c299eb9cf3ff1060a",
+      "size": 20853
     },
     {
       "path": ".agents/skills/oma-translator/resources/translation-rubric.md",
-      "sha256": "52ea3404dbce6625848d125298b345b3e9d2254cc52096617de05ccd010ee2b9",
-      "size": 4080
+      "sha256": "b53229f653d7f62ee62934ce07b198f377e744f4150ad7f17261e60de04c6ba6",
+      "size": 4096
     },
     {
       "path": ".agents/skills/oma-video/SKILL.md",
