@@ -68,7 +68,7 @@ export const SKILLS: SkillsRegistry = {
     },
     {
       name: "oma-docs",
-      desc: `Verify documentation references against the current codebase and propose updates for diff-affected docs. Use to check if docs still match reality (broken file paths, CLI commands, config keys, env vars, scripts) and to surface docs that may need updating after code changes.`,
+      desc: `Verify documentation references against the current codebase, propose updates for diff-affected docs, detect i18n translation drift, and lint translated docs for CJK style issues. Use to check if docs still match reality (broken file paths, CLI commands, config keys, env vars, scripts), to surface docs that may need updating after code changes, or to find stale or style-broken translations.`,
     },
     {
       name: "oma-hwp",
