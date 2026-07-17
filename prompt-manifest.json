@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.19.2",
-  "releaseDate": "2026-07-17T06:43:28.135Z",
+  "releaseDate": "2026-07-17T06:45:39.635Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -1721,28 +1721,28 @@
     },
     {
       "path": ".agents/skills/oma-search/SKILL.md",
-      "sha256": "7c74416e70714d239f113646e7fc39b84e66cf7eaf3a14b10d2cb5ac95e6f180",
-      "size": 7808
+      "sha256": "2d9fc15e17bb0df1f0bb980389c1b0a91c23ae7cd36151743d14f24c64bf2af6",
+      "size": 8045
     },
     {
       "path": ".agents/skills/oma-search/resources/checklist.md",
-      "sha256": "8e46809060a688bf643cfe1ef72f8aa675bc25682e66a04754d3ae714c34ab34",
-      "size": 1543
+      "sha256": "19de1f510039f4ef89f5c2bbbe5e7411a243782ade60cedfa182760c3d50f99f",
+      "size": 1653
     },
     {
       "path": ".agents/skills/oma-search/resources/error-playbook.md",
-      "sha256": "31a3f64596bbce7055324b7eb1ca738d2c88498abc56ed16f54fef6ca6dd15e9",
-      "size": 4894
+      "sha256": "39c09063c3d2b3dba255d5c2cee006c8a7904ccb5de3353ee3381bf3ba871bf1",
+      "size": 4975
     },
     {
       "path": ".agents/skills/oma-search/resources/examples.md",
-      "sha256": "99d0ccd23b4c5a8590e8e2db1667baf2bf56947141342b99f9135c0ebda27702",
-      "size": 4317
+      "sha256": "8da8954b1ee4aa43622a567449313e3cfaabdb4d64923defc3f42bb9e803345b",
+      "size": 4329
     },
     {
       "path": ".agents/skills/oma-search/resources/execution-protocol.md",
-      "sha256": "d9ab93c1ba02cd4f348baa681bfc97643af223aafc7bd188cd94f4f84391e7e6",
-      "size": 4538
+      "sha256": "ba459612f9ee78946f339eeddc73d816e02a70615b852069e667f518e1aa71c4",
+      "size": 4588
     },
     {
       "path": ".agents/skills/oma-search/resources/intent-rules.md",
@@ -1751,8 +1751,8 @@
     },
     {
       "path": ".agents/skills/oma-search/resources/trust-registry.md",
-      "sha256": "5c344099cb048dfa8620d01be23e42d897a384fabd5de2015e30ae5e68b49cd0",
-      "size": 4481
+      "sha256": "0a6c30e9d2aaaa208a86336d0a1b1f914209fbb83d67911474378c601c433918",
+      "size": 5045
     },
     {
       "path": ".agents/skills/oma-skill-creator/SKILL.md",
