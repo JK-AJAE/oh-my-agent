@@ -232,7 +232,7 @@ Cross-vendor tasks still use `oma agent:spawn`.
 - Step 8: Improvement/Regression Review (no regressions introduced)
 - VERIFY_GATE: Zero CRITICAL, zero HIGH, Quality Score >= 75
 
-**Phase 4, REFINE (Steps 9-13, Debug Agent spawned):**
+**Phase 4, REFINE (Steps 9-13, Refactor Agent spawned):**
 - Step 9: Split large files (> 500 lines) and functions (> 50 lines)
 - Step 10: Integration/Reuse Review (eliminate duplicate logic)
 - Step 11: Side Effect Review (trace cascade impact with `find_referencing_symbols`)

@@ -113,7 +113,7 @@ Noun whitelist (15): app, api, service, server, cli, tool, website, dashboard, s
 | **PLAN** | 1-4 | PM Agent (inline) | Completeness, Meta-review, Over-engineering/Simplicity |
 | **IMPL** | 5 | Dev Agents (spawned) | Implementation |
 | **VERIFY** | 6-8 | QA Agent (spawned) | Alignment, Safety (OWASP), Regression Prevention |
-| **REFINE** | 9-13 | Debug Agent (spawned) | File splitting, Reusability, Cascade Impact, Consistency, Dead Code |
+| **REFINE** | 9-13 | Refactor Agent (spawned) | File splitting, Reusability, Cascade Impact, Consistency, Dead Code |
 | **SHIP** | 14-17 | QA Agent (spawned) | Code Quality (lint/coverage), UX Flow, Related Issues, Deployment Readiness |
 
 **Gate definitions:**
