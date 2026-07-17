@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.19.2",
-  "releaseDate": "2026-07-17T06:28:09.061Z",
+  "releaseDate": "2026-07-17T06:43:28.135Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -316,8 +316,8 @@
     },
     {
       "path": ".agents/rules/database.md",
-      "sha256": "2b4a3975c87d224d1f4cac9341a097139ee05a003e7b20d9bb5060cbbb8e66b6",
-      "size": 1791
+      "sha256": "53cd2e888117f45a4d12ccc29b5e71e35614c48bc6454f931997dacba24eef81",
+      "size": 2193
     },
     {
       "path": ".agents/rules/debug.md",
@@ -711,8 +711,8 @@
     },
     {
       "path": ".agents/skills/oma-db/SKILL.md",
-      "sha256": "26361bb6216313b16c912e88833f9f99da960d8d5d300b74e3887048c9567257",
-      "size": 12266
+      "sha256": "cfe6a066bce5d3b583d0a9e88eb472e1d4f666df80d55724390d040e19c7809b",
+      "size": 13148
     },
     {
       "path": ".agents/skills/oma-db/resources/anti-patterns.md",
@@ -721,8 +721,8 @@
     },
     {
       "path": ".agents/skills/oma-db/resources/checklist.md",
-      "sha256": "18ffbcf84486d283d2dc1f50618b1167efba89204b8a87aaf7d53ce08bbfa1dd",
-      "size": 2937
+      "sha256": "c2346733c5205fecdf9e1e14ab64c644939c3142ce1b4b327e6f71fb07b0ffeb",
+      "size": 3468
     },
     {
       "path": ".agents/skills/oma-db/resources/document-templates.md",
@@ -731,23 +731,33 @@
     },
     {
       "path": ".agents/skills/oma-db/resources/error-playbook.md",
-      "sha256": "12a6cd6255cccf1eea83a0ed10c0d82275ff2bc8e6c03b8e6d663fbcbcc243b2",
-      "size": 1243
+      "sha256": "bc8e31de7a289a73eb85799c53d2fb87507ce188e29e437b9448b6170411f7e5",
+      "size": 3152
     },
     {
       "path": ".agents/skills/oma-db/resources/examples.md",
-      "sha256": "3e76601a39667eddd8adb076c2254e6c0c335201bc8a93ab1b3629d0e5987aac",
-      "size": 4049
+      "sha256": "0f8248d818e28b55e49efa495a614bbcf2d82795f9d73d93ae02f79f64013dbd",
+      "size": 5712
     },
     {
       "path": ".agents/skills/oma-db/resources/execution-protocol.md",
-      "sha256": "d065cd1f415e38b2cd3617efa2add90c4daa78107eb98bf180de4ab08327e3ad",
-      "size": 5093
+      "sha256": "2c9fc876bb814d927c5bb4d256ae6a0d2647e4f8f6d1b778ac137e939b64987a",
+      "size": 6248
     },
     {
       "path": ".agents/skills/oma-db/resources/iso-controls.md",
       "sha256": "34292ecbb130c6a69e9d81d41f7cb7ac316a21d9d1180e99f6bc82ce6635400d",
       "size": 3313
+    },
+    {
+      "path": ".agents/skills/oma-db/resources/migration-playbook.md",
+      "sha256": "e25d0ced69cd7071bb7c1effc54e25e907d5528d0b5ab2348374ad2d9a5985a8",
+      "size": 5294
+    },
+    {
+      "path": ".agents/skills/oma-db/resources/query-tuning.md",
+      "sha256": "c9adb0d6f5ae70d2d71c11edd6ca31cc28b5e9fc4c81e098fb10f5f147b0738a",
+      "size": 4458
     },
     {
       "path": ".agents/skills/oma-db/resources/vector-db.md",
@@ -2151,6 +2161,6 @@
   "metadata": {
     "skillCount": 32,
     "workflowCount": 23,
-    "totalFiles": 428
+    "totalFiles": 430
   }
 }
