@@ -1,7 +1,7 @@
 {
   "name": "oh-my-agent",
   "version": "10.20.1",
-  "releaseDate": "2026-07-17T11:02:27.982Z",
+  "releaseDate": "2026-07-17T11:06:47.759Z",
   "repository": "https://github.com/first-fluke/oh-my-agent",
   "files": [
     {
@@ -41,8 +41,8 @@
     },
     {
       "path": ".agents/agents/pm-planner.md",
-      "sha256": "4e495a2e5219f009b6876bdddc52a6bd1ab597f779abde6c47c071a8e25a7df6",
-      "size": 1987
+      "sha256": "fc6d200dc5c7e77faed9c9dfc0ffc6ab346834b757dbbea3ab5a0fb0c37ad56c",
+      "size": 2165
     },
     {
       "path": ".agents/agents/qa-reviewer.md",
@@ -1531,18 +1531,18 @@
     },
     {
       "path": ".agents/skills/oma-pm/SKILL.md",
-      "sha256": "3168f09fa940bd79ca5f161cd6ae326a00b5bafc946d538a1b16826bba21e4f1",
-      "size": 7304
+      "sha256": "0548590379ab707f0cc5b3373b784fdc06746907d807ac7d7ae32ad8882c42bd",
+      "size": 7352
     },
     {
       "path": ".agents/skills/oma-pm/resources/error-playbook.md",
-      "sha256": "789d14b184315cb62f700d9f2d100ac8800c4ba6d02dc5a0a8bd7cf3029724df",
-      "size": 2513
+      "sha256": "34062439b05f3ec0426ad03be23afc2b0051849c34c8ff4473129e2db5b13184",
+      "size": 2741
     },
     {
       "path": ".agents/skills/oma-pm/resources/examples.md",
-      "sha256": "75e393597f53d65505ed60ceaab30ca1c16dd9ddbdec47a2344b0d1448db0fa7",
-      "size": 3917
+      "sha256": "e40554319bc1a4747d007ba26e608a942a452602ca508ab7e17fc9971541c828",
+      "size": 4167
     },
     {
       "path": ".agents/skills/oma-pm/resources/execution-protocol.md",
@@ -1556,13 +1556,13 @@
     },
     {
       "path": ".agents/skills/oma-pm/resources/plan-phase-protocol.md",
-      "sha256": "94f3ac117ab56b1575c825be252a6bf7dd7342476f80b12d6e9f1673df851a51",
-      "size": 1329
+      "sha256": "e809ef98aad44cae319fb1cf4b0413c676a5b5bc307d89569de5d0425cb715e6",
+      "size": 1354
     },
     {
       "path": ".agents/skills/oma-pm/resources/task-template.json",
-      "sha256": "c7d29e54399610e1402eba0bba0c95324bad41a8f4f7ba0049a209023522cd8b",
-      "size": 1106
+      "sha256": "690fc97b8dbe1af8db38e34f906e6e8aaa12510748d4a9b96dd1c4f63ef9f6a0",
+      "size": 1517
     },
     {
       "path": ".agents/skills/oma-qa/SKILL.md",
@@ -2071,13 +2071,13 @@
     },
     {
       "path": ".agents/workflows/orchestrate.md",
-      "sha256": "9c5bd8ed84378267bcd9ae905c44314e83085bfa68f1bb2eb037e93ecd18ce19",
-      "size": 10873
+      "sha256": "6d51a289f0a86524d9d5228ecb46d17c1f0c74e00c7206fb0353d1750f008a40",
+      "size": 10889
     },
     {
       "path": ".agents/workflows/plan.md",
-      "sha256": "5dfd0a65830038e3c5e38dfc247b37574fb774d20eaa2aee63c02ce2f8dc23dc",
-      "size": 8568
+      "sha256": "7edfd50240dc6d3cc8a9bea21ff7f50f8a547fb171f9ad3a6956472d241e6bf9",
+      "size": 8683
     },
     {
       "path": ".agents/workflows/ralph/resources/judge-protocol.md",
@@ -2141,8 +2141,8 @@
     },
     {
       "path": ".agents/workflows/work.md",
-      "sha256": "9d0b03d11791110cfffadf8ec130e3bbb92855d2c1df011b79e478d5fd868305",
-      "size": 8198
+      "sha256": "9a716550ae6d341b44d409cd7fbe59a0ea1e0817b84d5e06e74594c53de42687",
+      "size": 8236
     }
   ],
   "checksums": {
